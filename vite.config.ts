@@ -3,9 +3,9 @@ import react from "@vitejs/plugin-react";
 import tailwindcss from "@tailwindcss/vite";
 import { fileURLToPath, URL } from "node:url";
 
-// GitHub Pages serves the app at /bimanage-frontend/; Vercel (VERCEL=1 during
-// its builds) and custom domains serve it at the root. VITE_BASE_PATH overrides both.
-const base = process.env.VITE_BASE_PATH ?? (process.env.VERCEL ? "/" : "/bimanage-frontend/");
+// Served at the domain root (Vercel). VITE_BASE_PATH overrides it if the app
+// is ever hosted under a sub-path.
+const base = process.env.VITE_BASE_PATH ?? "/";
 
 export default defineConfig({
   base,

@@ -10,7 +10,7 @@
   "scripts": {
     "tokens": "node scripts/build-tokens.mjs",
     "dev": "npm run tokens && vite",
-    "build": "npm run tokens && tsc -b && vite build && node scripts/spa-fallback.mjs",
+    "build": "npm run tokens && tsc -b && vite build",
     "preview": "vite preview",
     "typecheck": "tsc -b",
     "test": "vitest run",
