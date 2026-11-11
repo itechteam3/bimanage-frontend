@@ -1,0 +1,925 @@
+{
+  "$schema": "https://design-tokens.github.io/community-group/format/",
+  "$description": "BiManage design tokens, extracted from Figma file chA2nADlqsen1ggIXUJL8X ('bimanage new', lastModified 2026-11-11T11:50:25Z) via the REST API. Sources: '00 — Design System' page (nodes cited per token) and measured usage across pages 01–16 (counts cited). Where the Design System and the screens disagree, the value the screens actually use wins, so builds match the screen PNGs; values within 1–2 units of each other are merged into one token. Light theme only: the file has no dark-mode frames. Named Figma styles 'BiManage / …' exist but no layer uses them, so they carry no values and are not a source.",
+  "color": {
+    "$type": "color",
+    "brand": {
+      "navy": {
+        "$value": "#00456C",
+        "$description": "DS 'Navy / Brand' (1917:1407), 'Brand navy' (1849:1343). ~3,600 uses as fill/text/stroke; #00456B and #00466B (~1,000 uses) are drift of the same colour and map here."
+      },
+      "navy-pressed": {
+        "$value": "#003654",
+        "$description": "Button / Mobile v2, Primary Pressed (2154:205)."
+      },
+      "navy-deep": {
+        "$value": "#003B5B",
+        "$description": "Start stop of the auth brand-panel gradient (1882:1389)."
+      },
+      "navy-mid": {
+        "$value": "#045F98",
+        "$description": "Middle stop of the auth brand-panel gradient."
+      },
+      "navy-end": {
+        "$value": "#0A4B7B",
+        "$description": "End stop of the auth brand-panel gradient."
+      },
+      "sky": {
+        "$value": "#4DADF5",
+        "$description": "DS 'Sky accent' (1917:1425)."
+      },
+      "violet": {
+        "$value": "#7D8FFF",
+        "$description": "DS 'Violet accent' (1917:1428)."
+      },
+      "cyan": {
+        "$value": "#26C0E2",
+        "$description": "Fill style 'badge' (66 style uses)."
+      },
+      "chart-bar": {
+        "$value": "#A9D9F0",
+        "$description": "Inactive chart bars, auth showcase card (1882:1389)."
+      }
+    },
+    "text": {
+      "strong": {
+        "$value": "#12252F",
+        "$description": "DS v2 text (1917:1403); 2,524 text uses. Older #12202B / #121F2B / #172D3B variants, and legacy #000000 / #333333 on older screens, normalise here."
+      },
+      "muted": {
+        "$value": "#687784",
+        "$description": "DS v2 muted (1917:1403); 1,473 text uses. #687682 (DS v1), #657D8A, #667080 normalise here."
+      },
+      "secondary": {
+        "$value": "#47525E",
+        "$description": "Header breadcrumb (1749:1558)."
+      },
+      "disabled": {
+        "$value": "#7F96A4",
+        "$description": "Disabled button label (2154:205)."
+      },
+      "brand": {
+        "$value": "#00456C",
+        "$description": "Labels, links and secondary actions (2,464 text uses)."
+      },
+      "on-brand": {
+        "$value": "#FFFFFF"
+      },
+      "on-brand-muted": {
+        "$value": "#DCEEF8",
+        "$description": "Body copy on the navy brand panel (1882:1389)."
+      },
+      "on-brand-accent": {
+        "$value": "#B9EBFF",
+        "$description": "Eyebrow text on the navy brand panel (1882:1389)."
+      },
+      "on-brand-soft": {
+        "$value": "#A2C1FF",
+        "$description": "Workspace name in the sidebar footer (125 text uses; 1889:1781)."
+      }
+    },
+    "surface": {
+      "page": {
+        "$value": "#F8FBFD",
+        "$description": "DS 'Canvas' (1917:1410); app screen background (e.g. 03.02, 1889:1781)."
+      },
+      "card": {
+        "$value": "#FFFFFF"
+      },
+      "pale": {
+        "$value": "#EFF7FB",
+        "$description": "DS v1 'Pale surface' (1849:1343); 1,330 fill uses (secondary button, neutral status, disabled field)."
+      },
+      "tint-blue": {
+        "$value": "#E9F5FC",
+        "$description": "DS 'Blue tint' (1917:1413); info cards, icon surfaces, active mobile nav."
+      },
+      "tint-aqua": {
+        "$value": "#E9FAF8",
+        "$description": "DS 'Aqua tint' (1917:1416)."
+      },
+      "tint-lavender": {
+        "$value": "#F1F1FF",
+        "$description": "DS 'Lavender tint' (1917:1419)."
+      },
+      "tint-warm": {
+        "$value": "#FFF8F1",
+        "$description": "DS 'Warm tint' (1917:1422)."
+      },
+      "tint-feli": {
+        "$value": "#F5F8FF",
+        "$description": "FELI insight card (1882:1389)."
+      },
+      "tonal": {
+        "$value": "#E7F3FB",
+        "$description": "Tonal button (2154:205)."
+      },
+      "tonal-pressed": {
+        "$value": "#CFEBF9",
+        "$description": "Tonal button pressed (2154:205)."
+      },
+      "disabled": {
+        "$value": "#DBE5ED",
+        "$description": "Disabled button (2154:205)."
+      },
+      "nav-active": {
+        "$value": "#EFF4FB",
+        "$description": "Active sidebar row (03.02, 1889:1781)."
+      },
+      "outlined-pressed": {
+        "$value": "#F2F8FC",
+        "$description": "Outlined button pressed (2154:205)."
+      },
+      "overlay": {
+        "$value": "#12252F80",
+        "$description": "Dialog scrim. Not drawn in Figma (dialogs are shown in place), so this is derived from text.strong at 50%."
+      },
+      "otp-cell": {
+        "$value": "#F7FBFD",
+        "$description": "OTP digit cell (1930:1422)."
+      }
+    },
+    "border": {
+      "default": {
+        "$value": "#D9E5EC",
+        "$description": "Field and card border; 641 stroke uses (#DAE5EC DS v1 1849:1343, #DDE8EF, #D6E3EC are the same colour)."
+      },
+      "strong": {
+        "$value": "#A3BDCC",
+        "$description": "Outlined button stroke (2154:205)."
+      },
+      "subtle": {
+        "$value": "#E6EDF3",
+        "$description": "Dialog and mobile bottom-nav outline (2186:12052, 1930:1438)."
+      },
+      "on-brand": {
+        "$value": "#FFFFFF36",
+        "$description": "Sidebar footer divider, white at 21% (1748:1513)."
+      },
+      "tint": {
+        "$value": "#C8E5F5",
+        "$description": "Outline of the blue-tinted reassurance card on mobile auth (1888:2872)."
+      }
+    },
+    "status": {
+      "success": {
+        "$value": "#1F875B",
+        "$description": "DS 'Success' (1849:1343)."
+      },
+      "success-strong": {
+        "$value": "#287951",
+        "$description": "Success state of buttons (2154:205)."
+      },
+      "success-bg": {
+        "$value": "#E8F8F1",
+        "$description": "Status Tone=Success (1850:1361); #E5F8EE on auth showcase is the same."
+      },
+      "warning": {
+        "$value": "#BD7D2E",
+        "$description": "DS 'Warning' (1849:1343)."
+      },
+      "warning-bg": {
+        "$value": "#FFF8F1",
+        "$description": "Warm tint. The Status master uses the pale surface for warnings; the warm tint is used so warning badges differ from neutral ones."
+      },
+      "danger": {
+        "$value": "#BB393B",
+        "$description": "DS 'Danger' (1849:1343); destructive button #BD393D is the same."
+      },
+      "danger-pressed": {
+        "$value": "#992E33",
+        "$description": "Destructive button pressed (2154:205)."
+      },
+      "danger-bg": {
+        "$value": "#FFF0F0",
+        "$description": "Status Tone=Error (1850:1361)."
+      },
+      "neutral": {
+        "$value": "#00456C"
+      },
+      "neutral-bg": {
+        "$value": "#EFF7FB",
+        "$description": "Status Tone=Neutral (1850:1361)."
+      },
+      "danger-on-brand": {
+        "$value": "#FA5250",
+        "$description": "Red that reads on navy: sidebar Log Out icon (168 fill uses; 1889:1781)."
+      },
+      "success-ink": {
+        "$value": "#145C3D",
+        "$description": "Reassurance text on auth, e.g. 'Your connection is encrypted.' (1882:1388)."
+      }
+    }
+  },
+  "gradient": {
+    "$type": "gradient",
+    "brand-panel": {
+      "$value": "linear-gradient(160deg, #003B5B 0%, #045F98 50%, #0A4B7B 100%)",
+      "$description": "Auth brand panel (1882:1389). The angle is approximate; Figma gives handle positions, not degrees."
+    },
+    "atmosphere": {
+      "$value": "linear-gradient(90deg, rgba(233,245,253,0.68) 0%, rgba(246,248,255,0.31) 65%, rgba(255,255,255,0) 100%)",
+      "$description": "'ATMOSPHERE • Premium contextual tint' behind page headers (03.02, 51 uses)."
+    },
+    "glow-sky": {
+      "$value": "rgba(73,167,255,0.17)",
+      "$description": "Blurred glow ellipses on brand panel, layer blur 68 (1882:1389)."
+    },
+    "glow-aqua": {
+      "$value": "rgba(112,224,236,0.17)"
+    },
+    "glow-violet": {
+      "$value": "rgba(108,122,255,0.17)"
+    }
+  },
+  "font": {
+    "family": {
+      "$type": "fontFamily",
+      "sans": {
+        "$value": [
+          "Poppins",
+          "system-ui",
+          "sans-serif"
+        ],
+        "$description": "DS 'One family: Poppins' (1849:1386). ~15,200 text layers use Poppins; Nunito/Open Sans/Inter/Roboto appear only inside legacy mock images and older screens, and normalise to Poppins."
+      }
+    },
+    "weight": {
+      "$type": "fontWeight",
+      "regular": {
+        "$value": 400
+      },
+      "medium": {
+        "$value": 500
+      },
+      "semibold": {
+        "$value": 600
+      },
+      "bold": {
+        "$value": 700,
+        "$description": "Rare (50 uses); kept for completeness."
+      }
+    }
+  },
+  "typography": {
+    "$type": "typography",
+    "$description": "Size/line-height in px. DS = specimen in 04 Typography (1849:1386).",
+    "display": {
+      "$value": {
+        "fontSize": 29,
+        "lineHeight": 44,
+        "fontWeight": 600
+      },
+      "$description": "DS Display."
+    },
+    "hero": {
+      "$value": {
+        "fontSize": 33,
+        "lineHeight": 49.5,
+        "fontWeight": 600
+      },
+      "$description": "Auth brand-panel headline (1882:1389)."
+    },
+    "page-title": {
+      "$value": {
+        "fontSize": 28,
+        "lineHeight": 42,
+        "fontWeight": 600
+      },
+      "$description": "DS Page title; 03.02 uses 28/36."
+    },
+    "dialog-title": {
+      "$value": {
+        "fontSize": 26,
+        "lineHeight": 39,
+        "fontWeight": 600
+      },
+      "$description": "Dialog / Premium v2 (2186:12052)."
+    },
+    "metric": {
+      "$value": {
+        "fontSize": 28,
+        "lineHeight": 42,
+        "fontWeight": 600
+      },
+      "$description": "Metric card value (1917:1434)."
+    },
+    "title-lg": {
+      "$value": {
+        "fontSize": 22,
+        "lineHeight": 33,
+        "fontWeight": 600
+      },
+      "$description": "Section headings on screens (99 uses); DS card titles at 22."
+    },
+    "section-title": {
+      "$value": {
+        "fontSize": 20,
+        "lineHeight": 30,
+        "fontWeight": 600
+      },
+      "$description": "DS Section title."
+    },
+    "title-sm": {
+      "$value": {
+        "fontSize": 18,
+        "lineHeight": 27,
+        "fontWeight": 600
+      },
+      "$description": "146 uses."
+    },
+    "card-heading": {
+      "$value": {
+        "fontSize": 16,
+        "lineHeight": 24,
+        "fontWeight": 600
+      },
+      "$description": "DS Card heading; 284 uses."
+    },
+    "button": {
+      "$value": {
+        "fontSize": 15,
+        "lineHeight": 22.5,
+        "fontWeight": 600
+      },
+      "$description": "Button / Mobile v2 label (2154:205); 279 uses."
+    },
+    "input": {
+      "$value": {
+        "fontSize": 16,
+        "lineHeight": 24,
+        "fontWeight": 500
+      },
+      "$description": "Auth input values (1882:1409). 16px also stops iOS zooming on focus."
+    },
+    "body-lg": {
+      "$value": {
+        "fontSize": 14,
+        "lineHeight": 21,
+        "fontWeight": 400
+      },
+      "$description": "618 uses."
+    },
+    "body-lg-medium": {
+      "$value": {
+        "fontSize": 14,
+        "lineHeight": 20,
+        "fontWeight": 500
+      },
+      "$description": "Second most used style (1,875 uses)."
+    },
+    "body": {
+      "$value": {
+        "fontSize": 13,
+        "lineHeight": 20,
+        "fontWeight": 400
+      },
+      "$description": "DS Body."
+    },
+    "body-sm": {
+      "$value": {
+        "fontSize": 12,
+        "lineHeight": 18,
+        "fontWeight": 400
+      },
+      "$description": "Most used style (2,573 uses); semibold variant 1,853 uses."
+    },
+    "label": {
+      "$value": {
+        "fontSize": 11,
+        "lineHeight": 16,
+        "fontWeight": 600,
+        "textTransform": "uppercase"
+      },
+      "$description": "DS Label; Field master label (1850:1352)."
+    },
+    "caption": {
+      "$value": {
+        "fontSize": 11,
+        "lineHeight": 16.5,
+        "fontWeight": 400
+      },
+      "$description": "DS Caption; 1,189 uses."
+    },
+    "micro": {
+      "$value": {
+        "fontSize": 10,
+        "lineHeight": 15,
+        "fontWeight": 400
+      },
+      "$description": "Metric card footnote (1917:1434)."
+    },
+    "otp": {
+      "$value": {
+        "fontSize": 23,
+        "lineHeight": 34.5,
+        "fontWeight": 600
+      },
+      "$description": "OTP digit (1930:1422)."
+    },
+    "title-md": {
+      "$value": {
+        "fontSize": 24,
+        "lineHeight": 36,
+        "fontWeight": 600
+      },
+      "$description": "Mobile auth heading 'Welcome back' (1888:2872); 93 uses."
+    },
+    "mobile-field-label": {
+      "$value": {
+        "fontSize": 14,
+        "lineHeight": 21,
+        "fontWeight": 600,
+        "textTransform": "uppercase"
+      },
+      "$description": "Field label inside filled mobile fields (1888:2872)."
+    },
+    "button-lg": {
+      "$value": {
+        "fontSize": 16,
+        "lineHeight": 24,
+        "fontWeight": 600
+      },
+      "$description": "Primary/Google buttons on auth screens (1882:1414, 2051:2, 1888:2872)."
+    },
+    "action": {
+      "$value": {
+        "fontSize": 14,
+        "lineHeight": 21,
+        "fontWeight": 500
+      },
+      "$description": "Secondary actions, e.g. 'Forgot password?' (4126:23); 600 on mobile (1888:2872)."
+    },
+    "nav": {
+      "$value": {
+        "fontSize": 14,
+        "lineHeight": 20,
+        "fontWeight": 500
+      },
+      "$description": "Sidebar nav rows (1889:1781)."
+    },
+    "field-label": {
+      "$value": {
+        "fontSize": 14,
+        "lineHeight": 21,
+        "fontWeight": 600,
+        "textTransform": "uppercase"
+      },
+      "$description": "Field labels as used on screens, desktop and mobile (1882:1388, 1888:2872). The Field master (1850:1352) shows 11px, but screens use 14px."
+    }
+  },
+  "spacing": {
+    "$type": "dimension",
+    "$description": "DS '05 Layout and spacing' (1849:1417): 8px system, 4px steps for optical tweaks. Most common gaps on screens: 8, 4, 12, 10; paddings 8, 4, 12, 10, 16, 18, 20.",
+    "0": {
+      "$value": "0px"
+    },
+    "1": {
+      "$value": "4px",
+      "$description": "Micro gap."
+    },
+    "2": {
+      "$value": "8px",
+      "$description": "Control gap."
+    },
+    "3": {
+      "$value": "12px",
+      "$description": "Compact inset."
+    },
+    "4": {
+      "$value": "16px",
+      "$description": "Field padding; mobile gutter."
+    },
+    "5": {
+      "$value": "20px",
+      "$description": "Button horizontal padding (2154:205)."
+    },
+    "6": {
+      "$value": "24px",
+      "$description": "Card padding; content gap."
+    },
+    "8": {
+      "$value": "32px",
+      "$description": "Section gap; header horizontal padding (1749:1558)."
+    },
+    "10": {
+      "$value": "40px",
+      "$description": "Large section rhythm."
+    },
+    "12": {
+      "$value": "48px",
+      "$description": "DS guidance: 32–48px section gaps (1917:1431)."
+    },
+    "16": {
+      "$value": "64px"
+    }
+  },
+  "radius": {
+    "$type": "dimension",
+    "$description": "Most common on screens: 9 (1,868), 12 (1,440), 8 (1,303), 10 (939), 15, 20, 16. DS guidance: cards 18–20, controls 8–16.",
+    "xs": {
+      "$value": "4px"
+    },
+    "sm": {
+      "$value": "8px",
+      "$description": "Inputs and secondary actions on auth (1882:1409, 4126:23)."
+    },
+    "md": {
+      "$value": "10px",
+      "$description": "Buttons and nav rows as used on screens (9–10px: 1882:1414, 2051:2, 1748:1513)."
+    },
+    "lg": {
+      "$value": "12px",
+      "$description": "Field master control (1850:1352); active nav row."
+    },
+    "xl": {
+      "$value": "16px",
+      "$description": "Button / Mobile v2 masters; icon surfaces; mobile bottom nav."
+    },
+    "2xl": {
+      "$value": "20px",
+      "$description": "Cards and frames (DS 'Card radius 18–20px', 1917:1431)."
+    },
+    "3xl": {
+      "$value": "22px",
+      "$description": "Dialog (2186:12052); auth showcase cards."
+    },
+    "full": {
+      "$value": "9999px",
+      "$description": "Pills: status badges (r=9–14 at 28px height) render as pills."
+    },
+    "tab": {
+      "$value": "15px",
+      "$description": "Mobile tab pill (1924:1387)."
+    },
+    "tab-bar": {
+      "$value": "22px",
+      "$description": "Mobile tab bar (1924:1387)."
+    },
+    "icon": {
+      "$value": "18px",
+      "$description": "Dialog icon surface (2186:12052); metric/info cards use 18 too (1917:1434)."
+    }
+  },
+  "shadow": {
+    "$type": "shadow",
+    "card": {
+      "$value": "0 6px 16px 0 rgba(0,51,89,0.045)",
+      "$description": "Most used effect (274 uses)."
+    },
+    "card-soft": {
+      "$value": "0 3px 12px 0 rgba(10,32,56,0.038)",
+      "$description": "100 uses."
+    },
+    "metric": {
+      "$value": "0 10px 60px 0 rgba(226,236,249,0.5)",
+      "$description": "Dashboard metric cards (03.02)."
+    },
+    "raised": {
+      "$value": "0 3px 8px 0 rgba(41,61,102,0.1)",
+      "$description": "86 uses."
+    },
+    "floating": {
+      "$value": "0 16px 24px 0 rgba(0,33,69,0.15)",
+      "$description": "Floating showcase cards and popovers (1882:1389)."
+    },
+    "sidebar": {
+      "$value": "0 1px 4px 2px rgba(0,69,108,0.3)",
+      "$description": "Navy sidebar (1748:1513)."
+    },
+    "focus": {
+      "$value": "0 0 0 3px rgba(77,173,245,0.45)",
+      "$description": "Focus ring. Figma has no focus state, so this is derived from the sky accent to meet WCAG 2.2 focus visibility."
+    }
+  },
+  "border-width": {
+    "$type": "dimension",
+    "default": {
+      "$value": "1px",
+      "$description": "Fields, cards, outlines (1,814 uses)."
+    },
+    "outlined-button": {
+      "$value": "1.2px",
+      "$description": "Outlined button (2154:205)."
+    }
+  },
+  "size": {
+    "$type": "dimension",
+    "control-sm": {
+      "$value": "40px",
+      "$description": "Sidebar nav row; date inputs."
+    },
+    "control-md": {
+      "$value": "44px",
+      "$description": "Secondary actions (4126:23); minimum touch target."
+    },
+    "control-lg": {
+      "$value": "52px",
+      "$description": "Primary buttons and inputs (2154:205, 1850:1352, 1882:1409)."
+    },
+    "icon": {
+      "$value": "20px",
+      "$description": "Tabler icons render at 20px (2154:221)."
+    },
+    "sidebar": {
+      "$value": "218px",
+      "$description": "Desktop sidebar width (1748:1513)."
+    },
+    "header": {
+      "$value": "72px",
+      "$description": "Desktop header height (1749:1558)."
+    },
+    "bottom-nav": {
+      "$value": "76px",
+      "$description": "Mobile bottom navigation (1930:1438)."
+    },
+    "auth-panel": {
+      "$value": "570px",
+      "$description": "Auth brand panel width on desktop (1882:1389)."
+    },
+    "auth-form": {
+      "$value": "645px",
+      "$description": "Auth form column width (1882:1409)."
+    },
+    "otp-cell-w": {
+      "$value": "68px",
+      "$description": "OTP cell width on desktop (1930:1422)."
+    },
+    "otp-cell-h": {
+      "$value": "72px",
+      "$description": "OTP cell height on desktop (1930:1422)."
+    },
+    "mobile-header": {
+      "$value": "68px",
+      "$description": "Mobile app/auth header (1888:2872, 1924:1387)."
+    },
+    "mobile-content": {
+      "$value": "400px",
+      "$description": "Mobile content width inside the 440px frame — 20px gutters."
+    },
+    "mobile-tab-bar": {
+      "$value": "68px",
+      "$description": "Mobile tab bar as used on screens (1924:1387): 408x68, r=22, tabs 94x52 r=15."
+    },
+    "nav-icon-slot": {
+      "$value": "32px",
+      "$description": "Sidebar icon slot (1889:1781)."
+    },
+    "avatar-header": {
+      "$value": "50px",
+      "$description": "Header avatar (1889:1781)."
+    },
+    "avatar-sidebar": {
+      "$value": "36px",
+      "$description": "Sidebar footer avatar (1889:1781)."
+    },
+    "header-action": {
+      "$value": "40px",
+      "$description": "Header icon buttons (1889:1781)."
+    },
+    "dialog": {
+      "$value": "630px",
+      "$description": "Dialog max width (2186:12052)."
+    },
+    "dialog-icon": {
+      "$value": "58px",
+      "$description": "Dialog icon surface (2186:12052)."
+    },
+    "empty-icon": {
+      "$value": "54px",
+      "$description": "Guided empty state icon surface (1917:1444)."
+    },
+    "feature-icon": {
+      "$value": "48px",
+      "$description": "Icon surface on showcase / feature cards (1882:1389)."
+    },
+    "status": {
+      "$value": "28px",
+      "$description": "Status pill height (1850:1361, 1882:1389)."
+    },
+    "icon-sm": {
+      "$value": "18px",
+      "$description": "Small icons, e.g. sidebar Log Out (1889:1781)."
+    },
+    "mobile-tab-bar-w": {
+      "$value": "408px",
+      "$description": "Mobile tab bar width (1924:1387)."
+    },
+    "mobile-tab": {
+      "$value": "52px",
+      "$description": "Mobile tab height (1924:1387)."
+    },
+    "showcase-sales": {
+      "$value": "456px",
+      "$description": "Auth brand panel: sales showcase card (1882:1389)."
+    },
+    "showcase-store": {
+      "$value": "420px",
+      "$description": "Auth brand panel: store showcase card (1882:1389)."
+    },
+    "showcase-feli": {
+      "$value": "415px",
+      "$description": "Auth brand panel: FELI insight card (1882:1389)."
+    },
+    "brand-copy": {
+      "$value": "462px",
+      "$description": "Auth brand panel: body copy width (1882:1389)."
+    }
+  },
+  "breakpoint": {
+    "$type": "dimension",
+    "$description": "Figma has Desktop (1440) and Mobile (440) frames only, no tablet. Mobile-first: one column up to md; the sidebar layout from lg.",
+    "mobile": {
+      "$value": "440px",
+      "$description": "Mobile frame width."
+    },
+    "md": {
+      "$value": "768px"
+    },
+    "lg": {
+      "$value": "1024px",
+      "$description": "Sidebar + header shell from here."
+    },
+    "desktop": {
+      "$value": "1440px",
+      "$description": "Desktop frame width."
+    }
+  },
+  "component": {
+    "$description": "Component specs, as measured (px).",
+    "button": {
+      "height": 52,
+      "radius": "radius.md",
+      "paddingX": 20,
+      "gap": 8,
+      "typography": "typography.button",
+      "variants": {
+        "primary": {
+          "bg": "color.brand.navy",
+          "fg": "color.text.on-brand",
+          "pressedBg": "color.brand.navy-pressed"
+        },
+        "tonal": {
+          "bg": "color.surface.tonal",
+          "fg": "color.text.brand",
+          "pressedBg": "color.surface.tonal-pressed"
+        },
+        "outlined": {
+          "bg": "color.surface.card",
+          "fg": "color.text.brand",
+          "border": "color.border.strong",
+          "pressedBg": "color.surface.outlined-pressed"
+        },
+        "secondary": {
+          "bg": "color.surface.card",
+          "fg": "color.text.brand",
+          "border": "color.border.default",
+          "$description": "Auth secondary actions (4126:23), 44px tall, 14/21 medium."
+        },
+        "destructive": {
+          "bg": "color.status.danger",
+          "fg": "color.text.on-brand",
+          "pressedBg": "color.status.danger-pressed"
+        }
+      },
+      "states": {
+        "disabled": {
+          "bg": "color.surface.disabled",
+          "fg": "color.text.disabled"
+        },
+        "success": {
+          "bg": "color.status.success-strong",
+          "fg": "color.text.on-brand"
+        },
+        "loading": {
+          "$description": "Same colours as the variant, with label 'Processing…' and a spinner."
+        }
+      },
+      "source": "2154:205, 1882:1414"
+    },
+    "icon-button": {
+      "height": 48,
+      "radius": 14,
+      "bg": "color.surface.tonal",
+      "pressedBg": "color.surface.tonal-pressed",
+      "disabledIconOpacity": 0.46,
+      "source": "2154:221"
+    },
+    "field": {
+      "labelTypography": "typography.field-label",
+      "labelColor": "color.text.secondary (desktop), color.text.brand (mobile)",
+      "labelGap": 6,
+      "height": 52,
+      "radius": "radius.sm",
+      "paddingX": 16,
+      "border": "color.border.default",
+      "valueTypography": "typography.input",
+      "valueColor": "color.text.strong",
+      "placeholderColor": "color.text.muted",
+      "error": {
+        "border": "color.status.danger",
+        "messageColor": "color.status.danger"
+      },
+      "disabled": {
+        "bg": "color.surface.pale"
+      },
+      "source": "1850:1352, 1882:1409",
+      "mobile": {
+        "$description": "Below lg the field is filled: label inside, no border (1888:2872).",
+        "bg": "color.surface.pale",
+        "radius": "radius.sm",
+        "padding": "10px 16px",
+        "gap": 8,
+        "labelTypography": "typography.mobile-field-label",
+        "valueTypography": "16/24 400"
+      },
+      "hintTypography": "typography.body-lg (14/21), color.text.secondary"
+    },
+    "status": {
+      "height": 28,
+      "radius": "radius.full",
+      "paddingX": 12,
+      "typography": "typography.body-sm (600)",
+      "tones": {
+        "success": {
+          "bg": "color.status.success-bg",
+          "fg": "color.status.success"
+        },
+        "warning": {
+          "bg": "color.status.warning-bg",
+          "fg": "color.status.warning"
+        },
+        "danger": {
+          "bg": "color.status.danger-bg",
+          "fg": "color.status.danger"
+        },
+        "neutral": {
+          "bg": "color.status.neutral-bg",
+          "fg": "color.status.neutral"
+        }
+      },
+      "source": "1850:1361"
+    },
+    "dialog": {
+      "width": 630,
+      "radius": "radius.3xl",
+      "border": "color.border.subtle",
+      "padding": 30,
+      "iconSize": 58,
+      "iconRadius": 18,
+      "iconBg": "color.surface.tint-blue",
+      "titleTypography": "typography.dialog-title",
+      "bodyTypography": "typography.body-lg",
+      "source": "2186:12052"
+    },
+    "metric-card": {
+      "radius": "radius.2xl",
+      "labelTypography": "typography.body-sm (600, uppercase)",
+      "valueTypography": "typography.metric",
+      "valueColor": "color.text.brand",
+      "source": "1917:1434"
+    },
+    "sidebar": {
+      "width": 218,
+      "bg": "color.brand.navy",
+      "radius": "radius.2xl",
+      "shadow": "shadow.sidebar",
+      "rowHeight": 40,
+      "rowRadius": "radius.md",
+      "rowGap": 4,
+      "rowPadding": "4px 8px",
+      "activeRowBg": "color.surface.nav-active",
+      "source": "1748:1513, 1889:1781"
+    },
+    "header": {
+      "height": 72,
+      "bg": "color.surface.card",
+      "paddingX": 32,
+      "breadcrumbTypography": "typography.body-lg-medium",
+      "breadcrumbColor": "color.text.secondary",
+      "source": "1749:1558"
+    },
+    "bottom-nav": {
+      "$description": "As used on screens (1924:1387); the 1930:1438 master differs slightly.",
+      "width": 408,
+      "height": 68,
+      "radius": "radius.tab-bar",
+      "padding": "7px 8px",
+      "gap": 4,
+      "border": "color.border.subtle",
+      "tabWidth": 94,
+      "tabHeight": 52,
+      "tabRadius": "radius.tab",
+      "activeBg": "color.surface.tonal",
+      "activeFg": "color.text.brand",
+      "inactiveFg": "color.text.muted",
+      "items": [
+        "Home",
+        "Activity",
+        "Tasks",
+        "More"
+      ],
+      "source": "1924:1387, 1930:1438"
+    }
+  }
+}

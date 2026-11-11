@@ -1,0 +1,3142 @@
+[
+ {
+  "id": "1882:1388",
+  "page": "01-authentication",
+  "file": "01.01-sign-in-desktop.png",
+  "screen": "01.01",
+  "title": "Sign in",
+  "variant": "Desktop",
+  "width": 1440.0,
+  "height": 960.0
+ },
+ {
+  "id": "1888:2872",
+  "page": "01-authentication",
+  "file": "01.01-sign-in-mobile.png",
+  "screen": "01.01",
+  "title": "Sign in",
+  "variant": "Mobile",
+  "width": 440.0,
+  "height": 1051.0
+ },
+ {
+  "id": "1882:1419",
+  "page": "01-authentication",
+  "file": "01.02-create-an-account-desktop.png",
+  "screen": "01.02",
+  "title": "Create an account",
+  "variant": "Desktop",
+  "width": 1440.0,
+  "height": 1066.0
+ },
+ {
+  "id": "1888:2894",
+  "page": "01-authentication",
+  "file": "01.02-create-an-account-mobile.png",
+  "screen": "01.02",
+  "title": "Create an account",
+  "variant": "Mobile",
+  "width": 440.0,
+  "height": 1217.0
+ },
+ {
+  "id": "1882:1456",
+  "page": "01-authentication",
+  "file": "01.03-verify-email-desktop.png",
+  "screen": "01.03",
+  "title": "Verify email",
+  "variant": "Desktop",
+  "width": 1440.0,
+  "height": 960.0
+ },
+ {
+  "id": "1888:2922",
+  "page": "01-authentication",
+  "file": "01.03-verify-email-mobile.png",
+  "screen": "01.03",
+  "title": "Verify email",
+  "variant": "Mobile",
+  "width": 440.0,
+  "height": 956.0
+ },
+ {
+  "id": "1882:1484",
+  "page": "01-authentication",
+  "file": "01.04-forgot-password-desktop.png",
+  "screen": "01.04",
+  "title": "Forgot password",
+  "variant": "Desktop",
+  "width": 1440.0,
+  "height": 960.0
+ },
+ {
+  "id": "1888:2941",
+  "page": "01-authentication",
+  "file": "01.04-forgot-password-mobile.png",
+  "screen": "01.04",
+  "title": "Forgot password",
+  "variant": "Mobile",
+  "width": 440.0,
+  "height": 956.0
+ },
+ {
+  "id": "1882:1512",
+  "page": "01-authentication",
+  "file": "01.05-choose-new-password-desktop.png",
+  "screen": "01.05",
+  "title": "Choose new password",
+  "variant": "Desktop",
+  "width": 1440.0,
+  "height": 960.0
+ },
+ {
+  "id": "1888:2960",
+  "page": "01-authentication",
+  "file": "01.05-choose-new-password-mobile.png",
+  "screen": "01.05",
+  "title": "Choose new password",
+  "variant": "Mobile",
+  "width": 440.0,
+  "height": 956.0
+ },
+ {
+  "id": "1882:1546",
+  "page": "01-authentication",
+  "file": "01.06-password-changed-desktop.png",
+  "screen": "01.06",
+  "title": "Password changed",
+  "variant": "Desktop",
+  "width": 1440.0,
+  "height": 960.0
+ },
+ {
+  "id": "1888:2985",
+  "page": "01-authentication",
+  "file": "01.06-password-changed-mobile.png",
+  "screen": "01.06",
+  "title": "Password changed",
+  "variant": "Mobile",
+  "width": 440.0,
+  "height": 956.0
+ },
+ {
+  "id": "1929:1387",
+  "page": "01-authentication",
+  "file": "01.07-one-time-code-expired-desktop.png",
+  "screen": "01.07",
+  "title": "One-time code expired",
+  "variant": "Desktop",
+  "width": 1440.0,
+  "height": 960.0
+ },
+ {
+  "id": "1929:1462",
+  "page": "01-authentication",
+  "file": "01.08-invalid-sign-in-desktop.png",
+  "screen": "01.08",
+  "title": "Invalid sign-in",
+  "variant": "Desktop",
+  "width": 1440.0,
+  "height": 960.0
+ },
+ {
+  "id": "4120:17",
+  "page": "01-authentication",
+  "file": "01.09-check-your-email-desktop.png",
+  "screen": "01.09",
+  "title": "Check your email",
+  "variant": "Desktop",
+  "width": 1440.0,
+  "height": 960.0
+ },
+ {
+  "id": "4120:86",
+  "page": "01-authentication",
+  "file": "01.10-invalid-password-reset-link-desktop.png",
+  "screen": "01.10",
+  "title": "Invalid password reset link",
+  "variant": "Desktop",
+  "width": 1440.0,
+  "height": 960.0
+ },
+ {
+  "id": "1929:1434",
+  "page": "01-authentication",
+  "file": "01.07-one-time-code-expired-mobile.png",
+  "screen": "01.07",
+  "title": "One-time code expired",
+  "variant": "Mobile",
+  "width": 440.0,
+  "height": 956.0
+ },
+ {
+  "id": "1929:1512",
+  "page": "01-authentication",
+  "file": "01.08-invalid-sign-in-mobile.png",
+  "screen": "01.08",
+  "title": "Invalid sign-in",
+  "variant": "Mobile",
+  "width": 440.0,
+  "height": 956.0
+ },
+ {
+  "id": "4120:66",
+  "page": "01-authentication",
+  "file": "01.09-check-your-email-mobile.png",
+  "screen": "01.09",
+  "title": "Check your email",
+  "variant": "Mobile",
+  "width": 440.0,
+  "height": 956.0
+ },
+ {
+  "id": "4120:135",
+  "page": "01-authentication",
+  "file": "01.10-invalid-password-reset-link-mobile.png",
+  "screen": "01.10",
+  "title": "Invalid password reset link",
+  "variant": "Mobile",
+  "width": 440.0,
+  "height": 956.0
+ },
+ {
+  "id": "4120:155",
+  "page": "01-authentication",
+  "file": "01.11-loading-submitting-desktop.png",
+  "screen": "01.11",
+  "title": "Loading / Submitting",
+  "variant": "Desktop",
+  "width": 1440.0,
+  "height": 960.0
+ },
+ {
+  "id": "4120:204",
+  "page": "01-authentication",
+  "file": "01.11-loading-submitting-mobile.png",
+  "screen": "01.11",
+  "title": "Loading / Submitting",
+  "variant": "Mobile",
+  "width": 440.0,
+  "height": 956.0
+ },
+ {
+  "id": "4120:224",
+  "page": "01-authentication",
+  "file": "01.12-passwords-do-not-match-desktop.png",
+  "screen": "01.12",
+  "title": "Passwords do not match",
+  "variant": "Desktop",
+  "width": 1440.0,
+  "height": 960.0
+ },
+ {
+  "id": "4120:279",
+  "page": "01-authentication",
+  "file": "01.12-passwords-do-not-match-mobile.png",
+  "screen": "01.12",
+  "title": "Passwords do not match",
+  "variant": "Mobile",
+  "width": 440.0,
+  "height": 956.0
+ },
+ {
+  "id": "4120:322",
+  "page": "01-authentication",
+  "file": "01.13-invalid-verification-code-desktop.png",
+  "screen": "01.13",
+  "title": "Invalid verification code",
+  "variant": "Desktop",
+  "width": 1440.0,
+  "height": 960.0
+ },
+ {
+  "id": "4120:342",
+  "page": "01-authentication",
+  "file": "01.13-invalid-verification-code-mobile.png",
+  "screen": "01.13",
+  "title": "Invalid verification code",
+  "variant": "Mobile",
+  "width": 440.0,
+  "height": 956.0
+ },
+ {
+  "id": "4120:360",
+  "page": "01-authentication",
+  "file": "01.14-reset-request-failed-desktop.png",
+  "screen": "01.14",
+  "title": "Reset request failed",
+  "variant": "Desktop",
+  "width": 1440.0,
+  "height": 960.0
+ },
+ {
+  "id": "4120:380",
+  "page": "01-authentication",
+  "file": "01.14-reset-request-failed-mobile.png",
+  "screen": "01.14",
+  "title": "Reset request failed",
+  "variant": "Mobile",
+  "width": 440.0,
+  "height": 956.0
+ },
+ {
+  "id": "1683:2318",
+  "page": "02-onboarding",
+  "file": "02.01-onboarding-existing-business-trial-desktop.png",
+  "screen": "02.01",
+  "title": "Onboarding — Existing business trial",
+  "variant": "Desktop",
+  "width": 1440.0,
+  "height": 1050.0
+ },
+ {
+  "id": "1902:2160",
+  "page": "02-onboarding",
+  "file": "02.01-onboarding-existing-business-trial-mobile.png",
+  "screen": "02.01",
+  "title": "Onboarding — Existing business trial",
+  "variant": "Mobile",
+  "width": 440.0,
+  "height": 1640.0
+ },
+ {
+  "id": "1897:2366",
+  "page": "02-onboarding",
+  "file": "02.02-onboarding-select-business-path-desktop.png",
+  "screen": "02.02",
+  "title": "Onboarding — Select business path",
+  "variant": "Desktop",
+  "width": 1440.0,
+  "height": 1024.0
+ },
+ {
+  "id": "1898:2471",
+  "page": "02-onboarding",
+  "file": "02.02-onboarding-select-business-path-mobile.png",
+  "screen": "02.02",
+  "title": "Onboarding — Select business path",
+  "variant": "Mobile",
+  "width": 440.0,
+  "height": 865.0
+ },
+ {
+  "id": "1897:2548",
+  "page": "02-onboarding",
+  "file": "02.03-onboarding-complete-business-identity-desktop.png",
+  "screen": "02.03",
+  "title": "Onboarding — Complete business identity",
+  "variant": "Desktop",
+  "width": 1440.0,
+  "height": 1024.0
+ },
+ {
+  "id": "1898:2504",
+  "page": "02-onboarding",
+  "file": "02.03-onboarding-complete-business-identity-mobile.png",
+  "screen": "02.03",
+  "title": "Onboarding — Complete business identity",
+  "variant": "Mobile",
+  "width": 440.0,
+  "height": 1475.0
+ },
+ {
+  "id": "1679:4594",
+  "page": "02-onboarding",
+  "file": "02.04-onboarding-path-details-desktop.png",
+  "screen": "02.04",
+  "title": "Onboarding — Path details",
+  "variant": "Desktop",
+  "width": 1440.0,
+  "height": 1050.0
+ },
+ {
+  "id": "1902:2611",
+  "page": "02-onboarding",
+  "file": "02.04-onboarding-path-details-mobile.png",
+  "screen": "02.04",
+  "title": "Onboarding — Path details",
+  "variant": "Mobile",
+  "width": 440.0,
+  "height": 1355.0
+ },
+ {
+  "id": "1683:2488",
+  "page": "02-onboarding",
+  "file": "02.05-onboarding-setup-tracker-desktop.png",
+  "screen": "02.05",
+  "title": "Onboarding — Setup tracker",
+  "variant": "Desktop",
+  "width": 1440.0,
+  "height": 1050.0
+ },
+ {
+  "id": "1902:2667",
+  "page": "02-onboarding",
+  "file": "02.05-onboarding-setup-tracker-mobile.png",
+  "screen": "02.05",
+  "title": "Onboarding — Setup tracker",
+  "variant": "Mobile",
+  "width": 440.0,
+  "height": 1026.0
+ },
+ {
+  "id": "2234:337",
+  "page": "02-onboarding",
+  "file": "02.06A-startup-onboarding-30-day-free-trial-desktop.png",
+  "screen": "02.06A",
+  "title": "Startup onboarding / 30-day free trial",
+  "variant": "Desktop",
+  "width": 1440.0,
+  "height": 1050.0
+ },
+ {
+  "id": "2234:627",
+  "page": "02-onboarding",
+  "file": "02.06A-startup-onboarding-30-day-free-trial-mobile.png",
+  "screen": "02.06A",
+  "title": "Startup onboarding / 30-day free trial",
+  "variant": "Mobile",
+  "width": 440.0,
+  "height": 1355.0
+ },
+ {
+  "id": "2234:676",
+  "page": "02-onboarding",
+  "file": "02.06B-startup-onboarding-paid-30-day-package-desktop.png",
+  "screen": "02.06B",
+  "title": "Startup onboarding / Paid 30-day package",
+  "variant": "Desktop",
+  "width": 1440.0,
+  "height": 1050.0
+ },
+ {
+  "id": "2234:966",
+  "page": "02-onboarding",
+  "file": "02.06B-startup-onboarding-paid-30-day-package-mobile.png",
+  "screen": "02.06B",
+  "title": "Startup onboarding / Paid 30-day package",
+  "variant": "Mobile",
+  "width": 440.0,
+  "height": 1355.0
+ },
+ {
+  "id": "1889:1388",
+  "page": "03-dashboard",
+  "file": "03.01-dashboard-empty-state-desktop.png",
+  "screen": "03.01",
+  "title": "Dashboard / Empty state",
+  "variant": "Desktop",
+  "width": 1440.0,
+  "height": 1454.0
+ },
+ {
+  "id": "1889:8190",
+  "page": "03-dashboard",
+  "file": "03.01-dashboard-empty-state-mobile.png",
+  "screen": "03.01",
+  "title": "Dashboard / Empty state",
+  "variant": "Mobile",
+  "width": 440.0,
+  "height": 1893.0
+ },
+ {
+  "id": "1889:1781",
+  "page": "03-dashboard",
+  "file": "03.02-dashboard-populated-desktop.png",
+  "screen": "03.02",
+  "title": "Dashboard / Populated",
+  "variant": "Desktop",
+  "width": 1440.0,
+  "height": 1454.0
+ },
+ {
+  "id": "1924:1387",
+  "page": "03-dashboard",
+  "file": "03.02-dashboard-populated-mobile.png",
+  "screen": "03.02",
+  "title": "Dashboard / Populated",
+  "variant": "Mobile",
+  "width": 440.0,
+  "height": 1893.0
+ },
+ {
+  "id": "1674:2964",
+  "page": "04-business-management",
+  "file": "04.01-team-directory-desktop.png",
+  "screen": "04.01",
+  "title": "Team — Directory",
+  "variant": "Desktop",
+  "width": 1500.0,
+  "height": 1117.0
+ },
+ {
+  "id": "1899:1628",
+  "page": "04-business-management",
+  "file": "04.01-team-directory-mobile.png",
+  "screen": "04.01",
+  "title": "Team — Directory",
+  "variant": "Mobile",
+  "width": 440.0,
+  "height": 958.0
+ },
+ {
+  "id": "1674:3339",
+  "page": "04-business-management",
+  "file": "04.02-projects-board-and-task-creation-desktop.png",
+  "screen": "04.02",
+  "title": "Projects — Board and task creation",
+  "variant": "Desktop",
+  "width": 1440.0,
+  "height": 1145.0
+ },
+ {
+  "id": "1899:1678",
+  "page": "04-business-management",
+  "file": "04.02-projects-board-and-task-creation-mobile.png",
+  "screen": "04.02",
+  "title": "Projects — Board and task creation",
+  "variant": "Mobile",
+  "width": 440.0,
+  "height": 958.0
+ },
+ {
+  "id": "1674:3661",
+  "page": "04-business-management",
+  "file": "04.03-projects-calendar-desktop.png",
+  "screen": "04.03",
+  "title": "Projects — Calendar",
+  "variant": "Desktop",
+  "width": 1440.0,
+  "height": 1340.0
+ },
+ {
+  "id": "1899:1726",
+  "page": "04-business-management",
+  "file": "04.03-projects-calendar-mobile.png",
+  "screen": "04.03",
+  "title": "Projects — Calendar",
+  "variant": "Mobile",
+  "width": 440.0,
+  "height": 958.0
+ },
+ {
+  "id": "1674:5011",
+  "page": "04-business-management",
+  "file": "04.04-projects-overview-desktop.png",
+  "screen": "04.04",
+  "title": "Projects — Overview",
+  "variant": "Desktop",
+  "width": 1467.0,
+  "height": 1168.0
+ },
+ {
+  "id": "1899:1931",
+  "page": "04-business-management",
+  "file": "04.04-projects-overview-mobile.png",
+  "screen": "04.04",
+  "title": "Projects — Overview",
+  "variant": "Mobile",
+  "width": 440.0,
+  "height": 958.0
+ },
+ {
+  "id": "1677:1893",
+  "page": "04-business-management",
+  "file": "04.05-team-invite-member-and-permissions-desktop.png",
+  "screen": "04.05",
+  "title": "Team — Invite member and permissions",
+  "variant": "Desktop",
+  "width": 1500.0,
+  "height": 1047.0
+ },
+ {
+  "id": "1899:2031",
+  "page": "04-business-management",
+  "file": "04.05-team-invite-member-and-permissions-mobile.png",
+  "screen": "04.05",
+  "title": "Team — Invite member and permissions",
+  "variant": "Mobile",
+  "width": 440.0,
+  "height": 958.0
+ },
+ {
+  "id": "1677:2478",
+  "page": "04-business-management",
+  "file": "04.06-projects-kanban-overview-desktop.png",
+  "screen": "04.06",
+  "title": "Projects — Kanban overview",
+  "variant": "Desktop",
+  "width": 1440.0,
+  "height": 1145.0
+ },
+ {
+  "id": "1901:1439",
+  "page": "04-business-management",
+  "file": "04.06-projects-kanban-overview-mobile.png",
+  "screen": "04.06",
+  "title": "Projects — Kanban overview",
+  "variant": "Mobile",
+  "width": 440.0,
+  "height": 1131.0
+ },
+ {
+  "id": "1693:2388",
+  "page": "04-business-management",
+  "file": "04.07-projects-task-added-desktop.png",
+  "screen": "04.07",
+  "title": "Projects — Task added",
+  "variant": "Desktop",
+  "width": 1440.0,
+  "height": 1145.0
+ },
+ {
+  "id": "1901:1785",
+  "page": "04-business-management",
+  "file": "04.07-projects-task-added-mobile.png",
+  "screen": "04.07",
+  "title": "Projects — Task added",
+  "variant": "Mobile",
+  "width": 440.0,
+  "height": 958.0
+ },
+ {
+  "id": "1693:2710",
+  "page": "04-business-management",
+  "file": "04.08-projects-edit-task-desktop.png",
+  "screen": "04.08",
+  "title": "Projects — Edit task",
+  "variant": "Desktop",
+  "width": 1440.0,
+  "height": 1145.0
+ },
+ {
+  "id": "1901:1811",
+  "page": "04-business-management",
+  "file": "04.08-projects-edit-task-mobile.png",
+  "screen": "04.08",
+  "title": "Projects — Edit task",
+  "variant": "Mobile",
+  "width": 440.0,
+  "height": 1174.0
+ },
+ {
+  "id": "1698:2388",
+  "page": "04-business-management",
+  "file": "04.09-team-invitation-sent-desktop.png",
+  "screen": "04.09",
+  "title": "Team — Invitation sent",
+  "variant": "Desktop",
+  "width": 1440.0,
+  "height": 1050.0
+ },
+ {
+  "id": "1901:1859",
+  "page": "04-business-management",
+  "file": "04.09-team-invitation-sent-mobile.png",
+  "screen": "04.09",
+  "title": "Team — Invitation sent",
+  "variant": "Mobile",
+  "width": 440.0,
+  "height": 958.0
+ },
+ {
+  "id": "1674:1691",
+  "page": "05-sales-orders-and-invoices",
+  "file": "05.01-sales-overview-desktop.png",
+  "screen": "05.01",
+  "title": "Sales — Overview",
+  "variant": "Desktop",
+  "width": 1440.0,
+  "height": 1117.0
+ },
+ {
+  "id": "1899:1387",
+  "page": "05-sales-orders-and-invoices",
+  "file": "05.01-sales-overview-mobile.png",
+  "screen": "05.01",
+  "title": "Sales — Overview",
+  "variant": "Mobile",
+  "width": 440.0,
+  "height": 1569.0
+ },
+ {
+  "id": "1674:1953",
+  "page": "05-sales-orders-and-invoices",
+  "file": "05.02-orders-list-and-status-filters-desktop.png",
+  "screen": "05.02",
+  "title": "Orders — List and status filters",
+  "variant": "Desktop",
+  "width": 1500.0,
+  "height": 1117.0
+ },
+ {
+  "id": "1899:1451",
+  "page": "05-sales-orders-and-invoices",
+  "file": "05.02-orders-list-and-status-filters-mobile.png",
+  "screen": "05.02",
+  "title": "Orders — List and status filters",
+  "variant": "Mobile",
+  "width": 440.0,
+  "height": 1499.0
+ },
+ {
+  "id": "1674:2265",
+  "page": "05-sales-orders-and-invoices",
+  "file": "05.03-invoices-create-and-preview-desktop.png",
+  "screen": "05.03",
+  "title": "Invoices — Create and preview",
+  "variant": "Desktop",
+  "width": 1440.0,
+  "height": 1117.0
+ },
+ {
+  "id": "1899:1514",
+  "page": "05-sales-orders-and-invoices",
+  "file": "05.03-invoices-create-and-preview-mobile.png",
+  "screen": "05.03",
+  "title": "Invoices — Create and preview",
+  "variant": "Mobile",
+  "width": 440.0,
+  "height": 1516.0
+ },
+ {
+  "id": "1674:4088",
+  "page": "05-sales-orders-and-invoices",
+  "file": "05.04-orders-details-and-fulfilment-desktop.png",
+  "screen": "05.04",
+  "title": "Orders — Details and fulfilment",
+  "variant": "Desktop",
+  "width": 1440.0,
+  "height": 1117.0
+ },
+ {
+  "id": "1899:1832",
+  "page": "05-sales-orders-and-invoices",
+  "file": "05.04-orders-details-and-fulfilment-mobile.png",
+  "screen": "05.04",
+  "title": "Orders — Details and fulfilment",
+  "variant": "Mobile",
+  "width": 440.0,
+  "height": 992.0
+ },
+ {
+  "id": "1674:5369",
+  "page": "05-sales-orders-and-invoices",
+  "file": "05.05-sales-analytics-desktop.png",
+  "screen": "05.05",
+  "title": "Sales — Analytics",
+  "variant": "Desktop",
+  "width": 1500.0,
+  "height": 1117.0
+ },
+ {
+  "id": "1899:1981",
+  "page": "05-sales-orders-and-invoices",
+  "file": "05.05-sales-analytics-mobile.png",
+  "screen": "05.05",
+  "title": "Sales — Analytics",
+  "variant": "Mobile",
+  "width": 440.0,
+  "height": 1146.0
+ },
+ {
+  "id": "1677:2308",
+  "page": "05-sales-orders-and-invoices",
+  "file": "05.06-invoices-created-confirmation-desktop.png",
+  "screen": "05.06",
+  "title": "Invoices — Created confirmation",
+  "variant": "Desktop",
+  "width": 1440.0,
+  "height": 1050.0
+ },
+ {
+  "id": "1901:1387",
+  "page": "05-sales-orders-and-invoices",
+  "file": "05.06-invoices-created-confirmation-mobile.png",
+  "screen": "05.06",
+  "title": "Invoices — Created confirmation",
+  "variant": "Mobile",
+  "width": 440.0,
+  "height": 958.0
+ },
+ {
+  "id": "1677:2800",
+  "page": "05-sales-orders-and-invoices",
+  "file": "05.07-orders-cancellation-confirmation-desktop.png",
+  "screen": "05.07",
+  "title": "Orders — Cancellation confirmation",
+  "variant": "Desktop",
+  "width": 1440.0,
+  "height": 1050.0
+ },
+ {
+  "id": "1901:1465",
+  "page": "05-sales-orders-and-invoices",
+  "file": "05.07-orders-cancellation-confirmation-mobile.png",
+  "screen": "05.07",
+  "title": "Orders — Cancellation confirmation",
+  "variant": "Mobile",
+  "width": 440.0,
+  "height": 958.0
+ },
+ {
+  "id": "1678:1963",
+  "page": "05-sales-orders-and-invoices",
+  "file": "05.08-orders-cancellation-completed-desktop.png",
+  "screen": "05.08",
+  "title": "Orders — Cancellation completed",
+  "variant": "Desktop",
+  "width": 1440.0,
+  "height": 1050.0
+ },
+ {
+  "id": "1901:1517",
+  "page": "05-sales-orders-and-invoices",
+  "file": "05.08-orders-cancellation-completed-mobile.png",
+  "screen": "05.08",
+  "title": "Orders — Cancellation completed",
+  "variant": "Mobile",
+  "width": 440.0,
+  "height": 958.0
+ },
+ {
+  "id": "1689:2318",
+  "page": "05-sales-orders-and-invoices",
+  "file": "05.09-orders-create-order-desktop.png",
+  "screen": "05.09",
+  "title": "Orders — Create order",
+  "variant": "Desktop",
+  "width": 1500.0,
+  "height": 1047.0
+ },
+ {
+  "id": "1901:1569",
+  "page": "05-sales-orders-and-invoices",
+  "file": "05.09-orders-create-order-mobile.png",
+  "screen": "05.09",
+  "title": "Orders — Create order",
+  "variant": "Mobile",
+  "width": 440.0,
+  "height": 958.0
+ },
+ {
+  "id": "1689:3197",
+  "page": "05-sales-orders-and-invoices",
+  "file": "05.10-invoices-email-invoice-desktop.png",
+  "screen": "05.10",
+  "title": "Invoices — Email invoice",
+  "variant": "Desktop",
+  "width": 1440.0,
+  "height": 1100.0
+ },
+ {
+  "id": "1901:1621",
+  "page": "05-sales-orders-and-invoices",
+  "file": "05.10-invoices-email-invoice-mobile.png",
+  "screen": "05.10",
+  "title": "Invoices — Email invoice",
+  "variant": "Mobile",
+  "width": 440.0,
+  "height": 1430.0
+ },
+ {
+  "id": "1689:3556",
+  "page": "05-sales-orders-and-invoices",
+  "file": "05.11-invoices-sent-confirmation-desktop.png",
+  "screen": "05.11",
+  "title": "Invoices — Sent confirmation",
+  "variant": "Desktop",
+  "width": 1440.0,
+  "height": 1050.0
+ },
+ {
+  "id": "1901:1681",
+  "page": "05-sales-orders-and-invoices",
+  "file": "05.11-invoices-sent-confirmation-mobile.png",
+  "screen": "05.11",
+  "title": "Invoices — Sent confirmation",
+  "variant": "Mobile",
+  "width": 440.0,
+  "height": 958.0
+ },
+ {
+  "id": "1692:2353",
+  "page": "05-sales-orders-and-invoices",
+  "file": "05.12-orders-created-confirmation-desktop.png",
+  "screen": "05.12",
+  "title": "Orders — Created confirmation",
+  "variant": "Desktop",
+  "width": 1440.0,
+  "height": 1050.0
+ },
+ {
+  "id": "1901:1733",
+  "page": "05-sales-orders-and-invoices",
+  "file": "05.12-orders-created-confirmation-mobile.png",
+  "screen": "05.12",
+  "title": "Orders — Created confirmation",
+  "variant": "Mobile",
+  "width": 440.0,
+  "height": 958.0
+ },
+ {
+  "id": "1821:1328",
+  "page": "05-sales-orders-and-invoices",
+  "file": "05.13-invoices-pdf-preview-desktop.png",
+  "screen": "05.13",
+  "title": "Invoices — PDF preview",
+  "variant": "Desktop",
+  "width": 1440.0,
+  "height": 1117.0
+ },
+ {
+  "id": "1901:1963",
+  "page": "05-sales-orders-and-invoices",
+  "file": "05.13-invoices-pdf-preview-mobile.png",
+  "screen": "05.13",
+  "title": "Invoices — PDF preview",
+  "variant": "Mobile",
+  "width": 440.0,
+  "height": 1457.0
+ },
+ {
+  "id": "1869:1388",
+  "page": "06-wallet-and-transactions",
+  "file": "06.01-wallet-balances-and-availability-desktop.png",
+  "screen": "06.01",
+  "title": "Wallet — Balances and availability",
+  "variant": "Desktop",
+  "width": 1440.0,
+  "height": 1024.0
+ },
+ {
+  "id": "1888:1388",
+  "page": "06-wallet-and-transactions",
+  "file": "06.01-wallet-balances-and-availability-mobile.png",
+  "screen": "06.01",
+  "title": "Wallet — Balances and availability",
+  "variant": "Mobile",
+  "width": 440.0,
+  "height": 1478.0
+ },
+ {
+  "id": "1870:1519",
+  "page": "06-wallet-and-transactions",
+  "file": "06.02-wallet-link-bank-account-desktop.png",
+  "screen": "06.02",
+  "title": "Wallet — Link bank account",
+  "variant": "Desktop",
+  "width": 1440.0,
+  "height": 1024.0
+ },
+ {
+  "id": "1888:1449",
+  "page": "06-wallet-and-transactions",
+  "file": "06.02-wallet-link-bank-account-mobile.png",
+  "screen": "06.02",
+  "title": "Wallet — Link bank account",
+  "variant": "Mobile",
+  "width": 440.0,
+  "height": 1291.0
+ },
+ {
+  "id": "1872:1387",
+  "page": "06-wallet-and-transactions",
+  "file": "06.03-wallet-withdrawal-schedule-desktop.png",
+  "screen": "06.03",
+  "title": "Wallet — Withdrawal schedule",
+  "variant": "Desktop",
+  "width": 1440.0,
+  "height": 1024.0
+ },
+ {
+  "id": "1888:1500",
+  "page": "06-wallet-and-transactions",
+  "file": "06.03-wallet-withdrawal-schedule-mobile.png",
+  "screen": "06.03",
+  "title": "Wallet — Withdrawal schedule",
+  "variant": "Mobile",
+  "width": 440.0,
+  "height": 1309.0
+ },
+ {
+  "id": "1872:1724",
+  "page": "06-wallet-and-transactions",
+  "file": "06.04-wallet-request-withdrawal-desktop.png",
+  "screen": "06.04",
+  "title": "Wallet — Request withdrawal",
+  "variant": "Desktop",
+  "width": 1440.0,
+  "height": 1024.0
+ },
+ {
+  "id": "1888:1551",
+  "page": "06-wallet-and-transactions",
+  "file": "06.04-wallet-request-withdrawal-mobile.png",
+  "screen": "06.04",
+  "title": "Wallet — Request withdrawal",
+  "variant": "Mobile",
+  "width": 440.0,
+  "height": 1510.0
+ },
+ {
+  "id": "1872:2073",
+  "page": "06-wallet-and-transactions",
+  "file": "06.05-wallet-review-withdrawal-desktop.png",
+  "screen": "06.05",
+  "title": "Wallet — Review withdrawal",
+  "variant": "Desktop",
+  "width": 1440.0,
+  "height": 1024.0
+ },
+ {
+  "id": "1888:1611",
+  "page": "06-wallet-and-transactions",
+  "file": "06.05-wallet-review-withdrawal-mobile.png",
+  "screen": "06.05",
+  "title": "Wallet — Review withdrawal",
+  "variant": "Mobile",
+  "width": 440.0,
+  "height": 956.0
+ },
+ {
+  "id": "1872:2388",
+  "page": "06-wallet-and-transactions",
+  "file": "06.06-wallet-withdrawal-submitted-desktop.png",
+  "screen": "06.06",
+  "title": "Wallet — Withdrawal submitted",
+  "variant": "Desktop",
+  "width": 1440.0,
+  "height": 1024.0
+ },
+ {
+  "id": "1888:1647",
+  "page": "06-wallet-and-transactions",
+  "file": "06.06-wallet-withdrawal-submitted-mobile.png",
+  "screen": "06.06",
+  "title": "Wallet — Withdrawal submitted",
+  "variant": "Mobile",
+  "width": 440.0,
+  "height": 956.0
+ },
+ {
+  "id": "1873:1387",
+  "page": "06-wallet-and-transactions",
+  "file": "06.07-wallet-transaction-history-desktop.png",
+  "screen": "06.07",
+  "title": "Wallet — Transaction history",
+  "variant": "Desktop",
+  "width": 1440.0,
+  "height": 1024.0
+ },
+ {
+  "id": "1888:1683",
+  "page": "06-wallet-and-transactions",
+  "file": "06.07-wallet-transaction-history-mobile.png",
+  "screen": "06.07",
+  "title": "Wallet — Transaction history",
+  "variant": "Mobile",
+  "width": 440.0,
+  "height": 1344.0
+ },
+ {
+  "id": "1873:1732",
+  "page": "06-wallet-and-transactions",
+  "file": "06.08-wallet-transaction-details-desktop.png",
+  "screen": "06.08",
+  "title": "Wallet — Transaction details",
+  "variant": "Desktop",
+  "width": 1440.0,
+  "height": 1024.0
+ },
+ {
+  "id": "1888:1740",
+  "page": "06-wallet-and-transactions",
+  "file": "06.08-wallet-transaction-details-mobile.png",
+  "screen": "06.08",
+  "title": "Wallet — Transaction details",
+  "variant": "Mobile",
+  "width": 440.0,
+  "height": 1279.0
+ },
+ {
+  "id": "1873:2073",
+  "page": "06-wallet-and-transactions",
+  "file": "06.09-wallet-bank-validation-failure-desktop.png",
+  "screen": "06.09",
+  "title": "Wallet — Bank validation failure",
+  "variant": "Desktop",
+  "width": 1440.0,
+  "height": 1024.0
+ },
+ {
+  "id": "1888:1794",
+  "page": "06-wallet-and-transactions",
+  "file": "06.09-wallet-bank-validation-failure-mobile.png",
+  "screen": "06.09",
+  "title": "Wallet — Bank validation failure",
+  "variant": "Mobile",
+  "width": 440.0,
+  "height": 956.0
+ },
+ {
+  "id": "1873:2385",
+  "page": "06-wallet-and-transactions",
+  "file": "06.10-wallet-payout-unsuccessful-desktop.png",
+  "screen": "06.10",
+  "title": "Wallet — Payout unsuccessful",
+  "variant": "Desktop",
+  "width": 1440.0,
+  "height": 1024.0
+ },
+ {
+  "id": "1888:1827",
+  "page": "06-wallet-and-transactions",
+  "file": "06.10-wallet-payout-unsuccessful-mobile.png",
+  "screen": "06.10",
+  "title": "Wallet — Payout unsuccessful",
+  "variant": "Mobile",
+  "width": 440.0,
+  "height": 956.0
+ },
+ {
+  "id": "1664:4520",
+  "page": "07-subscriptions-and-packages",
+  "file": "07.01-plan-comparison-desktop.png",
+  "screen": "07.01",
+  "title": "Plan comparison",
+  "variant": "Desktop",
+  "width": 1440.0,
+  "height": 1050.0
+ },
+ {
+  "id": "1902:1388",
+  "page": "07-subscriptions-and-packages",
+  "file": "07.01-plan-comparison-mobile.png",
+  "screen": "07.01",
+  "title": "Plan comparison",
+  "variant": "Mobile",
+  "width": 440.0,
+  "height": 1536.0
+ },
+ {
+  "id": "1665:1464",
+  "page": "07-subscriptions-and-packages",
+  "file": "07.02-secure-payment-handoff-desktop.png",
+  "screen": "07.02",
+  "title": "Secure payment handoff",
+  "variant": "Desktop",
+  "width": 1440.0,
+  "height": 1050.0
+ },
+ {
+  "id": "1902:1521",
+  "page": "07-subscriptions-and-packages",
+  "file": "07.02-secure-payment-handoff-mobile.png",
+  "screen": "07.02",
+  "title": "Secure payment handoff",
+  "variant": "Mobile",
+  "width": 440.0,
+  "height": 1000.0
+ },
+ {
+  "id": "1665:1669",
+  "page": "07-subscriptions-and-packages",
+  "file": "07.03-payment-processing-desktop.png",
+  "screen": "07.03",
+  "title": "Payment processing",
+  "variant": "Desktop",
+  "width": 1440.0,
+  "height": 1050.0
+ },
+ {
+  "id": "1902:1577",
+  "page": "07-subscriptions-and-packages",
+  "file": "07.03-payment-processing-mobile.png",
+  "screen": "07.03",
+  "title": "Payment processing",
+  "variant": "Mobile",
+  "width": 440.0,
+  "height": 1000.0
+ },
+ {
+  "id": "1665:1874",
+  "page": "07-subscriptions-and-packages",
+  "file": "07.04-payment-successful-desktop.png",
+  "screen": "07.04",
+  "title": "Payment successful",
+  "variant": "Desktop",
+  "width": 1440.0,
+  "height": 1050.0
+ },
+ {
+  "id": "1902:1642",
+  "page": "07-subscriptions-and-packages",
+  "file": "07.04-payment-successful-mobile.png",
+  "screen": "07.04",
+  "title": "Payment successful",
+  "variant": "Mobile",
+  "width": 440.0,
+  "height": 1000.0
+ },
+ {
+  "id": "1665:2079",
+  "page": "07-subscriptions-and-packages",
+  "file": "07.05-payment-unsuccessful-desktop.png",
+  "screen": "07.05",
+  "title": "Payment unsuccessful",
+  "variant": "Desktop",
+  "width": 1440.0,
+  "height": 1050.0
+ },
+ {
+  "id": "1902:1707",
+  "page": "07-subscriptions-and-packages",
+  "file": "07.05-payment-unsuccessful-mobile.png",
+  "screen": "07.05",
+  "title": "Payment unsuccessful",
+  "variant": "Mobile",
+  "width": 440.0,
+  "height": 1000.0
+ },
+ {
+  "id": "1665:2284",
+  "page": "07-subscriptions-and-packages",
+  "file": "07.06-plan-and-usage-desktop.png",
+  "screen": "07.06",
+  "title": "Plan and usage",
+  "variant": "Desktop",
+  "width": 1440.0,
+  "height": 1050.0
+ },
+ {
+  "id": "1902:1772",
+  "page": "07-subscriptions-and-packages",
+  "file": "07.06-plan-and-usage-mobile.png",
+  "screen": "07.06",
+  "title": "Plan and usage",
+  "variant": "Mobile",
+  "width": 440.0,
+  "height": 1699.0
+ },
+ {
+  "id": "1665:2489",
+  "page": "07-subscriptions-and-packages",
+  "file": "07.07-daily-credit-limit-desktop.png",
+  "screen": "07.07",
+  "title": "Daily credit limit",
+  "variant": "Desktop",
+  "width": 1440.0,
+  "height": 1050.0
+ },
+ {
+  "id": "1902:1835",
+  "page": "07-subscriptions-and-packages",
+  "file": "07.07-daily-credit-limit-mobile.png",
+  "screen": "07.07",
+  "title": "Daily credit limit",
+  "variant": "Mobile",
+  "width": 440.0,
+  "height": 1659.0
+ },
+ {
+  "id": "1665:2694",
+  "page": "07-subscriptions-and-packages",
+  "file": "07.08-trial-ending-desktop.png",
+  "screen": "07.08",
+  "title": "Trial ending",
+  "variant": "Desktop",
+  "width": 1440.0,
+  "height": 1050.0
+ },
+ {
+  "id": "1902:1900",
+  "page": "07-subscriptions-and-packages",
+  "file": "07.08-trial-ending-mobile.png",
+  "screen": "07.08",
+  "title": "Trial ending",
+  "variant": "Mobile",
+  "width": 440.0,
+  "height": 1641.0
+ },
+ {
+  "id": "1665:2899",
+  "page": "07-subscriptions-and-packages",
+  "file": "07.09-trial-expired-desktop.png",
+  "screen": "07.09",
+  "title": "Trial expired",
+  "variant": "Desktop",
+  "width": 1440.0,
+  "height": 1050.0
+ },
+ {
+  "id": "1902:1965",
+  "page": "07-subscriptions-and-packages",
+  "file": "07.09-trial-expired-mobile.png",
+  "screen": "07.09",
+  "title": "Trial expired",
+  "variant": "Mobile",
+  "width": 440.0,
+  "height": 1659.0
+ },
+ {
+  "id": "1665:3104",
+  "page": "07-subscriptions-and-packages",
+  "file": "07.10-change-plan-review-desktop.png",
+  "screen": "07.10",
+  "title": "Change plan review",
+  "variant": "Desktop",
+  "width": 1440.0,
+  "height": 1050.0
+ },
+ {
+  "id": "1902:2030",
+  "page": "07-subscriptions-and-packages",
+  "file": "07.10-change-plan-review-mobile.png",
+  "screen": "07.10",
+  "title": "Change plan review",
+  "variant": "Mobile",
+  "width": 440.0,
+  "height": 1641.0
+ },
+ {
+  "id": "1665:3309",
+  "page": "07-subscriptions-and-packages",
+  "file": "07.11-billing-history-desktop.png",
+  "screen": "07.11",
+  "title": "Billing history",
+  "variant": "Desktop",
+  "width": 1440.0,
+  "height": 1050.0
+ },
+ {
+  "id": "1902:2095",
+  "page": "07-subscriptions-and-packages",
+  "file": "07.11-billing-history-mobile.png",
+  "screen": "07.11",
+  "title": "Billing history",
+  "variant": "Mobile",
+  "width": 440.0,
+  "height": 1659.0
+ },
+ {
+  "id": "1664:4690",
+  "page": "07-subscriptions-and-packages",
+  "file": "07.12-startup-packages-desktop.png",
+  "screen": "07.12",
+  "title": "Startup packages",
+  "variant": "Desktop",
+  "width": 1440.0,
+  "height": 1050.0
+ },
+ {
+  "id": "1902:1422",
+  "page": "07-subscriptions-and-packages",
+  "file": "07.12-startup-packages-mobile.png",
+  "screen": "07.12",
+  "title": "Startup packages",
+  "variant": "Mobile",
+  "width": 440.0,
+  "height": 960.0
+ },
+ {
+  "id": "1665:1259",
+  "page": "07-subscriptions-and-packages",
+  "file": "07.13-startup-package-review-desktop.png",
+  "screen": "07.13",
+  "title": "Startup package review",
+  "variant": "Desktop",
+  "width": 1440.0,
+  "height": 1050.0
+ },
+ {
+  "id": "1902:1456",
+  "page": "07-subscriptions-and-packages",
+  "file": "07.13-startup-package-review-mobile.png",
+  "screen": "07.13",
+  "title": "Startup package review",
+  "variant": "Mobile",
+  "width": 440.0,
+  "height": 1623.0
+ },
+ {
+  "id": "1853:1345",
+  "page": "07-subscriptions-and-packages",
+  "file": "07.14-standard-startup-package-review-desktop.png",
+  "screen": "07.14",
+  "title": "Standard startup package review",
+  "variant": "Desktop",
+  "width": 1440.0,
+  "height": 1050.0
+ },
+ {
+  "id": "1902:2225",
+  "page": "07-subscriptions-and-packages",
+  "file": "07.14-standard-startup-package-review-mobile.png",
+  "screen": "07.14",
+  "title": "Standard startup package review",
+  "variant": "Mobile",
+  "width": 440.0,
+  "height": 1641.0
+ },
+ {
+  "id": "1853:1801",
+  "page": "07-subscriptions-and-packages",
+  "file": "07.15-premium-startup-package-review-desktop.png",
+  "screen": "07.15",
+  "title": "Premium startup package review",
+  "variant": "Desktop",
+  "width": 1440.0,
+  "height": 1050.0
+ },
+ {
+  "id": "1902:2290",
+  "page": "07-subscriptions-and-packages",
+  "file": "07.15-premium-startup-package-review-mobile.png",
+  "screen": "07.15",
+  "title": "Premium startup package review",
+  "variant": "Mobile",
+  "width": 440.0,
+  "height": 1659.0
+ },
+ {
+  "id": "1866:1388",
+  "page": "08-online-store",
+  "file": "08.01-create-storefront-desktop.png",
+  "screen": "08.01",
+  "title": "Create storefront",
+  "variant": "Desktop",
+  "width": 1440.0,
+  "height": 1024.0
+ },
+ {
+  "id": "1885:1387",
+  "page": "08-online-store",
+  "file": "08.01-create-storefront-mobile.png",
+  "screen": "08.01",
+  "title": "Create storefront",
+  "variant": "Mobile",
+  "width": 440.0,
+  "height": 1274.0
+ },
+ {
+  "id": "1866:1593",
+  "page": "08-online-store",
+  "file": "08.02-launch-checklist-desktop.png",
+  "screen": "08.02",
+  "title": "Launch checklist",
+  "variant": "Desktop",
+  "width": 1440.0,
+  "height": 1024.0
+ },
+ {
+  "id": "1885:1438",
+  "page": "08-online-store",
+  "file": "08.02-launch-checklist-mobile.png",
+  "screen": "08.02",
+  "title": "Launch checklist",
+  "variant": "Mobile",
+  "width": 440.0,
+  "height": 1363.0
+ },
+ {
+  "id": "1866:1805",
+  "page": "08-online-store",
+  "file": "08.03-catalogue-management-desktop.png",
+  "screen": "08.03",
+  "title": "Catalogue management",
+  "variant": "Desktop",
+  "width": 1440.0,
+  "height": 1024.0
+ },
+ {
+  "id": "1885:1499",
+  "page": "08-online-store",
+  "file": "08.03-catalogue-management-mobile.png",
+  "screen": "08.03",
+  "title": "Catalogue management",
+  "variant": "Mobile",
+  "width": 440.0,
+  "height": 1406.0
+ },
+ {
+  "id": "1866:2018",
+  "page": "08-online-store",
+  "file": "08.04-add-and-edit-product-desktop.png",
+  "screen": "08.04",
+  "title": "Add & edit product",
+  "variant": "Desktop",
+  "width": 1440.0,
+  "height": 1024.0
+ },
+ {
+  "id": "1885:1556",
+  "page": "08-online-store",
+  "file": "08.04-add-and-edit-product-mobile.png",
+  "screen": "08.04",
+  "title": "Add & edit product",
+  "variant": "Mobile",
+  "width": 440.0,
+  "height": 1510.0
+ },
+ {
+  "id": "1866:2235",
+  "page": "08-online-store",
+  "file": "08.05-bulk-product-upload-desktop.png",
+  "screen": "08.05",
+  "title": "Bulk product upload",
+  "variant": "Desktop",
+  "width": 1440.0,
+  "height": 1024.0
+ },
+ {
+  "id": "1885:1616",
+  "page": "08-online-store",
+  "file": "08.05-bulk-product-upload-mobile.png",
+  "screen": "08.05",
+  "title": "Bulk product upload",
+  "variant": "Mobile",
+  "width": 440.0,
+  "height": 1510.0
+ },
+ {
+  "id": "1866:2452",
+  "page": "08-online-store",
+  "file": "08.06-inventory-synchronization-desktop.png",
+  "screen": "08.06",
+  "title": "Inventory synchronization",
+  "variant": "Desktop",
+  "width": 1440.0,
+  "height": 1024.0
+ },
+ {
+  "id": "1885:1676",
+  "page": "08-online-store",
+  "file": "08.06-inventory-synchronization-mobile.png",
+  "screen": "08.06",
+  "title": "Inventory synchronization",
+  "variant": "Mobile",
+  "width": 440.0,
+  "height": 1406.0
+ },
+ {
+  "id": "1866:2665",
+  "page": "08-online-store",
+  "file": "08.07-product-detail-desktop.png",
+  "screen": "08.07",
+  "title": "Product detail",
+  "variant": "Desktop",
+  "width": 1440.0,
+  "height": 1024.0
+ },
+ {
+  "id": "1885:1733",
+  "page": "08-online-store",
+  "file": "08.07-product-detail-mobile.png",
+  "screen": "08.07",
+  "title": "Product detail",
+  "variant": "Mobile",
+  "width": 440.0,
+  "height": 1337.0
+ },
+ {
+  "id": "1866:2874",
+  "page": "08-online-store",
+  "file": "08.08-template-selection-desktop.png",
+  "screen": "08.08",
+  "title": "Template selection",
+  "variant": "Desktop",
+  "width": 1440.0,
+  "height": 1024.0
+ },
+ {
+  "id": "1885:1787",
+  "page": "08-online-store",
+  "file": "08.08-template-selection-mobile.png",
+  "screen": "08.08",
+  "title": "Template selection",
+  "variant": "Mobile",
+  "width": 440.0,
+  "height": 1052.0
+ },
+ {
+  "id": "1866:3067",
+  "page": "08-online-store",
+  "file": "08.09-store-domain-settings-desktop.png",
+  "screen": "08.09",
+  "title": "Store domain settings",
+  "variant": "Desktop",
+  "width": 1440.0,
+  "height": 1024.0
+ },
+ {
+  "id": "1885:1825",
+  "page": "08-online-store",
+  "file": "08.09-store-domain-settings-mobile.png",
+  "screen": "08.09",
+  "title": "Store domain settings",
+  "variant": "Mobile",
+  "width": 440.0,
+  "height": 1510.0
+ },
+ {
+  "id": "1866:3284",
+  "page": "08-online-store",
+  "file": "08.10-analytics-and-sales-desktop.png",
+  "screen": "08.10",
+  "title": "Analytics and sales",
+  "variant": "Desktop",
+  "width": 1440.0,
+  "height": 1024.0
+ },
+ {
+  "id": "1885:1885",
+  "page": "08-online-store",
+  "file": "08.10-analytics-and-sales-mobile.png",
+  "screen": "08.10",
+  "title": "Analytics and sales",
+  "variant": "Mobile",
+  "width": 440.0,
+  "height": 1437.0
+ },
+ {
+  "id": "1866:3509",
+  "page": "08-online-store",
+  "file": "08.11-public-storefront-desktop.png",
+  "screen": "08.11",
+  "title": "Public storefront",
+  "variant": "Desktop",
+  "width": 1440.0,
+  "height": 1166.0
+ },
+ {
+  "id": "1885:1946",
+  "page": "08-online-store",
+  "file": "08.11-public-storefront-mobile.png",
+  "screen": "08.11",
+  "title": "Public storefront",
+  "variant": "Mobile",
+  "width": 440.0,
+  "height": 1386.0
+ },
+ {
+  "id": "1866:3554",
+  "page": "08-online-store",
+  "file": "08.12-customer-search-and-filters-desktop.png",
+  "screen": "08.12",
+  "title": "Customer search and filters",
+  "variant": "Desktop",
+  "width": 1440.0,
+  "height": 1166.0
+ },
+ {
+  "id": "1885:1991",
+  "page": "08-online-store",
+  "file": "08.12-customer-search-and-filters-mobile.png",
+  "screen": "08.12",
+  "title": "Customer search and filters",
+  "variant": "Mobile",
+  "width": 440.0,
+  "height": 1330.0
+ },
+ {
+  "id": "1866:3599",
+  "page": "08-online-store",
+  "file": "08.13-public-product-detail-desktop.png",
+  "screen": "08.13",
+  "title": "Public product detail",
+  "variant": "Desktop",
+  "width": 1440.0,
+  "height": 1024.0
+ },
+ {
+  "id": "1885:2036",
+  "page": "08-online-store",
+  "file": "08.13-public-product-detail-mobile.png",
+  "screen": "08.13",
+  "title": "Public product detail",
+  "variant": "Mobile",
+  "width": 440.0,
+  "height": 1339.0
+ },
+ {
+  "id": "1866:3649",
+  "page": "08-online-store",
+  "file": "08.14-customer-shopping-cart-desktop.png",
+  "screen": "08.14",
+  "title": "Customer shopping cart",
+  "variant": "Desktop",
+  "width": 1440.0,
+  "height": 1024.0
+ },
+ {
+  "id": "1885:2088",
+  "page": "08-online-store",
+  "file": "08.14-customer-shopping-cart-mobile.png",
+  "screen": "08.14",
+  "title": "Customer shopping cart",
+  "variant": "Mobile",
+  "width": 440.0,
+  "height": 1271.0
+ },
+ {
+  "id": "1866:3695",
+  "page": "08-online-store",
+  "file": "08.15-customer-guest-checkout-desktop.png",
+  "screen": "08.15",
+  "title": "Customer guest checkout",
+  "variant": "Desktop",
+  "width": 1440.0,
+  "height": 1024.0
+ },
+ {
+  "id": "1885:2137",
+  "page": "08-online-store",
+  "file": "08.15-customer-guest-checkout-mobile.png",
+  "screen": "08.15",
+  "title": "Customer guest checkout",
+  "variant": "Mobile",
+  "width": 440.0,
+  "height": 1447.0
+ },
+ {
+  "id": "1866:3748",
+  "page": "08-online-store",
+  "file": "08.16-payment-verifying-desktop.png",
+  "screen": "08.16",
+  "title": "Payment verifying",
+  "variant": "Desktop",
+  "width": 1440.0,
+  "height": 1024.0
+ },
+ {
+  "id": "1885:2192",
+  "page": "08-online-store",
+  "file": "08.16-payment-verifying-mobile.png",
+  "screen": "08.16",
+  "title": "Payment verifying",
+  "variant": "Mobile",
+  "width": 440.0,
+  "height": 971.0
+ },
+ {
+  "id": "1866:3928",
+  "page": "08-online-store",
+  "file": "08.17-payment-successful-desktop.png",
+  "screen": "08.17",
+  "title": "Payment successful",
+  "variant": "Desktop",
+  "width": 1440.0,
+  "height": 1024.0
+ },
+ {
+  "id": "1885:2223",
+  "page": "08-online-store",
+  "file": "08.17-payment-successful-mobile.png",
+  "screen": "08.17",
+  "title": "Payment successful",
+  "variant": "Mobile",
+  "width": 440.0,
+  "height": 971.0
+ },
+ {
+  "id": "1866:4111",
+  "page": "08-online-store",
+  "file": "08.18-payment-unsuccessful-desktop.png",
+  "screen": "08.18",
+  "title": "Payment unsuccessful",
+  "variant": "Desktop",
+  "width": 1440.0,
+  "height": 1024.0
+ },
+ {
+  "id": "1885:2257",
+  "page": "08-online-store",
+  "file": "08.18-payment-unsuccessful-mobile.png",
+  "screen": "08.18",
+  "title": "Payment unsuccessful",
+  "variant": "Mobile",
+  "width": 440.0,
+  "height": 971.0
+ },
+ {
+  "id": "1866:4291",
+  "page": "08-online-store",
+  "file": "08.19-guest-order-tracking-desktop.png",
+  "screen": "08.19",
+  "title": "Guest order tracking",
+  "variant": "Desktop",
+  "width": 1440.0,
+  "height": 1024.0
+ },
+ {
+  "id": "1885:2288",
+  "page": "08-online-store",
+  "file": "08.19-guest-order-tracking-mobile.png",
+  "screen": "08.19",
+  "title": "Guest order tracking",
+  "variant": "Mobile",
+  "width": 440.0,
+  "height": 1339.0
+ },
+ {
+  "id": "1866:4341",
+  "page": "08-online-store",
+  "file": "08.20-empty-cart-and-validation-states-desktop.png",
+  "screen": "08.20",
+  "title": "Empty cart & validation states",
+  "variant": "Desktop",
+  "width": 1440.0,
+  "height": 1024.0
+ },
+ {
+  "id": "1885:2340",
+  "page": "08-online-store",
+  "file": "08.20-empty-cart-and-validation-states-mobile.png",
+  "screen": "08.20",
+  "title": "Empty cart & validation states",
+  "variant": "Mobile",
+  "width": 440.0,
+  "height": 971.0
+ },
+ {
+  "id": "1674:2584",
+  "page": "09-inventory-and-customers",
+  "file": "09.01-customers-directory-and-add-customer-desktop.png",
+  "screen": "09.01",
+  "title": "Customers — Directory and add customer",
+  "variant": "Desktop",
+  "width": 1440.0,
+  "height": 1047.0
+ },
+ {
+  "id": "1899:1579",
+  "page": "09-inventory-and-customers",
+  "file": "09.01-customers-directory-and-add-customer-mobile.png",
+  "screen": "09.01",
+  "title": "Customers — Directory and add customer",
+  "variant": "Mobile",
+  "width": 440.0,
+  "height": 958.0
+ },
+ {
+  "id": "1674:4615",
+  "page": "09-inventory-and-customers",
+  "file": "09.02-customers-edit-details-desktop.png",
+  "screen": "09.02",
+  "title": "Customers — Edit details",
+  "variant": "Desktop",
+  "width": 1440.0,
+  "height": 1104.0
+ },
+ {
+  "id": "1899:1882",
+  "page": "09-inventory-and-customers",
+  "file": "09.02-customers-edit-details-mobile.png",
+  "screen": "09.02",
+  "title": "Customers — Edit details",
+  "variant": "Mobile",
+  "width": 440.0,
+  "height": 958.0
+ },
+ {
+  "id": "1698:2559",
+  "page": "09-inventory-and-customers",
+  "file": "09.03-customers-customer-added-desktop.png",
+  "screen": "09.03",
+  "title": "Customers — Customer added",
+  "variant": "Desktop",
+  "width": 1440.0,
+  "height": 1050.0
+ },
+ {
+  "id": "1901:1911",
+  "page": "09-inventory-and-customers",
+  "file": "09.03-customers-customer-added-mobile.png",
+  "screen": "09.03",
+  "title": "Customers — Customer added",
+  "variant": "Mobile",
+  "width": 440.0,
+  "height": 958.0
+ },
+ {
+  "id": "1893:4730",
+  "page": "09-inventory-and-customers",
+  "file": "09.04-inventory-barcode-lookup-desktop.png",
+  "screen": "09.04",
+  "title": "Inventory — Barcode lookup",
+  "variant": "Desktop",
+  "width": 1440.0,
+  "height": 1024.0
+ },
+ {
+  "id": "1898:1388",
+  "page": "09-inventory-and-customers",
+  "file": "09.04-inventory-barcode-lookup-mobile.png",
+  "screen": "09.04",
+  "title": "Inventory — Barcode lookup",
+  "variant": "Mobile",
+  "width": 440.0,
+  "height": 1331.0
+ },
+ {
+  "id": "1893:4935",
+  "page": "09-inventory-and-customers",
+  "file": "09.05-inventory-add-edit-product-details-desktop.png",
+  "screen": "09.05",
+  "title": "Inventory — Add/edit product details",
+  "variant": "Desktop",
+  "width": 1440.0,
+  "height": 1024.0
+ },
+ {
+  "id": "1898:1439",
+  "page": "09-inventory-and-customers",
+  "file": "09.05-inventory-add-edit-product-details-mobile.png",
+  "screen": "09.05",
+  "title": "Inventory — Add/edit product details",
+  "variant": "Mobile",
+  "width": 440.0,
+  "height": 1546.0
+ },
+ {
+  "id": "1893:5152",
+  "page": "09-inventory-and-customers",
+  "file": "09.06-inventory-stock-adjustment-desktop.png",
+  "screen": "09.06",
+  "title": "Inventory — Stock adjustment",
+  "variant": "Desktop",
+  "width": 1440.0,
+  "height": 1024.0
+ },
+ {
+  "id": "1898:1499",
+  "page": "09-inventory-and-customers",
+  "file": "09.06-inventory-stock-adjustment-mobile.png",
+  "screen": "09.06",
+  "title": "Inventory — Stock adjustment",
+  "variant": "Mobile",
+  "width": 440.0,
+  "height": 1564.0
+ },
+ {
+  "id": "1893:5369",
+  "page": "09-inventory-and-customers",
+  "file": "09.07-inventory-low-stock-monitor-desktop.png",
+  "screen": "09.07",
+  "title": "Inventory — Low stock monitor",
+  "variant": "Desktop",
+  "width": 1440.0,
+  "height": 1024.0
+ },
+ {
+  "id": "1898:1559",
+  "page": "09-inventory-and-customers",
+  "file": "09.07-inventory-low-stock-monitor-mobile.png",
+  "screen": "09.07",
+  "title": "Inventory — Low stock monitor",
+  "variant": "Mobile",
+  "width": 440.0,
+  "height": 1449.0
+ },
+ {
+  "id": "1893:5582",
+  "page": "09-inventory-and-customers",
+  "file": "09.08-inventory-export-completed-desktop.png",
+  "screen": "09.08",
+  "title": "Inventory — Export completed",
+  "variant": "Desktop",
+  "width": 1440.0,
+  "height": 1024.0
+ },
+ {
+  "id": "1898:1616",
+  "page": "09-inventory-and-customers",
+  "file": "09.08-inventory-export-completed-mobile.png",
+  "screen": "09.08",
+  "title": "Inventory — Export completed",
+  "variant": "Mobile",
+  "width": 440.0,
+  "height": 956.0
+ },
+ {
+  "id": "1889:2174",
+  "page": "09-inventory-and-customers",
+  "file": "09.09-inventory-add-first-product-desktop.png",
+  "screen": "09.09",
+  "title": "Inventory / Add first product",
+  "variant": "Desktop",
+  "width": 1440.0,
+  "height": 1030.0
+ },
+ {
+  "id": "1889:8251",
+  "page": "09-inventory-and-customers",
+  "file": "09.09-inventory-add-first-product-mobile.png",
+  "screen": "09.09",
+  "title": "Inventory / Add first product",
+  "variant": "Mobile",
+  "width": 440.0,
+  "height": 1480.0
+ },
+ {
+  "id": "1889:2379",
+  "page": "09-inventory-and-customers",
+  "file": "09.10-inventory-overview-desktop.png",
+  "screen": "09.10",
+  "title": "Inventory / Overview",
+  "variant": "Desktop",
+  "width": 1440.0,
+  "height": 1030.0
+ },
+ {
+  "id": "1925:1387",
+  "page": "09-inventory-and-customers",
+  "file": "09.10-inventory-overview-mobile.png",
+  "screen": "09.10",
+  "title": "Inventory / Overview",
+  "variant": "Mobile",
+  "width": 440.0,
+  "height": 1611.0
+ },
+ {
+  "id": "1889:2591",
+  "page": "09-inventory-and-customers",
+  "file": "09.11-inventory-product-register-desktop.png",
+  "screen": "09.11",
+  "title": "Inventory / Product register",
+  "variant": "Desktop",
+  "width": 1440.0,
+  "height": 1030.0
+ },
+ {
+  "id": "1925:1445",
+  "page": "09-inventory-and-customers",
+  "file": "09.11-inventory-product-register-mobile.png",
+  "screen": "09.11",
+  "title": "Inventory / Product register",
+  "variant": "Mobile",
+  "width": 440.0,
+  "height": 1480.0
+ },
+ {
+  "id": "1874:1388",
+  "page": "10-bisupplynet",
+  "file": "10.01-find-suppliers-desktop.png",
+  "screen": "10.01",
+  "title": "Find suppliers",
+  "variant": "Desktop",
+  "width": 1440.0,
+  "height": 1024.0
+ },
+ {
+  "id": "1888:1861",
+  "page": "10-bisupplynet",
+  "file": "10.01-find-suppliers-mobile.png",
+  "screen": "10.01",
+  "title": "Find suppliers",
+  "variant": "Mobile",
+  "width": 440.0,
+  "height": 1416.0
+ },
+ {
+  "id": "1874:1733",
+  "page": "10-bisupplynet",
+  "file": "10.02-verified-supplier-profile-desktop.png",
+  "screen": "10.02",
+  "title": "Verified supplier profile",
+  "variant": "Desktop",
+  "width": 1440.0,
+  "height": 1024.0
+ },
+ {
+  "id": "1888:1918",
+  "page": "10-bisupplynet",
+  "file": "10.02-verified-supplier-profile-mobile.png",
+  "screen": "10.02",
+  "title": "Verified supplier profile",
+  "variant": "Mobile",
+  "width": 440.0,
+  "height": 1419.0
+ },
+ {
+  "id": "1874:2074",
+  "page": "10-bisupplynet",
+  "file": "10.03-wholesaler-application-desktop.png",
+  "screen": "10.03",
+  "title": "Wholesaler application",
+  "variant": "Desktop",
+  "width": 1440.0,
+  "height": 1024.0
+ },
+ {
+  "id": "1888:1972",
+  "page": "10-bisupplynet",
+  "file": "10.03-wholesaler-application-mobile.png",
+  "screen": "10.03",
+  "title": "Wholesaler application",
+  "variant": "Mobile",
+  "width": 440.0,
+  "height": 1540.0
+ },
+ {
+  "id": "1874:2423",
+  "page": "10-bisupplynet",
+  "file": "10.04-application-review-desktop.png",
+  "screen": "10.04",
+  "title": "Application review",
+  "variant": "Desktop",
+  "width": 1440.0,
+  "height": 1024.0
+ },
+ {
+  "id": "1888:2032",
+  "page": "10-bisupplynet",
+  "file": "10.04-application-review-mobile.png",
+  "screen": "10.04",
+  "title": "Application review",
+  "variant": "Mobile",
+  "width": 440.0,
+  "height": 956.0
+ },
+ {
+  "id": "1875:1387",
+  "page": "10-bisupplynet",
+  "file": "10.05-wholesale-product-catalogue-desktop.png",
+  "screen": "10.05",
+  "title": "Wholesale product catalogue",
+  "variant": "Desktop",
+  "width": 1440.0,
+  "height": 1024.0
+ },
+ {
+  "id": "1888:2065",
+  "page": "10-bisupplynet",
+  "file": "10.05-wholesale-product-catalogue-mobile.png",
+  "screen": "10.05",
+  "title": "Wholesale product catalogue",
+  "variant": "Mobile",
+  "width": 440.0,
+  "height": 1398.0
+ },
+ {
+  "id": "1875:1732",
+  "page": "10-bisupplynet",
+  "file": "10.06-bulk-order-checkout-desktop.png",
+  "screen": "10.06",
+  "title": "Bulk order checkout",
+  "variant": "Desktop",
+  "width": 1440.0,
+  "height": 1024.0
+ },
+ {
+  "id": "1888:2122",
+  "page": "10-bisupplynet",
+  "file": "10.06-bulk-order-checkout-mobile.png",
+  "screen": "10.06",
+  "title": "Bulk order checkout",
+  "variant": "Mobile",
+  "width": 440.0,
+  "height": 1522.0
+ },
+ {
+  "id": "1875:2081",
+  "page": "10-bisupplynet",
+  "file": "10.07-protected-escrow-payment-desktop.png",
+  "screen": "10.07",
+  "title": "Protected escrow payment",
+  "variant": "Desktop",
+  "width": 1440.0,
+  "height": 1024.0
+ },
+ {
+  "id": "1888:2182",
+  "page": "10-bisupplynet",
+  "file": "10.07-protected-escrow-payment-mobile.png",
+  "screen": "10.07",
+  "title": "Protected escrow payment",
+  "variant": "Mobile",
+  "width": 440.0,
+  "height": 956.0
+ },
+ {
+  "id": "1875:2396",
+  "page": "10-bisupplynet",
+  "file": "10.08-wholesale-order-tracking-desktop.png",
+  "screen": "10.08",
+  "title": "Wholesale order tracking",
+  "variant": "Desktop",
+  "width": 1440.0,
+  "height": 1024.0
+ },
+ {
+  "id": "1888:2218",
+  "page": "10-bisupplynet",
+  "file": "10.08-wholesale-order-tracking-mobile.png",
+  "screen": "10.08",
+  "title": "Wholesale order tracking",
+  "variant": "Mobile",
+  "width": 440.0,
+  "height": 1347.0
+ },
+ {
+  "id": "1877:1387",
+  "page": "10-bisupplynet",
+  "file": "10.09-confirm-delivery-desktop.png",
+  "screen": "10.09",
+  "title": "Confirm delivery",
+  "variant": "Desktop",
+  "width": 1440.0,
+  "height": 1024.0
+ },
+ {
+  "id": "1888:2272",
+  "page": "10-bisupplynet",
+  "file": "10.09-confirm-delivery-mobile.png",
+  "screen": "10.09",
+  "title": "Confirm delivery",
+  "variant": "Mobile",
+  "width": 440.0,
+  "height": 956.0
+ },
+ {
+  "id": "1877:1699",
+  "page": "10-bisupplynet",
+  "file": "10.10-file-a-dispute-desktop.png",
+  "screen": "10.10",
+  "title": "File a dispute",
+  "variant": "Desktop",
+  "width": 1440.0,
+  "height": 1024.0
+ },
+ {
+  "id": "1888:2305",
+  "page": "10-bisupplynet",
+  "file": "10.10-file-a-dispute-mobile.png",
+  "screen": "10.10",
+  "title": "File a dispute",
+  "variant": "Mobile",
+  "width": 440.0,
+  "height": 1540.0
+ },
+ {
+  "id": "1877:2048",
+  "page": "10-bisupplynet",
+  "file": "10.11-dispute-review-desktop.png",
+  "screen": "10.11",
+  "title": "Dispute review",
+  "variant": "Desktop",
+  "width": 1440.0,
+  "height": 1024.0
+ },
+ {
+  "id": "1888:2365",
+  "page": "10-bisupplynet",
+  "file": "10.11-dispute-review-mobile.png",
+  "screen": "10.11",
+  "title": "Dispute review",
+  "variant": "Mobile",
+  "width": 440.0,
+  "height": 1324.0
+ },
+ {
+  "id": "1877:2389",
+  "page": "10-bisupplynet",
+  "file": "10.12-supplier-earnings-desktop.png",
+  "screen": "10.12",
+  "title": "Supplier earnings",
+  "variant": "Desktop",
+  "width": 1440.0,
+  "height": 1024.0
+ },
+ {
+  "id": "1888:2419",
+  "page": "10-bisupplynet",
+  "file": "10.12-supplier-earnings-mobile.png",
+  "screen": "10.12",
+  "title": "Supplier earnings",
+  "variant": "Mobile",
+  "width": 440.0,
+  "height": 1546.0
+ },
+ {
+  "id": "1897:1387",
+  "page": "11-feli-ai",
+  "file": "11.01-action-proposal-desktop.png",
+  "screen": "11.01",
+  "title": "Action proposal",
+  "variant": "Desktop",
+  "width": 1440.0,
+  "height": 1024.0
+ },
+ {
+  "id": "1898:2252",
+  "page": "11-feli-ai",
+  "file": "11.01-action-proposal-mobile.png",
+  "screen": "11.01",
+  "title": "Action proposal",
+  "variant": "Mobile",
+  "width": 440.0,
+  "height": 1349.0
+ },
+ {
+  "id": "1897:1592",
+  "page": "11-feli-ai",
+  "file": "11.02-create-task-review-desktop.png",
+  "screen": "11.02",
+  "title": "Create task review",
+  "variant": "Desktop",
+  "width": 1440.0,
+  "height": 1024.0
+ },
+ {
+  "id": "1898:2303",
+  "page": "11-feli-ai",
+  "file": "11.02-create-task-review-mobile.png",
+  "screen": "11.02",
+  "title": "Create task review",
+  "variant": "Mobile",
+  "width": 440.0,
+  "height": 1349.0
+ },
+ {
+  "id": "1897:1797",
+  "page": "11-feli-ai",
+  "file": "11.03-daily-credit-limit-desktop.png",
+  "screen": "11.03",
+  "title": "Daily credit limit",
+  "variant": "Desktop",
+  "width": 1440.0,
+  "height": 1024.0
+ },
+ {
+  "id": "1898:2354",
+  "page": "11-feli-ai",
+  "file": "11.03-daily-credit-limit-mobile.png",
+  "screen": "11.03",
+  "title": "Daily credit limit",
+  "variant": "Mobile",
+  "width": 440.0,
+  "height": 956.0
+ },
+ {
+  "id": "1897:1979",
+  "page": "11-feli-ai",
+  "file": "11.04-premium-action-restriction-desktop.png",
+  "screen": "11.04",
+  "title": "Premium action restriction",
+  "variant": "Desktop",
+  "width": 1440.0,
+  "height": 1024.0
+ },
+ {
+  "id": "1898:2387",
+  "page": "11-feli-ai",
+  "file": "11.04-premium-action-restriction-mobile.png",
+  "screen": "11.04",
+  "title": "Premium action restriction",
+  "variant": "Mobile",
+  "width": 440.0,
+  "height": 956.0
+ },
+ {
+  "id": "1679:3697",
+  "page": "11-feli-ai",
+  "file": "11.05-feli-ai-assistant-desktop.png",
+  "screen": "11.05",
+  "title": "FELI AI — Assistant",
+  "variant": "Desktop",
+  "width": 1440.0,
+  "height": 1050.0
+ },
+ {
+  "id": "1902:2419",
+  "page": "11-feli-ai",
+  "file": "11.05-feli-ai-assistant-mobile.png",
+  "screen": "11.05",
+  "title": "FELI AI — Assistant",
+  "variant": "Mobile",
+  "width": 440.0,
+  "height": 1494.0
+ },
+ {
+  "id": "1896:1388",
+  "page": "12-messaging-and-support",
+  "file": "12.01-messaging-conversation-directory-desktop.png",
+  "screen": "12.01",
+  "title": "Messaging — Conversation directory",
+  "variant": "Desktop",
+  "width": 1440.0,
+  "height": 1024.0
+ },
+ {
+  "id": "1898:1886",
+  "page": "12-messaging-and-support",
+  "file": "12.01-messaging-conversation-directory-mobile.png",
+  "screen": "12.01",
+  "title": "Messaging — Conversation directory",
+  "variant": "Mobile",
+  "width": 440.0,
+  "height": 1449.0
+ },
+ {
+  "id": "1896:1601",
+  "page": "12-messaging-and-support",
+  "file": "12.02-messaging-protected-order-conversation-desktop.png",
+  "screen": "12.02",
+  "title": "Messaging — Protected order conversation",
+  "variant": "Desktop",
+  "width": 1440.0,
+  "height": 1024.0
+ },
+ {
+  "id": "1898:1943",
+  "page": "12-messaging-and-support",
+  "file": "12.02-messaging-protected-order-conversation-mobile.png",
+  "screen": "12.02",
+  "title": "Messaging — Protected order conversation",
+  "variant": "Mobile",
+  "width": 440.0,
+  "height": 1378.0
+ },
+ {
+  "id": "1896:1810",
+  "page": "12-messaging-and-support",
+  "file": "12.03-messaging-guest-customer-support-desktop.png",
+  "screen": "12.03",
+  "title": "Messaging — Guest customer support",
+  "variant": "Desktop",
+  "width": 1440.0,
+  "height": 1024.0
+ },
+ {
+  "id": "1898:1997",
+  "page": "12-messaging-and-support",
+  "file": "12.03-messaging-guest-customer-support-mobile.png",
+  "screen": "12.03",
+  "title": "Messaging — Guest customer support",
+  "variant": "Mobile",
+  "width": 440.0,
+  "height": 1331.0
+ },
+ {
+  "id": "1896:2015",
+  "page": "12-messaging-and-support",
+  "file": "12.04-messaging-block-action-restricted-desktop.png",
+  "screen": "12.04",
+  "title": "Messaging — Block action restricted",
+  "variant": "Desktop",
+  "width": 1440.0,
+  "height": 1024.0
+ },
+ {
+  "id": "1898:2048",
+  "page": "12-messaging-and-support",
+  "file": "12.04-messaging-block-action-restricted-mobile.png",
+  "screen": "12.04",
+  "title": "Messaging — Block action restricted",
+  "variant": "Mobile",
+  "width": 440.0,
+  "height": 956.0
+ },
+ {
+  "id": "1896:2197",
+  "page": "12-messaging-and-support",
+  "file": "12.05-support-submit-a-ticket-desktop.png",
+  "screen": "12.05",
+  "title": "Support — Submit a ticket",
+  "variant": "Desktop",
+  "width": 1440.0,
+  "height": 1024.0
+ },
+ {
+  "id": "1898:2081",
+  "page": "12-messaging-and-support",
+  "file": "12.05-support-submit-a-ticket-mobile.png",
+  "screen": "12.05",
+  "title": "Support — Submit a ticket",
+  "variant": "Mobile",
+  "width": 440.0,
+  "height": 1564.0
+ },
+ {
+  "id": "1896:2414",
+  "page": "12-messaging-and-support",
+  "file": "12.06-support-ticket-detail-and-replies-desktop.png",
+  "screen": "12.06",
+  "title": "Support — Ticket detail and replies",
+  "variant": "Desktop",
+  "width": 1440.0,
+  "height": 1024.0
+ },
+ {
+  "id": "1898:2141",
+  "page": "12-messaging-and-support",
+  "file": "12.06-support-ticket-detail-and-replies-mobile.png",
+  "screen": "12.06",
+  "title": "Support — Ticket detail and replies",
+  "variant": "Mobile",
+  "width": 440.0,
+  "height": 1360.0
+ },
+ {
+  "id": "1896:2623",
+  "page": "12-messaging-and-support",
+  "file": "12.07-support-help-centre-desktop.png",
+  "screen": "12.07",
+  "title": "Support — Help centre",
+  "variant": "Desktop",
+  "width": 1440.0,
+  "height": 1024.0
+ },
+ {
+  "id": "1898:2195",
+  "page": "12-messaging-and-support",
+  "file": "12.07-support-help-centre-mobile.png",
+  "screen": "12.07",
+  "title": "Support — Help centre",
+  "variant": "Mobile",
+  "width": 440.0,
+  "height": 1449.0
+ },
+ {
+  "id": "1897:2161",
+  "page": "12-messaging-and-support",
+  "file": "12.08-notifications-alert-delivery-preferences-desktop.png",
+  "screen": "12.08",
+  "title": "Notifications — Alert delivery preferences",
+  "variant": "Desktop",
+  "width": 1440.0,
+  "height": 1024.0
+ },
+ {
+  "id": "1898:2420",
+  "page": "12-messaging-and-support",
+  "file": "12.08-notifications-alert-delivery-preferences-mobile.png",
+  "screen": "12.08",
+  "title": "Notifications — Alert delivery preferences",
+  "variant": "Mobile",
+  "width": 440.0,
+  "height": 1349.0
+ },
+ {
+  "id": "1679:3317",
+  "page": "12-messaging-and-support",
+  "file": "12.09-support-ticket-centre-desktop.png",
+  "screen": "12.09",
+  "title": "Support — Ticket centre",
+  "variant": "Desktop",
+  "width": 1440.0,
+  "height": 1047.0
+ },
+ {
+  "id": "1902:2356",
+  "page": "12-messaging-and-support",
+  "file": "12.09-support-ticket-centre-mobile.png",
+  "screen": "12.09",
+  "title": "Support — Ticket centre",
+  "variant": "Mobile",
+  "width": 440.0,
+  "height": 1671.0
+ },
+ {
+  "id": "1679:3902",
+  "page": "12-messaging-and-support",
+  "file": "12.10-messaging-conversations-desktop.png",
+  "screen": "12.10",
+  "title": "Messaging — Conversations",
+  "variant": "Desktop",
+  "width": 1440.0,
+  "height": 1047.0
+ },
+ {
+  "id": "1902:2475",
+  "page": "12-messaging-and-support",
+  "file": "12.10-messaging-conversations-mobile.png",
+  "screen": "12.10",
+  "title": "Messaging — Conversations",
+  "variant": "Mobile",
+  "width": 440.0,
+  "height": 1821.0
+ },
+ {
+  "id": "1679:4282",
+  "page": "12-messaging-and-support",
+  "file": "12.11-notifications-centre-desktop.png",
+  "screen": "12.11",
+  "title": "Notifications — Centre",
+  "variant": "Desktop",
+  "width": 1500.0,
+  "height": 1117.0
+ },
+ {
+  "id": "1902:2541",
+  "page": "12-messaging-and-support",
+  "file": "12.11-notifications-centre-mobile.png",
+  "screen": "12.11",
+  "title": "Notifications — Centre",
+  "variant": "Mobile",
+  "width": 440.0,
+  "height": 1816.0
+ },
+ {
+  "id": "1817:2744",
+  "page": "12-messaging-and-support",
+  "file": "12.12-support-ticket-submission-confirmation-desktop.png",
+  "screen": "12.12",
+  "title": "Support — Ticket submission confirmation",
+  "variant": "Desktop",
+  "width": 1440.0,
+  "height": 1047.0
+ },
+ {
+  "id": "1902:2723",
+  "page": "12-messaging-and-support",
+  "file": "12.12-support-ticket-submission-confirmation-mobile.png",
+  "screen": "12.12",
+  "title": "Support — Ticket submission confirmation",
+  "variant": "Mobile",
+  "width": 440.0,
+  "height": 960.0
+ },
+ {
+  "id": "1820:1328",
+  "page": "12-messaging-and-support",
+  "file": "12.13-notifications-preferences-desktop.png",
+  "screen": "12.13",
+  "title": "Notifications — Preferences",
+  "variant": "Desktop",
+  "width": 1500.0,
+  "height": 1117.0
+ },
+ {
+  "id": "1902:2786",
+  "page": "12-messaging-and-support",
+  "file": "12.13-notifications-preferences-mobile.png",
+  "screen": "12.13",
+  "title": "Notifications — Preferences",
+  "variant": "Mobile",
+  "width": 440.0,
+  "height": 1326.0
+ },
+ {
+  "id": "1968:1286",
+  "page": "12-messaging-and-support",
+  "file": "12.14-support-bitechteam-service-request-desktop.png",
+  "screen": "12.14",
+  "title": "Support — BiTechTeam service request",
+  "variant": "Desktop",
+  "width": 1440.0,
+  "height": 1024.0
+ },
+ {
+  "id": "1968:1516",
+  "page": "12-messaging-and-support",
+  "file": "12.14-support-bitechteam-service-request-mobile.png",
+  "screen": "12.14",
+  "title": "Support — BiTechTeam service request",
+  "variant": "Mobile",
+  "width": 440.0,
+  "height": 1564.0
+ },
+ {
+  "id": "1968:1577",
+  "page": "12-messaging-and-support",
+  "file": "12.16-reviews-write-platform-review-desktop.png",
+  "screen": "12.16",
+  "title": "Reviews — Write platform review",
+  "variant": "Desktop",
+  "width": 1440.0,
+  "height": 1024.0
+ },
+ {
+  "id": "1968:1807",
+  "page": "12-messaging-and-support",
+  "file": "12.16-reviews-write-platform-review-mobile.png",
+  "screen": "12.16",
+  "title": "Reviews — Write platform review",
+  "variant": "Mobile",
+  "width": 440.0,
+  "height": 1582.0
+ },
+ {
+  "id": "1969:1286",
+  "page": "12-messaging-and-support",
+  "file": "12.15-reviews-public-rating-and-feedback-desktop.png",
+  "screen": "12.15",
+  "title": "Reviews — Public rating and feedback",
+  "variant": "Desktop",
+  "width": 1546.0,
+  "height": 1200.0
+ },
+ {
+  "id": "1969:1327",
+  "page": "12-messaging-and-support",
+  "file": "12.15-reviews-public-rating-and-feedback-mobile.png",
+  "screen": "12.15",
+  "title": "Reviews — Public rating and feedback",
+  "variant": "Mobile",
+  "width": 440.0,
+  "height": 1602.0
+ },
+ {
+  "id": "1971:1286",
+  "page": "12-messaging-and-support",
+  "file": "12.17-support-service-request-submitted-desktop.png",
+  "screen": "12.17",
+  "title": "Support — Service request submitted",
+  "variant": "Desktop",
+  "width": 1440.0,
+  "height": 1024.0
+ },
+ {
+  "id": "1971:1545",
+  "page": "12-messaging-and-support",
+  "file": "12.17-support-service-request-submitted-mobile.png",
+  "screen": "12.17",
+  "title": "Support — Service request submitted",
+  "variant": "Mobile",
+  "width": 440.0,
+  "height": 1053.0
+ },
+ {
+  "id": "1971:1632",
+  "page": "12-messaging-and-support",
+  "file": "12.18-reviews-review-submitted-desktop.png",
+  "screen": "12.18",
+  "title": "Reviews — Review submitted",
+  "variant": "Desktop",
+  "width": 1440.0,
+  "height": 1024.0
+ },
+ {
+  "id": "1971:1891",
+  "page": "12-messaging-and-support",
+  "file": "12.18-reviews-review-submitted-mobile.png",
+  "screen": "12.18",
+  "title": "Reviews — Review submitted",
+  "variant": "Mobile",
+  "width": 440.0,
+  "height": 1053.0
+ },
+ {
+  "id": "1879:1388",
+  "page": "13-account-and-settings",
+  "file": "13.01-business-profile-desktop.png",
+  "screen": "13.01",
+  "title": "Business profile",
+  "variant": "Desktop",
+  "width": 1440.0,
+  "height": 1024.0
+ },
+ {
+  "id": "1888:2481",
+  "page": "13-account-and-settings",
+  "file": "13.01-business-profile-mobile.png",
+  "screen": "13.01",
+  "title": "Business profile",
+  "variant": "Mobile",
+  "width": 440.0,
+  "height": 1360.0
+ },
+ {
+  "id": "1879:1729",
+  "page": "13-account-and-settings",
+  "file": "13.02-edit-business-profile-desktop.png",
+  "screen": "13.02",
+  "title": "Edit business profile",
+  "variant": "Desktop",
+  "width": 1440.0,
+  "height": 1024.0
+ },
+ {
+  "id": "1888:2535",
+  "page": "13-account-and-settings",
+  "file": "13.02-edit-business-profile-mobile.png",
+  "screen": "13.02",
+  "title": "Edit business profile",
+  "variant": "Mobile",
+  "width": 440.0,
+  "height": 1540.0
+ },
+ {
+  "id": "1879:2078",
+  "page": "13-account-and-settings",
+  "file": "13.03-workspace-preferences-desktop.png",
+  "screen": "13.03",
+  "title": "Workspace preferences",
+  "variant": "Desktop",
+  "width": 1440.0,
+  "height": 1024.0
+ },
+ {
+  "id": "1888:2595",
+  "page": "13-account-and-settings",
+  "file": "13.03-workspace-preferences-mobile.png",
+  "screen": "13.03",
+  "title": "Workspace preferences",
+  "variant": "Mobile",
+  "width": 440.0,
+  "height": 1300.0
+ },
+ {
+  "id": "1879:2415",
+  "page": "13-account-and-settings",
+  "file": "13.04-security-and-password-desktop.png",
+  "screen": "13.04",
+  "title": "Security and password",
+  "variant": "Desktop",
+  "width": 1440.0,
+  "height": 1024.0
+ },
+ {
+  "id": "1888:2646",
+  "page": "13-account-and-settings",
+  "file": "13.04-security-and-password-mobile.png",
+  "screen": "13.04",
+  "title": "Security and password",
+  "variant": "Mobile",
+  "width": 440.0,
+  "height": 1318.0
+ },
+ {
+  "id": "1879:2752",
+  "page": "13-account-and-settings",
+  "file": "13.05-notifications-preferences-desktop.png",
+  "screen": "13.05",
+  "title": "Notifications preferences",
+  "variant": "Desktop",
+  "width": 1440.0,
+  "height": 1024.0
+ },
+ {
+  "id": "1888:2697",
+  "page": "13-account-and-settings",
+  "file": "13.05-notifications-preferences-mobile.png",
+  "screen": "13.05",
+  "title": "Notifications preferences",
+  "variant": "Mobile",
+  "width": 440.0,
+  "height": 1318.0
+ },
+ {
+  "id": "1879:3089",
+  "page": "13-account-and-settings",
+  "file": "13.06-sessions-and-devices-desktop.png",
+  "screen": "13.06",
+  "title": "Sessions and devices",
+  "variant": "Desktop",
+  "width": 1440.0,
+  "height": 1024.0
+ },
+ {
+  "id": "1888:2748",
+  "page": "13-account-and-settings",
+  "file": "13.06-sessions-and-devices-mobile.png",
+  "screen": "13.06",
+  "title": "Sessions and devices",
+  "variant": "Mobile",
+  "width": 440.0,
+  "height": 1398.0
+ },
+ {
+  "id": "1879:3434",
+  "page": "13-account-and-settings",
+  "file": "13.07-session-expired-desktop.png",
+  "screen": "13.07",
+  "title": "Session expired",
+  "variant": "Desktop",
+  "width": 1440.0,
+  "height": 1024.0
+ },
+ {
+  "id": "1888:2805",
+  "page": "13-account-and-settings",
+  "file": "13.07-session-expired-mobile.png",
+  "screen": "13.07",
+  "title": "Session expired",
+  "variant": "Mobile",
+  "width": 440.0,
+  "height": 956.0
+ },
+ {
+  "id": "1879:3746",
+  "page": "13-account-and-settings",
+  "file": "13.08-close-account-confirmation-desktop.png",
+  "screen": "13.08",
+  "title": "Close account confirmation",
+  "variant": "Desktop",
+  "width": 1440.0,
+  "height": 1024.0
+ },
+ {
+  "id": "1888:2838",
+  "page": "13-account-and-settings",
+  "file": "13.08-close-account-confirmation-mobile.png",
+  "screen": "13.08",
+  "title": "Close account confirmation",
+  "variant": "Mobile",
+  "width": 440.0,
+  "height": 956.0
+ },
+ {
+  "id": "1895:1387",
+  "page": "14-analytics-and-reports",
+  "file": "14.01-company-analytics-desktop.png",
+  "screen": "14.01",
+  "title": "Company analytics",
+  "variant": "Desktop",
+  "width": 1440.0,
+  "height": 1024.0
+ },
+ {
+  "id": "1898:1649",
+  "page": "14-analytics-and-reports",
+  "file": "14.01-company-analytics-mobile.png",
+  "screen": "14.01",
+  "title": "Company analytics",
+  "variant": "Mobile",
+  "width": 440.0,
+  "height": 1520.0
+ },
+ {
+  "id": "1895:1612",
+  "page": "14-analytics-and-reports",
+  "file": "14.02-sales-ledger-desktop.png",
+  "screen": "14.02",
+  "title": "Sales ledger",
+  "variant": "Desktop",
+  "width": 1440.0,
+  "height": 1024.0
+ },
+ {
+  "id": "1898:1710",
+  "page": "14-analytics-and-reports",
+  "file": "14.02-sales-ledger-mobile.png",
+  "screen": "14.02",
+  "title": "Sales ledger",
+  "variant": "Mobile",
+  "width": 440.0,
+  "height": 1610.0
+ },
+ {
+  "id": "1895:1825",
+  "page": "14-analytics-and-reports",
+  "file": "14.03-inventory-health-and-value-desktop.png",
+  "screen": "14.03",
+  "title": "Inventory health and value",
+  "variant": "Desktop",
+  "width": 1440.0,
+  "height": 1024.0
+ },
+ {
+  "id": "1898:1767",
+  "page": "14-analytics-and-reports",
+  "file": "14.03-inventory-health-and-value-mobile.png",
+  "screen": "14.03",
+  "title": "Inventory health and value",
+  "variant": "Mobile",
+  "width": 440.0,
+  "height": 1538.0
+ },
+ {
+  "id": "1895:2037",
+  "page": "14-analytics-and-reports",
+  "file": "14.04-invoice-collections-desktop.png",
+  "screen": "14.04",
+  "title": "Invoice collections",
+  "variant": "Desktop",
+  "width": 1440.0,
+  "height": 1024.0
+ },
+ {
+  "id": "1898:1828",
+  "page": "14-analytics-and-reports",
+  "file": "14.04-invoice-collections-mobile.png",
+  "screen": "14.04",
+  "title": "Invoice collections",
+  "variant": "Mobile",
+  "width": 440.0,
+  "height": 1628.0
+ },
+ {
+  "id": "1674:3831",
+  "page": "15-social-media",
+  "file": "15.01-content-scheduling-desktop.png",
+  "screen": "15.01",
+  "title": "Content scheduling",
+  "variant": "Desktop",
+  "width": 1500.0,
+  "height": 1117.0
+ },
+ {
+  "id": "1899:1776",
+  "page": "15-social-media",
+  "file": "15.01-content-scheduling-mobile.png",
+  "screen": "15.01",
+  "title": "Content scheduling",
+  "variant": "Mobile",
+  "width": 440.0,
+  "height": 1348.0
+ },
+ {
+  "id": "1975:1288",
+  "page": "16-platform-administration",
+  "file": "16.01-platform-overview-desktop.png",
+  "screen": "16.01",
+  "title": "Platform overview",
+  "variant": "Desktop",
+  "width": 1440.0,
+  "height": 1221.0
+ },
+ {
+  "id": "1975:1289",
+  "page": "16-platform-administration",
+  "file": "16.01-platform-overview-mobile.png",
+  "screen": "16.01",
+  "title": "Platform overview",
+  "variant": "Mobile",
+  "width": 440.0,
+  "height": 1114.0
+ },
+ {
+  "id": "1975:1405",
+  "page": "16-platform-administration",
+  "file": "16.02-user-accounts-desktop.png",
+  "screen": "16.02",
+  "title": "User accounts",
+  "variant": "Desktop",
+  "width": 1440.0,
+  "height": 1221.0
+ },
+ {
+  "id": "1975:1406",
+  "page": "16-platform-administration",
+  "file": "16.02-user-accounts-mobile.png",
+  "screen": "16.02",
+  "title": "User accounts",
+  "variant": "Mobile",
+  "width": 440.0,
+  "height": 1114.0
+ },
+ {
+  "id": "1975:1522",
+  "page": "16-platform-administration",
+  "file": "16.03-wholesaler-verification-desktop.png",
+  "screen": "16.03",
+  "title": "Wholesaler verification",
+  "variant": "Desktop",
+  "width": 1440.0,
+  "height": 1221.0
+ },
+ {
+  "id": "1975:1523",
+  "page": "16-platform-administration",
+  "file": "16.03-wholesaler-verification-mobile.png",
+  "screen": "16.03",
+  "title": "Wholesaler verification",
+  "variant": "Mobile",
+  "width": 440.0,
+  "height": 1114.0
+ },
+ {
+  "id": "1975:1639",
+  "page": "16-platform-administration",
+  "file": "16.04-dispute-resolution-desktop.png",
+  "screen": "16.04",
+  "title": "Dispute resolution",
+  "variant": "Desktop",
+  "width": 1440.0,
+  "height": 1221.0
+ },
+ {
+  "id": "1975:1640",
+  "page": "16-platform-administration",
+  "file": "16.04-dispute-resolution-mobile.png",
+  "screen": "16.04",
+  "title": "Dispute resolution",
+  "variant": "Mobile",
+  "width": 440.0,
+  "height": 1114.0
+ },
+ {
+  "id": "1975:1756",
+  "page": "16-platform-administration",
+  "file": "16.05-support-operations-desktop.png",
+  "screen": "16.05",
+  "title": "Support operations",
+  "variant": "Desktop",
+  "width": 1440.0,
+  "height": 1221.0
+ },
+ {
+  "id": "1975:1757",
+  "page": "16-platform-administration",
+  "file": "16.05-support-operations-mobile.png",
+  "screen": "16.05",
+  "title": "Support operations",
+  "variant": "Mobile",
+  "width": 440.0,
+  "height": 1132.0
+ },
+ {
+  "id": "1975:1873",
+  "page": "16-platform-administration",
+  "file": "16.06-announcements-desktop.png",
+  "screen": "16.06",
+  "title": "Announcements",
+  "variant": "Desktop",
+  "width": 1440.0,
+  "height": 1221.0
+ },
+ {
+  "id": "1975:1874",
+  "page": "16-platform-administration",
+  "file": "16.06-announcements-mobile.png",
+  "screen": "16.06",
+  "title": "Announcements",
+  "variant": "Mobile",
+  "width": 440.0,
+  "height": 1114.0
+ },
+ {
+  "id": "1975:1990",
+  "page": "16-platform-administration",
+  "file": "16.07-platform-analytics-desktop.png",
+  "screen": "16.07",
+  "title": "Platform analytics",
+  "variant": "Desktop",
+  "width": 1440.0,
+  "height": 1221.0
+ },
+ {
+  "id": "1975:1991",
+  "page": "16-platform-administration",
+  "file": "16.07-platform-analytics-mobile.png",
+  "screen": "16.07",
+  "title": "Platform analytics",
+  "variant": "Mobile",
+  "width": 440.0,
+  "height": 1114.0
+ },
+ {
+  "id": "1975:2107",
+  "page": "16-platform-administration",
+  "file": "16.08-admin-permissions-desktop.png",
+  "screen": "16.08",
+  "title": "Admin permissions",
+  "variant": "Desktop",
+  "width": 1440.0,
+  "height": 1221.0
+ },
+ {
+  "id": "1975:2108",
+  "page": "16-platform-administration",
+  "file": "16.08-admin-permissions-mobile.png",
+  "screen": "16.08",
+  "title": "Admin permissions",
+  "variant": "Mobile",
+  "width": 440.0,
+  "height": 1114.0
+ }
+]
