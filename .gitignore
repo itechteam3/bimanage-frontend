@@ -1,0 +1,24 @@
+# Dependencies & builds
+node_modules/
+dist/
+coverage/
+*.tsbuildinfo
+
+# Environment — never commit
+.env
+.env.*
+!.env.example
+
+# Confidential / internal docs (public repo)
+docs/*.pdf
+docs/api-reference.md
+
+# Figma renders are large; regenerate with figma-cache/scripts/figma_render.py
+docs/figma/**/*.png
+docs/figma/missing.json
+
+# Editors / OS
+.vscode/
+.idea/
+.DS_Store
+Thumbs.db
