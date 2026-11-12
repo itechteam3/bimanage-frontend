@@ -65,6 +65,16 @@ const TeamDirectoryPage = work("TeamDirectoryPage");
 const InvitePage = work("InvitePage");
 const InviteSentPage = work("InviteSentPage");
 // Online store, merchant side (Phase 8, Figma 08.01–08.10) loads as one chunk.
+// Wallet & payouts (Figma 06.01–06.10) loads as one chunk.
+const wal = (name: keyof typeof import("@/pages/wallet/index")) => lazy(() => import("@/pages/wallet/index").then((m) => ({ default: m[name] })));
+const WalletOverviewPage = wal("WalletOverviewPage");
+const BankAccountPage = wal("BankAccountPage");
+const SchedulePage = wal("SchedulePage");
+const WithdrawPage = wal("WithdrawPage");
+const ReviewWithdrawalPage = wal("ReviewWithdrawalPage");
+const WithdrawalSubmittedPage = wal("WithdrawalSubmittedPage");
+const TransactionsPage = wal("TransactionsPage");
+const TransactionDetailPage = wal("TransactionDetailPage");
 const shop = (name: keyof typeof import("@/pages/store/index")) => lazy(() => import("@/pages/store/index").then((m) => ({ default: m[name] })));
 const CreateStorePage = shop("CreateStorePage");
 const StoreOverviewPage = shop("StoreOverviewPage");
@@ -147,7 +157,6 @@ const guest = (el: React.ReactNode) => <GuestOnly>{el}</GuestOnly>;
 const comingSoon = (
   [
     ["/bisupplynet/*", "BiSupplyNet"],
-    ["/wallet/*", "Wallet"],
     ["/feli", "FELI AI"],
     ["/support/*", "Support"],
     ["/subscription", "Subscription"],
@@ -287,6 +296,25 @@ export const routes = [
               { path: "/store/orders", element: <StoreOrdersPage />, handle: { section: "Online Store", back: back("/store", SCREENS.store) } },
               { path: "/store/orders/:id", element: <StoreOrderDetailPage />, handle: { section: "Online Store", back: back("/store/orders", SCREENS.store) } },
               { path: "/store/*", element: <Navigate to="/store" replace /> },
+            ],
+          },
+          // Wallet & payouts (Figma 06.01–06.10), owner only
+          {
+            element: (
+              <Suspense fallback={<SectionLoading />}>
+                <Outlet />
+              </Suspense>
+            ),
+            children: [
+              { path: "/wallet", element: <WalletOverviewPage />, handle: { section: "Wallet" } },
+              { path: "/wallet/bank", element: <BankAccountPage />, handle: { section: "Wallet", back: back("/wallet", SCREENS.wallet) } },
+              { path: "/wallet/schedule", element: <SchedulePage />, handle: { section: "Wallet", back: back("/wallet", SCREENS.wallet) } },
+              { path: "/wallet/withdraw", element: <WithdrawPage />, handle: { section: "Wallet", back: back("/wallet", SCREENS.wallet) } },
+              { path: "/wallet/withdraw/review", element: <ReviewWithdrawalPage />, handle: { section: "Wallet", back: back("/wallet/withdraw", SCREENS.wallet) } },
+              { path: "/wallet/withdraw/submitted", element: <WithdrawalSubmittedPage />, handle: { section: "Wallet", back: back("/wallet", SCREENS.wallet) } },
+              { path: "/wallet/transactions", element: <TransactionsPage />, handle: { section: "Wallet", back: back("/wallet", SCREENS.wallet) } },
+              { path: "/wallet/transactions/:id", element: <TransactionDetailPage />, handle: { section: "Wallet", back: back("/wallet/transactions", SCREENS.wallet) } },
+              { path: "/wallet/*", element: <Navigate to="/wallet" replace /> },
             ],
           },
           // Later phases
