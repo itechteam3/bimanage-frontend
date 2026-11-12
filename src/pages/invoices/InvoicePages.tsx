@@ -8,6 +8,7 @@ import { Button, ButtonLink, Dialog, Field, Spinner, Status, TextInput } from "@
 import { InfoStrip, IntroCard, PageTitle, Panel } from "@/components/page/Blocks";
 import { ErrorNote } from "@/components/feedback/ErrorNote";
 import { useBusinessProfile } from "@/lib/workspace/api";
+import { useAuth } from "@/lib/auth/AuthProvider";
 import {
   downloadInvoicePdf,
   invoiceBadge,
@@ -583,12 +584,14 @@ export function EmailInvoicePage() {
   const [formError, setFormError] = useState<unknown>(null);
   const [unavailable, setUnavailable] = useState(false);
   const { register, handleSubmit, reset, setError, formState } = useForm<EmailValues>({ resolver: zodResolver(emailSchema) });
-  const business = profile.data?.businessName || "your business";
+  // Same name the server uses: business profile name, else the account name.
+  const { user } = useAuth();
+  const business = profile.data?.businessName?.trim() || user?.name || "";
 
   useEffect(() => {
     const i = inv.data;
     if (!i) return;
-    reset({ to: i.clientEmail ?? "", cc: "", subject: `Invoice ${i.invoiceNumber} from ${business}`, message: `Hello ${i.clientName},\n\nPlease find your invoice attached.\n\nThank you.` });
+    reset({ to: i.clientEmail ?? "", cc: "", subject: business ? `Invoice ${i.invoiceNumber} from ${business}` : "", message: `Hello ${i.clientName},\n\nPlease find invoice ${i.invoiceNumber} attached.\n\nThank you.` });
   }, [inv.data, business, reset]);
 
   if (!inv.data) return inv.isLoading ? <Loading /> : <ErrorNote error={inv.error ?? true} fallback="We couldn't load this invoice." onRetry={() => void inv.refetch()} />;
