@@ -4,7 +4,7 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
 import { useNavigate } from "react-router-dom";
 import { AuthActions, AuthLayout, AuthNote } from "@/components/layout/AuthLayout";
-import { Button, ButtonLink, Field, PasswordInput, TextInput, buttonClasses } from "@/components/ui";
+import { Button, ButtonLink, EmailSuggestion, Field, PasswordInput, TextInput, buttonClasses } from "@/components/ui";
 import { authApi } from "@/lib/auth/api";
 import { characterTypes, MIN_PASSWORD } from "@/lib/auth/password";
 import { LEGAL } from "@/config/links";
@@ -35,7 +35,7 @@ const legalLinks = [
 export function RegisterPage() {
   const navigate = useNavigate();
   const [formError, setFormError] = useState<string | null>(null);
-  const { register, handleSubmit, setError, formState } = useForm<Values>({ resolver: zodResolver(schema) });
+  const { register, handleSubmit, setError, setValue, watch, formState } = useForm<Values>({ resolver: zodResolver(schema) });
   const guard = useLeaveGuard(formState.isDirty && !formState.isSubmitSuccessful);
 
   const onSubmit = handleSubmit(async ({ name, email, password }) => {
@@ -73,6 +73,7 @@ export function RegisterPage() {
           <Field label="Work email" required error={formState.errors.email?.message}>
             <TextInput type="email" autoComplete="email" inputMode="email" placeholder="you@yourbusiness.com" {...register("email")} />
           </Field>
+          <EmailSuggestion value={watch("email")} onAccept={(email) => setValue("email", email, { shouldDirty: true, shouldValidate: true })} />
           <Field label="Password" required error={formState.errors.password?.message} hint="8+ characters • mixed character types" hintTone="success">
             <PasswordInput autoComplete="new-password" placeholder="At least 8 characters" {...register("password")} />
           </Field>

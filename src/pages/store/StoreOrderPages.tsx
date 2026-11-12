@@ -207,7 +207,16 @@ function StoreOrderDetail({ store, id }: { store: Store; id: string }) {
 
   return (
     <div className="flex flex-col gap-6">
-      <PageTitle actions={<Status tone={b.tone}>{b.label}</Status>}>Order {o.trackingNo}</PageTitle>
+      <PageTitle
+        actions={
+          <span className="flex flex-wrap gap-2">
+            {o.paymentMode === "test" && <Status tone="neutral">Test payment (no money moved)</Status>}
+            <Status tone={b.tone}>{b.label}</Status>
+          </span>
+        }
+      >
+        Order {o.trackingNo}
+      </PageTitle>
       <p className="-mt-4 text-body-sm text-ink-muted">
         Placed {shortDate(o.createdAt)} · {count(units)} {units === 1 ? "item" : "items"} · {o.isPaid ? `paid ${shortDate(o.paidAt)}` : "not paid"}
       </p>

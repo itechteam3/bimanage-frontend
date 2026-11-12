@@ -5,7 +5,9 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
 import { useQueryClient } from "@tanstack/react-query";
 import { IconCheck, IconCircle, IconMinus, IconPlus, IconSearch, IconShoppingBag, IconTrash } from "@tabler/icons-react";
-import { Button, ButtonLink, Field, SelectInput, Spinner, Status, TextArea, TextInput } from "@/components/ui";
+import { Button, ButtonLink, EmailSuggestion, Field, SelectInput, Spinner, Status, TextArea, TextInput } from "@/components/ui";
+import { suggestEmail } from "@/lib/emailTypos";
+import { hasInAppHistory } from "@/lib/nav/history";
 import { DetailRows, Panel } from "@/components/page/Blocks";
 import { ErrorNote } from "@/components/feedback/ErrorNote";
 import { ApiError } from "@/lib/api/client";
@@ -483,21 +485,37 @@ export function CheckoutPage() {
   const { slug } = useStorefront();
   const cart = useCart(slug);
   const block = useBuyBlock();
+  const navigate = useNavigate();
+  const [params, setParams] = useSearchParams();
   const [formError, setFormError] = useState<unknown>(null);
   const [unavailable, setUnavailable] = useState(false);
   const [redirecting, setRedirecting] = useState(false);
-  const { register, handleSubmit, setError, formState } = useForm<CheckoutValues>({ resolver: zodResolver(checkoutSchema) });
+  const [paying, setPaying] = useState(false);
+  const { register, handleSubmit, setError, setValue, getValues, watch, formState } = useForm<CheckoutValues>({ resolver: zodResolver(checkoutSchema) });
   const guard = useLeaveGuard(formState.isDirty && !redirecting);
+  const email = watch("customerEmail");
 
   if (cart.isLoading) return <Loading label="Loading your bag…" />;
   const c = cart.data;
   if (!c || c.items.length === 0) return <EmptyBag />;
 
-  const onSubmit = handleSubmit(async (v) => {
+  // Step 2 (?step=review) is a real URL, so Back returns to the details. After a
+  // refresh the form is empty, so it starts again at the details.
+  const reviewing = params.get("step") === "review" && Boolean(getValues("customerEmail"));
+  const backToDetails = () => (params.get("step") === "review" && hasInAppHistory() ? navigate(-1) : setParams({}, { replace: true }));
+
+  const toReview = handleSubmit(() => {
+    setFormError(null);
+    setParams({ step: "review" });
+  });
+
+  const pay = async () => {
+    const v = getValues();
     setFormError(null);
     setUnavailable(false);
+    setPaying(true);
     try {
-      const res = await startCheckout(slug, { ...v, notes: v.notes || undefined });
+      const res = await startCheckout(slug, { ...v, customerEmail: v.customerEmail.trim(), notes: v.notes || undefined });
       try {
         sessionStorage.setItem(CHECKOUT_EMAIL, v.customerEmail);
       } catch {
@@ -507,49 +525,95 @@ export function CheckoutPage() {
       setRedirecting(true);
       browser.go(res.authorizationUrl);
     } catch (err) {
+      setPaying(false);
       if (isPaymentsUnavailable(err)) setUnavailable(true);
-      else if (!applyFieldErrors(err, setError, ["customerName", "customerEmail", "customerPhone", "deliveryAddress", "city", "state", "notes"])) setFormError(err);
+      else if (applyFieldErrors(err, setError, ["customerName", "customerEmail", "customerPhone", "deliveryAddress", "city", "state", "notes"])) setParams({}, { replace: true });
+      else setFormError(err);
       void cart.refetch();
     }
-  });
+  };
 
   const field = (name: keyof CheckoutValues) => formState.errors[name]?.message;
+  const v = getValues();
+  const typo = reviewing ? suggestEmail(v.customerEmail ?? "") : null;
   return (
     <div className="flex flex-col gap-6">
       {guard.dialog}
-      <Hero title="Secure guest checkout">No account required · Your delivery details stay protected</Hero>
+      <Hero title={reviewing ? "Check your details" : "Secure guest checkout"}>
+        {reviewing ? "Step 2 of 2 · Make sure your email is right: your receipt and tracking link go there." : "Step 1 of 2 · No account required · Your delivery details stay protected"}
+      </Hero>
       <div className="grid gap-5 lg:grid-cols-[minmax(0,1.6fr)_minmax(0,1fr)]">
-        <form id="checkout" noValidate onSubmit={onSubmit} className="flex flex-col gap-5">
-          <Panel title="Delivery and contact details" subtitle="Guest checkout · no account creation needed">
-            <div className="grid gap-4 md:grid-cols-2 md:gap-x-8 md:gap-y-5">
-              <Field label="Full name" required error={field("customerName")}>
-                <TextInput autoComplete="name" {...register("customerName")} />
-              </Field>
-              <Field label="Email address" required error={field("customerEmail")} hint="Your receipt and tracking link go here.">
-                <TextInput type="email" autoComplete="email" {...register("customerEmail")} />
-              </Field>
-              <Field label="Phone number" required error={field("customerPhone")}>
-                <TextInput type="tel" autoComplete="tel" placeholder="+234 803 000 0000" {...register("customerPhone")} />
-              </Field>
-              <Field label="Delivery address" required error={field("deliveryAddress")} className="md:col-span-2">
-                <TextInput autoComplete="street-address" {...register("deliveryAddress")} />
-              </Field>
-              <Field label="City" required error={field("city")}>
-                <TextInput autoComplete="address-level2" {...register("city")} />
-              </Field>
-              <Field label="State" required error={field("state")}>
-                <TextInput autoComplete="address-level1" {...register("state")} />
-              </Field>
-              <Field label="Delivery note" error={field("notes")} className="md:col-span-2">
-                <TextArea rows={2} placeholder="Optional directions for the courier" {...register("notes")} />
-              </Field>
+        {reviewing ? (
+          <Panel title="Review your order">
+            <section aria-labelledby="confirm-email" className="rounded-xl bg-surface-tint-blue px-4 py-4">
+              <h3 id="confirm-email" className="text-caption font-semibold uppercase text-ink-brand">
+                Is this your email?
+              </h3>
+              <p className="mt-1 break-all text-title-sm text-ink-strong" data-testid="review-email">
+                {v.customerEmail}
+              </p>
+              <p className="mt-1 text-body-sm text-ink-secondary">We&apos;ll send your receipt and tracking link here. If it&apos;s wrong, you won&apos;t get them.</p>
+              {typo && (
+                <div role="alert" className="mt-3 flex flex-col gap-2 rounded-md bg-surface-tint-warm px-3 py-2 md:flex-row md:items-center md:justify-between">
+                  <p className="text-body-sm text-ink-strong">
+                    Did you mean <strong>{typo}</strong>?
+                  </p>
+                  <Button size="md" variant="secondary" onClick={() => setValue("customerEmail", typo, { shouldDirty: true })}>
+                    Use {typo}
+                  </Button>
+                </div>
+              )}
+            </section>
+            <div className="mt-4">
+              <DetailRows
+                rows={[
+                  ["Name", v.customerName],
+                  ["Phone", v.customerPhone],
+                  ["Deliver to", [v.deliveryAddress, v.city, v.state].filter(Boolean).join(", ")],
+                  ...(v.notes ? ([["Note", v.notes]] as Array<[string, string]>) : []),
+                ]}
+              />
             </div>
-            <div className="mt-5 rounded-xl bg-surface-tint-blue px-4 py-3">
-              <p className="font-semibold text-ink-brand">Payment provider: Paystack</p>
-              <p className="text-body-sm text-ink-secondary">You'll go to a secure payment page to finish your order.</p>
-            </div>
+            <Button variant="secondary" size="md" className="mt-5" onClick={backToDetails}>
+              Edit details
+            </Button>
           </Panel>
-        </form>
+        ) : (
+          <form id="checkout" noValidate onSubmit={toReview} className="flex flex-col gap-5">
+            <Panel title="Delivery and contact details" subtitle="Guest checkout · no account creation needed">
+              <div className="grid gap-4 md:grid-cols-2 md:gap-x-8 md:gap-y-5">
+                <Field label="Full name" required error={field("customerName")}>
+                  <TextInput autoComplete="name" {...register("customerName")} />
+                </Field>
+                <div className="flex flex-col gap-1">
+                  <Field label="Email address" required error={field("customerEmail")} hint="Your receipt and tracking link go here.">
+                    <TextInput type="email" autoComplete="email" inputMode="email" {...register("customerEmail")} />
+                  </Field>
+                  <EmailSuggestion value={email} onAccept={(e) => setValue("customerEmail", e, { shouldDirty: true, shouldValidate: true })} />
+                </div>
+                <Field label="Phone number" required error={field("customerPhone")}>
+                  <TextInput type="tel" autoComplete="tel" placeholder="+234 803 000 0000" {...register("customerPhone")} />
+                </Field>
+                <Field label="Delivery address" required error={field("deliveryAddress")} className="md:col-span-2">
+                  <TextInput autoComplete="street-address" {...register("deliveryAddress")} />
+                </Field>
+                <Field label="City" required error={field("city")}>
+                  <TextInput autoComplete="address-level2" {...register("city")} />
+                </Field>
+                <Field label="State" required error={field("state")}>
+                  <TextInput autoComplete="address-level1" {...register("state")} />
+                </Field>
+                <Field label="Delivery note" error={field("notes")} className="md:col-span-2">
+                  <TextArea rows={2} placeholder="Optional directions for the courier" {...register("notes")} />
+                </Field>
+              </div>
+              <div className="mt-5 rounded-xl bg-surface-tint-blue px-4 py-3">
+                <p className="font-semibold text-ink-brand">Payment provider: Paystack</p>
+                <p className="text-body-sm text-ink-secondary">You&apos;ll check your details, then go to a secure payment page to finish your order.</p>
+              </div>
+            </Panel>
+          </form>
+        )}
         <Panel title="Order summary">
           <ul className="flex flex-col gap-2 text-body-sm">
             {c.items.map((i) => (
@@ -575,9 +639,13 @@ export function CheckoutPage() {
               <p className="text-body-sm font-semibold text-ink-strong">{block ?? "Online payment is coming soon for this store. Contact the store to order."}</p>
               <ContactStore />
             </div>
+          ) : reviewing ? (
+            <Button fullWidth className="mt-4" onClick={() => void pay()} loading={paying || redirecting} loadingText={redirecting ? "Opening Paystack…" : "Reserving your items…"}>
+              Confirm and pay with Paystack →
+            </Button>
           ) : (
-            <Button type="submit" form="checkout" fullWidth className="mt-4" loading={formState.isSubmitting || redirecting} loadingText={redirecting ? "Opening Paystack…" : "Reserving your items…"}>
-              Continue to Paystack →
+            <Button type="submit" form="checkout" fullWidth className="mt-4">
+              Review order →
             </Button>
           )}
           <ErrorNote error={formError} fallback="We couldn't start your payment. Please try again." className="mt-3" />
@@ -703,13 +771,45 @@ const TIMELINE: Array<{ key: string; title: string; body: string; reached: (o: P
   { key: "shipped", title: "Dispatched", body: "On its way to you", reached: (o) => ["shipped", "delivered", "completed"].includes(o.status) },
   { key: "delivered", title: "Delivered", body: "You've received your order", reached: (o) => ["delivered", "completed"].includes(o.status) },
 ];
-const STATUS_TEXT: Partial<Record<StoreOrderStatus, string>> = {
-  pending: "Awaiting payment",
-  payment_failed: "Payment not completed",
-  expired: "Expired (not paid in time)",
-  cancelled: "Cancelled",
-  refunded: "Refunded",
-};
+type PayState = NonNullable<PublicOrder["payment"]>["state"];
+
+/** Where an order stands (from the server's payment summary; older servers: from the status). */
+function payStateOf(o: PublicOrder): { state: PayState; holdExpiresAt: string | null; canRetryPayment: boolean } {
+  if (o.payment) return o.payment;
+  const map: Partial<Record<StoreOrderStatus, PayState>> = { pending: "awaiting_payment", payment_failed: "payment_failed", expired: "expired", cancelled: "cancelled", refunded: "refunded" };
+  return { state: o.isPaid && !map[o.status] ? "paid" : map[o.status] ?? "paid", holdExpiresAt: null, canRetryPayment: false };
+}
+const time = (iso: string) => new Date(iso).toLocaleTimeString("en-GB", { hour: "2-digit", minute: "2-digit", timeZone: "Africa/Lagos" });
+
+function PaymentNotice({ o, onRetry, retrying }: { o: PublicOrder; onRetry: () => void; retrying: boolean }) {
+  const { slug } = useStorefront();
+  const p = payStateOf(o);
+  if (p.state === "paid") return null;
+  const copy: Record<Exclude<PayState, "paid">, { title: string; body: string }> = {
+    awaiting_payment: { title: "This order hasn't been paid yet", body: p.holdExpiresAt ? `Your items are held until ${time(p.holdExpiresAt)}. Pay before then to keep them.` : "Pay to confirm your order." },
+    payment_failed: { title: "Your payment didn't go through", body: p.holdExpiresAt ? `You weren't charged. Your items are held until ${time(p.holdExpiresAt)}, so you can try again.` : "You weren't charged." },
+    expired: { title: "This order wasn't paid and has expired", body: "Your bag was released, so the items are back on sale. Place a new order to buy them." },
+    cancelled: { title: "This order was cancelled", body: o.isPaid ? "If you paid, the store will arrange your refund. Contact them below if you have questions." : "Nothing was charged." },
+    refunded: { title: "This order was refunded", body: "The payment was returned to you." },
+  };
+  const c = copy[p.state];
+  return (
+    <section role="status" className={cn("rounded-md px-4 py-3", p.state === "expired" || p.state === "cancelled" || p.state === "refunded" ? "bg-surface-tint-warm" : "bg-danger-bg")}>
+      <p className="font-semibold text-ink-strong">{c.title}</p>
+      <p className="mt-1 text-body-sm text-ink-secondary">{c.body}</p>
+      {p.canRetryPayment && (
+        <Button size="md" className="mt-3" onClick={onRetry} loading={retrying} loadingText="Opening Paystack…">
+          {p.state === "payment_failed" ? "Try payment again" : "Pay now"}
+        </Button>
+      )}
+      {p.state === "expired" && (
+        <ButtonLink to={`/s/${slug}`} size="md" variant="secondary" className="mt-3">
+          Shop again
+        </ButtonLink>
+      )}
+    </section>
+  );
+}
 
 const trackSchema = z.object({ order: z.string().trim().min(4, "Enter your order number."), email: z.string().trim().email("Enter the email you used.") });
 
@@ -718,14 +818,27 @@ export function TrackOrderPage() {
   const [orderParam, setOrderParam] = useUrlState<string>("order", "");
   const [result, setResult] = useState<PublicOrder | null>(null);
   const [error, setError] = useState<unknown>(null);
-  const { register, handleSubmit, formState } = useForm<z.infer<typeof trackSchema>>({ resolver: zodResolver(trackSchema), defaultValues: { order: orderParam, email: "" } });
+  const { register, handleSubmit, getValues, formState } = useForm<z.infer<typeof trackSchema>>({ resolver: zodResolver(trackSchema), defaultValues: { order: orderParam, email: "" } });
   const navigate = useNavigate();
+  const [retrying, setRetrying] = useState(false);
+  const retry = async () => {
+    if (!result) return;
+    setError(null);
+    setRetrying(true);
+    try {
+      const res = await retryStorePayment(result.store?.storeSlug ?? slug, result.trackingNo, getValues("email"));
+      browser.go(res.authorizationUrl);
+    } catch (err) {
+      setRetrying(false);
+      setError(err);
+    }
+  };
 
   const onSubmit = handleSubmit(async (v) => {
     setError(null);
     setResult(null);
     try {
-      const o = await trackStoreOrder(v.order.toUpperCase(), v.email);
+      const o = await trackStoreOrder(v.order.trim(), v.email.trim());
       if (o.store && o.store.storeSlug !== slug) {
         navigate(`/s/${o.store.storeSlug}/track?order=${encodeURIComponent(o.trackingNo)}`);
         return;
@@ -738,7 +851,8 @@ export function TrackOrderPage() {
   });
 
   const o = result;
-  const problem = o ? STATUS_TEXT[o.status] : null;
+  const pay = o ? payStateOf(o) : null;
+  const showTimeline = Boolean(pay && (pay.state === "paid" || pay.state === "cancelled" || pay.state === "refunded"));
   return (
     <div className="flex flex-col gap-6">
       <Hero title="Track an order">Follow delivery progress using your order number and email.</Hero>
@@ -755,15 +869,14 @@ export function TrackOrderPage() {
               Track
             </Button>
           </form>
-          <ErrorNote error={error} fallback="We couldn't find that order. Check the order number and email." className="mt-4" />
+          <ErrorNote error={error} fallback="We couldn't find an order with that number and email. Check the order number in your confirmation email (it starts with BM-) and the email you typed at checkout, including its spelling." className="mt-4" />
           {o && (
-            <ol className="mt-6 flex flex-col gap-2">
-              {problem && (
-                <li className="rounded-md bg-danger-bg px-4 py-3">
-                  <p className="font-semibold text-danger">{problem}</p>
-                  {o.status === "payment_failed" || o.status === "pending" ? <p className="text-body-sm text-ink-secondary">Use the link in your email, or contact the store, to pay.</p> : null}
-                </li>
-              )}
+            <div className="mt-6">
+              <PaymentNotice o={o} onRetry={() => void retry()} retrying={retrying} />
+            </div>
+          )}
+          {o && showTimeline && (
+            <ol className="mt-4 flex flex-col gap-2">
               {TIMELINE.map((step) => {
                 const done = step.reached(o);
                 return (
