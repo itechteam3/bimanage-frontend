@@ -25,6 +25,8 @@ export interface FieldProps {
   label: string;
   required?: boolean;
   hint?: ReactNode;
+  /** success = green guidance, e.g. password rules (Figma 01.02). */
+  hintTone?: "muted" | "success";
   error?: string;
   /** Text shown next to the label, e.g. a "Forgot password?" link. */
   labelAside?: ReactNode;
@@ -33,7 +35,7 @@ export interface FieldProps {
   children: ReactNode;
 }
 
-export function Field({ label, required = false, hint, error, labelAside, id, className, children }: FieldProps) {
+export function Field({ label, required = false, hint, hintTone = "muted", error, labelAside, id, className, children }: FieldProps) {
   const autoId = useId();
   const fieldId = id ?? `f${autoId}`;
   const hintId = hint ? `${fieldId}-hint` : undefined;
@@ -67,7 +69,7 @@ export function Field({ label, required = false, hint, error, labelAside, id, cl
         </div>
         {children}
         {hint && !error && (
-          <p id={hintId} className="text-body-lg text-ink-secondary">
+          <p id={hintId} className={cn("text-body-lg", hintTone === "success" ? "text-success-ink" : "text-ink-secondary")}>
             {hint}
           </p>
         )}

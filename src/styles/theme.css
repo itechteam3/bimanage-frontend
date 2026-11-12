@@ -12,6 +12,7 @@
   --color-brand-violet: #7D8FFF;
   --color-brand-cyan: #26C0E2;
   --color-brand-chart-bar: #A9D9F0;
+  --color-brand-navy-panel: #064563;
   --color-ink-strong: #12252F;
   --color-ink-muted: #687784;
   --color-ink-secondary: #47525E;
@@ -165,6 +166,7 @@
   --spacing-showcase-store: 420px;
   --spacing-showcase-feli: 415px;
   --spacing-brand-copy: 462px;
+  --spacing-auth-action: 260px;
 
   /* radius */
   --radius-*: initial;

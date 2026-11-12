@@ -39,6 +39,10 @@
       "chart-bar": {
         "$value": "#A9D9F0",
         "$description": "Inactive chart bars, auth showcase card (1882:1389)."
+      },
+      "navy-panel": {
+        "$value": "#064563",
+        "$description": "Solid brand panel on account-recovery and verification screens (01.03–01.14, 1918:1454)."
       }
     },
     "text": {
@@ -724,6 +728,10 @@
     "brand-copy": {
       "$value": "462px",
       "$description": "Auth brand panel: body copy width (1882:1389)."
+    },
+    "auth-action": {
+      "$value": "260px",
+      "$description": "Secondary auth actions side by side on desktop (4126:23)."
     }
   },
   "breakpoint": {

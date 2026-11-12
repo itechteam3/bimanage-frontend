@@ -133,7 +133,7 @@ function Gallery() {
 
 function AuthDemo() {
   return (
-    <AuthLayout kicker="Welcome back" title="Sign in to BiManage" subtitle="Access your business workspace securely." footer="Your connection is encrypted.">
+    <AuthLayout kicker="Welcome back" title="Sign in to BiManage" subtitle="Access your business workspace securely." reassurance>
       <form className="flex flex-col gap-4 rounded-lg border border-line-default bg-surface-card p-5 lg:gap-5 lg:border-0 lg:bg-transparent lg:p-0" onSubmit={(e) => e.preventDefault()}>
         <Field label="Email address" required>
           <TextInput type="email" autoComplete="email" defaultValue="samuel@elijahapparel.com" />
