@@ -1,5 +1,6 @@
 import { describe, expect, it } from "vitest";
-import { readFileSync } from "node:fs";
+import { readFileSync, readdirSync, statSync } from "node:fs";
+import { join } from "node:path";
 import { resolve } from "node:path";
 import { buildThemeCss } from "../../scripts/build-tokens.mjs";
 import { featureAccess, PLAN_FEATURES } from "./plans";
@@ -35,5 +36,21 @@ describe("plan gating config", () => {
   });
   it("an expired trial falls back to the plan", () => {
     expect(featureAccess({ plan: "freemium", isTrialActive: true, trialEndDate: "2020-01-01" }, "invoices")).toBe(false);
+  });
+});
+
+describe("breakpoints", () => {
+  // Tailwind's default sm/xl/2xl are switched off (tokens define md, lg, desktop);
+  // an undefined prefix silently does nothing, so catch it here.
+  const files = (dir: string): string[] =>
+    readdirSync(dir).flatMap((f) => {
+      const p = join(dir, f);
+      return statSync(p).isDirectory() ? files(p) : /\.(tsx|ts)$/.test(f) && !/\.test\./.test(f) ? [p] : [];
+    });
+  it("only uses breakpoints that exist (md, lg, desktop)", () => {
+    const offenders = files(resolve(root, "src")).flatMap((f) =>
+      [...readFileSync(f, "utf8").matchAll(/["'`\s](sm|xl|2xl):[a-z]/g)].map((m) => `${f}: ${m[0].trim()}`)
+    );
+    expect(offenders).toEqual([]);
   });
 });

@@ -15,7 +15,12 @@ import { VerifyEmailPage } from "@/pages/auth/VerifyEmailPage";
 import { ForgotPasswordPage, NewPasswordPage, PasswordChangedPage, ResetCodePage } from "@/pages/auth/RecoveryPages";
 import { OAuthCallbackPage } from "@/pages/auth/OAuthCallbackPage";
 import { InviteAcceptPage } from "@/pages/auth/InviteAcceptPage";
-import { DashboardPlaceholder } from "@/pages/app/DashboardPlaceholder";
+import { WorkspaceLayout } from "@/components/layout/WorkspaceLayout";
+import { DashboardPage } from "@/pages/app/DashboardPage";
+import { ComingSoonPage } from "@/pages/app/ComingSoonPage";
+import { PathPage } from "@/pages/onboarding/PathPage";
+import { CheckoutPage, PackagesPage, PaymentStatusPage } from "@/pages/onboarding/PackagePages";
+import { BusinessIdentityPage, ChecklistPage, TrialStartedPage } from "@/pages/onboarding/SetupPages";
 
 const UiKitPage = lazy(() => import("@/pages/dev/UiKitPage"));
 
@@ -53,6 +58,29 @@ function RootLayout() {
 }
 
 const guest = (el: React.ReactNode) => <GuestOnly>{el}</GuestOnly>;
+
+// Sections built in later phases: real routes now, so links never 404.
+const comingSoon = (
+  [
+    ["/inventory", "Inventory"],
+    ["/sales", "Sales"],
+    ["/orders", "Orders"],
+    ["/invoices", "Invoices"],
+    ["/projects", "Projects"],
+    ["/settings/team", "Team"],
+    ["/store/*", "Online Store"],
+    ["/bisupplynet/*", "BiSupplyNet"],
+    ["/wallet/*", "Wallet"],
+    ["/feli", "FELI AI"],
+    ["/support/*", "Support"],
+    ["/subscription", "Subscription"],
+    ["/settings/*", "Settings"],
+    ["/analytics", "Analytics"],
+    ["/notifications", "Notifications"],
+    ["/messages", "Messages"],
+    ["/more", "More"],
+  ] as const
+).map(([path, section]) => ({ path, element: <ComingSoonPage />, handle: { section } }));
 const authed = (el: React.ReactNode) => <RequireAuth>{el}</RequireAuth>;
 
 export const routes = [
@@ -70,8 +98,23 @@ export const routes = [
       { path: "/reset-password/done", element: <PasswordChangedPage /> },
       { path: "/oauth/callback", element: <OAuthCallbackPage /> },
       { path: "/invite/accept", element: <InviteAcceptPage /> },
-      // Signed in
-      { path: "/dashboard", element: authed(<DashboardPlaceholder />) },
+      // Signed in — inside the app shell
+      {
+        element: authed(<WorkspaceLayout />),
+        children: [
+          { path: "/dashboard", element: <DashboardPage />, handle: { section: "Dashboard" } },
+          // Onboarding (Figma 02.xx, startup packages 07.12–07.05)
+          { path: "/onboarding", element: <PathPage />, handle: { section: "Onboarding" } },
+          { path: "/onboarding/packages", element: <PackagesPage />, handle: { section: "Subscription" } },
+          { path: "/onboarding/packages/:packageId", element: <CheckoutPage />, handle: { section: "Subscription" } },
+          { path: "/onboarding/payment", element: <PaymentStatusPage />, handle: { section: "Subscription" } },
+          { path: "/onboarding/trial", element: <TrialStartedPage />, handle: { section: "Subscription" } },
+          { path: "/onboarding/business", element: <BusinessIdentityPage />, handle: { section: "Onboarding" } },
+          { path: "/onboarding/checklist", element: <ChecklistPage />, handle: { section: "Dashboard" } },
+          // Later phases
+          ...comingSoon,
+        ],
+      },
       // Design review
       { path: "/ui-kit/*", element: <UiKitPage /> },
       { path: "*", element: <NotFoundPage /> },

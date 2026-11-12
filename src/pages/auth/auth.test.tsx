@@ -2,6 +2,7 @@ import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { render, screen, waitFor } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { createMemoryRouter, RouterProvider } from "react-router-dom";
+import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { routes } from "@/App";
 import { AuthProvider } from "@/lib/auth/AuthProvider";
 import { tokenStore } from "@/lib/auth/tokenStore";
@@ -24,6 +25,13 @@ beforeEach(() => {
   handlers = {
     "GET /auth/me": () => [200, ME],
     "GET /settings/my-role": () => [200, OWNER_WS],
+    // workspace shell + dashboard
+    "GET /onboarding/status": () => [200, { userPath: "existing_business", isTrialUsed: true }],
+    "GET /onboarding/steps": () => [200, { completedCount: 2, totalSteps: 7, isComplete: false, percentage: 29, steps: [] }],
+    "GET /dashboard": () => [200, { stats: { totalProducts: 0, totalStock: 0, totalInventoryValue: 0, totalSales: 0, totalTasks: 0, pendingTasks: 0 }, recentOrders: [], topSelling: [], salesChart: [], analytics: { totalOrders: 0, sale: 0, distribute: 0, return: 0 } }],
+    "GET /notifications/unread-count": () => [200, { unreadCount: 0 }],
+    "GET /messages/unread-count": () => [200, { unreadCount: 0 }],
+    "GET /business-profile": () => [200, { businessName: "Dior Factory LTD." }],
   };
   vi.stubGlobal(
     "fetch",
@@ -44,9 +52,11 @@ afterEach(() => vi.unstubAllGlobals());
 const renderAt = (path: string, state?: unknown) => {
   const router = createMemoryRouter(routes, { initialEntries: [{ pathname: path.split("?")[0]!, search: path.includes("?") ? `?${path.split("?")[1]}` : "", state }] });
   render(
-    <AuthProvider>
-      <RouterProvider router={router} />
-    </AuthProvider>
+    <QueryClientProvider client={new QueryClient({ defaultOptions: { queries: { retry: false } } })}>
+      <AuthProvider>
+        <RouterProvider router={router} />
+      </AuthProvider>
+    </QueryClientProvider>
   );
   return router;
 };
@@ -59,7 +69,7 @@ describe("sign in (01.01 / 01.08)", () => {
     await type(/email address/i, "sam@x.com");
     await type(/^password/i, "Secret123");
     await userEvent.click(screen.getByRole("button", { name: "Sign in" }));
-    expect(await screen.findByRole("heading", { name: /welcome, samuel/i })).toBeInTheDocument();
+    expect(await screen.findByRole("heading", { name: /business dashboard/i })).toBeInTheDocument();
     expect(tokenStore.get()).toBe("tok-1");
     expect(router.state.location.pathname).toBe("/dashboard");
     expect(calls.find((c) => c.key === "GET /auth/me")!.headers.Authorization).toBe("Bearer tok-1");

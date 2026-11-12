@@ -42,6 +42,7 @@
   --color-line-subtle: #E6EDF3;
   --color-line-on-brand: #FFFFFF36;
   --color-line-tint: #C8E5F5;
+  --color-line-card: #DEE8F0;
   --color-success: #1F875B;
   --color-success-strong: #287951;
   --color-success-bg: #E8F8F1;
@@ -54,6 +55,18 @@
   --color-neutral-bg: #EFF7FB;
   --color-danger-on-brand: #FA5250;
   --color-success-ink: #145C3D;
+  --color-kpi-revenue-bg: #EAF7F2;
+  --color-kpi-revenue-fg: #176A55;
+  --color-kpi-revenue-line: #17836E;
+  --color-kpi-orders-bg: #F0EEFB;
+  --color-kpi-orders-fg: #5B4AA2;
+  --color-kpi-orders-line: #7965B5;
+  --color-kpi-invoices-bg: #FFF4E6;
+  --color-kpi-invoices-fg: #986018;
+  --color-kpi-invoices-line: #986018;
+  --color-kpi-stock-bg: #FCEEF0;
+  --color-kpi-stock-fg: #A44257;
+  --color-kpi-stock-line: #A44257;
 
   /* type */
   --text-*: initial;

@@ -163,6 +163,10 @@
       "tint": {
         "$value": "#C8E5F5",
         "$description": "Outline of the blue-tinted reassurance card on mobile auth (1888:2872)."
+      },
+      "card": {
+        "$value": "#DEE8F0",
+        "$description": "Card/panel outline on app screens (03.02, 07.13); same family as border.default."
       }
     },
     "status": {
@@ -212,6 +216,56 @@
       "success-ink": {
         "$value": "#145C3D",
         "$description": "Reassurance text on auth, e.g. 'Your connection is encrypted.' (1882:1388)."
+      }
+    },
+    "kpi": {
+      "revenue-bg": {
+        "$value": "#EAF7F2",
+        "$description": "KPI • revenue card fill (03.02, 1889:1781)."
+      },
+      "revenue-fg": {
+        "$value": "#176A55",
+        "$description": "KPI • revenue value colour (03.02)."
+      },
+      "revenue-line": {
+        "$value": "#17836E",
+        "$description": "KPI • revenue sparkline (03.02)."
+      },
+      "orders-bg": {
+        "$value": "#F0EEFB",
+        "$description": "KPI • orders card fill (03.02, 1889:1781)."
+      },
+      "orders-fg": {
+        "$value": "#5B4AA2",
+        "$description": "KPI • orders value colour (03.02)."
+      },
+      "orders-line": {
+        "$value": "#7965B5",
+        "$description": "KPI • orders sparkline (03.02)."
+      },
+      "invoices-bg": {
+        "$value": "#FFF4E6",
+        "$description": "KPI • invoices card fill (03.02, 1889:1781)."
+      },
+      "invoices-fg": {
+        "$value": "#986018",
+        "$description": "KPI • invoices value colour (03.02)."
+      },
+      "invoices-line": {
+        "$value": "#986018",
+        "$description": "KPI • invoices sparkline (03.02)."
+      },
+      "stock-bg": {
+        "$value": "#FCEEF0",
+        "$description": "KPI • stock card fill (03.02, 1889:1781)."
+      },
+      "stock-fg": {
+        "$value": "#A44257",
+        "$description": "KPI • stock value colour (03.02)."
+      },
+      "stock-line": {
+        "$value": "#A44257",
+        "$description": "KPI • stock sparkline (03.02)."
       }
     }
   },

@@ -5,8 +5,10 @@ import {
   useId,
   useState,
   type InputHTMLAttributes,
+  type SelectHTMLAttributes,
   type ReactNode,
 } from "react";
+import { IconChevronDown } from "@tabler/icons-react";
 import { cn } from "@/lib/cn";
 
 // BiManage / Field (Figma 1850:1352; screens 1882:1409 desktop, 1888:2872 mobile).
@@ -155,3 +157,27 @@ export const PasswordInput = forwardRef<HTMLInputElement, Omit<TextInputProps, "
     );
   }
 );
+
+/** Native select styled like TextInput; labelled by its Field. */
+export const SelectInput = forwardRef<HTMLSelectElement, SelectHTMLAttributes<HTMLSelectElement>>(function SelectInput(
+  { className, id, children, ...rest },
+  ref
+) {
+  const field = useField();
+  return (
+    <div className={cn(controlBox, "relative lg:pr-3", field?.invalid && "lg:border-danger", className)}>
+      <select
+        ref={ref}
+        id={id ?? field?.id}
+        aria-invalid={field?.invalid || undefined}
+        aria-describedby={field?.describedBy}
+        aria-required={field?.required || undefined}
+        className="min-w-0 flex-1 appearance-none bg-transparent pr-6 text-input font-normal text-ink-strong outline-none lg:font-medium"
+        {...rest}
+      >
+        {children}
+      </select>
+      <IconChevronDown aria-hidden="true" className="pointer-events-none absolute right-0 size-icon text-ink-muted lg:right-3" />
+    </div>
+  );
+});

@@ -28,7 +28,7 @@ export function buildThemeCss(tokens) {
 
   // Colours. Group prefixes keep utilities readable: text.* → ink-*, border.* → line-*,
   // status.* → flat (success, danger-bg …).
-  const groupPrefix = { brand: "brand-", text: "ink-", surface: "surface-", border: "line-", status: "" };
+  const groupPrefix = { brand: "brand-", text: "ink-", surface: "surface-", border: "line-", status: "", kpi: "kpi-" };
   lines.push("  /* colour */", "  --color-*: initial;");
   for (const [group, entries] of Object.entries(tokens.color)) {
     if (group.startsWith("$")) continue;

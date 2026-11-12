@@ -149,10 +149,10 @@ function AuthDemo() {
 
 function AppDemo() {
   return (
-    <AppShell section="Dashboard" user={{ name: "Samuel Inyima", businessName: "Elijah Apparel" }} unreadCount={3}>
+    <AppShell section="Dashboard" user={{ name: "Samuel Inyima", businessName: "Elijah Apparel" }} unread={{ notifications: 3, messages: 1 }}>
       <h1 className="text-title-lg lg:text-page-title">Business overview</h1>
       <p className="mt-1 text-body text-ink-muted">Revenue, orders and operations at a glance.</p>
-      <div className="mt-6 grid gap-4 md:grid-cols-2 xl:grid-cols-3">
+      <div className="mt-6 grid gap-4 md:grid-cols-2 lg:grid-cols-3">
         <MetricCard label="Revenue" value="₦198,000" change={{ value: "37.8% this month", direction: "up" }} />
         <MetricCard label="Net sales" value="₦2,400" change={{ value: "2% this month", direction: "down" }} />
         <MetricCard label="Receivables" value="₦89,000" change={{ value: "11% this week", direction: "up" }} />
