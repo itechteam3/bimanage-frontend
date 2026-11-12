@@ -55,15 +55,18 @@ function SalesTrend({ data }: { data: Array<{ label: string; value: number }> })
   if (max === 0) return <p className="py-10 text-body-lg text-ink-secondary">Your sales trend appears here when you record orders.</p>;
   return (
     <figure>
-      <div className="flex h-40 items-end justify-between gap-3 pt-4 md:gap-8">
+      {/* Bars are sized as a share of the plot area, so the chart scales with its container. */}
+      <div className="flex h-40 min-w-0 justify-between gap-2 pt-4 md:gap-8" data-sales-trend>
         {data.map((d) => (
-          <div key={d.label} className="flex flex-1 flex-col items-center gap-2">
-            <div
-              className="w-full max-w-16 rounded-sm bg-brand-navy"
-              style={{ height: `${Math.max(4, (d.value / max) * 120)}px` }}
-              title={`${d.label}: ${naira(d.value)}`}
-            />
-            <span className="text-micro text-ink-muted">{d.label}</span>
+          <div key={d.label} className="flex min-w-0 flex-1 flex-col items-center gap-2">
+            <div className="flex w-full flex-1 items-end justify-center border-b border-line-subtle">
+              <div
+                className="w-full max-w-16 rounded-t-[4px] bg-brand-navy"
+                style={{ height: d.value > 0 ? `${Math.max((d.value / max) * 100, 3)}%` : 0 }}
+                title={`${d.label}: ${naira(d.value)}`}
+              />
+            </div>
+            <span className="max-w-full truncate text-micro text-ink-muted">{d.label}</span>
           </div>
         ))}
       </div>

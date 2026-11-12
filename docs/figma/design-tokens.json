@@ -731,6 +731,22 @@
       "$value": "36px",
       "$description": "Sidebar footer avatar (1889:1781)."
     },
+    "kpi-trend-w-mobile": {
+      "$value": "56px",
+      "$description": "KPI micro trend, Mobile frame (03.02 Mobile, 4082:384): 56x29, 16px from the card's right and bottom."
+    },
+    "kpi-trend-h-mobile": {
+      "$value": "29px",
+      "$description": "KPI micro trend height, Mobile frame (4082:384)."
+    },
+    "kpi-trend-w": {
+      "$value": "74px",
+      "$description": "KPI micro trend, Desktop frame (03.02 Desktop, KPI • REVENUE visual): 74x38."
+    },
+    "kpi-trend-h": {
+      "$value": "38px",
+      "$description": "KPI micro trend height, Desktop frame."
+    },
     "header-action": {
       "$value": "40px",
       "$description": "Header icon buttons (1889:1781)."

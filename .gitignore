@@ -22,3 +22,6 @@ docs/figma/missing.json
 .idea/
 .DS_Store
 Thumbs.db
+
+# screenshots from npm run check:layout
+layout-check/

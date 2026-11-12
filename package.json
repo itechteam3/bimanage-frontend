@@ -11,6 +11,7 @@
     "tokens": "node scripts/build-tokens.mjs",
     "dev": "npm run tokens && vite",
     "build": "npm run tokens && tsc -b && vite build && node scripts/check-bundle.mjs",
+    "check:layout": "node scripts/check-layout.mjs",
     "build:local": "npm run tokens && tsc -b && vite build",
     "preview": "vite preview",
     "typecheck": "tsc -b",

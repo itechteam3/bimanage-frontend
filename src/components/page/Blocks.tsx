@@ -120,29 +120,49 @@ const kpiTone: Record<KpiTone, { bg: string; fg: string; line: string }> = {
   stock: { bg: "bg-kpi-stock-bg", fg: "text-kpi-stock-fg", line: "text-kpi-stock-line" },
 };
 
-/** KPI tile (03.02 "KPI • REVENUE"): tinted, label, big value, caption, optional sparkline. */
+/**
+ * KPI tile (03.02 "KPI • REVENUE"): tinted, label, big value, caption, and an
+ * optional micro trend. The trend shares the value's row (never laid over the
+ * text) at the Figma sizes — 56x29 on phones (Mobile frame 4082:384), 74x38
+ * from lg — and wraps under the value if a long number needs the room.
+ */
 export function KpiCard({ tone, label, value, caption, trend }: { tone: KpiTone; label: string; value: ReactNode; caption: string; trend?: number[] }) {
   const t = kpiTone[tone];
   return (
-    <section className={cn("relative flex min-h-32 flex-col justify-between overflow-hidden rounded-lg border border-line-card p-4 shadow-card", t.bg)}>
+    <section className={cn("flex min-h-32 min-w-0 flex-col justify-between gap-2 rounded-lg border border-line-card p-4 shadow-card", t.bg)}>
       <h3 className="text-caption font-semibold uppercase text-ink-muted">{label}</h3>
-      <p className={cn("text-title-md", t.fg)}>{value}</p>
+      <div data-kpi-row className="flex flex-wrap items-end justify-between gap-x-2 gap-y-1">
+        <p className={cn("min-w-0 break-words text-title-md", t.fg)}>{value}</p>
+        {trend && trend.length > 1 && (
+          <Sparkline values={trend} className={cn("h-kpi-trend-h-mobile w-kpi-trend-w-mobile shrink-0 lg:h-kpi-trend-h lg:w-kpi-trend-w", t.line)} />
+        )}
+      </div>
       <p className="text-caption text-ink-muted">{caption}</p>
-      {trend && trend.length > 1 && <Sparkline values={trend} className={cn("absolute bottom-6 right-4 h-10 w-20", t.line)} />}
     </section>
   );
 }
 
-function Sparkline({ values, className }: { values: number[]; className?: string }) {
+// Sparkline geometry, in a 74x38 box (both Figma sizes share this ratio).
+// The padding keeps the round line caps and the end dot (r 2.6 + 1.2 ring)
+// inside the box, so nothing is ever clipped.
+export const SPARK = { w: 74, h: 38, pad: 4.5 } as const;
+export function sparklinePoints(values: number[]): Array<[number, number]> {
   const max = Math.max(...values, 1);
   const min = Math.min(...values, 0);
-  const pts = values.map((v, i) => [(i / (values.length - 1)) * 70 + 2, 34 - ((v - min) / (max - min || 1)) * 28]);
-  const line = pts.map(([x, y], i) => `${i ? "L" : "M"}${x!.toFixed(1)},${y!.toFixed(1)}`).join(" ");
+  const { w, h, pad } = SPARK;
+  const n = Math.max(values.length - 1, 1);
+  return values.map((v, i) => [pad + (i / n) * (w - 2 * pad), h - pad - ((v - min) / (max - min || 1)) * (h - 2 * pad)]);
+}
+
+function Sparkline({ values, className }: { values: number[]; className?: string }) {
+  const pts = sparklinePoints(values);
+  const line = pts.map(([x, y], i) => `${i ? "L" : "M"}${x.toFixed(1)},${y.toFixed(1)}`).join(" ");
+  const first = pts[0]!;
   const last = pts[pts.length - 1]!;
   return (
-    <svg viewBox="0 0 74 38" className={className} aria-hidden="true">
-      <path d={`${line} L72,38 L2,38 Z`} fill="currentColor" opacity="0.09" />
-      <path d={line} fill="none" stroke="currentColor" strokeWidth="2.4" strokeLinecap="round" strokeLinejoin="round" />
+    <svg viewBox={`0 0 ${SPARK.w} ${SPARK.h}`} preserveAspectRatio="xMidYMid meet" className={className} aria-hidden="true" data-sparkline>
+      <path d={`${line} L${last[0].toFixed(1)},${SPARK.h} L${first[0].toFixed(1)},${SPARK.h} Z`} fill="currentColor" opacity="0.09" />
+      <path d={line} fill="none" stroke="currentColor" strokeWidth="2" vectorEffect="non-scaling-stroke" strokeLinecap="round" strokeLinejoin="round" />
       <circle cx={last[0]} cy={last[1]} r="2.6" fill="currentColor" stroke="var(--color-surface-card)" strokeWidth="1.2" />
     </svg>
   );

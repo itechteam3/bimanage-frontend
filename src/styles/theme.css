@@ -166,6 +166,10 @@
   --spacing-nav-icon-slot: 32px;
   --spacing-avatar-header: 50px;
   --spacing-avatar-sidebar: 36px;
+  --spacing-kpi-trend-w-mobile: 56px;
+  --spacing-kpi-trend-h-mobile: 29px;
+  --spacing-kpi-trend-w: 74px;
+  --spacing-kpi-trend-h: 38px;
   --spacing-header-action: 40px;
   --spacing-dialog: 630px;
   --spacing-dialog-icon: 58px;
