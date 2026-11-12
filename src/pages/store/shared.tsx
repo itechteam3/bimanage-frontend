@@ -16,6 +16,7 @@ export const Loading = () => (
 const TABS: Array<[string, string, boolean?]> = [
   ["/store", "Overview", true],
   ["/store/products", "Products"],
+  ["/store/orders", "Orders"],
   ["/store/templates", "Template"],
   ["/store/domain", "Domain"],
   ["/store/analytics", "Analytics"],

@@ -327,3 +327,82 @@ describe("storefront (guest, no sign-in)", () => {
     expect(screen.queryByRole("button", { name: /add to bag/i })).toBeNull();
   });
 });
+
+describe("merchant store orders", () => {
+  const ORDER = {
+    _id: "o1",
+    trackingNo: "BM-7K2Q-9MXA",
+    customerName: "Ada Nwosu",
+    customerEmail: "ada@example.com",
+    customerPhone: "+234 803 222 0180",
+    deliveryAddress: "14 Adebayo St",
+    city: "Yaba",
+    state: "Lagos",
+    items: [{ product: "p1", productName: "Classic linen shirt", price: 22500, quantity: 2, total: 45000 }],
+    subtotal: 45000,
+    deliveryFee: 2500,
+    total: 47500,
+    commissionRate: 3,
+    commissionAmount: 1425,
+    vendorPayout: 46075,
+    status: "payment_confirmed",
+    isPaid: true,
+    paidAt: "2026-11-12T09:05:00Z",
+    statusHistory: [{ status: "payment_confirmed", at: "2026-11-12T09:05:00Z" }],
+    createdAt: "2026-11-12T09:00:00Z",
+    nextStatuses: ["processing", "shipped", "cancelled"],
+  };
+
+  it("lists orders; status filter and search go to the API and stay in the URL", async () => {
+    fb.handlers["GET /store-orders/my-orders"] = () => [200, { orders: [ORDER], total: 1, page: 1, totalPages: 1 }];
+    const user = userEvent.setup();
+    const router = renderApp("/store/orders");
+    expect(await screen.findByRole("link", { name: "BM-7K2Q-9MXA" })).toHaveAttribute("href", "/store/orders/o1");
+    expect(screen.getByText("New · paid")).toBeInTheDocument();
+    await user.click(screen.getByRole("tab", { name: "Shipped" }));
+    await user.type(screen.getByRole("searchbox", { name: /search store orders/i }), "ada{Enter}");
+    await waitFor(() => expect(router.state.location.search).toContain("status=shipped"));
+    expect(router.state.location.search).toContain("q=ada");
+    const lastList = [...fb.calls].reverse().find((c) => c.key === "GET /store-orders/my-orders");
+    expect(lastList).toBeTruthy();
+  });
+
+  it("detail: earnings, customer contact, mark shipped; Back to Online Store", async () => {
+    let current: Record<string, unknown> = ORDER;
+    fb.handlers["GET /store-orders/o1"] = () => [200, current];
+    fb.handlers["PUT /store-orders/o1/status"] = (b) => ((current = { ...ORDER, status: b.status, nextStatuses: ["delivered"] }), [200, current]);
+    const user = userEvent.setup();
+    renderApp("/store/orders/o1");
+    expect(await screen.findByRole("heading", { name: "Order BM-7K2Q-9MXA" })).toBeInTheDocument();
+    expect(screen.getByText("₦46,075")).toBeInTheDocument();
+    expect(screen.getByRole("link", { name: /email ada@example.com/i }).getAttribute("href")).toMatch(/^mailto:ada@example\.com/);
+    expect(screen.getByRole("link", { name: /call \+234/i })).toHaveAttribute("href", "tel:+2348032220180");
+    expect(screen.getByTestId("back-to-screen")).toHaveTextContent("Back to Online Store");
+    await user.click(screen.getByRole("button", { name: "Mark shipped" }));
+    await waitFor(() => expect(last("PUT /store-orders/o1/status")?.body).toEqual({ status: "shipped" }));
+    expect(await screen.findByRole("button", { name: "Mark delivered" })).toBeInTheDocument();
+  });
+
+  it("cancelling a paid order confirms first, returns stock and flags the refund", async () => {
+    fb.handlers["GET /store-orders/o1"] = () => [200, ORDER];
+    fb.handlers["PUT /store-orders/o1/status"] = () => [200, { ...ORDER, status: "cancelled", earningsReversed: true, nextStatuses: [], refundNeeded: true }];
+    const user = userEvent.setup();
+    renderApp("/store/orders/o1");
+    await user.click(await screen.findByRole("button", { name: "Cancel order" }));
+    const dialog = await screen.findByRole("dialog");
+    expect(within(dialog).getByText(/back into stock.*refund them from your Paystack dashboard/)).toBeInTheDocument();
+    expect(last("PUT /store-orders/o1/status")).toBeUndefined();
+    await user.click(within(dialog).getByRole("button", { name: "Cancel order" }));
+    await waitFor(() => expect(last("PUT /store-orders/o1/status")?.body).toEqual({ status: "cancelled" }));
+    expect(await screen.findByText("Refund needed")).toBeInTheDocument();
+    expect(screen.getByText(/Refund ₦47,500 to Ada Nwosu/)).toBeInTheDocument();
+  });
+
+  it("an unpaid order warns not to send anything and only offers cancel", async () => {
+    fb.handlers["GET /store-orders/o1"] = () => [200, { ...ORDER, status: "pending", isPaid: false, paidAt: null, nextStatuses: ["cancelled"] }];
+    renderApp("/store/orders/o1");
+    expect(await screen.findByText(/hasn't been paid. Don't send anything yet/)).toBeInTheDocument();
+    expect(screen.queryByRole("button", { name: /mark/i })).toBeNull();
+    expect(screen.getByRole("button", { name: "Cancel order" })).toBeInTheDocument();
+  });
+});

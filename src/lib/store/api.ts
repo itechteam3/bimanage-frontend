@@ -504,3 +504,72 @@ export const trackStoreOrder = (orderNumber: string, email: string) => api<Publi
 
 /** Leave the app for Paystack (a separate object so tests can stub it). */
 export const browser = { go: (url: string) => window.location.assign(url) };
+
+// ── Merchant: store orders (no Figma frame; built in the 08.xx style) ─────
+
+export interface MerchantStoreOrder {
+  _id: string;
+  trackingNo: string;
+  customerName: string;
+  customerEmail: string;
+  customerPhone?: string;
+  deliveryAddress: string;
+  city?: string;
+  state?: string;
+  notes?: string | null;
+  items: Array<{ product: string; productName: string; productImage?: string; price: number; quantity: number; total: number }>;
+  subtotal: number;
+  deliveryFee: number;
+  total: number;
+  commissionRate?: number;
+  commissionAmount?: number;
+  vendorPayout?: number;
+  status: StoreOrderStatus;
+  isPaid: boolean;
+  paidAt?: string | null;
+  deliveredAt?: string | null;
+  completedAt?: string | null;
+  earningsReversed?: boolean;
+  statusHistory: Array<{ status: StoreOrderStatus; at: string }>;
+  createdAt: string;
+  nextStatuses?: StoreOrderStatus[];
+}
+
+export type StoreOrderFilter = "all" | "payment_confirmed" | "processing" | "shipped" | "delivered" | "completed" | "pending" | "cancelled";
+
+export const STORE_ORDER_STATUS: Record<StoreOrderStatus, { label: string; tone: "success" | "warning" | "danger" | "neutral" | "live" }> = {
+  pending: { label: "Awaiting payment", tone: "warning" },
+  payment_failed: { label: "Payment failed", tone: "danger" },
+  expired: { label: "Expired", tone: "neutral" },
+  payment_confirmed: { label: "New · paid", tone: "live" },
+  processing: { label: "Processing", tone: "warning" },
+  shipped: { label: "Shipped", tone: "warning" },
+  delivered: { label: "Delivered", tone: "success" },
+  completed: { label: "Completed", tone: "success" },
+  cancelled: { label: "Cancelled", tone: "neutral" },
+  refunded: { label: "Refunded", tone: "neutral" },
+};
+
+export const useMerchantStoreOrders = (status: StoreOrderFilter, search: string, page: number) =>
+  useQuery({
+    queryKey: ["store", "orders", status, search, page] as const,
+    queryFn: () =>
+      api<{ orders: MerchantStoreOrder[]; total: number; page: number; totalPages: number }>("/store-orders/my-orders", {
+        query: { status: status === "all" ? undefined : status, search: search || undefined, page, limit: 20 },
+      }),
+    placeholderData: keepPreviousData,
+  });
+
+export const useMerchantStoreOrder = (id: string) => useQuery({ queryKey: ["store", "order", id] as const, queryFn: () => api<MerchantStoreOrder>(`/store-orders/${encodeURIComponent(id)}`) });
+
+export function useSetStoreOrderStatus(id: string) {
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: (status: "processing" | "shipped" | "delivered" | "completed" | "cancelled") =>
+      api<MerchantStoreOrder & { refundNeeded?: boolean; message?: string }>(`/store-orders/${encodeURIComponent(id)}/status`, { method: "PUT", body: { status } }),
+    onSuccess: (order) => {
+      qc.setQueryData(["store", "order", id], order);
+      void qc.invalidateQueries({ queryKey: ["store"] });
+    },
+  });
+}
