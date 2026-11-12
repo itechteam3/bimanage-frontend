@@ -129,7 +129,9 @@ export function fieldErrors<F extends string>(err: unknown, fields: readonly F[]
   for (const field of fields) {
     const label = humanise(field);
     const starts = new RegExp(`^"?(${field}|${label})"?(\\s|$)`, "i");
-    const hit = named === field ? err.message : list.find((m) => starts.test(m.trim()));
+    // Per-field errors ({ field, message }) win over guessing from the text.
+    const tagged = extra.find((e): e is { field: string; message: string } => Boolean(e && typeof e === "object" && (e as { field?: unknown }).field === field && typeof (e as { message?: unknown }).message === "string"));
+    const hit = tagged ? tagged.message : named === field ? err.message : list.find((m) => starts.test(m.trim()));
     if (!hit) continue;
     const known = KNOWN.find(([re]) => re.test(hit));
     const shaped = FIELD_TEXT.find(([re]) => re.test(hit));

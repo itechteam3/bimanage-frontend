@@ -53,7 +53,7 @@ export const SIDEBAR_NAV: NavItem[] = [
   { label: "Orders", to: "/orders", icon: IconReceipt, feature: "orders" },
   { label: "Projects", to: "/projects", icon: IconLayoutKanban, feature: "projects" },
   { label: "Team", to: "/settings/team", icon: IconUsersGroup, permission: "manageTeam" },
-  { label: "Online Store", to: "/store/dashboard", icon: IconBuildingStore, feature: "store" },
+  { label: "Online Store", to: "/store", icon: IconBuildingStore, feature: "store" },
   { label: "BiSupplyNet", to: "/bisupplynet", icon: IconTruckDelivery, feature: "bisupplynet", permission: "accessBiSupplyNet" },
   { label: "Wallet", to: "/wallet", icon: IconWallet, ownerOnly: true },
   { label: "FELI AI", to: "/feli", icon: IconSparkles },
