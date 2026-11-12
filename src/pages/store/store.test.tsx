@@ -78,6 +78,7 @@ describe("merchant store", () => {
     let created = false;
     fb.handlers["GET /store/my-store"] = () => (created ? [200, STORE] : [404, { message: "Store not found" }]);
     fb.handlers["POST /store/create"] = () => ((created = true), [201, { store: STORE, storeUrl: STORE.publicUrl }]);
+    fb.handlers["GET /business-profile"] = () => [200, { businessName: "", businessEmail: "hello@dior.example" }];
     const user = userEvent.setup();
     const router = renderApp("/store");
     await waitFor(() => expect(router.state.location.pathname).toBe("/store/create"));
@@ -87,7 +88,7 @@ describe("merchant store", () => {
     await user.type(screen.getByLabelText(/store description/i), "Linen shirts and essentials");
     await user.click(screen.getByRole("button", { name: "Create store" }));
     await waitFor(() => expect(router.state.location.pathname).toBe("/store"));
-    expect(last("POST /store/create")?.body).toMatchObject({ storeName: "Elijah Apparel", category: "fashion", contactEmail: "sam@x.com" });
+    expect(last("POST /store/create")?.body).toMatchObject({ storeName: "Elijah Apparel", category: "fashion", contactEmail: "hello@dior.example" });
     expect(await screen.findByRole("heading", { name: "Ready to launch?" })).toBeInTheDocument();
   });
 

@@ -7,7 +7,7 @@ import { IconCheck, IconCircleDashed, IconCopy, IconExternalLink, IconLock, Icon
 import { Button, ButtonLink, Dialog, Field, SelectInput, Status, TextArea, TextInput } from "@/components/ui";
 import { HelpPanel, IntroCard, KpiCard, PageTitle, Panel } from "@/components/page/Blocks";
 import { ErrorNote } from "@/components/feedback/ErrorNote";
-import { useAuth } from "@/lib/auth/AuthProvider";
+import { useBusinessProfile } from "@/lib/workspace/api";
 import { applyFieldErrors } from "@/lib/api/errorMessage";
 import { ApiError } from "@/lib/api/client";
 import { naira } from "@/lib/format";
@@ -48,14 +48,16 @@ type CreateValues = z.infer<typeof createSchema>;
 export function CreateStorePage() {
   const navigate = useNavigate();
   const mine = useMyStore();
-  const { user } = useAuth();
+  // Customers see these: use the business contact details, never the login email.
+  const profile = useBusinessProfile();
   const create = useCreateStore();
   const [formError, setFormError] = useState<unknown>(null);
   const { register, handleSubmit, watch, setError, reset, formState } = useForm<CreateValues>({ resolver: zodResolver(createSchema), defaultValues: { storeName: "", category: "", description: "", contactEmail: "", contactPhone: "" } });
   const guard = useLeaveGuard(formState.isDirty && !formState.isSubmitSuccessful);
   useEffect(() => {
-    if (user?.email) reset({ storeName: "", category: "", description: "", contactEmail: user.email, contactPhone: "" });
-  }, [user?.email, reset]);
+    const p = profile.data;
+    if (p) reset({ storeName: p.businessName ?? "", category: "", description: "", contactEmail: p.businessEmail ?? "", contactPhone: p.businessPhone ?? "" });
+  }, [profile.data, reset]);
 
   if (mine.isLoading) return <Loading />;
   if (mine.data) return <Navigate to="/store" replace />;
@@ -98,7 +100,7 @@ export function CreateStorePage() {
               <Field label="Store description" required error={formState.errors.description?.message} className="md:col-span-2">
                 <TextArea rows={3} placeholder="Linen shirts and everyday essentials, made in Lagos." {...register("description")} />
               </Field>
-              <Field label="Business email" required error={formState.errors.contactEmail?.message} hint="Customers reply to this address.">
+              <Field label="Business email" required error={formState.errors.contactEmail?.message} hint="Shown to customers, who reply to it. Use a business address, not a personal one.">
                 <TextInput type="email" autoComplete="email" {...register("contactEmail")} />
               </Field>
               <Field label="Support phone" error={formState.errors.contactPhone?.message}>
