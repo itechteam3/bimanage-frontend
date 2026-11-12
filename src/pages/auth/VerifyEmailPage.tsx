@@ -3,7 +3,7 @@ import { useLocation, useNavigate, useSearchParams } from "react-router-dom";
 import { AuthActions, AuthLayout, AuthNote } from "@/components/layout/AuthLayout";
 import { CodeInput } from "@/components/auth/CodeInput";
 import { Button, ButtonLink, Field } from "@/components/ui";
-import { authApi } from "@/lib/auth/api";
+import { authApi, isExpiredCodeError } from "@/lib/auth/api";
 import { useAuth } from "@/lib/auth/AuthProvider";
 import { pendingInvite } from "@/lib/auth/pending";
 import { ApiError } from "@/lib/api/client";
@@ -59,7 +59,7 @@ export function VerifyEmailPage() {
       await signIn(res.token);
       navigate(pendingInvite.get() ? "/invite/accept" : "/dashboard", { replace: true });
     } catch (err) {
-      if (err instanceof ApiError && /expired/i.test(err.message)) {
+      if (err instanceof ApiError && isExpiredCodeError(err.message)) {
         setState("expired");
         setMessage(null);
       } else if (err instanceof ApiError && /already verified/i.test(err.message)) {

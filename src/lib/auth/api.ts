@@ -33,6 +33,10 @@ export interface LoginResult {
   token: string;
 }
 
+/** Backend says "OTP has expired…" only for genuinely expired codes;
+ * "Invalid or expired OTP" means the code is wrong (or none was issued). */
+export const isExpiredCodeError = (message: string) => /^otp has expired/i.test(message.trim());
+
 export const authApi = {
   login: (email: string, password: string) =>
     api<LoginResult>("/auth/login", { method: "POST", body: { email, password }, auth: false, quiet401: true }),

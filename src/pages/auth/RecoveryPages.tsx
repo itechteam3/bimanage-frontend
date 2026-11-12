@@ -7,7 +7,7 @@ import { AuthActions, AuthLayout, AuthNote, InfoRow } from "@/components/layout/
 import { CodeInput } from "@/components/auth/CodeInput";
 import { PasswordStrength } from "@/components/auth/PasswordStrength";
 import { Button, ButtonLink, Field, PasswordInput, TextInput, buttonClasses } from "@/components/ui";
-import { authApi } from "@/lib/auth/api";
+import { authApi, isExpiredCodeError } from "@/lib/auth/api";
 import { newPasswordSchema } from "@/lib/auth/password";
 import { SUPPORT_EMAIL } from "@/config/links";
 import { ApiError } from "@/lib/api/client";
@@ -104,7 +104,7 @@ export function ResetCodePage() {
       const { resetToken } = await authApi.verifyResetCode(email, code);
       navigate("/reset-password", { replace: true, state: { email, resetToken } satisfies RecoveryState });
     } catch (err) {
-      if (err instanceof ApiError && /expired/i.test(err.message)) setError("This code has expired. Send a new one below.");
+      if (err instanceof ApiError && isExpiredCodeError(err.message)) setError("This code has expired. Send a new one below.");
       else if (err instanceof ApiError && err.status === 400) setError("The code is incorrect. Check the six digits and try again.");
       else if (err instanceof ApiError && err.status === 429) setError(cooldownMessage(err));
       else setError(errorMessage(err));

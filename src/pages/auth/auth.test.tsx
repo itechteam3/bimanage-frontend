@@ -176,6 +176,15 @@ describe("password reset (01.04 → 01.09 → 01.05 → 01.06)", () => {
     expect(tokenStore.get()).toBeNull(); // not signed in by a reset
   });
 
+  it("a wrong reset code ('Invalid or expired OTP') is reported as incorrect, not expired", async () => {
+    handlers["POST /auth/verify-otp"] = () => [400, { message: "Invalid or expired OTP" }];
+    renderAt("/forgot-password/code", { email: "sam@x.com" });
+    await type(/reset code/i, "111111");
+    await userEvent.click(screen.getByRole("button", { name: "Continue" }));
+    expect(await screen.findByText(/the code is incorrect/i)).toBeInTheDocument();
+    expect(screen.queryByText(/has expired/i)).not.toBeInTheDocument();
+  });
+
   it("opening the new-password page without a reset session shows 01.10", async () => {
     renderAt("/reset-password");
     expect(await screen.findByRole("heading", { name: /this reset has expired/i })).toBeInTheDocument();
