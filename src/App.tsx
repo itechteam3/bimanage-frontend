@@ -22,6 +22,7 @@ import { PathPage } from "@/pages/onboarding/PathPage";
 import { CheckoutPage, PackagesPage, PaymentStatusPage } from "@/pages/onboarding/PackagePages";
 import { BusinessIdentityPage, ChecklistPage, TrialStartedPage } from "@/pages/onboarding/SetupPages";
 import { FeatureGate } from "@/lib/workspace/subscription";
+import type { Feature } from "@/config/plans";
 import { ProfilePage } from "@/pages/settings/ProfilePage";
 
 const UiKitPage = lazy(() => import("@/pages/dev/UiKitPage"));
@@ -34,6 +35,31 @@ const AdjustStockPage = inventory("AdjustStockPage");
 const LowStockPage = inventory("LowStockPage");
 const ExportReadyPage = inventory("ExportReadyPage");
 const BarcodeLookupPage = inventory("BarcodeLookupPage");
+// Sales, orders and invoices (Phase 5) load as one chunk.
+const sales = (name: keyof typeof import("@/pages/sales/index")) => lazy(() => import("@/pages/sales/index").then((m) => ({ default: m[name] })));
+const SalesOverviewPage = sales("SalesOverviewPage");
+const SalesAnalyticsPage = sales("SalesAnalyticsPage");
+const OrdersPage = sales("OrdersPage");
+const CreateOrderPage = sales("CreateOrderPage");
+const OrderCreatedPage = sales("OrderCreatedPage");
+const OrderDetailsPage = sales("OrderDetailsPage");
+const CancelOrderPage = sales("CancelOrderPage");
+const OrderCancelledPage = sales("OrderCancelledPage");
+const InvoicesPage = sales("InvoicesPage");
+const InvoiceEditorPage = sales("InvoiceEditorPage");
+const InvoiceCreatedPage = sales("InvoiceCreatedPage");
+const InvoicePreviewPage = sales("InvoicePreviewPage");
+const EmailInvoicePage = sales("EmailInvoicePage");
+const InvoiceSentPage = sales("InvoiceSentPage");
+
+/** A group of routes behind one plan feature, with an in-page loading state. */
+const gated = (feature: Feature, title: string) => (
+  <FeatureGate feature={feature} title={title}>
+    <Suspense fallback={<SectionLoading />}>
+      <Outlet />
+    </Suspense>
+  </FeatureGate>
+);
 
 export const queryClient = new QueryClient({
   defaultOptions: {
@@ -80,9 +106,6 @@ const guest = (el: React.ReactNode) => <GuestOnly>{el}</GuestOnly>;
 // Sections built in later phases: real routes now, so links never 404.
 const comingSoon = (
   [
-    ["/sales", "Sales"],
-    ["/orders", "Orders"],
-    ["/invoices", "Invoices"],
     ["/projects", "Projects"],
     ["/settings/team", "Team"],
     ["/store/*", "Online Store"],
@@ -92,7 +115,6 @@ const comingSoon = (
     ["/support/*", "Support"],
     ["/subscription", "Subscription"],
     ["/settings/*", "Settings"],
-    ["/analytics", "Analytics"],
     ["/notifications", "Notifications"],
     ["/messages", "Messages"],
     ["/more", "More"],
@@ -147,6 +169,38 @@ export const routes = [
               { path: "/inventory/low-stock", element: <LowStockPage />, handle: { section: "Inventory" } },
               { path: "/inventory/export", element: <ExportReadyPage />, handle: { section: "Inventory" } },
               { path: "/inventory/lookup", element: <BarcodeLookupPage />, handle: { section: "Inventory" } },
+            ],
+          },
+          // Sales, orders and invoices (Figma 05.01–05.13)
+          {
+            element: gated("orders", "Sales and orders"),
+            children: [
+              { path: "/sales", element: <SalesOverviewPage />, handle: { section: "Sales" } },
+              { path: "/orders", element: <OrdersPage />, handle: { section: "Orders" } },
+              { path: "/orders/new", element: <CreateOrderPage />, handle: { section: "Orders" } },
+              { path: "/orders/:id", element: <OrderDetailsPage />, handle: { section: "Orders" } },
+              { path: "/orders/:id/created", element: <OrderCreatedPage />, handle: { section: "Orders" } },
+              { path: "/orders/:id/cancel", element: <CancelOrderPage />, handle: { section: "Orders" } },
+              { path: "/orders/:id/cancelled", element: <OrderCancelledPage />, handle: { section: "Orders" } },
+            ],
+          },
+          {
+            element: gated("analytics", "Sales analytics"),
+            children: [
+              { path: "/sales/analytics", element: <SalesAnalyticsPage />, handle: { section: "Sales" } },
+              { path: "/analytics", element: <Navigate to="/sales/analytics" replace /> },
+            ],
+          },
+          {
+            element: gated("invoices", "Invoices"),
+            children: [
+              { path: "/invoices", element: <InvoicesPage />, handle: { section: "Sales" } },
+              { path: "/invoices/new", element: <InvoiceEditorPage />, handle: { section: "Sales" } },
+              { path: "/invoices/:id", element: <InvoicePreviewPage />, handle: { section: "Sales" } },
+              { path: "/invoices/:id/edit", element: <InvoiceEditorPage key="edit" />, handle: { section: "Sales" } },
+              { path: "/invoices/:id/created", element: <InvoiceCreatedPage />, handle: { section: "Sales" } },
+              { path: "/invoices/:id/email", element: <EmailInvoicePage />, handle: { section: "Sales" } },
+              { path: "/invoices/:id/sent", element: <InvoiceSentPage />, handle: { section: "Sales" } },
             ],
           },
           // Settings
