@@ -23,7 +23,8 @@ import {
   type Product,
 } from "@/lib/inventory/api";
 import { ApiError } from "@/lib/api/client";
-import { errorMessage } from "@/lib/api/errorMessage";
+import { applyFieldErrors, errorMessage } from "@/lib/api/errorMessage";
+import { ErrorNote } from "@/components/feedback/ErrorNote";
 import { count, naira, shortDate } from "@/lib/format";
 import { useCan } from "@/lib/auth/useCan";
 import { cn } from "@/lib/cn";
@@ -78,7 +79,7 @@ function PhotoField({ productId, image, onPicked }: { productId?: string; image?
     try {
       await uploadProductImage(productId, file);
     } catch (err) {
-      setError(errorMessage(err));
+      setError(errorMessage(err, "We couldn't upload the photo. Check your connection and try again."));
     } finally {
       setBusy(false);
     }
@@ -115,7 +116,7 @@ export function ProductFormPage() {
   const update = useUpdateProduct(id ?? "");
   const remove = useDeleteProduct();
   const [photo, setPhoto] = useState<File | null>(null);
-  const [formError, setFormError] = useState<string | null>(null);
+  const [formError, setFormError] = useState<unknown>(null);
   const [confirmDelete, setConfirmDelete] = useState(false);
 
   const { register, handleSubmit, reset, setError, formState } = useForm<ProductValues>({
@@ -159,13 +160,13 @@ export function ProductFormPage() {
         navigate("/inventory/products");
       }
     } catch (err) {
-      if (err instanceof ApiError && err.status === 409) setError("sku", { message: "Another product already uses this SKU." });
-      else setFormError(errorMessage(err));
+      if (err instanceof ApiError && err.status === 409) setError("sku", { message: "Another product already uses this SKU. Use a different one." });
+      else if (!applyFieldErrors(err, setError, ["name", "category", "sku", "barcode", "sellingPrice", "stockQuantity", "lowStockThreshold", "brand"])) setFormError(err);
     }
   });
 
   if (editing && existing.isLoading) return <Loading />;
-  if (editing && existing.error) return <AuthNote tone="danger">{errorMessage(existing.error)}</AuthNote>;
+  if (editing && existing.error) return <ErrorNote error={existing.error} fallback="We couldn't load this product. Please try again." onRetry={() => void existing.refetch()} />;
 
   return (
     <div className="flex flex-col gap-6">
@@ -220,7 +221,7 @@ export function ProductFormPage() {
               <p className="mt-2 text-body-lg text-ink-strong">Changes update stock values and connected online listings.</p>
             </div>
           </Panel>
-          {formError && <AuthNote tone="danger">{formError}</AuthNote>}
+          <ErrorNote error={formError} fallback="We couldn't save this product. Check your connection and try again." onRetry={() => void onSubmit()} />
           <div className="flex flex-col-reverse gap-3 md:flex-row md:justify-between">
             {editing ? (
               <Button variant="secondary" size="md" onClick={() => setConfirmDelete(true)} className="text-danger">
@@ -258,7 +259,7 @@ export function ProductFormPage() {
                   navigate("/inventory/products", { replace: true });
                 } catch (err) {
                   setConfirmDelete(false);
-                  setFormError(errorMessage(err));
+                  setFormError(err);
                 }
               }}
             >
@@ -275,16 +276,16 @@ export function ProductFormPage() {
 export function AddFirstProduct() {
   const navigate = useNavigate();
   const create = useCreateProduct();
-  const [formError, setFormError] = useState<string | null>(null);
+  const [formError, setFormError] = useState<unknown>(null);
   const schema = productSchema.extend({ sku: z.string().trim().max(40).optional(), lowStockThreshold: whole("Enter a number.").optional() });
-  const { register, handleSubmit, formState } = useForm<z.infer<typeof schema>>({ resolver: zodResolver(schema) });
+  const { register, handleSubmit, setError, formState } = useForm<z.infer<typeof schema>>({ resolver: zodResolver(schema) });
   const onSubmit = handleSubmit(async (v) => {
     setFormError(null);
     try {
       await create.mutateAsync(clean(v) as never);
       navigate("/inventory/products");
     } catch (err) {
-      setFormError(errorMessage(err));
+      if (!applyFieldErrors(err, setError, ["name", "category", "sku", "barcode", "sellingPrice", "stockQuantity", "lowStockThreshold", "brand"])) setFormError(err);
     }
   });
   return (
@@ -316,7 +317,7 @@ export function AddFirstProduct() {
               </Field>
             </div>
           </Panel>
-          {formError && <AuthNote tone="danger">{formError}</AuthNote>}
+          <ErrorNote error={formError} fallback="We couldn't add this product. Check your connection and try again." onRetry={() => void onSubmit()} />
           <Button type="submit" className="self-end" loading={formState.isSubmitting} loadingText="Adding…">
             Add product
           </Button>
@@ -343,7 +344,7 @@ export function AdjustStockPage() {
   const history = useStockHistory(id);
   const adjust = useAdjustStock(id ?? "");
   const historyRef = useRef<HTMLElement>(null);
-  const [formError, setFormError] = useState<string | null>(null);
+  const [formError, setFormError] = useState<unknown>(null);
   const [saved, setSaved] = useState<string | null>(null);
 
   const schema = z.object({
@@ -378,12 +379,12 @@ export function AdjustStockPage() {
       reset({ type: "increase", reason: "" } as unknown as Values);
       void history.refetch();
     } catch (err) {
-      setFormError(errorMessage(err));
+      if (!applyFieldErrors(err, setError, ["quantity", "reason", "location", "reference", "notes"])) setFormError(err);
     }
   });
 
   if (product.isLoading) return <Loading />;
-  if (product.error || !product.data) return <AuthNote tone="danger">{errorMessage(product.error, "Product not found.")}</AuthNote>;
+  if (product.error || !product.data) return <ErrorNote error={product.error ?? true} fallback="We couldn't load this product. Please try again." onRetry={() => void product.refetch()} />;
   const p = product.data;
 
   return (
@@ -439,7 +440,7 @@ export function AdjustStockPage() {
             </div>
             {updated < 0 && <AuthNote tone="danger" className="mt-4">Stock can't go below zero.</AuthNote>}
           </Panel>
-          {formError && <AuthNote tone="danger">{formError}</AuthNote>}
+          <ErrorNote error={formError} fallback="We couldn't record this adjustment. Check your connection and try again." onRetry={() => void onSubmit()} />
           {saved && <AuthNote tone="success">{saved}</AuthNote>}
           <div className="flex flex-col-reverse gap-3 md:flex-row md:justify-between">
             <Button variant="secondary" size="md" onClick={() => navigate(`/inventory/products/${p._id}`)}>
@@ -579,7 +580,7 @@ export function BarcodeLookupPage() {
       }
       setResult({ kind: "none", code: c });
     } catch (err) {
-      setError(errorMessage(err));
+      setError(errorMessage(err, "We couldn't look that up. Check your connection and try again."));
     } finally {
       setBusy(false);
     }

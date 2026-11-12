@@ -6,3 +6,4 @@ export { Dialog } from "./Dialog";
 export { Card, MetricCard, InfoCard, EmptyState } from "./Cards";
 export { OtpInput } from "./OtpInput";
 export { Spinner } from "./Spinner";
+export { Avatar, initialsOf } from "./Avatar";

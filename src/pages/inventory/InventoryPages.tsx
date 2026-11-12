@@ -10,6 +10,7 @@ import { saveBlob } from "@/lib/api/client";
 import { useCan } from "@/lib/auth/useCan";
 import { count, naira, nairaCompact } from "@/lib/format";
 import { errorMessage } from "@/lib/api/errorMessage";
+import { ErrorNote } from "@/components/feedback/ErrorNote";
 import { cn } from "@/lib/cn";
 import { AddFirstProduct } from "./ProductFormPages";
 
@@ -48,7 +49,7 @@ export function InventoryOverviewPage() {
   const s = stats.data;
 
   if (stats.isLoading) return <Loading label="Loading inventory…" />;
-  if (stats.error) return <AuthNote tone="danger">{errorMessage(stats.error)}</AuthNote>;
+  if (stats.error) return <ErrorNote error={stats.error} fallback="We couldn't load your inventory. Please try again." onRetry={() => void stats.refetch()} />;
   if (s && s.totalProducts === 0) return canEdit ? <AddFirstProduct /> : <AuthNote>No products have been added yet.</AuthNote>;
 
   const total = s?.totalProducts ?? 0;
@@ -178,7 +179,7 @@ export function ProductsPage() {
             </Field>
           </div>
           {products.isLoading && <Loading />}
-          {products.error && <AuthNote tone="danger">{errorMessage(products.error)}</AuthNote>}
+          <ErrorNote error={products.error} fallback="We couldn't load your products. Please try again." onRetry={() => void products.refetch()} />
           {products.data && (
             <div className="mt-4 overflow-x-auto">
               <table className="w-full min-w-[34rem] border-separate border-spacing-0 text-left text-body-sm">

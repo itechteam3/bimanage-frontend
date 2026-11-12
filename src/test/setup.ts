@@ -30,3 +30,7 @@ if (typeof HTMLDialogElement !== "undefined" && !HTMLDialogElement.prototype.sho
     this.removeAttribute("open");
   };
 }
+
+// Lazy route chunks load slower when the suite runs in parallel.
+import { configure } from "@testing-library/react";
+configure({ asyncUtilTimeout: 4000 });

@@ -22,6 +22,7 @@ import { PathPage } from "@/pages/onboarding/PathPage";
 import { CheckoutPage, PackagesPage, PaymentStatusPage } from "@/pages/onboarding/PackagePages";
 import { BusinessIdentityPage, ChecklistPage, TrialStartedPage } from "@/pages/onboarding/SetupPages";
 import { FeatureGate } from "@/lib/workspace/subscription";
+import { ProfilePage } from "@/pages/settings/ProfilePage";
 
 const UiKitPage = lazy(() => import("@/pages/dev/UiKitPage"));
 // Inventory screens load as one chunk on first visit.
@@ -148,6 +149,8 @@ export const routes = [
               { path: "/inventory/lookup", element: <BarcodeLookupPage />, handle: { section: "Inventory" } },
             ],
           },
+          // Settings
+          { path: "/settings/profile", element: <ProfilePage />, handle: { section: "Settings" } },
           // Later phases
           ...comingSoon,
         ],

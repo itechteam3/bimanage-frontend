@@ -3,6 +3,7 @@ import { useNavigate } from "react-router-dom";
 import { IconBolt, IconLock } from "@tabler/icons-react";
 import { apiEvents, type UpgradeReason } from "@/lib/api/events";
 import { Button, Dialog } from "@/components/ui";
+import { friendlyText } from "@/lib/api/errorMessage";
 
 // One dialog for every "your plan can't do this" answer from the API:
 // plan-gated features (07.07 / 11.04), daily credits (07.07 / 11.03) and the
@@ -37,7 +38,7 @@ export function UpgradeDialog() {
           }
         : {
             title: "Upgrade to unlock this",
-            body: reason.message || "This feature isn't included in your current plan.",
+            body: friendlyText(reason.message, "This feature isn't included in your current plan."),
             icon: <IconLock className="size-7" />,
           };
 

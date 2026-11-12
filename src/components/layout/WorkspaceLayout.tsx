@@ -1,9 +1,11 @@
+import { useState } from "react";
 import { Navigate, Outlet, useLocation, useMatches, useNavigate } from "react-router-dom";
 import { AppShell } from "./AppShell";
 import { useAuth } from "@/lib/auth/AuthProvider";
 import { useBusinessProfile, useOnboardingStatus, useUnreadCounts } from "@/lib/workspace/api";
 import type { NavItem } from "@/config/navigation";
 import { Spinner } from "@/components/ui";
+import { PhotoDialog } from "@/components/profile/PhotoDialog";
 
 // Signed-in pages render inside this. Routes declare their breadcrumb with
 // `handle: { section: "Dashboard" }`. Owners who haven't chosen an onboarding
@@ -17,6 +19,7 @@ export function WorkspaceLayout() {
   const onboarding = useOnboardingStatus(isOwner);
   const unread = useUnreadCounts();
   const profile = useBusinessProfile();
+  const [photoOpen, setPhotoOpen] = useState(false);
 
   const section =
     [...matches].reverse().map((m) => (m.handle as { section?: string } | undefined)?.section).find(Boolean) ?? "Dashboard";
@@ -52,8 +55,10 @@ export function WorkspaceLayout() {
       navState={navState}
       unread={unread.data}
       onLogout={() => void signOut().then(() => navigate("/login", { replace: true }))}
+      onChangePhoto={() => setPhotoOpen(true)}
     >
       <Outlet />
+      <PhotoDialog open={photoOpen} onClose={() => setPhotoOpen(false)} />
     </AppShell>
   );
 }

@@ -6,7 +6,7 @@ import { DetailRows, InfoStrip, IntroCard, PageTitle, Panel, PriceBox, Stepper, 
 import { AuthNote } from "@/components/layout/AuthLayout";
 import { startCheckout, useStartupPackages, verifyPayment, keys, type PaymentState, type StartupPackage } from "@/lib/workspace/api";
 import { naira } from "@/lib/format";
-import { errorMessage } from "@/lib/api/errorMessage";
+import { friendlyText, errorMessage } from "@/lib/api/errorMessage";
 import { SUPPORT_EMAIL } from "@/config/links";
 import { useQueryClient } from "@tanstack/react-query";
 import { cn } from "@/lib/cn";
@@ -366,7 +366,7 @@ export function PaymentStatusPage() {
                 ["Activation", "After successful verification"],
               ]}
             />
-            {(error || state?.message) && <AuthNote tone="danger">{error ?? state?.message}</AuthNote>}
+            {(error || state?.message) && <AuthNote tone="danger">{error ?? friendlyText(state?.message, "We couldn't confirm this payment yet. Check again in a moment.")}</AuthNote>}
             <Button fullWidth onClick={check} loading={checking} loadingText="Checking…">
               Check payment status <IconArrowRight aria-hidden="true" className="size-4" />
             </Button>

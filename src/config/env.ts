@@ -2,7 +2,9 @@
 // so it must never hold secrets — only public URLs.
 const trimSlash = (s: string) => s.replace(/\/+$/, "");
 
-const apiBase = trimSlash(import.meta.env.VITE_API_BASE_URL ?? "http://localhost:5000/api");
+// Production builds must set VITE_API_BASE_URL (scripts/check-bundle.mjs
+// fails the build otherwise); the localhost default is for `npm run dev` only.
+const apiBase = trimSlash(import.meta.env.VITE_API_BASE_URL ?? (import.meta.env.DEV ? "http://localhost:5000/api" : ""));
 
 export const env = {
   /** e.g. https://bimanage-backend.onrender.com/api */

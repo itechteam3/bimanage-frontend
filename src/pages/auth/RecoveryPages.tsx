@@ -49,7 +49,7 @@ export function ForgotPasswordPage() {
     } catch (err) {
       const fallback = "Your request could not be sent. Please try again."; // 01.14
       if (err instanceof ApiError && err.status === 429) setFailed(cooldownMessage(err));
-      else if (err instanceof ApiError && err.status === 400) setFailed(err.message || fallback);
+      else if (err instanceof ApiError && err.status === 400) setFailed(errorMessage(err, fallback));
       else setFailed(errorMessage(err, fallback));
     }
   });

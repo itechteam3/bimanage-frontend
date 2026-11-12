@@ -1,4 +1,5 @@
-import { createContext, useCallback, useContext, useEffect, useMemo, useState, type ReactNode } from "react";
+import { createContext, useCallback, useContext, useEffect, useMemo, useRef, useState, type ReactNode } from "react";
+import { useQueryClient } from "@tanstack/react-query";
 import { tokenStore } from "./tokenStore";
 import { authApi, type User, type Workspace } from "./api";
 import { apiEvents } from "@/lib/api/events";
@@ -27,23 +28,33 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const [user, setUser] = useState<User | null>(null);
   const [workspace, setWorkspace] = useState<Workspace | null>(null);
   const [signOutReason, setSignOutReason] = useState<SignOutReason>(null);
+  // Cached server data belongs to one account: drop it whenever the account
+  // changes, so nothing from a previous sign-in can show for the next person.
+  const queryClient = useQueryClient();
+  const userId = useRef<string | null>(null);
 
   const clear = useCallback((reason: SignOutReason) => {
     tokenStore.clear();
+    userId.current = null;
+    queryClient.clear();
     setUser(null);
     setWorkspace(null);
     setStatus("anonymous");
     setSignOutReason(reason);
-  }, []);
+  }, [queryClient]);
 
   const load = useCallback(async (token: string) => {
     const [me, ws] = await Promise.all([authApi.me(token), authApi.workspace(token).catch(() => null)]);
+    if (userId.current !== me._id) {
+      if (userId.current !== null) queryClient.clear();
+      userId.current = me._id;
+    }
     setUser(me);
     setWorkspace(ws);
     setStatus("authenticated");
     setSignOutReason(null);
     return me;
-  }, []);
+  }, [queryClient]);
 
   const signIn = useCallback(
     async (token: string) => {
