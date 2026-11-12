@@ -175,3 +175,26 @@ describe("back rules", () => {
     expect(hasInAppHistory()).toBe(false);
   });
 });
+
+describe("useUrlState", () => {
+  it("two changes in one event both stick (status + page reset)", async () => {
+    const { renderHook, act: hookAct } = await import("@testing-library/react");
+    const { createMemoryRouter, RouterProvider, useLocation } = await import("react-router-dom");
+    const { useUrlState } = await import("@/lib/nav/useUrlState");
+    const React = await import("react");
+    let api: { setA: (v: string) => void; setB: (v: string) => void; search: string } | null = null;
+    function Probe() {
+      const [, setA] = useUrlState<string>("status", "all");
+      const [, setB] = useUrlState<string>("page", "1");
+      api = { setA, setB, search: useLocation().search };
+      return null;
+    }
+    const router = createMemoryRouter([{ path: "/", element: React.createElement(Probe) }], { initialEntries: ["/?page=3"] });
+    renderHook(() => null, { wrapper: () => React.createElement(RouterProvider, { router }) });
+    await hookAct(async () => {
+      api!.setA("shipped");
+      api!.setB("1");
+    });
+    expect(router.state.location.search).toBe("?status=shipped");
+  });
+});

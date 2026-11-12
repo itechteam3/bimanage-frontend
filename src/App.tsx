@@ -77,6 +77,8 @@ const StoreProductDetailPage = shop("StoreProductDetailPage");
 const BulkUploadPage = shop("BulkUploadPage");
 const SyncInventoryPage = shop("SyncInventoryPage");
 const StoreAnalyticsPage = shop("StoreAnalyticsPage");
+const StoreOrdersPage = shop("StoreOrdersPage");
+const StoreOrderDetailPage = shop("StoreOrderDetailPage");
 // Public storefront (08.11–08.20): its own chunk, no sign-in.
 const front = (name: keyof typeof import("@/pages/storefront/index")) => lazy(() => import("@/pages/storefront/index").then((m) => ({ default: m[name] })));
 const StorefrontLayout = front("StorefrontLayout");
@@ -282,6 +284,8 @@ export const routes = [
               { path: "/store/products/sync", element: <SyncInventoryPage />, handle: { section: "Online Store", back: back("/store/products", SCREENS.store) } },
               { path: "/store/products/:id", element: <StoreProductDetailPage />, handle: { section: "Online Store", back: back("/store/products", SCREENS.store) } },
               { path: "/store/products/:id/edit", element: <StoreProductFormPage key="edit" />, handle: { section: "Online Store", back: back("/store/products/:id", SCREENS.store) } },
+              { path: "/store/orders", element: <StoreOrdersPage />, handle: { section: "Online Store", back: back("/store", SCREENS.store) } },
+              { path: "/store/orders/:id", element: <StoreOrderDetailPage />, handle: { section: "Online Store", back: back("/store/orders", SCREENS.store) } },
               { path: "/store/*", element: <Navigate to="/store" replace /> },
             ],
           },
