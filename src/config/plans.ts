@@ -115,17 +115,27 @@ export interface SubscriptionState {
   isStartupPackageExpired?: boolean;
 }
 
-/** Same order as the backend featureGate: trial, then startup package, then plan. */
+/**
+ * One-time startup packages get their own feature sets (backend
+ * STARTUP_PACKAGE_FEATURES, Figma 07.12) — Starter does not unlock everything.
+ */
+export const STARTUP_PACKAGE_FEATURES: Record<"starter" | "standard" | "premium", Partial<Record<Feature, Access>>> = {
+  starter: { ...PLAN_FEATURES.freemium, inventory: true, orders: true, tasks: true, projects: true, upload: true },
+  standard: { ...PLAN_FEATURES.standard, bisupplynet: true },
+  premium: { ...PLAN_FEATURES.premium },
+};
+
+/**
+ * Fallback mirror of the backend's effectiveAccess (the server's
+ * /subscriptions/current `features` wins when present): active trial =
+ * full access, active startup package = its own set, otherwise the plan.
+ */
 export function featureAccess(sub: SubscriptionState | null | undefined, feature: Feature, now = new Date()): Access {
   if (!sub) return false;
-  if (sub.isTrialActive && sub.trialEndDate && new Date(sub.trialEndDate) > now) return true;
-  if (
-    sub.startupPackage &&
-    !sub.isStartupPackageExpired &&
-    sub.startupPackageEndDate &&
-    new Date(sub.startupPackageEndDate) > now
-  ) {
-    return true;
+  if (sub.isTrialActive && sub.trialEndDate && new Date(sub.trialEndDate) > now) return PLAN_FEATURES.premium[feature] ?? false;
+  const pkg = sub.startupPackage as keyof typeof STARTUP_PACKAGE_FEATURES | null | undefined;
+  if (pkg && STARTUP_PACKAGE_FEATURES[pkg] && !sub.isStartupPackageExpired && sub.startupPackageEndDate && new Date(sub.startupPackageEndDate) > now) {
+    return STARTUP_PACKAGE_FEATURES[pkg][feature] ?? false;
   }
   return PLAN_FEATURES[sub.plan]?.[feature] ?? false;
 }

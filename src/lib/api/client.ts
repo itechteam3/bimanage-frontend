@@ -204,6 +204,41 @@ export async function api<T = unknown>(path: string, opts: RequestOptions = {}):
   }
 }
 
+/**
+ * Download a file (CSV/PDF) with the session token. Returns the blob plus the
+ * server's filename and record count when provided (exposed via CORS).
+ */
+export async function apiDownload(path: string, opts: Pick<RequestOptions, "query" | "signal"> = {}) {
+  const token = tokenStore.get();
+  const res = await fetch(buildUrl(path, opts.query), {
+    headers: token ? { Authorization: `Bearer ${token}` } : {},
+    signal: opts.signal,
+  }).catch(() => {
+    throw new ApiError("Can't reach the server. Check your connection.", 0, {}, "network");
+  });
+  if (!res.ok) {
+    const body = (await readBody(res, "json")) as Record<string, unknown>;
+    signal(res.status, body, Boolean(token), false);
+    throw new ApiError(typeof body.message === "string" ? body.message : `Download failed (${res.status})`, res.status, body);
+  }
+  const disposition = res.headers.get("content-disposition") ?? "";
+  const filename = /filename="?([^";]+)"?/i.exec(disposition)?.[1] ?? "download";
+  const countHeader = res.headers.get("x-record-count");
+  return { blob: await res.blob(), filename, count: countHeader ? Number(countHeader) : undefined };
+}
+
+/** Save a blob as a file in the browser. */
+export function saveBlob(blob: Blob, filename: string) {
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement("a");
+  a.href = url;
+  a.download = filename;
+  document.body.appendChild(a);
+  a.click();
+  a.remove();
+  setTimeout(() => URL.revokeObjectURL(url), 1000);
+}
+
 /** Ping the server root on app start so a sleeping Render instance starts waking immediately. */
 export async function wakeServer(signal?: AbortSignal): Promise<boolean> {
   try {

@@ -21,8 +21,18 @@ import { ComingSoonPage } from "@/pages/app/ComingSoonPage";
 import { PathPage } from "@/pages/onboarding/PathPage";
 import { CheckoutPage, PackagesPage, PaymentStatusPage } from "@/pages/onboarding/PackagePages";
 import { BusinessIdentityPage, ChecklistPage, TrialStartedPage } from "@/pages/onboarding/SetupPages";
+import { FeatureGate } from "@/lib/workspace/subscription";
 
 const UiKitPage = lazy(() => import("@/pages/dev/UiKitPage"));
+// Inventory screens load as one chunk on first visit.
+const inventory = (name: keyof typeof import("@/pages/inventory")) => lazy(() => import("@/pages/inventory").then((m) => ({ default: m[name] })));
+const InventoryOverviewPage = inventory("InventoryOverviewPage");
+const ProductsPage = inventory("ProductsPage");
+const ProductFormPage = inventory("ProductFormPage");
+const AdjustStockPage = inventory("AdjustStockPage");
+const LowStockPage = inventory("LowStockPage");
+const ExportReadyPage = inventory("ExportReadyPage");
+const BarcodeLookupPage = inventory("BarcodeLookupPage");
 
 export const queryClient = new QueryClient({
   defaultOptions: {
@@ -45,6 +55,13 @@ const Loading = () => (
   </div>
 );
 
+const SectionLoading = () => (
+  <div className="flex justify-center py-16 text-ink-brand" role="status">
+    <Spinner className="size-8" />
+    <span className="sr-only">Loading…</span>
+  </div>
+);
+
 function RootLayout() {
   return (
     <>
@@ -62,7 +79,6 @@ const guest = (el: React.ReactNode) => <GuestOnly>{el}</GuestOnly>;
 // Sections built in later phases: real routes now, so links never 404.
 const comingSoon = (
   [
-    ["/inventory", "Inventory"],
     ["/sales", "Sales"],
     ["/orders", "Orders"],
     ["/invoices", "Invoices"],
@@ -111,6 +127,27 @@ export const routes = [
           { path: "/onboarding/trial", element: <TrialStartedPage />, handle: { section: "Subscription" } },
           { path: "/onboarding/business", element: <BusinessIdentityPage />, handle: { section: "Onboarding" } },
           { path: "/onboarding/checklist", element: <ChecklistPage />, handle: { section: "Dashboard" } },
+          // Inventory and barcode (Figma 09.04–09.11), gated by plan
+          {
+            element: (
+              <FeatureGate feature="inventory" title="Inventory">
+                <Suspense fallback={<SectionLoading />}>
+                  <Outlet />
+                </Suspense>
+              </FeatureGate>
+            ),
+            handle: { section: "Inventory" },
+            children: [
+              { path: "/inventory", element: <InventoryOverviewPage />, handle: { section: "Inventory" } },
+              { path: "/inventory/products", element: <ProductsPage />, handle: { section: "Inventory" } },
+              { path: "/inventory/products/new", element: <ProductFormPage />, handle: { section: "Inventory" } },
+              { path: "/inventory/products/:id", element: <ProductFormPage key="edit" />, handle: { section: "Inventory" } },
+              { path: "/inventory/products/:id/adjust", element: <AdjustStockPage />, handle: { section: "Inventory" } },
+              { path: "/inventory/low-stock", element: <LowStockPage />, handle: { section: "Inventory" } },
+              { path: "/inventory/export", element: <ExportReadyPage />, handle: { section: "Inventory" } },
+              { path: "/inventory/lookup", element: <BarcodeLookupPage />, handle: { section: "Inventory" } },
+            ],
+          },
           // Later phases
           ...comingSoon,
         ],

@@ -30,9 +30,11 @@ describe("plan gating config", () => {
     expect(featureAccess({ plan: "freemium" }, "store")).toBe("view_only");
     expect(featureAccess({ plan: "freemium" }, "inventory")).toBe(false);
   });
-  it("an active trial or startup package unlocks everything", () => {
+  it("an active trial unlocks everything; a startup package only its own set", () => {
     expect(featureAccess({ plan: "freemium", isTrialActive: true, trialEndDate: future }, "bisupplynet")).toBe(true);
-    expect(featureAccess({ plan: "freemium", startupPackage: "starter", startupPackageEndDate: future }, "invoices")).toBe(true);
+    expect(featureAccess({ plan: "freemium", startupPackage: "starter", startupPackageEndDate: future }, "inventory")).toBe(true);
+    expect(featureAccess({ plan: "freemium", startupPackage: "starter", startupPackageEndDate: future }, "invoices")).toBe(false);
+    expect(featureAccess({ plan: "freemium", startupPackage: "standard", startupPackageEndDate: future }, "bisupplynet")).toBe(true);
   });
   it("an expired trial falls back to the plan", () => {
     expect(featureAccess({ plan: "freemium", isTrialActive: true, trialEndDate: "2020-01-01" }, "invoices")).toBe(false);

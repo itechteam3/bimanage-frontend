@@ -147,3 +147,25 @@ function Sparkline({ values, className }: { values: number[]; className?: string
     </svg>
   );
 }
+
+/** "HELP AND REQUIREMENTS" side panel (02.03, 09.04–09.06): labelled facts and an optional callout. */
+export function HelpPanel({ items, callout }: { items: Array<[string, ReactNode]>; callout?: { title: string; body: ReactNode } }) {
+  return (
+    <Panel tone="pale" title="Help and requirements">
+      <dl className="flex flex-col gap-4">
+        {items.map(([k, v]) => (
+          <div key={k} className="rounded-md bg-surface-card px-3 py-2">
+            <dt className="text-caption font-semibold uppercase text-ink-muted">{k}</dt>
+            <dd className="text-body-lg text-ink-strong">{v}</dd>
+          </div>
+        ))}
+      </dl>
+      {callout && (
+        <div className="mt-6 rounded-xl border border-line-card bg-surface-card p-4">
+          <p className="text-caption font-semibold uppercase text-ink-brand">{callout.title}</p>
+          <div className="mt-2 text-body-lg text-ink-strong">{callout.body}</div>
+        </div>
+      )}
+    </Panel>
+  );
+}
