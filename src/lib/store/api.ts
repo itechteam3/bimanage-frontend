@@ -158,6 +158,8 @@ export interface StoreAnalytics {
   range: { key: string; from: string; to: string; days: number };
   revenue: number;
   revenueChange: number | null;
+  /** Part of the figures from Paystack TEST payments (backend #29; absent on older servers). */
+  test?: { revenue: number; orders: number };
   orders: number;
   ordersChange: number | null;
   fulfilled: number;

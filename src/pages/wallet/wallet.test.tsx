@@ -152,3 +152,49 @@ describe("wallet", () => {
     expect(await screen.findByText(/Schedule saved/)).toBeInTheDocument();
   });
 });
+
+describe("test money in the headline figures", () => {
+  const TEST_MODE = { ...WALLET, balance: 0, pendingBalance: 0, totalEarned: 0, test: { balance: 140650, pendingBalance: 0, totalEarned: 140650 }, paymentsMode: "test", bank: null };
+
+  it("test mode: figures include test money, with a TEST badge and a note; withdrawable stays ₦0", async () => {
+    fb.handlers["GET /wallet"] = () => [200, TEST_MODE];
+    renderApp("/wallet");
+    const total = (await screen.findByRole("heading", { name: /total earnings/i })).closest("section")!;
+    expect(within(total).getByText("₦140,650")).toBeInTheDocument();
+    expect(within(total).getByTestId("kpi-badge")).toHaveTextContent("TEST");
+    expect(within(total).getByText("Includes ₦140,650 test money: not real, can't be withdrawn, cleared when payments go live.")).toBeInTheDocument();
+    const available = screen.getByRole("heading", { name: /^available/i }).closest("section")!;
+    expect(within(available).getByText("₦140,650")).toBeInTheDocument();
+    expect(within(available).getByText("Available to withdraw: ₦0")).toBeInTheDocument();
+    const onHold = screen.getByRole("heading", { name: /on hold/i }).closest("section")!;
+    expect(within(onHold).queryByTestId("kpi-badge")).toBeNull(); // no test money on hold
+    expect(screen.queryByLabelText("Test money")).toBeNull(); // no separate card in test mode
+  });
+
+  it("the payout screen only ever offers live money", async () => {
+    fb.handlers["GET /wallet"] = () => [200, TEST_MODE];
+    fb.handlers["GET /wallet/withdrawal-quote"] = () => [200, quote(0, { available: 0, canWithdraw: false, reasons: [{ code: "test_mode", message: "Payouts are only possible with real (live) payments. Test money can't be withdrawn." }] })];
+    renderApp("/wallet/withdraw");
+    expect(await screen.findByLabelText(/available to withdraw/i)).toHaveValue("₦0");
+    expect(screen.getByText("Test money (₦140,650) can't be withdrawn.")).toBeInTheDocument();
+    expect(screen.getByLabelText(/amount to withdraw/i)).toHaveValue("");
+    expect(screen.getByRole("button", { name: "Review payout" })).toBeDisabled();
+  });
+
+  it("live with test money not yet cleared: real figures only, test shown apart", async () => {
+    fb.handlers["GET /wallet"] = () => [200, { ...TEST_MODE, paymentsMode: "live", balance: 5000, totalEarned: 5000 }];
+    renderApp("/wallet");
+    const total = (await screen.findByRole("heading", { name: /total earnings/i })).closest("section")!;
+    expect(within(total).getByText("₦5,000")).toBeInTheDocument();
+    expect(within(total).queryByTestId("kpi-badge")).toBeNull();
+    expect(screen.getByLabelText("Test money")).toBeInTheDocument();
+  });
+
+  it("live and cleared: no badges, no notes", async () => {
+    fb.handlers["GET /wallet"] = () => [200, { ...WALLET, test: { balance: 0, pendingBalance: 0, totalEarned: 0 } }];
+    renderApp("/wallet");
+    await screen.findByRole("heading", { name: /total earnings/i });
+    expect(screen.queryAllByTestId("kpi-badge")).toHaveLength(0);
+    expect(screen.queryByText(/\btest money\b/i)).toBeNull();
+  });
+});
