@@ -26,6 +26,8 @@ import { saveBlob } from "@/lib/api/client";
 import { applyFieldErrors } from "@/lib/api/errorMessage";
 import { count, naira, shortDate } from "@/lib/format";
 import { cn } from "@/lib/cn";
+import { useUrlState } from "@/lib/nav/useUrlState";
+import { useLeaveGuard } from "@/lib/nav/useLeaveGuard";
 
 const Loading = () => (
   <div className="flex justify-center py-16 text-ink-brand" role="status">
@@ -65,7 +67,7 @@ const TABS: Array<[string, string]> = [
 ];
 
 export function InvoicesPage() {
-  const [tab, setTab] = useState("all");
+  const [tab, setTab] = useUrlState<string>("status", "all", TABS.map(([k]) => k));
   const invoices = useInvoices(tab);
   const list = invoices.data?.invoices ?? [];
   return (
@@ -247,6 +249,7 @@ export function InvoiceEditorPage() {
     defaultValues: { clientName: "", clientEmail: "", clientPhone: "", clientAddress: "", dueDate: "", tax: 0, notes: "", items: [{ description: "", quantity: 1, unitPrice: 0 }] } as unknown as InvoiceValues,
   });
   const { fields, append, remove } = useFieldArray({ control, name: "items" });
+  const guard = useLeaveGuard(formState.isDirty && !formState.isSubmitSuccessful);
 
   useEffect(() => {
     const i = existing.data;
@@ -278,7 +281,8 @@ export function InvoiceEditorPage() {
           items: v.items,
           ...(status ? { status } : {}),
         });
-        navigate(editing ? `/invoices/${inv._id}` : `/invoices/${inv._id}/created`, { state: { invoice: inv } });
+        guard.allow();
+        navigate(editing ? `/invoices/${inv._id}` : `/invoices/${inv._id}/created`, { replace: true, state: { invoice: inv } });
       } catch (err) {
         if (!applyFieldErrors(err, setError, ["clientName", "clientEmail", "dueDate", "tax"])) setFormError(err);
       }
@@ -292,6 +296,7 @@ export function InvoiceEditorPage() {
 
   return (
     <div className="flex flex-col gap-6">
+      {guard.dialog}
       <PageTitle>{editing ? `Edit invoice ${existing.data?.invoiceNumber}` : "Create an invoice"}</PageTitle>
       <p className="-mt-4 text-body-sm text-ink-muted">Prepare a branded invoice, review totals, then send or download a PDF.</p>
       <div className="grid gap-5 lg:grid-cols-[minmax(0,1.4fr)_minmax(0,1fr)]">
@@ -584,6 +589,7 @@ export function EmailInvoicePage() {
   const [formError, setFormError] = useState<unknown>(null);
   const [unavailable, setUnavailable] = useState(false);
   const { register, handleSubmit, reset, setError, formState } = useForm<EmailValues>({ resolver: zodResolver(emailSchema) });
+  const guard = useLeaveGuard(formState.isDirty && !formState.isSubmitSuccessful);
   // Same name the server uses: business profile name, else the account name.
   const { user } = useAuth();
   const business = profile.data?.businessName?.trim() || user?.name || "";
@@ -602,7 +608,8 @@ export function EmailInvoicePage() {
     setUnavailable(false);
     try {
       const res = await send.mutateAsync({ to: v.to, cc: v.cc ? v.cc.split(/[,;\s]+/).filter(Boolean) : undefined, subject: v.subject || undefined, message: v.message || undefined });
-      navigate(`/invoices/${i._id}/sent`, { state: { invoice: res.invoice, to: v.to } });
+      guard.allow();
+      navigate(`/invoices/${i._id}/sent`, { replace: true, state: { invoice: res.invoice, to: v.to } });
     } catch (err) {
       if (isEmailUnavailable(err)) setUnavailable(true);
       else if (!applyFieldErrors(err, setError, ["to", "cc", "subject", "message"])) setFormError(err);
@@ -611,6 +618,7 @@ export function EmailInvoicePage() {
 
   return (
     <div className="flex flex-col gap-6">
+      {guard.dialog}
       <PageTitle>Email your invoice</PageTitle>
       <IntroCard eyebrow="Invoicing / Customer communication" title="Send a professional invoice in a few steps.">
         An invoice PDF is attached to the customer email.

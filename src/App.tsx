@@ -1,5 +1,7 @@
 import { lazy, Suspense } from "react";
-import { createBrowserRouter, Navigate, Outlet, RouterProvider } from "react-router-dom";
+import { createBrowserRouter, Navigate, Outlet, RouterProvider, ScrollRestoration } from "react-router-dom";
+import { back, SCREENS } from "@/lib/nav/backNav";
+import { useTrackHistory } from "@/lib/nav/history";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { env } from "@/config/env";
 import { ApiError } from "@/lib/api/client";
@@ -101,10 +103,13 @@ const SectionLoading = () => (
 );
 
 function RootLayout() {
+  useTrackHistory();
   return (
     <>
       <ServerWakeBanner />
       <UpgradeDialog />
+      {/* Back (browser, phone or ours) returns to the same scroll position. */}
+      <ScrollRestoration />
       <Suspense fallback={<Loading />}>
         <Outlet />
       </Suspense>
@@ -139,10 +144,10 @@ export const routes = [
       // Authentication (Figma 01.xx)
       { path: "/login", element: guest(<SignInPage />) },
       { path: "/register", element: guest(<RegisterPage />) },
-      { path: "/verify", element: guest(<VerifyEmailPage />) },
-      { path: "/forgot-password", element: guest(<ForgotPasswordPage />) },
-      { path: "/forgot-password/code", element: guest(<ResetCodePage />) },
-      { path: "/reset-password", element: guest(<NewPasswordPage />) },
+      { path: "/verify", element: guest(<VerifyEmailPage />), handle: { back: back("/register", SCREENS.createAccount) } },
+      { path: "/forgot-password", element: guest(<ForgotPasswordPage />), handle: { back: back("/login", SCREENS.signIn) } },
+      { path: "/forgot-password/code", element: guest(<ResetCodePage />), handle: { back: back("/forgot-password", SCREENS.signIn) } },
+      { path: "/reset-password", element: guest(<NewPasswordPage />), handle: { back: back("/forgot-password/code", SCREENS.signIn) } },
       { path: "/reset-password/done", element: <PasswordChangedPage /> },
       { path: "/oauth/callback", element: <OAuthCallbackPage /> },
       { path: "/invite/accept", element: <InviteAcceptPage /> },
@@ -153,12 +158,12 @@ export const routes = [
           { path: "/dashboard", element: <DashboardPage />, handle: { section: "Dashboard" } },
           // Onboarding (Figma 02.xx, startup packages 07.12–07.05)
           { path: "/onboarding", element: <PathPage />, handle: { section: "Onboarding" } },
-          { path: "/onboarding/packages", element: <PackagesPage />, handle: { section: "Subscription" } },
-          { path: "/onboarding/packages/:packageId", element: <CheckoutPage />, handle: { section: "Subscription" } },
-          { path: "/onboarding/payment", element: <PaymentStatusPage />, handle: { section: "Subscription" } },
+          { path: "/onboarding/packages", element: <PackagesPage />, handle: { section: "Subscription", back: back("/onboarding", SCREENS.onboarding) } },
+          { path: "/onboarding/packages/:packageId", element: <CheckoutPage />, handle: { section: "Subscription", back: back("/onboarding/packages", SCREENS.onboarding) } },
+          { path: "/onboarding/payment", element: <PaymentStatusPage />, handle: { section: "Subscription", back: back("/onboarding/packages", SCREENS.onboarding) } },
           { path: "/onboarding/trial", element: <TrialStartedPage />, handle: { section: "Subscription" } },
-          { path: "/onboarding/business", element: <BusinessIdentityPage />, handle: { section: "Onboarding" } },
-          { path: "/onboarding/checklist", element: <ChecklistPage />, handle: { section: "Dashboard" } },
+          { path: "/onboarding/business", element: <BusinessIdentityPage />, handle: { section: "Onboarding", back: back("/onboarding", SCREENS.onboarding) } },
+          { path: "/onboarding/checklist", element: <ChecklistPage />, handle: { section: "Dashboard", back: back("/dashboard", SCREENS.dashboard) } },
           // Inventory and barcode (Figma 09.04–09.11), gated by plan
           {
             element: (
@@ -171,13 +176,13 @@ export const routes = [
             handle: { section: "Inventory" },
             children: [
               { path: "/inventory", element: <InventoryOverviewPage />, handle: { section: "Inventory" } },
-              { path: "/inventory/products", element: <ProductsPage />, handle: { section: "Inventory" } },
-              { path: "/inventory/products/new", element: <ProductFormPage />, handle: { section: "Inventory" } },
-              { path: "/inventory/products/:id", element: <ProductFormPage key="edit" />, handle: { section: "Inventory" } },
-              { path: "/inventory/products/:id/adjust", element: <AdjustStockPage />, handle: { section: "Inventory" } },
-              { path: "/inventory/low-stock", element: <LowStockPage />, handle: { section: "Inventory" } },
-              { path: "/inventory/export", element: <ExportReadyPage />, handle: { section: "Inventory" } },
-              { path: "/inventory/lookup", element: <BarcodeLookupPage />, handle: { section: "Inventory" } },
+              { path: "/inventory/products", element: <ProductsPage />, handle: { section: "Inventory", back: back("/inventory", SCREENS.inventory) } },
+              { path: "/inventory/products/new", element: <ProductFormPage />, handle: { section: "Inventory", back: back("/inventory/products", SCREENS.inventory) } },
+              { path: "/inventory/products/:id", element: <ProductFormPage key="edit" />, handle: { section: "Inventory", back: back("/inventory/products", SCREENS.inventory) } },
+              { path: "/inventory/products/:id/adjust", element: <AdjustStockPage />, handle: { section: "Inventory", back: back("/inventory/products/:id", SCREENS.inventory) } },
+              { path: "/inventory/low-stock", element: <LowStockPage />, handle: { section: "Inventory", back: back("/inventory", SCREENS.inventory) } },
+              { path: "/inventory/export", element: <ExportReadyPage />, handle: { section: "Inventory", back: back("/inventory", SCREENS.inventory) } },
+              { path: "/inventory/lookup", element: <BarcodeLookupPage />, handle: { section: "Inventory", back: back("/inventory", SCREENS.inventory) } },
             ],
           },
           // Sales, orders and invoices (Figma 05.01–05.13)
@@ -186,30 +191,30 @@ export const routes = [
             children: [
               { path: "/sales", element: <SalesOverviewPage />, handle: { section: "Sales" } },
               { path: "/orders", element: <OrdersPage />, handle: { section: "Orders" } },
-              { path: "/orders/new", element: <CreateOrderPage />, handle: { section: "Orders" } },
-              { path: "/orders/:id", element: <OrderDetailsPage />, handle: { section: "Orders" } },
-              { path: "/orders/:id/created", element: <OrderCreatedPage />, handle: { section: "Orders" } },
-              { path: "/orders/:id/cancel", element: <CancelOrderPage />, handle: { section: "Orders" } },
-              { path: "/orders/:id/cancelled", element: <OrderCancelledPage />, handle: { section: "Orders" } },
+              { path: "/orders/new", element: <CreateOrderPage />, handle: { section: "Orders", back: back("/orders", SCREENS.orders) } },
+              { path: "/orders/:id", element: <OrderDetailsPage />, handle: { section: "Orders", back: back("/orders", SCREENS.orders) } },
+              { path: "/orders/:id/created", element: <OrderCreatedPage />, handle: { section: "Orders", back: back("/orders/:id", SCREENS.orders) } },
+              { path: "/orders/:id/cancel", element: <CancelOrderPage />, handle: { section: "Orders", back: back("/orders/:id", SCREENS.orders) } },
+              { path: "/orders/:id/cancelled", element: <OrderCancelledPage />, handle: { section: "Orders", back: back("/orders/:id", SCREENS.orders) } },
             ],
           },
           {
             element: gated("analytics", "Sales analytics"),
             children: [
-              { path: "/sales/analytics", element: <SalesAnalyticsPage />, handle: { section: "Sales" } },
+              { path: "/sales/analytics", element: <SalesAnalyticsPage />, handle: { section: "Sales", back: back("/sales", SCREENS.sales) } },
               { path: "/analytics", element: <Navigate to="/sales/analytics" replace /> },
             ],
           },
           {
             element: gated("invoices", "Invoices"),
             children: [
-              { path: "/invoices", element: <InvoicesPage />, handle: { section: "Sales" } },
-              { path: "/invoices/new", element: <InvoiceEditorPage />, handle: { section: "Sales" } },
-              { path: "/invoices/:id", element: <InvoicePreviewPage />, handle: { section: "Sales" } },
-              { path: "/invoices/:id/edit", element: <InvoiceEditorPage key="edit" />, handle: { section: "Sales" } },
-              { path: "/invoices/:id/created", element: <InvoiceCreatedPage />, handle: { section: "Sales" } },
-              { path: "/invoices/:id/email", element: <EmailInvoicePage />, handle: { section: "Sales" } },
-              { path: "/invoices/:id/sent", element: <InvoiceSentPage />, handle: { section: "Sales" } },
+              { path: "/invoices", element: <InvoicesPage />, handle: { section: "Sales", back: back("/sales", SCREENS.sales) } },
+              { path: "/invoices/new", element: <InvoiceEditorPage />, handle: { section: "Sales", back: back("/invoices", SCREENS.sales) } },
+              { path: "/invoices/:id", element: <InvoicePreviewPage />, handle: { section: "Sales", back: back("/invoices", SCREENS.sales) } },
+              { path: "/invoices/:id/edit", element: <InvoiceEditorPage key="edit" />, handle: { section: "Sales", back: back("/invoices/:id", SCREENS.sales) } },
+              { path: "/invoices/:id/created", element: <InvoiceCreatedPage />, handle: { section: "Sales", back: back("/invoices/:id", SCREENS.sales) } },
+              { path: "/invoices/:id/email", element: <EmailInvoicePage />, handle: { section: "Sales", back: back("/invoices/:id", SCREENS.sales) } },
+              { path: "/invoices/:id/sent", element: <InvoiceSentPage />, handle: { section: "Sales", back: back("/invoices/:id", SCREENS.sales) } },
             ],
           },
           // Projects (Figma 04.02–04.08), behind the projects plan feature
@@ -217,11 +222,11 @@ export const routes = [
             element: gated("projects", "Projects"),
             children: [
               { path: "/projects", element: <ProjectsOverviewPage />, handle: { section: "Projects" } },
-              { path: "/projects/calendar", element: <ProjectsCalendarPage />, handle: { section: "Projects" } },
-              { path: "/projects/:id", element: <ProjectBoardPage />, handle: { section: "Projects" } },
-              { path: "/projects/:id/tasks/new", element: <NewTaskPage />, handle: { section: "Projects" } },
-              { path: "/projects/:id/tasks/:taskId", element: <EditTaskPage />, handle: { section: "Projects" } },
-              { path: "/projects/:id/tasks/:taskId/added", element: <TaskAddedPage />, handle: { section: "Projects" } },
+              { path: "/projects/calendar", element: <ProjectsCalendarPage />, handle: { section: "Projects", back: back("/projects", SCREENS.projects) } },
+              { path: "/projects/:id", element: <ProjectBoardPage />, handle: { section: "Projects", back: back("/projects", SCREENS.projects) } },
+              { path: "/projects/:id/tasks/new", element: <NewTaskPage />, handle: { section: "Projects", back: back("/projects/:id", SCREENS.projects) } },
+              { path: "/projects/:id/tasks/:taskId", element: <EditTaskPage />, handle: { section: "Projects", back: back("/projects/:id", SCREENS.projects) } },
+              { path: "/projects/:id/tasks/:taskId/added", element: <TaskAddedPage />, handle: { section: "Projects", back: back("/projects/:id", SCREENS.projects) } },
             ],
           },
           // Team & roles (Figma 04.01 / 04.05 / 04.09)
@@ -233,12 +238,12 @@ export const routes = [
             ),
             children: [
               { path: "/settings/team", element: <TeamDirectoryPage />, handle: { section: "Team" } },
-              { path: "/settings/team/invite", element: <InvitePage />, handle: { section: "Team" } },
-              { path: "/settings/team/invite/sent", element: <InviteSentPage />, handle: { section: "Team" } },
+              { path: "/settings/team/invite", element: <InvitePage />, handle: { section: "Team", back: back("/settings/team", SCREENS.team) } },
+              { path: "/settings/team/invite/sent", element: <InviteSentPage />, handle: { section: "Team", back: back("/settings/team", SCREENS.team) } },
             ],
           },
           // Settings
-          { path: "/settings/profile", element: <ProfilePage />, handle: { section: "Settings" } },
+          { path: "/settings/profile", element: <ProfilePage />, handle: { section: "Settings", back: back("/settings", SCREENS.settings) } },
           // Later phases
           ...comingSoon,
         ],

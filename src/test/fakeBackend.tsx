@@ -1,6 +1,7 @@
 import { vi } from "vitest";
 import { render } from "@testing-library/react";
 import { createMemoryRouter, RouterProvider } from "react-router-dom";
+import { resetHistory } from "@/lib/nav/history";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { routes } from "@/App";
 import { AuthProvider } from "@/lib/auth/AuthProvider";
@@ -54,6 +55,7 @@ export function installFakeBackend(): FakeBackend {
 }
 
 export function renderApp(path: string, state?: unknown) {
+  resetHistory();
   const [pathname, search] = path.split("?");
   const router = createMemoryRouter(routes, { initialEntries: [{ pathname: pathname!, search: search ? `?${search}` : "", state }] });
   const client = new QueryClient({ defaultOptions: { queries: { retry: false } } });

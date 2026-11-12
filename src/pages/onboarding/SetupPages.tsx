@@ -18,6 +18,7 @@ import {
 } from "@/lib/workspace/api";
 import { errorMessage } from "@/lib/api/errorMessage";
 import { cn } from "@/lib/cn";
+import { useLeaveGuard } from "@/lib/nav/useLeaveGuard";
 
 const Loading = () => (
   <div className="flex justify-center py-16 text-ink-brand" role="status">
@@ -101,6 +102,7 @@ export function BusinessIdentityPage() {
   const [formError, setFormError] = useState<string | null>(null);
   const [logoError, setLogoError] = useState<string | null>(null);
   const { register, handleSubmit, reset, formState } = useForm<Values>({ resolver: zodResolver(schema) });
+  const guard = useLeaveGuard(formState.isDirty && !formState.isSubmitSuccessful);
 
   useEffect(() => {
     if (!profile.data) return;
@@ -121,6 +123,7 @@ export function BusinessIdentityPage() {
     const body = Object.fromEntries(Object.entries(values).filter(([, v]) => v !== "" && v !== undefined));
     try {
       await save.mutateAsync(body);
+      guard.allow();
       navigate("/onboarding/checklist");
     } catch (err) {
       setFormError(errorMessage(err));
@@ -153,6 +156,7 @@ export function BusinessIdentityPage() {
       >
         Tell us about your business
       </PageTitle>
+      {guard.dialog}
       <p className="-mt-4 text-body-sm text-ink-muted">Set up your identity for orders, invoices and your online store.</p>
       <IntroCard eyebrow="Workspace / Onboarding" title="The same information is reused across BiManage modules." />
       <div className="grid gap-5 lg:grid-cols-[minmax(0,1.7fr)_minmax(0,1fr)]">

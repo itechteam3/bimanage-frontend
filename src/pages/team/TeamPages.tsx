@@ -31,6 +31,8 @@ import {
   type TeamInvite,
   type TeamMember,
 } from "@/lib/team/api";
+import { useUrlState } from "@/lib/nav/useUrlState";
+import { useLeaveGuard } from "@/lib/nav/useLeaveGuard";
 
 const Loading = () => (
   <div className="flex justify-center py-16 text-ink-brand" role="status">
@@ -73,7 +75,7 @@ function MembersPanel({ compact = false }: { compact?: boolean }) {
   const members = useTeamMembers();
   const invites = useTeamInvites();
   const rules = useManageRules();
-  const [q, setQ] = useState("");
+  const [q, setQ] = useUrlState<string>("q", "");
   const [editing, setEditing] = useState<TeamMember | null>(null);
   const [removing, setRemoving] = useState<TeamMember | null>(null);
   const resend = useResendInvite();
@@ -360,6 +362,7 @@ export function InvitePage() {
   const [unavailable, setUnavailable] = useState(false);
   const { register, handleSubmit, watch, setError, formState } = useForm<InviteValues>({ resolver: zodResolver(inviteSchema), defaultValues: { name: "", email: "", role: "staff" } });
   const role = watch("role");
+  const guard = useLeaveGuard(formState.isDirty && !formState.isSubmitSuccessful);
   if (!canManage) return <NoTeamAccess />;
 
   const onSubmit = handleSubmit(async (v) => {
@@ -370,7 +373,8 @@ export function InvitePage() {
     const overrides = Object.fromEntries(PERMISSIONS.map(([k]) => [k, perms[k]]).filter(([k, val]) => ROLE_DEFAULTS[v.role][k as Permission] !== val));
     try {
       const res = await invite.mutateAsync({ email: v.email, name: v.name || undefined, role: v.role, permissions: Object.keys(overrides).length ? overrides : undefined });
-      navigate("/settings/team/invite/sent", { state: { invite: res.invite } });
+      guard.allow();
+      navigate("/settings/team/invite/sent", { replace: true, state: { invite: res.invite } });
     } catch (err) {
       const id = pendingInviteId(err);
       if (id) setExistingInvite(id);
@@ -381,6 +385,7 @@ export function InvitePage() {
 
   return (
     <div className="flex flex-col gap-6">
+      {guard.dialog}
       <PageTitle>Invite a team member</PageTitle>
       <IntroCard eyebrow="Team management / Access control" title="Invite securely by email and configure the right access.">
         Owner, Admin, Manager and Staff roles are supported.

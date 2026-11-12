@@ -34,3 +34,6 @@ if (typeof HTMLDialogElement !== "undefined" && !HTMLDialogElement.prototype.sho
 // Lazy route chunks load slower when the suite runs in parallel.
 import { configure } from "@testing-library/react";
 configure({ asyncUtilTimeout: 4000 });
+
+// jsdom has no scrolling; ScrollRestoration calls window.scrollTo on every navigation.
+window.scrollTo = (() => undefined) as typeof window.scrollTo;
