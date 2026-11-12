@@ -150,7 +150,9 @@ async function attempt<T>(url: string, init: RequestInit, opts: RequestOptions, 
       if (retryAfter && body.retryAfterSeconds === undefined && /^\d+$/.test(retryAfter)) {
         body.retryAfterSeconds = Number(retryAfter);
       }
-      const sentToken = Boolean((init.headers as Record<string, string>)?.Authorization);
+      // A request that should carry the session counts even if the token was
+      // already gone (e.g. another tab signed out): the session is over.
+      const sentToken = Boolean((init.headers as Record<string, string>)?.Authorization) || opts.auth !== false;
       signal(res.status, body, sentToken, Boolean(opts.quiet401));
       throw new ApiError(
         typeof body.message === "string" && body.message ? body.message : `Request failed (${res.status})`,

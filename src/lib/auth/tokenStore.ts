@@ -4,11 +4,16 @@
 const KEY = "bimanage.session";
 
 let memory: string | null = null;
+// false once localStorage refuses a write (then memory is the only copy).
+let storageOk = true;
 
 export const tokenStore = {
+  key: KEY,
   get(): string | null {
     try {
-      return window.localStorage.getItem(KEY) ?? memory;
+      // localStorage is the shared source of truth across tabs; memory is
+      // only a fallback when storage is unavailable.
+      return storageOk ? window.localStorage.getItem(KEY) : memory;
     } catch {
       return memory;
     }
@@ -17,7 +22,9 @@ export const tokenStore = {
     memory = token;
     try {
       window.localStorage.setItem(KEY, token);
+      storageOk = true;
     } catch {
+      storageOk = false;
       /* memory only */
     }
   },

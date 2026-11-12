@@ -97,15 +97,36 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     });
   }, [load, clear]);
 
-  // Global signals from the API client.
+  // Global signals from the API client. Ignored when nobody is signed in
+  // (an anonymous page calling a protected endpoint isn't an expiry).
+  const statusRef = useRef(status);
+  statusRef.current = status;
   useEffect(() => {
-    const offExpired = apiEvents.on("session-expired", () => clear("expired"));
+    const offExpired = apiEvents.on("session-expired", () => {
+      if (statusRef.current !== "anonymous") clear("expired");
+    });
     const offSuspended = apiEvents.on("suspended", () => clear("suspended"));
     return () => {
       offExpired();
       offSuspended();
     };
   }, [clear]);
+
+  // Keep tabs in step: signing out (or in as someone else) in one tab
+  // applies to every open tab of the app.
+  useEffect(() => {
+    const onStorage = (e: StorageEvent) => {
+      if (e.key !== tokenStore.key && e.key !== null) return;
+      const token = tokenStore.get();
+      if (!token) {
+        if (statusRef.current !== "anonymous") clear("signed-out");
+      } else if (e.newValue && e.newValue !== e.oldValue) {
+        load(token).catch(() => clear("expired"));
+      }
+    };
+    window.addEventListener("storage", onStorage);
+    return () => window.removeEventListener("storage", onStorage);
+  }, [clear, load]);
 
   const value = useMemo(
     () => ({ status, user, workspace, signOutReason, signIn, signOut, refresh }),
