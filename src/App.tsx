@@ -51,6 +51,17 @@ const InvoiceCreatedPage = sales("InvoiceCreatedPage");
 const InvoicePreviewPage = sales("InvoicePreviewPage");
 const EmailInvoicePage = sales("EmailInvoicePage");
 const InvoiceSentPage = sales("InvoiceSentPage");
+// Projects and team (Phase 6) load as one chunk.
+const work = (name: keyof typeof import("@/pages/projects/index")) => lazy(() => import("@/pages/projects/index").then((m) => ({ default: m[name] })));
+const ProjectsOverviewPage = work("ProjectsOverviewPage");
+const ProjectBoardPage = work("ProjectBoardPage");
+const NewTaskPage = work("NewTaskPage");
+const EditTaskPage = work("EditTaskPage");
+const TaskAddedPage = work("TaskAddedPage");
+const ProjectsCalendarPage = work("ProjectsCalendarPage");
+const TeamDirectoryPage = work("TeamDirectoryPage");
+const InvitePage = work("InvitePage");
+const InviteSentPage = work("InviteSentPage");
 
 /** A group of routes behind one plan feature, with an in-page loading state. */
 const gated = (feature: Feature, title: string) => (
@@ -106,8 +117,6 @@ const guest = (el: React.ReactNode) => <GuestOnly>{el}</GuestOnly>;
 // Sections built in later phases: real routes now, so links never 404.
 const comingSoon = (
   [
-    ["/projects", "Projects"],
-    ["/settings/team", "Team"],
     ["/store/*", "Online Store"],
     ["/bisupplynet/*", "BiSupplyNet"],
     ["/wallet/*", "Wallet"],
@@ -201,6 +210,31 @@ export const routes = [
               { path: "/invoices/:id/created", element: <InvoiceCreatedPage />, handle: { section: "Sales" } },
               { path: "/invoices/:id/email", element: <EmailInvoicePage />, handle: { section: "Sales" } },
               { path: "/invoices/:id/sent", element: <InvoiceSentPage />, handle: { section: "Sales" } },
+            ],
+          },
+          // Projects (Figma 04.02–04.08), behind the projects plan feature
+          {
+            element: gated("projects", "Projects"),
+            children: [
+              { path: "/projects", element: <ProjectsOverviewPage />, handle: { section: "Projects" } },
+              { path: "/projects/calendar", element: <ProjectsCalendarPage />, handle: { section: "Projects" } },
+              { path: "/projects/:id", element: <ProjectBoardPage />, handle: { section: "Projects" } },
+              { path: "/projects/:id/tasks/new", element: <NewTaskPage />, handle: { section: "Projects" } },
+              { path: "/projects/:id/tasks/:taskId", element: <EditTaskPage />, handle: { section: "Projects" } },
+              { path: "/projects/:id/tasks/:taskId/added", element: <TaskAddedPage />, handle: { section: "Projects" } },
+            ],
+          },
+          // Team & roles (Figma 04.01 / 04.05 / 04.09)
+          {
+            element: (
+              <Suspense fallback={<SectionLoading />}>
+                <Outlet />
+              </Suspense>
+            ),
+            children: [
+              { path: "/settings/team", element: <TeamDirectoryPage />, handle: { section: "Team" } },
+              { path: "/settings/team/invite", element: <InvitePage />, handle: { section: "Team" } },
+              { path: "/settings/team/invite/sent", element: <InviteSentPage />, handle: { section: "Team" } },
             ],
           },
           // Settings

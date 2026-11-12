@@ -4,7 +4,7 @@ import { useFieldArray, useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
 import { IconDownload, IconMail, IconPlus, IconTrash } from "@tabler/icons-react";
-import { Button, ButtonLink, Dialog, Field, Spinner, Status, TextInput } from "@/components/ui";
+import { Button, ButtonLink, Dialog, Field, Spinner, Status, TextArea, TextInput } from "@/components/ui";
 import { InfoStrip, IntroCard, PageTitle, Panel } from "@/components/page/Blocks";
 import { ErrorNote } from "@/components/feedback/ErrorNote";
 import { useBusinessProfile } from "@/lib/workspace/api";
@@ -629,7 +629,7 @@ export function EmailInvoicePage() {
                 <TextInput autoComplete="off" placeholder="Add another email address" {...register("cc")} />
               </Field>
               <Field label="Message" error={formState.errors.message?.message}>
-                <textarea rows={5} className="w-full resize-y bg-transparent text-input text-ink-strong outline-none lg:rounded-sm lg:border lg:border-line-default lg:bg-surface-card lg:px-3 lg:py-2" {...register("message")} />
+                <TextArea rows={5} {...register("message")} />
               </Field>
               <Field label="Attachment">
                 <TextInput value={`${i.invoiceNumber}.pdf · PDF`} readOnly disabled />

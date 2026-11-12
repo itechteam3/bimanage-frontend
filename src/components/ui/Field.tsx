@@ -5,6 +5,7 @@ import {
   useId,
   useState,
   type InputHTMLAttributes,
+  type TextareaHTMLAttributes,
   type SelectHTMLAttributes,
   type ReactNode,
 } from "react";
@@ -129,6 +130,30 @@ export const TextInput = forwardRef<HTMLInputElement, TextInputProps>(function T
       />
       {trailing}
     </div>
+  );
+});
+
+/** Multi-line input, wired to its Field label, hint and error like TextInput. */
+export const TextArea = forwardRef<HTMLTextAreaElement, TextareaHTMLAttributes<HTMLTextAreaElement>>(function TextArea({ className, id, disabled, rows = 3, ...rest }, ref) {
+  const field = useField();
+  return (
+    <textarea
+      ref={ref}
+      id={id ?? field?.id}
+      rows={rows}
+      disabled={disabled}
+      aria-invalid={field?.invalid || undefined}
+      aria-describedby={field?.describedBy}
+      aria-required={field?.required || undefined}
+      className={cn(
+        "w-full resize-y bg-transparent text-input font-normal text-ink-strong outline-none lg:font-medium",
+        "placeholder:text-ink-muted disabled:cursor-not-allowed disabled:text-ink-muted",
+        "lg:rounded-sm lg:border lg:border-line-default lg:bg-surface-card lg:px-4 lg:py-2.5 lg:focus:border-brand-navy lg:focus:shadow-focus",
+        field?.invalid && "lg:border-danger",
+        className
+      )}
+      {...rest}
+    />
   );
 });
 
