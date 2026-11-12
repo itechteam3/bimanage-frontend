@@ -256,7 +256,10 @@ describe("storefront (guest, no sign-in)", () => {
     await user.type(screen.getByLabelText(/delivery address/i), "14 Adebayo St, Yaba");
     await user.type(screen.getByLabelText(/^city/i), "Yaba");
     await user.type(screen.getByLabelText(/^state/i), "Lagos");
-    await user.click(screen.getByRole("button", { name: /continue to paystack/i }));
+    await user.click(screen.getByRole("button", { name: /review order/i }));
+    expect(await screen.findByTestId("review-email")).toHaveTextContent("ada@example.com");
+    expect(last("POST /store-orders/elijahapparel/checkout")).toBeUndefined();
+    await user.click(screen.getByRole("button", { name: /confirm and pay with paystack/i }));
     await waitFor(() => expect(assigned).toBe("https://checkout.paystack.com/abc"));
     const call = last("POST /store-orders/elijahapparel/checkout")!;
     expect(call.body).toMatchObject({ customerName: "Ada Nwosu", customerEmail: "ada@example.com", city: "Yaba", state: "Lagos" });
@@ -268,7 +271,7 @@ describe("storefront (guest, no sign-in)", () => {
     fb.handlers["GET /cart/elijahapparel"] = () => [200, { items: [{ product: PUBLIC_SHIRT, quantity: 1, requested: 1, available: 28, lineTotal: 22500 }], itemCount: 1, subtotal: 22500, deliveryFee: 2500, total: 25000, freeDeliveryAbove: null }];
     renderApp("/s/elijahapparel/checkout");
     expect(await screen.findByText(/online payment is coming soon/i)).toBeInTheDocument();
-    expect(screen.queryByRole("button", { name: /continue to paystack/i })).toBeNull();
+    expect(screen.queryByRole("button", { name: /review order|confirm and pay/i })).toBeNull();
     expect(screen.getByRole("link", { name: "shop@example.com" })).toHaveAttribute("href", "mailto:shop@example.com");
   });
 
@@ -405,5 +408,120 @@ describe("merchant store orders", () => {
     expect(await screen.findByText(/hasn't been paid. Don't send anything yet/)).toBeInTheDocument();
     expect(screen.queryByRole("button", { name: /mark/i })).toBeNull();
     expect(screen.getByRole("button", { name: "Cancel order" })).toBeInTheDocument();
+  });
+});
+
+describe("email typos, review step and tracking states", () => {
+  beforeEach(() => {
+    tokenStore.clear();
+    fb.handlers["GET /store/elijahapparel"] = () => [200, PUBLIC_STORE];
+    fb.handlers["GET /cart/elijahapparel"] = () => [200, { items: [{ product: PUBLIC_SHIRT, quantity: 1, requested: 1, available: 28, lineTotal: 22500 }], itemCount: 1, subtotal: 22500, deliveryFee: 0, total: 22500, freeDeliveryAbove: null }];
+  });
+
+  const fill = async (user: ReturnType<typeof userEvent.setup>, email: string) => {
+    await user.type(await screen.findByLabelText(/full name/i), "Elijah Ayanlere");
+    await user.type(screen.getByLabelText(/email address/i), email);
+    await user.type(screen.getByLabelText(/phone number/i), "+234 904 534 8114");
+    await user.type(screen.getByLabelText(/delivery address/i), "12 Allen Avenue");
+    await user.type(screen.getByLabelText(/^city/i), "Ikeja");
+    await user.type(screen.getByLabelText(/^state/i), "Lagos");
+  };
+
+  it("checkout suggests the right domain for a typo, and one tap fixes it", async () => {
+    const user = userEvent.setup();
+    renderApp("/s/elijahapparel/checkout");
+    await fill(user, "elijahayanlere3@gmaiul.com");
+    const hint = await screen.findByTestId("email-suggestion");
+    expect(hint).toHaveTextContent("Did you mean elijahayanlere3@gmail.com?");
+    await user.click(within(hint).getByRole("button", { name: "elijahayanlere3@gmail.com" }));
+    expect(screen.getByLabelText(/email address/i)).toHaveValue("elijahayanlere3@gmail.com");
+    expect(screen.queryByTestId("email-suggestion")).toBeNull();
+  });
+
+  it("the review step asks to confirm the email, warns about a typo, and Back returns to the details", async () => {
+    const user = userEvent.setup();
+    const router = renderApp("/s/elijahapparel/checkout");
+    await fill(user, "elijahayanlere3@gmaiul.com");
+    await user.click(screen.getByRole("button", { name: /review order/i }));
+    await waitFor(() => expect(router.state.location.search).toBe("?step=review"));
+    expect(screen.getByRole("heading", { name: "Is this your email?" })).toBeInTheDocument();
+    expect(screen.getByRole("alert")).toHaveTextContent("Did you mean elijahayanlere3@gmail.com?");
+    await user.click(screen.getByRole("button", { name: "Use elijahayanlere3@gmail.com" }));
+    expect(screen.getByTestId("review-email")).toHaveTextContent("elijahayanlere3@gmail.com");
+
+    await user.click(screen.getByRole("button", { name: "Edit details" }));
+    await waitFor(() => expect(router.state.location.search).toBe(""));
+    expect(await screen.findByLabelText(/email address/i)).toHaveValue("elijahayanlere3@gmail.com");
+    expect(screen.getByLabelText(/full name/i)).toHaveValue("Elijah Ayanlere");
+  });
+
+  it("sign-up suggests the right domain too", async () => {
+    tokenStore.clear();
+    const user = userEvent.setup();
+    renderApp("/register");
+    await user.type(await screen.findByLabelText(/work email/i), "ada@gmial.com");
+    expect(await screen.findByTestId("email-suggestion")).toHaveTextContent("Did you mean ada@gmail.com?");
+  });
+
+  const TRACKED = { trackingNo: "BM-WYYZ-KJDF", status: "pending", isPaid: false, customerName: "Elijah", customerEmail: "elijahayanlere3@gmail.com", deliveryAddress: "12 Allen Avenue", city: "Ikeja", state: "Lagos", items: [], subtotal: 5000, deliveryFee: 0, total: 5000, statusHistory: [], createdAt: "2026-11-12T21:57:00Z", store: { storeName: "Elijah Apparel", storeSlug: "elijahapparel", contactEmail: null, contactPhone: null } };
+
+  it("tracking an expired unpaid order says so plainly, with no pay button", async () => {
+    fb.handlers["GET /store-orders/track"] = () => [200, { ...TRACKED, status: "expired", payment: { state: "expired", holdExpiresAt: null, canRetryPayment: false } }];
+    const user = userEvent.setup();
+    renderApp("/s/elijahapparel/track?order=BM-WYYZ-KJDF");
+    await user.type(await screen.findByLabelText(/email used/i), "elijahayanlere3@gmail.com");
+    await user.click(screen.getByRole("button", { name: "Track" }));
+    expect(await screen.findByText("This order wasn't paid and has expired")).toBeInTheDocument();
+    expect(screen.getByText(/Your bag was released/)).toBeInTheDocument();
+    expect(screen.queryByRole("button", { name: /pay now|try payment again/i })).toBeNull();
+    expect(screen.getByRole("link", { name: "Shop again" })).toBeInTheDocument();
+    expect(screen.queryByText(/^Dispatched/)).toBeNull();
+  });
+
+  it("an unpaid order still within its hold can be paid from tracking, with the email typed", async () => {
+    fb.handlers["GET /store-orders/track"] = () => [200, { ...TRACKED, payment: { state: "awaiting_payment", holdExpiresAt: "2026-11-12T22:27:00Z", canRetryPayment: true } }];
+    fb.handlers["POST /store-orders/elijahapparel/orders/BM-WYYZ-KJDF/retry"] = () => [200, { order: TRACKED, authorizationUrl: "https://checkout.paystack.com/again" }];
+    const user = userEvent.setup();
+    renderApp("/s/elijahapparel/track");
+    await user.type(await screen.findByLabelText(/order number/i), "bm wyyz kjdf");
+    await user.type(screen.getByLabelText(/email used/i), "  ElijahAyanlere3@Gmail.com ");
+    await user.click(screen.getByRole("button", { name: "Track" }));
+    expect(await screen.findByText(/held until 23:27/)).toBeInTheDocument();
+    await user.click(screen.getByRole("button", { name: "Pay now" }));
+    await waitFor(() => expect(assigned).toBe("https://checkout.paystack.com/again"));
+    expect(last("POST /store-orders/elijahapparel/orders/BM-WYYZ-KJDF/retry")?.body).toEqual({ email: "ElijahAyanlere3@Gmail.com" });
+  });
+
+  it("not found tells the shopper what to check", async () => {
+    fb.handlers["GET /store-orders/track"] = () => [404, { message: "We couldn't find an order with that number and email. Check the order number in your confirmation email (it starts with BM-) and the email you typed at checkout, including its spelling." }];
+    const user = userEvent.setup();
+    renderApp("/s/elijahapparel/track?order=BM-WYYZ-KJDF");
+    await user.type(await screen.findByLabelText(/email used/i), "elijahayanlere3@gmail.com");
+    await user.click(screen.getByRole("button", { name: "Track" }));
+    expect(await screen.findByText(/including its spelling/)).toBeInTheDocument();
+  });
+});
+
+describe("merchant store polish", () => {
+  it("the products page says it's loading instead of flashing 0 products", async () => {
+    let release: () => void = () => undefined;
+    const gate = new Promise<void>((r) => (release = r));
+    fb.handlers["GET /store/products"] = () => [200, [SHIRT]];
+    const original = globalThis.fetch;
+    vi.stubGlobal("fetch", async (url: string, init: RequestInit) => {
+      if (String(url).includes("/store/products")) await gate;
+      return original(url, init);
+    });
+    renderApp("/store/products");
+    expect(await screen.findByText("Loading your products…")).toBeInTheDocument();
+    expect(screen.queryByText(/^0 products/)).toBeNull();
+    release();
+    expect(await screen.findByText("1 product · 1 published")).toBeInTheDocument();
+  });
+
+  it("a test-mode payment is labelled on the order", async () => {
+    fb.handlers["GET /store-orders/o1"] = () => [200, { _id: "o1", trackingNo: "BM-WYYZ-KJDF", customerName: "Elijah", customerEmail: "e@x.com", deliveryAddress: "x", items: [], subtotal: 5000, deliveryFee: 0, total: 5000, status: "shipped", isPaid: true, paymentMode: "test", statusHistory: [], createdAt: "2026-11-12T21:57:00Z", nextStatuses: ["delivered"] }];
+    renderApp("/store/orders/o1");
+    expect(await screen.findByText("Test payment (no money moved)")).toBeInTheDocument();
   });
 });

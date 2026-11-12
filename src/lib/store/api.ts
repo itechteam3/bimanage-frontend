@@ -257,6 +257,8 @@ export interface PublicOrder {
   statusHistory: Array<{ status: StoreOrderStatus; at: string }>;
   createdAt: string;
   store?: { storeName: string; storeSlug: string; contactEmail: string | null; contactPhone: string | null };
+  /** Where the order stands for the shopper (backend #26; absent on older servers). */
+  payment?: { state: "paid" | "awaiting_payment" | "payment_failed" | "expired" | "cancelled" | "refunded"; holdExpiresAt: string | null; canRetryPayment: boolean };
 }
 
 export interface CheckoutInput {
@@ -530,6 +532,8 @@ export interface MerchantStoreOrder {
   deliveredAt?: string | null;
   completedAt?: string | null;
   earningsReversed?: boolean;
+  /** Paystack test or live payment (backend #26). */
+  paymentMode?: "test" | "live" | null;
   statusHistory: Array<{ status: StoreOrderStatus; at: string }>;
   createdAt: string;
   nextStatuses?: StoreOrderStatus[];

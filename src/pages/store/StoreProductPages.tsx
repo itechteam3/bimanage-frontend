@@ -81,7 +81,8 @@ function Catalogue({ store }: { store: Store }) {
       </PageTitle>
       <p className="-mt-4 text-body-sm text-ink-muted">Everything customers can see and buy in your store.</p>
       <StoreTabs />
-      <IntroCard eyebrow={opsEyebrow(store)} title={`${count(all.length)} products · ${count(published)} published`} />
+      {/* Counts only once the list has loaded (it used to flash "0 products"). */}
+      <IntroCard eyebrow={opsEyebrow(store)} title={products.isLoading ? "Loading your products…" : products.error ? "Store products" : `${count(all.length)} ${all.length === 1 ? "product" : "products"} · ${count(published)} published`} />
       <div className="grid gap-5 lg:grid-cols-[minmax(0,2.3fr)_minmax(0,1fr)]">
         <Panel>
           <div className="flex flex-col gap-3 md:flex-row">
@@ -136,7 +137,7 @@ function Catalogue({ store }: { store: Store }) {
         </Panel>
         <HelpPanel
           items={[
-            ["Published", `${count(published)} of ${count(all.length)}`],
+            ["Published", products.isLoading ? "…" : `${count(published)} of ${count(all.length)}`],
             ["Drafts", "Hidden from customers until published"],
             ["Synced products", "Stock comes from Inventory"],
             ["Storefront", <Link key="s" to={storefrontPath(store)} className="text-ink-brand hover:underline">Preview your store</Link>],
