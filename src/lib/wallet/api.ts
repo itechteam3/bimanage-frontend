@@ -145,3 +145,27 @@ export const useWalletTransaction = (id: string) => useQuery({ queryKey: walletK
 
 export const downloadTransactionsCsv = (q: Record<string, string>) => apiDownload("/wallet/transactions/export", { query: q });
 export const downloadReceipt = (id: string) => apiDownload(`/wallet/transactions/${encodeURIComponent(id)}/receipt`);
+
+/**
+ * The wallet's headline figures (decision 2026-11-13): while Paystack is in
+ * test mode, Total earnings / Available / On hold INCLUDE test money, each
+ * with a "TEST" badge and a note. What can be withdrawn is always live money
+ * only (`withdrawable`). Once payments are live (and test money is cleared)
+ * the figures are live money only and the notes disappear.
+ */
+export function walletFigures(w: Wallet) {
+  const t = w.test ?? { balance: 0, pendingBalance: 0, totalEarned: 0 };
+  const hasTest = t.balance > 0 || t.pendingBalance > 0 || t.totalEarned > 0;
+  const includeTest = w.paymentsMode !== "live" && hasTest;
+  const part = (live: number, test: number) => ({ value: live + (includeTest ? test : 0), test: includeTest ? test : 0 });
+  return {
+    includeTest,
+    /** Live mode with test money not yet cleared: show it apart, not in the figures. */
+    separateTest: w.paymentsMode === "live" && hasTest,
+    totalEarned: part(w.totalEarned, t.totalEarned),
+    available: part(w.balance, t.balance),
+    onHold: part(w.pendingBalance, t.pendingBalance),
+    withdrawable: w.balance,
+    testTotal: t.balance + t.pendingBalance,
+  };
+}

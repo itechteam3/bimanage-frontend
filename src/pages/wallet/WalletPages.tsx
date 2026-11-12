@@ -29,6 +29,7 @@ import {
   useWalletTransactions,
   useWithdraw,
   useWithdrawalQuote,
+  walletFigures,
   type Wallet,
   type WalletTx,
 } from "@/lib/wallet/api";
@@ -91,10 +92,13 @@ function WithWallet({ children }: { children: (w: Wallet) => ReactNode }) {
   return <>{children(wallet.data)}</>;
 }
 
-/** Money from Paystack test payments: shown, never withdrawable. */
+/** "Includes ₦X test money: not real, can't be withdrawn, cleared when payments go live." */
+const testNote = (amount: number) => (amount > 0 ? `Includes ${naira(amount)} test money: not real, can't be withdrawn, cleared when payments go live.` : undefined);
+
+/** Payments are live but test money hasn't been cleared yet: show it apart from the real figures. */
 function TestMoneyNote({ w }: { w: Wallet }) {
   const t = w.test;
-  if (!t || (t.balance <= 0 && t.pendingBalance <= 0)) return null;
+  if (!walletFigures(w).separateTest || !t) return null;
   return (
     <section aria-label="Test money" className="flex flex-col gap-1 rounded-xl border border-dashed border-line-strong bg-surface-pale px-5 py-4">
       <p className="flex items-center gap-2 font-semibold text-ink-strong">
@@ -115,8 +119,10 @@ export function WalletOverviewPage() {
 
 function Overview({ w }: { w: Wallet }) {
   const txs = useWalletTransactions({ limit: "5" });
-  const total = Math.max(w.balance + w.pendingBalance, 0);
-  const availPct = total ? Math.round((w.balance / total) * 100) : 0;
+  const f = walletFigures(w);
+  const total = Math.max(f.available.value + f.onHold.value, 0);
+  const availPct = total ? Math.round((f.available.value / total) * 100) : 0;
+  const badge = (part: { test: number }) => (part.test > 0 ? "TEST" : undefined);
   return (
     <div className="flex flex-col gap-6">
       <PageTitle
@@ -132,9 +138,9 @@ function Overview({ w }: { w: Wallet }) {
       <WalletTabs />
       <IntroCard eyebrow={EYEBROW} title="Store earnings become available when an order is completed (or 7 days after delivery)." />
       <div className="grid grid-cols-2 gap-3 lg:grid-cols-4 lg:gap-4">
-        <KpiCard tone="stock" label="Total earnings" value={naira(w.totalEarned)} caption="Store payments (after BiManage's 3%)" />
-        <KpiCard tone="revenue" label="Available" value={naira(w.balance)} caption="Ready to withdraw" />
-        <KpiCard tone="invoices" label="On hold" value={naira(w.pendingBalance)} caption="Orders not completed yet" />
+        <KpiCard tone="stock" label="Total earnings" value={naira(f.totalEarned.value)} caption="Store payments (after BiManage's 3%)" badge={badge(f.totalEarned)} note={testNote(f.totalEarned.test)} />
+        <KpiCard tone="revenue" label="Available" value={naira(f.available.value)} caption={f.includeTest ? `Available to withdraw: ${naira(f.withdrawable)}` : "Ready to withdraw"} badge={badge(f.available)} note={testNote(f.available.test)} />
+        <KpiCard tone="invoices" label="On hold" value={naira(f.onHold.value)} caption="Orders not completed yet" badge={badge(f.onHold)} note={testNote(f.onHold.test)} />
         <KpiCard tone="orders" label="Payouts" value={count(w.payoutsCount ?? 0)} caption="Completed transfers" />
       </div>
       <TestMoneyNote w={w} />
@@ -163,17 +169,17 @@ function Overview({ w }: { w: Wallet }) {
             <h3 id="dist" className="text-caption font-semibold uppercase text-ink-brand">
               Balance distribution
             </h3>
-            <p className="mt-1 text-caption text-ink-muted">Real money · {naira(total)}</p>
+            <p className="mt-1 text-caption text-ink-muted">{f.includeTest ? `${naira(total)} · includes ${naira(f.testTotal)} test money` : `Real money · ${naira(total)}`}</p>
             <div className="mt-3 flex h-3 gap-0.5 overflow-hidden rounded-full bg-surface-pale" aria-hidden="true">
-              {w.balance > 0 && <span className="h-full rounded-full bg-success" style={{ width: `${availPct}%` }} />}
-              {w.pendingBalance > 0 && <span className="h-full flex-1 rounded-full bg-warning" />}
+              {f.available.value > 0 && <span className="h-full rounded-full bg-success" style={{ width: `${availPct}%` }} />}
+              {f.onHold.value > 0 && <span className="h-full flex-1 rounded-full bg-warning" />}
             </div>
             <ul className="mt-3 flex flex-col gap-1 text-body-sm">
               <li className="flex items-center gap-2 text-ink-strong">
-                <span aria-hidden="true" className="size-2.5 rounded-full bg-success" /> Available {naira(w.balance)}
+                <span aria-hidden="true" className="size-2.5 rounded-full bg-success" /> Available {naira(f.available.value)}
               </li>
               <li className="flex items-center gap-2 text-ink-strong">
-                <span aria-hidden="true" className="size-2.5 rounded-full bg-warning" /> On hold {naira(w.pendingBalance)}
+                <span aria-hidden="true" className="size-2.5 rounded-full bg-warning" /> On hold {naira(f.onHold.value)}
               </li>
             </ul>
           </section>
@@ -496,7 +502,7 @@ function Withdraw({ w }: { w: Wallet }) {
         >
           <Panel title="Withdrawal details" subtitle="Confirm the amount, fees and recipient.">
             <div className="grid gap-4 md:grid-cols-2 md:gap-x-10 md:gap-y-6">
-              <Field label="Available balance">
+              <Field label="Available to withdraw" hint={walletFigures(w).testTotal > 0 ? `Test money (${naira(walletFigures(w).testTotal)}) can't be withdrawn.` : undefined}>
                 <TextInput readOnly value={naira(w.balance)} />
               </Field>
               <Field label="Amount to withdraw" required hint={`Minimum ${naira(w.fees.minWithdrawal)}`}>
@@ -548,7 +554,7 @@ function Withdraw({ w }: { w: Wallet }) {
         </form>
         <HelpPanel
           items={[
-            ["Available", naira(w.balance)],
+            ["Available to withdraw", naira(w.balance)],
             ["Hold period", "Until the order is completed"],
             ["Payout provider", "Paystack"],
             ["Notification", "Email and in-app alert"],
@@ -799,10 +805,10 @@ function Transactions({ w }: { w: Wallet }) {
         </Panel>
         <HelpPanel
           items={[
-            ["Total received", naira(w.totalEarned)],
+            ["Total received", walletFigures(w).includeTest ? `${naira(walletFigures(w).totalEarned.value)} (incl. ${naira(walletFigures(w).totalEarned.test)} test)` : naira(w.totalEarned)],
             ["Paid out", naira(w.totalWithdrawn)],
-            ["On hold", naira(w.pendingBalance)],
-            ...(w.test.totalEarned > 0 ? ([["Test money (not real)", naira(w.test.balance + w.test.pendingBalance)]] as Array<[string, string]>) : []),
+            ["On hold", walletFigures(w).includeTest ? `${naira(walletFigures(w).onHold.value)} (incl. ${naira(walletFigures(w).onHold.test)} test)` : naira(w.pendingBalance)],
+            ...(walletFigures(w).testTotal > 0 ? ([["Test money", "Not real, can't be withdrawn, cleared when payments go live"]] as Array<[string, string]>) : []),
           ]}
         />
       </div>

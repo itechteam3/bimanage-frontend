@@ -525,3 +525,14 @@ describe("merchant store polish", () => {
     expect(await screen.findByText("Test payment (no money moved)")).toBeInTheDocument();
   });
 });
+
+describe("store analytics with test payments", () => {
+  it("revenue and orders that include test payments are labelled TEST", async () => {
+    fb.handlers["GET /store/analytics"] = () => [200, { range: { key: "30d", from: "2026-10-14", to: "2026-11-12", days: 30 }, revenue: 140650, revenueChange: null, orders: 3, ordersChange: null, fulfilled: 3, averageOrderValue: 46883, cancelled: 0, storeViews: 10, productViews: 5, topProduct: null, topProducts: [], series: [], payouts: { pending: 0, available: 0 }, test: { revenue: 140650, orders: 3 } }];
+    renderApp("/store/analytics");
+    const revenue = (await screen.findByRole("heading", { name: /revenue/i, level: 3 })).closest("section")!;
+    expect(within(revenue).getByTestId("kpi-badge")).toHaveTextContent("TEST");
+    expect(within(revenue).getByText("Includes ₦140,650 from test payments: not real money.")).toBeInTheDocument();
+    expect(screen.getByText("Includes 3 test orders.")).toBeInTheDocument();
+  });
+});

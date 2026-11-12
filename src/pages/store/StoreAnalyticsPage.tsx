@@ -89,8 +89,22 @@ function Analytics({ store }: { store: Store }) {
       ) : (
         <>
           <div className="grid grid-cols-2 gap-3 lg:grid-cols-4 lg:gap-4">
-            <KpiCard tone="revenue" label="Revenue" value={nairaCompact(a.revenue)} caption={change(a.revenueChange)} />
-            <KpiCard tone="orders" label="Orders" value={count(a.orders)} caption={`${count(a.fulfilled)} fulfilled`} />
+            <KpiCard
+              tone="revenue"
+              label="Revenue"
+              value={nairaCompact(a.revenue)}
+              caption={change(a.revenueChange)}
+              badge={a.test?.revenue ? "TEST" : undefined}
+              note={a.test?.revenue ? `Includes ${naira(a.test.revenue)} from test payments: not real money.` : undefined}
+            />
+            <KpiCard
+              tone="orders"
+              label="Orders"
+              value={count(a.orders)}
+              caption={`${count(a.fulfilled)} fulfilled`}
+              badge={a.test?.orders ? "TEST" : undefined}
+              note={a.test?.orders ? `Includes ${count(a.test.orders)} test ${a.test.orders === 1 ? "order" : "orders"}.` : undefined}
+            />
             <KpiCard tone="stock" label="Product views" value={count(a.productViews)} caption={`${count(a.storeViews)} store visits (all time)`} />
             <KpiCard tone="invoices" label="Top product" value={a.topProduct?.name ?? "—"} caption={a.topProduct ? `${count(a.topProduct.sold)} sold` : "No sales yet"} />
           </div>

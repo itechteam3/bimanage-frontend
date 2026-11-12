@@ -126,11 +126,22 @@ const kpiTone: Record<KpiTone, { bg: string; fg: string; line: string }> = {
  * text) at the Figma sizes — 56x29 on phones (Mobile frame 4082:384), 74x38
  * from lg — and wraps under the value if a long number needs the room.
  */
-export function KpiCard({ tone, label, value, caption, trend }: { tone: KpiTone; label: string; value: ReactNode; caption: string; trend?: number[] }) {
+/**
+ * `badge` (e.g. "TEST") marks a figure that includes something special;
+ * `note` explains it under the caption (e.g. "Includes ₦140,650 test money…").
+ */
+export function KpiCard({ tone, label, value, caption, trend, badge, note }: { tone: KpiTone; label: string; value: ReactNode; caption: string; trend?: number[]; badge?: string; note?: ReactNode }) {
   const t = kpiTone[tone];
   return (
     <section className={cn("flex min-h-32 min-w-0 flex-col justify-between gap-2 rounded-lg border border-line-card p-4 shadow-card", t.bg)}>
-      <h3 className="text-caption font-semibold uppercase text-ink-muted">{label}</h3>
+      <h3 className="flex flex-wrap items-center gap-2 text-caption font-semibold uppercase text-ink-muted">
+        {label}
+        {badge && (
+          <span data-testid="kpi-badge" className="rounded-sm border border-line-strong bg-surface-card px-1.5 py-px text-label font-semibold tracking-wide text-ink-strong">
+            {badge}
+          </span>
+        )}
+      </h3>
       <div data-kpi-row className="flex flex-wrap items-end justify-between gap-x-2 gap-y-1">
         <p className={cn("min-w-0 break-words text-title-md", t.fg)}>{value}</p>
         {trend && trend.length > 1 && (
@@ -138,6 +149,7 @@ export function KpiCard({ tone, label, value, caption, trend }: { tone: KpiTone;
         )}
       </div>
       <p className="text-caption text-ink-muted">{caption}</p>
+      {note && <p className="text-caption text-ink-secondary">{note}</p>}
     </section>
   );
 }
