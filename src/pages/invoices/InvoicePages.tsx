@@ -182,7 +182,10 @@ function InvoiceDocument({
         <div>
           <p className="text-caption font-semibold uppercase text-ink-muted">Bill to</p>
           <p className="mt-2 text-body-lg text-ink-strong">{client.name || "Customer name"}</p>
-          <p className="text-body-sm text-ink-muted">{[client.email, client.phone, client.address].filter(Boolean).join(" · ") || "customer@example.com"}</p>
+          {/* Only the customer's real details — never a placeholder that could be mistaken for one. */}
+          {[client.email, client.phone, client.address].some(Boolean) && (
+            <p className="text-body-sm text-ink-muted">{[client.email, client.phone, client.address].filter(Boolean).join(" · ")}</p>
+          )}
         </div>
         <div>
           <p className="text-caption font-semibold uppercase text-ink-muted">From</p>
@@ -190,28 +193,33 @@ function InvoiceDocument({
           <p className="text-body-sm text-ink-muted">{[p?.businessEmail, p?.businessPhone, p?.businessAddress].filter(Boolean).join(" · ") || "Add these in your business profile"}</p>
         </div>
       </div>
-      <div className="mt-5 overflow-x-auto">
-        <table className="w-full min-w-[26rem] text-left text-body-sm">
-          <thead className="bg-surface-pale text-caption font-semibold uppercase text-ink-muted">
-            <tr>
-              <th scope="col" className="rounded-l-lg px-3 py-3">Description</th>
-              <th scope="col" className="px-3 py-3">Qty</th>
-              <th scope="col" className="px-3 py-3">Rate</th>
-              <th scope="col" className="rounded-r-lg px-3 py-3 text-ink-brand">Amount</th>
+      {/* Fits any column width: fixed layout, description wraps, no sideways scroll. */}
+      <table className="mt-5 w-full table-fixed text-left text-body-sm" data-invoice-lines>
+        <colgroup>
+          <col />
+          <col className="w-10" />
+          <col className="w-[26%]" />
+          <col className="w-[28%]" />
+        </colgroup>
+        <thead className="bg-surface-pale text-caption font-semibold uppercase text-ink-muted">
+          <tr>
+            <th scope="col" className="rounded-l-lg px-2 py-3">Description</th>
+            <th scope="col" className="px-1 py-3 text-right">Qty</th>
+            <th scope="col" className="px-2 py-3 text-right">Rate</th>
+            <th scope="col" className="rounded-r-lg px-2 py-3 text-right text-ink-brand">Amount</th>
+          </tr>
+        </thead>
+        <tbody>
+          {lines.map((l, n) => (
+            <tr key={n} className="border-b border-line-subtle align-top last:border-0">
+              <td className="break-words px-2 py-3 text-ink-strong">{l.description || "—"}</td>
+              <td className="px-1 py-3 text-right text-ink-strong">{count(l.quantity)}</td>
+              <td className="break-words px-2 py-3 text-right text-ink-strong">{naira(l.unitPrice)}</td>
+              <td className="break-words px-2 py-3 text-right font-semibold text-ink-brand">{naira(l.total)}</td>
             </tr>
-          </thead>
-          <tbody>
-            {lines.map((l, n) => (
-              <tr key={n} className="border-b border-line-subtle last:border-0">
-                <td className="px-3 py-3 text-ink-strong">{l.description || "—"}</td>
-                <td className="px-3 py-3 text-ink-strong">{count(l.quantity)}</td>
-                <td className="px-3 py-3 text-ink-strong">{naira(l.unitPrice)}</td>
-                <td className="px-3 py-3 font-semibold text-ink-brand">{naira(l.total)}</td>
-              </tr>
-            ))}
-          </tbody>
-        </table>
-      </div>
+          ))}
+        </tbody>
+      </table>
       {tax > 0 && (
         <p className="mt-3 text-right text-body-sm text-ink-muted">
           Subtotal {naira(subtotal)} · Tax ({tax}%) {naira(taxAmount)}

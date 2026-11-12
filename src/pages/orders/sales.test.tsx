@@ -197,6 +197,17 @@ describe("invoices (05.03 / 05.06 / 05.10 / 05.11 / 05.13)", () => {
     expect(await screen.findByText(/is on its way/i)).toBeInTheDocument();
   });
 
+  it("preview: the line table fits any column, and no placeholder contact is shown", async () => {
+    fb.handlers["GET /invoices/i1"] = () => [200, { ...INVOICE, clientEmail: "" }];
+    renderApp("/invoices/i1");
+    const doc = await screen.findByRole("article", { name: /invoice preview/i });
+    const table = doc.querySelector("table[data-invoice-lines]")!;
+    expect(table.classList.contains("table-fixed")).toBe(true);
+    expect(table.className).not.toMatch(/min-w-/);
+    expect(table.closest(".overflow-x-auto")).toBeNull();
+    expect(within(doc).queryByText(/example\.com/)).toBeNull();
+  });
+
   it("preview: mark as paid", async () => {
     let inv = { ...INVOICE, status: "sent" as const };
     fb.handlers["GET /invoices/i1"] = () => [200, inv];
