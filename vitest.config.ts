@@ -11,5 +11,8 @@ export default defineConfig({
     setupFiles: ["./src/test/setup.ts"],
     css: false,
     restoreMocks: true,
+    // Flow tests click and type through whole screens; 5 s (the default) is
+    // too tight on a busy machine or CI. Each `findBy` still gives up after 8 s (src/test/setup.ts).
+    testTimeout: 20_000,
   },
 });
