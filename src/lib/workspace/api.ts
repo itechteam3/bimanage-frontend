@@ -1,5 +1,5 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { api } from "@/lib/api/client";
+import { ApiError, api } from "@/lib/api/client";
 import type { PlanId } from "@/config/plans";
 
 // Typed workspace endpoints (docs/api-reference.md + backend PR #6).
@@ -41,7 +41,14 @@ export interface StartupPackage {
   tagline: string;
   summary: string;
   days: number;
+  /** false until Paystack is configured on the server ("coming soon"). */
+  paymentsAvailable?: boolean;
 }
+
+export const PAYMENTS_COMING_SOON = "Online payments are coming soon. You can keep using your free trial in the meantime.";
+/** The server's "payments aren't set up yet" answer. */
+export const isPaymentsUnavailable = (err: unknown) =>
+  err instanceof ApiError && err.status === 503 && err.data.paymentsUnavailable === true;
 
 export interface PaymentState {
   reference: string;

@@ -4,7 +4,7 @@ import { IconCheck, IconArrowRight, IconAlertTriangle } from "@tabler/icons-reac
 import { Button, ButtonLink, Spinner, buttonClasses } from "@/components/ui";
 import { DetailRows, InfoStrip, IntroCard, PageTitle, Panel, PriceBox, Stepper, TipList } from "@/components/page/Blocks";
 import { AuthNote } from "@/components/layout/AuthLayout";
-import { startCheckout, useStartupPackages, verifyPayment, keys, type PaymentState, type StartupPackage } from "@/lib/workspace/api";
+import { isPaymentsUnavailable, PAYMENTS_COMING_SOON, startCheckout, useStartupPackages, verifyPayment, keys, type PaymentState, type StartupPackage } from "@/lib/workspace/api";
 import { naira } from "@/lib/format";
 import { friendlyText, errorMessage } from "@/lib/api/errorMessage";
 import { SUPPORT_EMAIL } from "@/config/links";
@@ -118,6 +118,7 @@ export function CheckoutPage() {
   const { packageId } = useParams();
   const packages = useStartupPackages();
   const [paying, setPaying] = useState(false);
+  const [unavailable, setUnavailable] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const pkg = packages.data?.find((p) => p.id === packageId);
 
@@ -141,10 +142,12 @@ export function CheckoutPage() {
       rememberRef(res.reference);
       window.location.assign(res.authorizationUrl); // Paystack returns to /onboarding/payment
     } catch (err) {
-      setError(errorMessage(err, "We couldn't start the payment. Please try again."));
+      if (isPaymentsUnavailable(err)) setUnavailable(true);
+      else setError(errorMessage(err, "We couldn't start the payment. Please try again."));
       setPaying(false);
     }
   };
+  const comingSoon = unavailable || pkg.paymentsAvailable === false;
 
   return (
     <div className="flex flex-col gap-6">
@@ -166,10 +169,21 @@ export function CheckoutPage() {
               ]}
             />
             {error && <AuthNote tone="danger">{error}</AuthNote>}
-            <Button fullWidth onClick={pay} loading={paying} loadingText="Opening Paystack…">
-              Pay {naira(pkg.amount)} with Paystack
-            </Button>
-            <p className="text-body-sm text-ink-muted">You'll be taken to Paystack's secure checkout (card, bank transfer or USSD), then brought back here.</p>
+            {comingSoon ? (
+              <>
+                <p role="status" className="rounded-xl bg-surface-pale px-4 py-3 text-body-lg text-ink-strong">{PAYMENTS_COMING_SOON}</p>
+                <ButtonLink to="/dashboard" fullWidth>
+                  Back to dashboard
+                </ButtonLink>
+              </>
+            ) : (
+              <>
+                <Button fullWidth onClick={pay} loading={paying} loadingText="Opening Paystack…">
+                  Pay {naira(pkg.amount)} with Paystack
+                </Button>
+                <p className="text-body-sm text-ink-muted">You'll be taken to Paystack's secure checkout (card, bank transfer or USSD), then brought back here.</p>
+              </>
+            )}
           </div>
         </Panel>
         <TipList

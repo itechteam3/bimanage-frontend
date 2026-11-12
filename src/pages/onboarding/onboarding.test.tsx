@@ -70,6 +70,22 @@ describe("paths", () => {
     await waitFor(() => expect(assign).toHaveBeenCalledWith("https://checkout.paystack.com/xyz"));
     expect(fb.calls.find((c) => c.key === "POST /onboarding/startup-package/checkout")!.body).toEqual({ package: "standard" });
   });
+
+  it("payments not set up yet: says 'coming soon' instead of a Pay button or an error", async () => {
+    fb.handlers["GET /onboarding/startup-packages"] = () => [200, PACKAGES.map((p) => ({ ...p, paymentsAvailable: false }))];
+    renderApp("/onboarding/packages/starter");
+    expect(await screen.findByText(/online payments are coming soon/i)).toBeInTheDocument();
+    expect(screen.queryByRole("button", { name: /pay .* with paystack/i })).toBeNull();
+    expect(screen.getByRole("link", { name: /back to dashboard/i })).toBeInTheDocument();
+  });
+
+  it("if the server says payments are unavailable at checkout, show 'coming soon', not an error", async () => {
+    fb.handlers["POST /onboarding/startup-package/checkout"] = () => [503, { paymentsUnavailable: true, message: "Online payments are coming soon." }];
+    renderApp("/onboarding/packages/starter");
+    await userEvent.click(await screen.findByRole("button", { name: /pay .* with paystack/i }));
+    expect(await screen.findByText(/online payments are coming soon/i)).toBeInTheDocument();
+    expect(screen.queryByRole("alert")).toBeNull();
+  });
 });
 
 describe("payment return (07.03 / 07.04 / 07.05)", () => {
