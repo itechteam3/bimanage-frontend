@@ -36,13 +36,17 @@ export function resolveBack(matches: UIMatch[]): ResolvedBack | null {
   for (const m of [...matches].reverse()) {
     const meta = (m.handle as { back?: BackMeta } | undefined)?.back;
     if (!meta) continue;
-    let parentTo = meta.parent;
-    try {
-      parentTo = generatePath(meta.parent, m.params as Record<string, string>);
-    } catch {
-      parentTo = meta.screen.to;
-    }
-    return { parentTo, screen: meta.screen, deep: stripQuery(parentTo) !== stripQuery(meta.screen.to) };
+    const fill = (path: string) => {
+      try {
+        return generatePath(path, m.params as Record<string, string>);
+      } catch {
+        return null;
+      }
+    };
+    // Screens can use params too ("Back to Shop" → /s/:slug).
+    const screen = { ...meta.screen, to: fill(meta.screen.to) ?? meta.screen.to };
+    const parentTo = fill(meta.parent) ?? screen.to;
+    return { parentTo, screen, deep: stripQuery(parentTo) !== stripQuery(screen.to) };
   }
   return null;
 }
@@ -63,4 +67,6 @@ export const SCREENS = {
   projects: { label: "Projects", to: "/projects" },
   team: { label: "Team", to: "/settings/team" },
   settings: { label: "Settings", to: "/settings" },
+  store: { label: "Online Store", to: "/store" },
+  shop: { label: "Shop", to: "/s/:slug" },
 } satisfies Record<string, Screen>;

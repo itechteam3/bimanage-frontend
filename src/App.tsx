@@ -64,6 +64,28 @@ const ProjectsCalendarPage = work("ProjectsCalendarPage");
 const TeamDirectoryPage = work("TeamDirectoryPage");
 const InvitePage = work("InvitePage");
 const InviteSentPage = work("InviteSentPage");
+// Online store, merchant side (Phase 8, Figma 08.01–08.10) loads as one chunk.
+const shop = (name: keyof typeof import("@/pages/store/index")) => lazy(() => import("@/pages/store/index").then((m) => ({ default: m[name] })));
+const CreateStorePage = shop("CreateStorePage");
+const StoreOverviewPage = shop("StoreOverviewPage");
+const StoreSettingsPage = shop("StoreSettingsPage");
+const TemplatesPage = shop("TemplatesPage");
+const DomainPage = shop("DomainPage");
+const CataloguePage = shop("CataloguePage");
+const StoreProductFormPage = shop("StoreProductFormPage");
+const StoreProductDetailPage = shop("StoreProductDetailPage");
+const BulkUploadPage = shop("BulkUploadPage");
+const SyncInventoryPage = shop("SyncInventoryPage");
+const StoreAnalyticsPage = shop("StoreAnalyticsPage");
+// Public storefront (08.11–08.20): its own chunk, no sign-in.
+const front = (name: keyof typeof import("@/pages/storefront/index")) => lazy(() => import("@/pages/storefront/index").then((m) => ({ default: m[name] })));
+const StorefrontLayout = front("StorefrontLayout");
+const StorefrontHomePage = front("StorefrontHomePage");
+const StorefrontProductPage = front("StorefrontProductPage");
+const CartPage = front("CartPage");
+const StoreCheckoutPage = front("CheckoutPage");
+const StorePaymentPage = front("PaymentPage");
+const TrackOrderPage = front("TrackOrderPage");
 
 /** A group of routes behind one plan feature, with an in-page loading state. */
 const gated = (feature: Feature, title: string) => (
@@ -122,7 +144,6 @@ const guest = (el: React.ReactNode) => <GuestOnly>{el}</GuestOnly>;
 // Sections built in later phases: real routes now, so links never 404.
 const comingSoon = (
   [
-    ["/store/*", "Online Store"],
     ["/bisupplynet/*", "BiSupplyNet"],
     ["/wallet/*", "Wallet"],
     ["/feli", "FELI AI"],
@@ -244,8 +265,45 @@ export const routes = [
           },
           // Settings
           { path: "/settings/profile", element: <ProfilePage />, handle: { section: "Settings", back: back("/settings", SCREENS.settings) } },
+          // Online store (Figma 08.01–08.10). Freemium has the store "view only":
+          // it can build and preview; publishing is refused by plan.
+          {
+            element: gated("store", "Online Store"),
+            children: [
+              { path: "/store", element: <StoreOverviewPage />, handle: { section: "Online Store" } },
+              { path: "/store/create", element: <CreateStorePage />, handle: { section: "Online Store", back: back("/dashboard", SCREENS.dashboard) } },
+              { path: "/store/settings", element: <StoreSettingsPage />, handle: { section: "Online Store", back: back("/store", SCREENS.store) } },
+              { path: "/store/templates", element: <TemplatesPage />, handle: { section: "Online Store", back: back("/store", SCREENS.store) } },
+              { path: "/store/domain", element: <DomainPage />, handle: { section: "Online Store", back: back("/store", SCREENS.store) } },
+              { path: "/store/analytics", element: <StoreAnalyticsPage />, handle: { section: "Online Store", back: back("/store", SCREENS.store) } },
+              { path: "/store/products", element: <CataloguePage />, handle: { section: "Online Store", back: back("/store", SCREENS.store) } },
+              { path: "/store/products/new", element: <StoreProductFormPage />, handle: { section: "Online Store", back: back("/store/products", SCREENS.store) } },
+              { path: "/store/products/bulk", element: <BulkUploadPage />, handle: { section: "Online Store", back: back("/store/products", SCREENS.store) } },
+              { path: "/store/products/sync", element: <SyncInventoryPage />, handle: { section: "Online Store", back: back("/store/products", SCREENS.store) } },
+              { path: "/store/products/:id", element: <StoreProductDetailPage />, handle: { section: "Online Store", back: back("/store/products", SCREENS.store) } },
+              { path: "/store/products/:id/edit", element: <StoreProductFormPage key="edit" />, handle: { section: "Online Store", back: back("/store/products/:id", SCREENS.store) } },
+              { path: "/store/*", element: <Navigate to="/store" replace /> },
+            ],
+          },
           // Later phases
           ...comingSoon,
+        ],
+      },
+      // Public storefront (Figma 08.11–08.20): no sign-in, guest checkout.
+      {
+        path: "/s/:slug",
+        element: (
+          <Suspense fallback={<Loading />}>
+            <StorefrontLayout />
+          </Suspense>
+        ),
+        children: [
+          { index: true, element: <StorefrontHomePage /> },
+          { path: "products/:productId", element: <StorefrontProductPage />, handle: { back: back("/s/:slug", SCREENS.shop) } },
+          { path: "cart", element: <CartPage />, handle: { back: back("/s/:slug", SCREENS.shop) } },
+          { path: "checkout", element: <StoreCheckoutPage />, handle: { back: back("/s/:slug/cart", SCREENS.shop) } },
+          { path: "payment", element: <StorePaymentPage />, handle: { back: back("/s/:slug", SCREENS.shop) } },
+          { path: "track", element: <TrackOrderPage />, handle: { back: back("/s/:slug", SCREENS.shop) } },
         ],
       },
       // Design review
