@@ -637,8 +637,8 @@ export function EmailInvoicePage() {
             </p>
             {unavailable && (
               <div role="status" className="mt-4 rounded-lg bg-surface-tint-warm px-4 py-3 text-body-sm text-ink-strong">
-                <p className="font-semibold">Email sending isn't available yet.</p>
-                <p className="mt-1">Download the PDF and send it to your customer yourself. The invoice stays as {invoiceBadge[i.status].label}.</p>
+                <p className="font-semibold">We couldn't send the email right now.</p>
+                <p className="mt-1">Try again in a few minutes, or download the PDF and send it yourself. The invoice stays as {invoiceBadge[i.status].label}.</p>
                 <Button size="md" variant="secondary" className="mt-3" loading={pdf.busy} loadingText="Preparing…" onClick={() => void pdf.run(i)}>
                   <IconDownload aria-hidden="true" className="size-icon" /> Download PDF
                 </Button>

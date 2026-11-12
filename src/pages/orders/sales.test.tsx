@@ -182,7 +182,7 @@ describe("invoices (05.03 / 05.06 / 05.10 / 05.11 / 05.13)", () => {
     expect(await screen.findByLabelText(/^to email/i)).toHaveValue("amina@example.com");
     await user.type(screen.getByLabelText(/^cc/i), "acct@example.com, boss@example.com");
     await user.click(screen.getByRole("button", { name: /send invoice to customer/i }));
-    expect(await screen.findByText(/email sending isn't available yet/i)).toBeInTheDocument();
+    expect(await screen.findByText(/couldn.t send the email right now/i)).toBeInTheDocument();
     expect(screen.getByRole("button", { name: /download pdf/i })).toBeInTheDocument();
     expect(screen.queryByRole("alert")).toBeNull();
     expect(last("POST /invoices/i1/send")!.body).toMatchObject({ to: "amina@example.com", cc: ["acct@example.com", "boss@example.com"] });
