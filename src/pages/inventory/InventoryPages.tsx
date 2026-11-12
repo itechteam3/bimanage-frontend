@@ -13,6 +13,7 @@ import { errorMessage } from "@/lib/api/errorMessage";
 import { ErrorNote } from "@/components/feedback/ErrorNote";
 import { cn } from "@/lib/cn";
 import { AddFirstProduct } from "./ProductFormPages";
+import { useUrlState } from "@/lib/nav/useUrlState";
 
 const Loading = ({ label = "Loading…" }: { label?: string }) => (
   <div className="flex justify-center py-16 text-ink-brand" role="status">
@@ -145,7 +146,7 @@ export function ProductsPage() {
   const products = useProducts();
   const canEdit = useCan("manageInventory");
   const exp = useInventoryExport();
-  const [q, setQ] = useState("");
+  const [q, setQ] = useUrlState<string>("q", "");
   const list = useMemo(() => {
     const term = q.trim().toLowerCase();
     const all = products.data ?? [];
@@ -243,7 +244,7 @@ export function ProductsPage() {
 export function LowStockPage() {
   const stats = useInventoryStats();
   const exp = useInventoryExport();
-  const [q, setQ] = useState("");
+  const [q, setQ] = useUrlState<string>("q", "");
   const items = (stats.data?.lowStockProducts ?? []).filter((p) => !q.trim() || p.name.toLowerCase().includes(q.trim().toLowerCase()));
   const soldOut = stats.data?.stockAvailability.outOfStock ?? 0;
   const low = stats.data?.stockAvailability.lowStock ?? 0;

@@ -11,6 +11,7 @@ import { useAuth } from "@/lib/auth/AuthProvider";
 import { updateProfile } from "@/lib/auth/profile";
 import { applyFieldErrors } from "@/lib/api/errorMessage";
 import { ErrorNote } from "@/components/feedback/ErrorNote";
+import { useLeaveGuard } from "@/lib/nav/useLeaveGuard";
 
 const schema = z.object({
   name: z.string().trim().min(2, "Enter your name (at least 2 characters).").max(60),
@@ -30,6 +31,7 @@ export function ProfilePage() {
   const [saved, setSaved] = useState(false);
   const [formError, setFormError] = useState<unknown>(null);
   const { register, handleSubmit, reset, setError, formState } = useForm<Values>({ resolver: zodResolver(schema) });
+  const guard = useLeaveGuard(formState.isDirty);
 
   useEffect(() => {
     if (user) reset({ name: user.name ?? "", username: user.username ?? "", phone: user.phone ?? "" });
@@ -41,6 +43,7 @@ export function ProfilePage() {
     try {
       await updateProfile(Object.fromEntries(Object.entries(v).filter(([, x]) => x !== "")));
       await refresh();
+      reset(v);
       setSaved(true);
     } catch (err) {
       if (!applyFieldErrors(err, setError, ["name", "username", "phone"])) setFormError(err);
@@ -49,6 +52,7 @@ export function ProfilePage() {
 
   return (
     <div className="flex flex-col gap-6">
+      {guard.dialog}
       <PageTitle>Profile</PageTitle>
       <p className="-mt-4 text-body-sm text-ink-muted">How you appear to your team and customers.</p>
 

@@ -11,6 +11,7 @@ import { downloadSalesCsv, useInvoiceStats, useOrders, useSalesAnalytics, type A
 import { saveBlob } from "@/lib/api/client";
 import { count, naira, nairaCompact } from "@/lib/format";
 import { cn } from "@/lib/cn";
+import { useUrlState } from "@/lib/nav/useUrlState";
 
 const Loading = () => (
   <div className="flex justify-center py-16 text-ink-brand" role="status">
@@ -180,7 +181,7 @@ function dailySeries(rows: Array<{ _id: { year: number; month: number; day: numb
 
 // 05.05 Sales analytics
 export function SalesAnalyticsPage() {
-  const [range, setRange] = useState<AnalyticsRange>("7days");
+  const [range, setRange] = useUrlState<AnalyticsRange>("range", "7days", RANGES.map(([r]) => r));
   const analytics = useSalesAnalytics(range);
   const invoicesOn = useFeature("invoices").access === true;
   const invoiceStats = useInvoiceStats(invoicesOn);

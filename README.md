@@ -94,3 +94,23 @@ one upgrade dialog explains why, so screens don't handle those cases themselves.
 
 Open question for BiTechTeam: should BiSupplyNet be on all plans (Product Blueprint) or Premium
 only (detailed explanation, current backend)? It's a single flag in `plans.ts`.
+
+## Back navigation
+
+Every screen gets two controls, from `components/layout/BackNav.tsx`:
+
+- **Back** returns to the exact previous view, with its filters, search and scroll position. If there's no earlier view in this tab, it goes up one level.
+- **Back to [Screen]** goes to the screen's start view from any depth. It shows only when you're more than one level deep.
+
+Placement: on desktop, top-left of the content area. On phones, "Back" is the arrow in the header, and "Back to [Screen]" sits at the top of the content. Neither shows on a screen's start view. Browser Back, phone Back and refresh all work, because every step is a real URL.
+
+## New-screen checklist
+
+- [ ] Route in `src/App.tsx` with `handle.section`. Unless it's a screen's start view, add `handle.back: back(parentPath, SCREENS.x)`. A test fails if a nested route has no `back`.
+- [ ] Each step or sub-view is its own URL (a route or a query). Filters, search, tabs and dates use `useUrlState`.
+- [ ] Forms use `useLeaveGuard(formState.isDirty)` and render `guard.dialog`. Call `guard.allow()` before navigating after a successful save.
+- [ ] After saving, use `useReturnTo()` to go back to a list, or `navigate(result, { replace: true })` for a "done" page, so Back never reopens a submitted form.
+- [ ] Design tokens only (no one-off colours or sizes). Mobile-first, checked at 390px and 1440px.
+- [ ] Keyboard and screen-reader accessible: labelled controls, visible focus.
+- [ ] Errors go through `errorMessage` / `ErrorNote`. Plan limits go through the upgrade dialog.
+- [ ] Tests cover the screen with the fake backend, including Back.

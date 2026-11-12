@@ -32,6 +32,8 @@ import {
   type Task,
   type TaskStatus,
 } from "@/lib/projects/api";
+import { useUrlState } from "@/lib/nav/useUrlState";
+import { useLeaveGuard } from "@/lib/nav/useLeaveGuard";
 
 const Loading = () => (
   <div className="flex justify-center py-16 text-ink-brand" role="status">
@@ -346,6 +348,7 @@ function TaskForm({ project, task }: { project: Project; task?: Task }) {
     resolver: zodResolver(taskSchema),
     defaultValues: { title: "", assignedTo: "", dueDate: "", priority: "medium", status: "todo", checklist: "", notes: "" },
   });
+  const guard = useLeaveGuard(formState.isDirty && !formState.isSubmitSuccessful);
   useEffect(() => {
     reset({
       title: task?.title ?? "",
@@ -372,7 +375,8 @@ function TaskForm({ project, task }: { project: Project; task?: Task }) {
       } else {
         const items = v.checklist.split("\n").map((s) => s.trim()).filter(Boolean);
         const created = await add.mutateAsync({ title: v.title, assignedTo: v.assignedTo || null, dueDate: v.dueDate || null, priority: v.priority, status: v.status, notes: v.notes || undefined, subtasks: items.length ? items : undefined });
-        navigate(`/projects/${project._id}/tasks/${created._id}/added`);
+        guard.allow();
+        navigate(`/projects/${project._id}/tasks/${created._id}/added`, { replace: true });
       }
     } catch (err) {
       if (!applyFieldErrors(err, setFieldError, ["title", "assignedTo", "dueDate", "priority", "status", "notes"])) setError(err);
@@ -382,6 +386,7 @@ function TaskForm({ project, task }: { project: Project; task?: Task }) {
   return (
     <Panel tone="pale" title={task ? "Edit task details" : "Create a task"}>
       <form noValidate onSubmit={onSubmit} className="flex flex-col gap-4">
+        {guard.dialog}
         <Field label="Title" required error={formState.errors.title?.message}>
           <TextInput placeholder="Enter task name" disabled={staffOnly && Boolean(task)} {...register("title")} />
         </Field>
@@ -484,6 +489,7 @@ function TaskForm({ project, task }: { project: Project; task?: Task }) {
                 onClick={async () => {
                   try {
                     await del.mutateAsync(task._id);
+                    guard.allow();
                     navigate(`/projects/${project._id}`, { replace: true });
                   } catch (err) {
                     setConfirmDelete(false);
@@ -598,10 +604,18 @@ const iso = (d: Date) => `${d.getFullYear()}-${String(d.getMonth() + 1).padStart
 
 export function ProjectsCalendarPage() {
   const navigate = useNavigate();
-  const [month, setMonth] = useState(() => {
+  // ?month=2026-11 keeps the month across Back and refresh.
+  const [monthKey, setMonthKey] = useUrlState<string>("month", "");
+  const month = useMemo(() => {
+    const m = /^(\d{4})-(\d{2})$/.exec(monthKey);
     const d = new Date();
-    return new Date(d.getFullYear(), d.getMonth(), 1);
-  });
+    return m ? new Date(Number(m[1]), Number(m[2]) - 1, 1) : new Date(d.getFullYear(), d.getMonth(), 1);
+  }, [monthKey]);
+  const setMonth = (d: Date) => {
+    const now = new Date();
+    const isNow = d.getFullYear() === now.getFullYear() && d.getMonth() === now.getMonth();
+    setMonthKey(isNow ? "" : `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}`);
+  };
   const start = month;
   const end = new Date(month.getFullYear(), month.getMonth() + 1, 0, 23, 59, 59);
   const tasks = useCalendarTasks(iso(start), end.toISOString());

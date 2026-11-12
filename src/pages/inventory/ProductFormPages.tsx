@@ -28,6 +28,8 @@ import { ErrorNote } from "@/components/feedback/ErrorNote";
 import { count, naira, shortDate } from "@/lib/format";
 import { useCan } from "@/lib/auth/useCan";
 import { cn } from "@/lib/cn";
+import { useLeaveGuard } from "@/lib/nav/useLeaveGuard";
+import { useReturnTo } from "@/lib/nav/history";
 
 const Loading = () => (
   <div className="flex justify-center py-16 text-ink-brand" role="status">
@@ -108,7 +110,6 @@ const stockHelp: Array<[string, string]> = [
 export function ProductFormPage() {
   const { id } = useParams();
   const editing = Boolean(id);
-  const navigate = useNavigate();
   const location = useLocation();
   const prefill = (location.state ?? {}) as Partial<BarcodeInfo>;
   const existing = useProduct(id);
@@ -130,6 +131,8 @@ export function ProductFormPage() {
       lowStockThreshold: 10,
     } as unknown as ProductValues,
   });
+  const guard = useLeaveGuard((formState.isDirty || Boolean(photo)) && !formState.isSubmitSuccessful);
+  const returnTo = useReturnTo();
 
   useEffect(() => {
     const p = existing.data;
@@ -153,11 +156,13 @@ export function ProductFormPage() {
         const { stockQuantity: _ignored, ...rest } = v;
         void _ignored;
         await update.mutateAsync({ ...clean(rest), sku: v.sku, barcode: v.barcode ?? "" } as never);
-        navigate("/inventory/products");
+        guard.allow();
+        returnTo("/inventory/products");
       } else {
         const product = await create.mutateAsync({ ...(clean(v) as ProductValues), image: prefill.image ?? undefined });
         if (photo) await uploadProductImage(product._id, photo).catch(() => undefined);
-        navigate("/inventory/products");
+        guard.allow();
+        returnTo("/inventory/products");
       }
     } catch (err) {
       if (err instanceof ApiError && err.status === 409) setError("sku", { message: "Another product already uses this SKU. Use a different one." });
@@ -170,6 +175,7 @@ export function ProductFormPage() {
 
   return (
     <div className="flex flex-col gap-6">
+      {guard.dialog}
       <PageTitle
         actions={
           editing && (
@@ -256,7 +262,8 @@ export function ProductFormPage() {
               onClick={async () => {
                 try {
                   await remove.mutateAsync(id!);
-                  navigate("/inventory/products", { replace: true });
+                  guard.allow();
+                  returnTo("/inventory/products");
                 } catch (err) {
                   setConfirmDelete(false);
                   setFormError(err);
@@ -279,17 +286,20 @@ export function AddFirstProduct() {
   const [formError, setFormError] = useState<unknown>(null);
   const schema = productSchema.extend({ sku: z.string().trim().max(40).optional(), lowStockThreshold: whole("Enter a number.").optional() });
   const { register, handleSubmit, setError, formState } = useForm<z.infer<typeof schema>>({ resolver: zodResolver(schema) });
+  const guard = useLeaveGuard(formState.isDirty && !formState.isSubmitSuccessful);
   const onSubmit = handleSubmit(async (v) => {
     setFormError(null);
     try {
       await create.mutateAsync(clean(v) as never);
-      navigate("/inventory/products");
+      guard.allow();
+      navigate("/inventory/products", { replace: true });
     } catch (err) {
       if (!applyFieldErrors(err, setError, ["name", "category", "sku", "barcode", "sellingPrice", "stockQuantity", "lowStockThreshold", "brand"])) setFormError(err);
     }
   });
   return (
     <div className="flex flex-col gap-6">
+      {guard.dialog}
       <PageTitle>Add your first inventory product</PageTitle>
       <p className="-mt-4 text-body-sm text-ink-muted">Start tracking products and stock from one place.</p>
       <IntroCard eyebrow="Inventory" title="Every sale reduces stock automatically, so you always know what you have." />
@@ -360,6 +370,7 @@ export function AdjustStockPage() {
     resolver: zodResolver(schema),
     defaultValues: { type: "increase", reason: "" } as unknown as Values,
   });
+  const guard = useLeaveGuard(formState.isDirty);
 
   const current = product.data?.stockQuantity ?? 0;
   const type = watch("type");
@@ -398,6 +409,7 @@ export function AdjustStockPage() {
       >
         Adjust stock quantity
       </PageTitle>
+      {guard.dialog}
       <p className="-mt-4 text-body-sm text-ink-muted">Record corrections and received inventory.</p>
       <IntroCard eyebrow="Workspace / Inventory" title="Every manual adjustment is recorded in the product audit trail." />
       <div className="grid gap-5 lg:grid-cols-[minmax(0,1.7fr)_minmax(0,1fr)]">

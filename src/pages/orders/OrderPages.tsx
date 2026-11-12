@@ -8,6 +8,7 @@ import { Button, ButtonLink, Field, SelectInput, Spinner, Status, TextInput } fr
 import { DetailRows, InfoStrip, IntroCard, KpiCard, PageTitle, Panel, TipList } from "@/components/page/Blocks";
 import { ErrorNote } from "@/components/feedback/ErrorNote";
 import { useProducts } from "@/lib/inventory/api";
+import { useUrlState } from "@/lib/nav/useUrlState";
 import {
   PAYMENT_METHODS,
   createInvoiceFromOrder,
@@ -27,6 +28,7 @@ import { applyFieldErrors } from "@/lib/api/errorMessage";
 import { useCan } from "@/lib/auth/useCan";
 import { count, naira, shortDate } from "@/lib/format";
 import { cn } from "@/lib/cn";
+import { useLeaveGuard } from "@/lib/nav/useLeaveGuard";
 
 const Loading = () => (
   <div className="flex justify-center py-16 text-ink-brand" role="status">
@@ -85,9 +87,10 @@ export function OrderTable({ orders, empty }: { orders: Order[]; empty: React.Re
 
 // 05.02 Orders & sales history
 export function OrdersPage() {
-  const [filter, setFilter] = useState<OrderFilter>("all");
-  const [q, setQ] = useState("");
-  const [query, setQuery] = useState("");
+  // Filter and search live in the URL, so Back and refresh return to this view.
+  const [filter, setFilter] = useUrlState<OrderFilter>("status", "all", FILTERS.map(([k]) => k));
+  const [query, setQuery] = useUrlState<string>("q", "");
+  const [q, setQ] = useState<string>(query);
   const orders = useOrders(filter, query);
   const stats = useOrderStats();
   const canCreate = useCan("createOrders");
@@ -222,6 +225,7 @@ export function CreateOrderPage() {
     } as unknown as OrderValues,
   });
   const { fields, append, remove } = useFieldArray({ control, name: "items" });
+  const guard = useLeaveGuard(formState.isDirty && !formState.isSubmitSuccessful);
   const byId = useMemo(() => new Map((products.data ?? []).map((p) => [p._id, p])), [products.data]);
 
   const watched = watch();
@@ -256,7 +260,8 @@ export function CreateOrderPage() {
         deliveryFee: v.deliveryFee || undefined,
         notes: v.notes || undefined,
       });
-      navigate(`/orders/${order._id}/created`, { state: { order } });
+      guard.allow();
+      navigate(`/orders/${order._id}/created`, { replace: true, state: { order } });
     } catch (err) {
       const data = (err as { data?: { productId?: string; available?: number } }).data;
       const n = data?.productId ? v.items.findIndex((i) => i.productId === data.productId) : -1;
@@ -270,6 +275,7 @@ export function CreateOrderPage() {
 
   return (
     <div className="flex flex-col gap-6">
+      {guard.dialog}
       <PageTitle>Create a sales order</PageTitle>
       <IntroCard eyebrow="New sale / Order creation" title="Record the sale. We'll keep inventory in sync.">
         Select items, quantity, customer and payment method before saving.
@@ -645,6 +651,7 @@ export function CancelOrderPage() {
   const cancel = useCancelOrder(order.data?._id ?? "");
   const [reason, setReason] = useState("");
   const [error, setError] = useState<unknown>(null);
+  const guard = useLeaveGuard(reason.trim() !== "");
   if (order.isLoading) return <Loading />;
   if (!order.data) return <ErrorNote error={order.error ?? true} fallback="We couldn't load this order. Please try again." onRetry={() => void order.refetch()} />;
   const o = order.data;
@@ -653,6 +660,7 @@ export function CancelOrderPage() {
     setError(null);
     try {
       await cancel.mutateAsync(reason.trim() || undefined);
+      guard.allow();
       navigate(`/orders/${o._id}/cancelled`, { replace: true });
     } catch (err) {
       setError(err);
@@ -661,6 +669,7 @@ export function CancelOrderPage() {
 
   return (
     <div className="flex flex-col gap-6">
+      {guard.dialog}
       <PageTitle>Order cancellation</PageTitle>
       <Banner tone="danger" eyebrow="Review required" title="Cancel this unfulfilled order?" body="Review the order and inventory changes before confirming." />
       <div className="grid gap-5 lg:grid-cols-[minmax(0,1.7fr)_minmax(0,1fr)]">

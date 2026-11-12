@@ -3,6 +3,7 @@ import { IconDiamond, IconSparkles, IconArrowUpRight } from "@tabler/icons-react
 import { Logo } from "@/components/brand/Logo";
 import { Status } from "@/components/ui";
 import { cn } from "@/lib/cn";
+import { BackBar, HeaderBackButton } from "./BackNav";
 
 // Authentication layout (Figma 01.xx).
 // Desktop: 570px brand panel + form column (645px).
@@ -129,12 +130,14 @@ export function AuthLayout({
 }: AuthLayoutProps) {
   return (
     <div className="flex min-h-dvh flex-col bg-surface-page lg:flex-row lg:bg-surface-card">
-      <header className="flex h-mobile-header items-center bg-brand-navy px-5 lg:hidden">
+      <header className="flex h-mobile-header items-center gap-2 bg-brand-navy px-5 lg:hidden">
+        <HeaderBackButton />
         <Logo tone="on-brand" compact />
       </header>
       {panel === "showcase" ? <ShowcasePanel /> : <SecurityPanel />}
       <main className="flex flex-1 justify-center px-5 py-8 lg:px-20 lg:py-16">
         <div className="flex w-full max-w-mobile-content flex-col gap-4 lg:max-w-auth-form lg:gap-0">
+          <BackBar className="mb-0 lg:mb-6" />
           <p className="text-action font-semibold uppercase text-ink-brand lg:mb-20">
             Secure access&nbsp;&nbsp;/&nbsp;&nbsp;BiManage
           </p>

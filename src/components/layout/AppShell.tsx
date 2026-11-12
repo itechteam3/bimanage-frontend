@@ -5,6 +5,7 @@ import { cn } from "@/lib/cn";
 import { Logo } from "@/components/brand/Logo";
 import { Avatar as AvatarImage, IconButton } from "@/components/ui";
 import { SIDEBAR_NAV, MOBILE_TABS, type NavItem } from "@/config/navigation";
+import { BackBar, HeaderBackButton } from "./BackNav";
 
 export interface ShellUser {
   name: string;
@@ -196,9 +197,12 @@ function MobileHeader({ user, navState, onLogout }: Pick<AppShellProps, "user" |
   return (
     <>
       <header className="sticky top-0 z-20 flex h-mobile-header items-center justify-between bg-brand-navy px-5 lg:hidden">
-        <Link to="/dashboard">
-          <Logo tone="on-brand" compact />
-        </Link>
+        <div className="flex items-center gap-2">
+          <HeaderBackButton />
+          <Link to="/dashboard">
+            <Logo tone="on-brand" compact />
+          </Link>
+        </div>
         <IconButton tone="on-brand" size="sm" label="Open menu" aria-expanded={open} icon={<IconMenu2 aria-hidden="true" className="size-6" />} onClick={() => setOpen(true)} />
       </header>
       {open && (
@@ -255,7 +259,10 @@ export function AppShell({ section, user, navState, onLogout, onChangePhoto, unr
         <DesktopHeader section={section} user={user} unread={unread} onLogout={onLogout} onChangePhoto={onChangePhoto} />
         <main id="main" className="relative flex-1 px-5 pb-28 pt-5 lg:px-12 lg:pb-12 lg:pt-6">
           <div aria-hidden="true" className="pointer-events-none absolute inset-x-0 top-0 h-52 bg-gradient-atmosphere" />
-          <div className="relative mx-auto w-full max-w-6xl">{children}</div>
+          <div className="relative mx-auto w-full max-w-6xl">
+            <BackBar />
+            {children}
+          </div>
         </main>
       </div>
       <MobileTabs />

@@ -10,6 +10,7 @@ import { characterTypes, MIN_PASSWORD } from "@/lib/auth/password";
 import { LEGAL } from "@/config/links";
 import { ApiError } from "@/lib/api/client";
 import { cooldownMessage, errorMessage } from "@/lib/api/errorMessage";
+import { useLeaveGuard } from "@/lib/nav/useLeaveGuard";
 
 // 01.02 Create an account (Figma 1882:1419 / 1888:2894); mismatch copy from 01.12.
 const schema = z
@@ -35,11 +36,13 @@ export function RegisterPage() {
   const navigate = useNavigate();
   const [formError, setFormError] = useState<string | null>(null);
   const { register, handleSubmit, setError, formState } = useForm<Values>({ resolver: zodResolver(schema) });
+  const guard = useLeaveGuard(formState.isDirty && !formState.isSubmitSuccessful);
 
   const onSubmit = handleSubmit(async ({ name, email, password }) => {
     setFormError(null);
     try {
       await authApi.register({ name: name.trim(), email: email.trim(), password });
+      guard.allow();
       navigate(`/verify?email=${encodeURIComponent(email.trim())}`, { state: { justRegistered: true } });
     } catch (err) {
       if (err instanceof ApiError && err.status === 400 && /email already in use/i.test(err.message)) {
@@ -103,6 +106,7 @@ export function RegisterPage() {
           <span className="hidden lg:inline">Next: choose Starting a Business or Existing Business onboarding.</span>
         </AuthNote>
       </form>
+      {guard.dialog}
     </AuthLayout>
   );
 }
