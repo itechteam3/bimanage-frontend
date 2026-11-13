@@ -3,9 +3,8 @@
 // what the UI shows). Change a flag here when BiTechTeam settles a plan
 // question — no component code changes needed.
 //
-// OPEN QUESTION (BiTechTeam): the Product Blueprint gives BiSupplyNet to
-// every plan; the detailed explanation and the backend give it to Premium
-// only. Until decided, follow the backend.
+// BiSupplyNet (decided 2026-11-13): Standard and Premium can buy from
+// wholesalers ("bisupplynet"); only Premium can sell ("bisupplynetSell").
 
 export type PlanId = "freemium" | "standard" | "premium";
 
@@ -21,6 +20,7 @@ export type Feature =
   | "invoices"
   | "messages"
   | "bisupplynet"
+  | "bisupplynetSell"
   | "notifications"
   | "profile"
   | "businessProfile"
@@ -56,7 +56,8 @@ export const PLAN_FEATURES: Record<PlanId, Partial<Record<Feature, Access>>> = {
     projects: true,
     invoices: true,
     messages: true,
-    bisupplynet: false, // ← open question, see above
+    bisupplynet: true, // Standard can buy (decision 2026-11-13)
+    bisupplynetSell: false,
     notifications: true,
     profile: true,
     businessProfile: true,
@@ -74,6 +75,7 @@ export const PLAN_FEATURES: Record<PlanId, Partial<Record<Feature, Access>>> = {
     invoices: true,
     messages: true,
     bisupplynet: true,
+    bisupplynetSell: true,
     notifications: true,
     profile: true,
     businessProfile: true,
@@ -126,7 +128,7 @@ export interface SubscriptionState {
  */
 export const STARTUP_PACKAGE_FEATURES: Record<"starter" | "standard" | "premium", Partial<Record<Feature, Access>>> = {
   starter: { ...PLAN_FEATURES.freemium, inventory: true, orders: true, tasks: true, projects: true, upload: true },
-  standard: { ...PLAN_FEATURES.standard, bisupplynet: true },
+  standard: { ...PLAN_FEATURES.standard },
   premium: { ...PLAN_FEATURES.premium },
 };
 

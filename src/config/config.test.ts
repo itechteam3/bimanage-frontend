@@ -22,9 +22,13 @@ describe("design tokens", () => {
 
 describe("plan gating config", () => {
   const future = new Date(Date.now() + 86_400_000).toISOString();
-  it("follows the backend: BiSupplyNet is Premium-only (open question)", () => {
-    expect(PLAN_FEATURES.standard.bisupplynet).toBe(false);
+  it("follows the backend: Standard can buy on BiSupplyNet, only Premium can sell", () => {
+    expect(PLAN_FEATURES.freemium.bisupplynet ?? false).toBe(false);
+    expect(PLAN_FEATURES.standard.bisupplynet).toBe(true);
+    expect(PLAN_FEATURES.standard.bisupplynetSell).toBe(false);
     expect(PLAN_FEATURES.premium.bisupplynet).toBe(true);
+    expect(PLAN_FEATURES.premium.bisupplynetSell).toBe(true);
+    expect(featureAccess({ plan: "freemium", startupPackage: "starter", startupPackageEndDate: future }, "bisupplynet")).toBe(false);
   });
   it("freemium store is view-only", () => {
     expect(featureAccess({ plan: "freemium" }, "store")).toBe("view_only");
