@@ -5,6 +5,10 @@ import { resetHistory } from "@/lib/nav/history";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { routes } from "@/App";
 import { AuthProvider } from "@/lib/auth/AuthProvider";
+import { RealtimeProvider } from "@/lib/realtime/RealtimeProvider";
+
+/** The QueryClient of the last renderApp() (for live-update tests). */
+export let testQueryClient: QueryClient | null = null;
 
 // A fake BiManage API for flow tests: "METHOD /path" → handler returning
 // [status, json]. Every call is recorded for assertions.
@@ -59,10 +63,13 @@ export function renderApp(path: string, state?: unknown) {
   const [pathname, search] = path.split("?");
   const router = createMemoryRouter(routes, { initialEntries: [{ pathname: pathname!, search: search ? `?${search}` : "", state }] });
   const client = new QueryClient({ defaultOptions: { queries: { retry: false } } });
+  testQueryClient = client;
   render(
     <QueryClientProvider client={client}>
       <AuthProvider>
-        <RouterProvider router={router} />
+        <RealtimeProvider>
+          <RouterProvider router={router} />
+        </RealtimeProvider>
       </AuthProvider>
     </QueryClientProvider>
   );

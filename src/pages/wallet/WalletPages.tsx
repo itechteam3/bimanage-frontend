@@ -7,6 +7,7 @@ import { IconAlertTriangle, IconCheck, IconDownload, IconLock, IconSearch, IconW
 import { Button, ButtonLink, EmptyState, Field, SelectInput, Spinner, Status, TextInput } from "@/components/ui";
 import { DetailRows, HelpPanel, IntroCard, KpiCard, PageTitle, Panel } from "@/components/page/Blocks";
 import { ErrorNote } from "@/components/feedback/ErrorNote";
+import { UpdatedNote } from "@/components/feedback/UpdatedNote";
 import { ApiError, saveBlob } from "@/lib/api/client";
 import { applyFieldErrors } from "@/lib/api/errorMessage";
 import { useAuth } from "@/lib/auth/AuthProvider";
@@ -118,6 +119,7 @@ export function WalletOverviewPage() {
 }
 
 function Overview({ w }: { w: Wallet }) {
+  const { dataUpdatedAt } = useWallet();
   const txs = useWalletTransactions({ limit: "5" });
   const f = walletFigures(w);
   const total = Math.max(f.available.value + f.onHold.value, 0);
@@ -137,6 +139,7 @@ function Overview({ w }: { w: Wallet }) {
       <p className="-mt-4 text-body-sm text-ink-muted">Track earnings, money on hold and payouts.</p>
       <WalletTabs />
       <IntroCard eyebrow={EYEBROW} title="Store earnings become available when an order is completed (or 7 days after delivery)." />
+      <UpdatedNote updatedAt={dataUpdatedAt} className="-mb-2" />
       <div className="grid grid-cols-2 gap-3 lg:grid-cols-4 lg:gap-4">
         <KpiCard tone="stock" label="Total earnings" value={naira(f.totalEarned.value)} caption="Store payments (after BiManage's 3%)" badge={badge(f.totalEarned)} note={testNote(f.totalEarned.test)} />
         <KpiCard tone="revenue" label="Available" value={naira(f.available.value)} caption={f.includeTest ? `Available to withdraw: ${naira(f.withdrawable)}` : "Ready to withdraw"} badge={badge(f.available)} note={testNote(f.available.test)} />

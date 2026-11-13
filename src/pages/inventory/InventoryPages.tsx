@@ -1,4 +1,6 @@
 import { useMemo, useState } from "react";
+import { UpdatedNote, newRowClass } from "@/components/feedback/UpdatedNote";
+import { useNewItems } from "@/lib/realtime/useLiveList";
 import { Link, useLocation, useNavigate } from "react-router-dom";
 import { IconDownload, IconPlus, IconSearch, IconScan, IconFileSpreadsheet, IconAlertTriangle } from "@tabler/icons-react";
 import { Button, ButtonLink, Field, Spinner, TextInput, buttonClasses } from "@/components/ui";
@@ -144,6 +146,7 @@ export function InventoryOverviewPage() {
 // 09.11 Inventory products (register)
 export function ProductsPage() {
   const products = useProducts();
+  const fresh = useNewItems(products.data?.map((p) => p._id));
   const canEdit = useCan("manageInventory");
   const exp = useInventoryExport();
   const [q, setQ] = useUrlState<string>("q", "");
@@ -181,6 +184,7 @@ export function ProductsPage() {
           </div>
           {products.isLoading && <Loading />}
           <ErrorNote error={products.error} fallback="We couldn't load your products. Please try again." onRetry={() => void products.refetch()} />
+          {products.data && <UpdatedNote updatedAt={products.dataUpdatedAt} className="mt-3" />}
           {products.data && (
             <div className="mt-4 overflow-x-auto">
               <table className="w-full min-w-[34rem] border-separate border-spacing-0 text-left text-body-sm">
@@ -195,7 +199,7 @@ export function ProductsPage() {
                 </thead>
                 <tbody>
                   {list.map((p, i) => (
-                    <tr key={p._id} className={cn(i % 2 === 1 && "bg-surface-pale")}>
+                    <tr key={p._id} data-new={fresh.has(p._id) || undefined} className={cn(i % 2 === 1 && "bg-surface-pale", fresh.has(p._id) && newRowClass)}>
                       <td className="rounded-l-lg px-3 py-4">
                         <Link to={`/inventory/products/${p._id}`} className="font-semibold text-ink-strong hover:underline">
                           {p.name}

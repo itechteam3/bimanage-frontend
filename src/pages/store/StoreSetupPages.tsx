@@ -56,7 +56,7 @@ export function CreateStorePage() {
   const guard = useLeaveGuard(formState.isDirty && !formState.isSubmitSuccessful);
   useEffect(() => {
     const p = profile.data;
-    if (p) reset({ storeName: p.businessName ?? "", category: "", description: "", contactEmail: p.businessEmail ?? "", contactPhone: p.businessPhone ?? "" });
+    if (p) reset({ storeName: p.businessName ?? "", category: "", description: "", contactEmail: p.businessEmail ?? "", contactPhone: p.businessPhone ?? "" }, { keepDirtyValues: true });
   }, [profile.data, reset]);
 
   if (mine.isLoading) return <Loading />;
@@ -516,7 +516,7 @@ function DomainSettings({ store }: { store: Store }) {
   const guard = useLeaveGuard(formState.isDirty);
   const d: DomainState | undefined = domain.data;
   useEffect(() => {
-    reset({ domain: d?.customDomain ?? "" });
+    reset({ domain: d?.customDomain ?? "" }, { keepDirtyValues: true });
   }, [d?.customDomain, reset]);
 
   if (domain.isLoading) return <Loading />;

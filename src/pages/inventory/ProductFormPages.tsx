@@ -146,7 +146,7 @@ export function ProductFormPage() {
       stockQuantity: p.stockQuantity,
       lowStockThreshold: thresholdOf(p),
       brand: p.brand ?? "",
-    });
+    }, { keepDirtyValues: true });
   }, [existing.data, reset]);
 
   const onSubmit = handleSubmit(async (v) => {

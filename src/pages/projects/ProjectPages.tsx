@@ -358,7 +358,7 @@ function TaskForm({ project, task }: { project: Project; task?: Task }) {
       status: task?.status ?? "todo",
       checklist: "",
       notes: task?.notes ?? "",
-    });
+    }, { keepDirtyValues: true });
     setSaved(false);
   }, [task, reset]);
 
