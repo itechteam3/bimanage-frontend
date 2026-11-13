@@ -5,12 +5,7 @@ import type { StatusTone } from "@/components/ui";
 // Help & support (Figma 12.05–12.17): tickets, BiTechTeam service requests
 // and the public help centre (FAQs). Every query key starts with "support".
 
-export interface Attachment {
-  url: string;
-  name: string;
-  type: string;
-  size: number;
-}
+import type { Attachment } from "@/lib/attachments";
 
 export type TicketCategory = "billing" | "wallet" | "orders" | "store" | "inventory" | "bisupplynet" | "account" | "technical" | "other";
 export type TicketPriority = "low" | "medium" | "high";
@@ -159,18 +154,6 @@ export const serviceLabel = (s?: string | null) => lookup(SERVICE_TYPES, s);
 export const startLabel = (s?: string | null) => lookup(PREFERRED_STARTS, s);
 export const ticketStatus = (s: string) => TICKET_STATUS[s as TicketStatus] ?? { label: s, tone: "neutral" as StatusTone };
 export const requestStatus = (s: string) => REQUEST_STATUS[s as ServiceRequestStatus] ?? { label: s, tone: "neutral" as StatusTone };
-
-// ── Attachments (POST /upload/attachment, multipart "file") ──────────────
-
-export const ATTACHMENT_TYPES = ["image/jpeg", "image/png", "image/webp", "application/pdf"];
-export const ATTACHMENT_MAX_BYTES = 5 * 1024 * 1024;
-export const ATTACHMENT_MAX_FILES = 5;
-
-export const uploadAttachment = (file: File) => {
-  const form = new FormData();
-  form.append("file", file, file.name);
-  return api<Attachment>("/upload/attachment", { method: "POST", body: form });
-};
 
 // ── Queries ──────────────────────────────────────────────────────────────
 

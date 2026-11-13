@@ -14,10 +14,8 @@ import { useUrlState } from "@/lib/nav/useUrlState";
 import { SUPPORT_EMAIL } from "@/config/links";
 import { shortDate } from "@/lib/format";
 import { cn } from "@/lib/cn";
+import { ATTACHMENT_TYPES, MAX_ATTACHMENTS as ATTACHMENT_MAX_FILES, attachmentProblem, uploadAttachment, type Attachment } from "@/lib/attachments";
 import {
-  ATTACHMENT_MAX_BYTES,
-  ATTACHMENT_MAX_FILES,
-  ATTACHMENT_TYPES,
   PREFERRED_STARTS,
   PRIORITIES,
   SERVICE_TYPES,
@@ -28,7 +26,6 @@ import {
   serviceLabel,
   startLabel,
   ticketStatus,
-  uploadAttachment,
   useCloseTicket,
   useCreateServiceRequest,
   useCreateTicket,
@@ -40,7 +37,6 @@ import {
   useTicket,
   useTickets,
   useVoteFaq,
-  type Attachment,
   type PreferredStart,
   type ServiceRequest,
   type ServiceType,
@@ -124,12 +120,9 @@ function AttachmentPicker({ value, onChange, onBusy, label = "Attachments" }: { 
         setError(`You can attach up to ${ATTACHMENT_MAX_FILES} files.`);
         break;
       }
-      if (!ATTACHMENT_TYPES.includes(f.type)) {
-        setError(`${f.name} isn't a JPG, PNG, WebP or PDF file.`);
-        continue;
-      }
-      if (f.size > ATTACHMENT_MAX_BYTES) {
-        setError(`${f.name} is larger than 5 MB.`);
+      const problem = attachmentProblem(f);
+      if (problem) {
+        setError(problem);
         continue;
       }
       try {

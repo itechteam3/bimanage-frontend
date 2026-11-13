@@ -17,7 +17,7 @@ export const MAX_ATTACHMENTS = 5;
 
 /** A plain reason a file can't be attached, or null. */
 export function attachmentProblem(file: File): string | null {
-  if (!ATTACHMENT_TYPES.includes(file.type)) return `${file.name}: attach a JPG, PNG, WEBP or PDF.`;
+  if (!ATTACHMENT_TYPES.includes(file.type)) return `${file.name} isn't a JPG, PNG, WebP or PDF file.`;
   if (file.size > ATTACHMENT_MAX_BYTES) return `${file.name} is larger than 5 MB.`;
   return null;
 }
