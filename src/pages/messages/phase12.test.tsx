@@ -217,6 +217,28 @@ describe("storefront guest chat (12.03)", () => {
     expect(await screen.findByText("Yes, size M is in stock.")).toBeInTheDocument();
   });
 
+  it("a live reply doesn't crash the page in browsers where scrollIntoView returns a Promise", async () => {
+    // Chrome now returns a Promise from scrollIntoView; an effect that returns it breaks React.
+    const original = Element.prototype.scrollIntoView;
+    Element.prototype.scrollIntoView = function () {
+      return Promise.resolve() as unknown as void;
+    };
+    try {
+      chatToken.set("elijahapparel", "k".repeat(32));
+      let msgs = [{ _id: "m1", content: "Hello", mine: true }];
+      fb.handlers["GET /store-chat/elijahapparel/session"] = () => [200, CHAT(msgs)];
+      renderApp("/s/elijahapparel/chat");
+      expect(await screen.findByText("Hello")).toBeInTheDocument();
+      await waitFor(() => expect(sockets.latest("/shop")).toBeTruthy());
+      msgs = [...msgs, { _id: "m2", content: "Reply from the store", mine: false }];
+      sockets.latest("/shop")!.fire("chat:update", {});
+      expect(await screen.findByText("Reply from the store")).toBeInTheDocument();
+      expect(screen.queryByText(/unexpected application error/i)).not.toBeInTheDocument();
+    } finally {
+      Element.prototype.scrollIntoView = original;
+    }
+  });
+
   it("an emailed link (#t=…) opens the chat; an expired one goes back to the start form", async () => {
     window.history.replaceState(null, "", "/s/elijahapparel/chat#t=" + "e".repeat(32));
     fb.handlers["GET /store-chat/elijahapparel/session"] = () => [404, { message: "expired" }];

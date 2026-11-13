@@ -1,6 +1,6 @@
 import { useEffect, useMemo, useRef, useState, type FormEvent, type KeyboardEvent, type ReactNode } from "react";
 import { Link, useNavigate, useParams } from "react-router-dom";
-import { IconAlertTriangle, IconArrowLeft, IconBell, IconBellOff, IconFileText, IconFlag, IconLock, IconMessages, IconPaperclip, IconPlus, IconSearch, IconSend, IconShieldCheck, IconTrash, IconX } from "@tabler/icons-react";
+import { IconAlertTriangle, IconBell, IconBellOff, IconFileText, IconFlag, IconLock, IconMessages, IconPaperclip, IconPlus, IconSearch, IconSend, IconShieldCheck, IconTrash, IconX } from "@tabler/icons-react";
 import { Avatar, Button, ButtonLink, Dialog, EmptyState, Field, Spinner, Status, TextArea, TextInput } from "@/components/ui";
 import { PageTitle } from "@/components/page/Blocks";
 import { ErrorNote } from "@/components/feedback/ErrorNote";
@@ -49,16 +49,16 @@ export function MessagesPage() {
     <div className="flex flex-col gap-5">
       <div className={cn(id && "hidden lg:block")}>
         <PageTitle actions={<NewMessageButton disabled={!canMessage} />}>Messages and conversations</PageTitle>
-        <p className="-mt-3 text-body-sm text-ink-muted">Chat with customers, team members and wholesale partners. Messages arrive in real time.</p>
+        <p className="mt-1 text-body-sm text-ink-muted">Chat with customers, team members and wholesale partners. Messages arrive in real time.</p>
       </div>
-      <div className="grid gap-4 lg:grid-cols-[minmax(0,22rem)_minmax(0,1fr)] desktop:grid-cols-[minmax(0,22rem)_minmax(0,1fr)_16rem]">
-        <section aria-label="Conversations" className={cn(id && "hidden lg:block")}>
+      <div className="grid grid-cols-[minmax(0,1fr)] gap-4 lg:grid-cols-[minmax(0,22rem)_minmax(0,1fr)] desktop:grid-cols-[minmax(0,22rem)_minmax(0,1fr)_16rem]">
+        <section aria-label="Conversations" className={cn("min-w-0", id && "hidden lg:block")}>
           <ConversationList activeId={id} />
         </section>
         {id ? (
           <ThreadView key={id} id={id} canMessage={canMessage === true} />
         ) : (
-          <div className="hidden rounded-2xl border border-line-card bg-surface-card lg:block">
+          <div className="hidden min-w-0 rounded-2xl border border-line-card bg-surface-card lg:block">
             <EmptyState className="border-0" icon={<IconMessages className="size-7" />} title="Choose a conversation" body="Or start a new one with a teammate or supplier." />
           </div>
         )}
@@ -111,7 +111,7 @@ function ConversationList({ activeId }: { activeId?: string }) {
       <Field label="Search">
         <TextInput type="search" placeholder="Find a person, business or order" value={typed} onChange={(e) => setTyped(e.target.value)} trailing={<IconSearch aria-hidden="true" className="size-4 shrink-0 text-ink-muted" />} />
       </Field>
-      <div role="tablist" aria-label="Filter conversations" className="-mx-1 flex gap-1 overflow-x-auto px-1">
+      <div role="tablist" aria-label="Filter conversations" className="flex flex-wrap gap-1.5">
         {FILTERS.map(([k, label]) => (
           <button key={k} role="tab" aria-selected={filter === k} type="button" onClick={() => setFilter(k)} className={cn("min-h-9 shrink-0 rounded-full px-3 text-caption font-semibold", filter === k ? "bg-brand-navy text-ink-on-brand" : "bg-surface-pale text-ink-muted hover:text-ink-brand")}>
             {label}
@@ -221,7 +221,6 @@ function NewMessageButton({ disabled }: { disabled: boolean }) {
 // ── Thread ───────────────────────────────────────────────────────────────
 function ThreadView({ id, canMessage }: { id: string; canMessage: boolean }) {
   const thread = useThread(id);
-  const navigate = useNavigate();
   const first = thread.data?.pages[0];
   // Oldest first for reading (each server page is oldest→newest; later pages are older).
   const messages = useMemo(() => [...(thread.data?.pages ?? [])].reverse().flatMap((p: Thread) => p.messages), [thread.data]);
@@ -251,11 +250,8 @@ function ThreadView({ id, canMessage }: { id: string; canMessage: boolean }) {
   }
   const c = first.conversation;
   return (
-    <section aria-label={`Conversation with ${c.title}`} className="flex min-h-[32rem] flex-col rounded-2xl border border-line-card bg-surface-card">
+    <section aria-label={`Conversation with ${c.title}`} className="flex min-h-[32rem] min-w-0 flex-col rounded-2xl border border-line-card bg-surface-card">
       <header className="flex items-center gap-3 border-b border-line-subtle px-4 py-3">
-        <button type="button" onClick={() => navigate("/messages")} className="flex size-10 items-center justify-center rounded-full hover:bg-surface-pale lg:hidden" aria-label="Back to conversations">
-          <IconArrowLeft aria-hidden="true" className="size-5" />
-        </button>
         <Avatar name={c.title} />
         <div className="min-w-0 flex-1">
           <h2 className="truncate text-body-lg font-semibold text-ink-strong">{c.title}</h2>
@@ -270,7 +266,7 @@ function ThreadView({ id, canMessage }: { id: string; canMessage: boolean }) {
         </p>
       )}
       <ConversationActions id={id} c={c} />
-      <div className="flex flex-1 flex-col gap-3 overflow-y-auto px-4 py-4" aria-live="polite">
+      <div className="flex min-w-0 flex-1 flex-col gap-3 overflow-y-auto px-4 py-4" aria-live="polite">
         {thread.hasNextPage && (
           <Button variant="outlined" size="md" className="self-center" loading={thread.isFetchingNextPage} onClick={() => void thread.fetchNextPage()}>
             Load earlier messages
@@ -307,7 +303,7 @@ function Bubble({ m }: { m: ChatMessage }) {
         {m.mine ? "You" : m.sender.name} · {new Date(m.createdAt).toLocaleTimeString("en-NG", { hour: "numeric", minute: "2-digit" })}
         {inboxTime(m.createdAt) !== new Date(m.createdAt).toLocaleTimeString("en-NG", { hour: "numeric", minute: "2-digit" }) ? ` · ${shortDate(m.createdAt)}` : ""}
       </span>
-      {m.content && <p className={cn("whitespace-pre-wrap break-words rounded-2xl px-4 py-2 text-body-sm", m.mine ? "bg-brand-navy text-ink-on-brand" : "bg-surface-pale text-ink-strong")}>{m.content}</p>}
+      {m.content && <p className={cn("max-w-full whitespace-pre-wrap break-words [overflow-wrap:anywhere] rounded-2xl px-4 py-2 text-body-sm", m.mine ? "bg-brand-navy text-ink-on-brand" : "bg-surface-pale text-ink-strong")}>{m.content}</p>}
       {m.attachments.map((a) => (
         <AttachmentLink key={a.url} a={a} />
       ))}
@@ -317,9 +313,9 @@ function Bubble({ m }: { m: ChatMessage }) {
 
 export function AttachmentLink({ a }: { a: Attachment }) {
   return (
-    <a href={a.url} target="_blank" rel="noopener noreferrer" className="flex items-center gap-2 rounded-lg border border-line-card bg-surface-card px-3 py-2 text-body-sm text-ink-brand hover:bg-surface-pale">
+    <a href={a.url} target="_blank" rel="noopener noreferrer" className="flex max-w-full items-center gap-2 rounded-lg border border-line-card bg-surface-card px-3 py-2 text-body-sm text-ink-brand hover:bg-surface-pale">
       {isImage(a) ? <img src={a.url} alt="" className="size-10 rounded object-cover" /> : <IconFileText aria-hidden="true" className="size-5" />}
-      <span className="max-w-48 truncate">{a.name || "Attachment"}</span>
+      <span className="min-w-0 max-w-48 truncate">{a.name || "Attachment"}</span>
       {a.size ? <span className="text-caption text-ink-muted">{sizeLabel(a.size)}</span> : null}
     </a>
   );
@@ -402,7 +398,7 @@ function Composer({ id }: { id: string }) {
         <label className="sr-only" htmlFor={`composer-${id}`}>
           Message
         </label>
-        <TextArea id={`composer-${id}`} rows={1} maxLength={5000} placeholder="Type a message" value={text} onChange={(e) => setText(e.target.value)} onKeyDown={onKey} className="max-h-40 min-h-11 flex-1" />
+        <textarea id={`composer-${id}`} rows={1} maxLength={5000} placeholder="Type a message" value={text} onChange={(e) => setText(e.target.value)} onKeyDown={onKey} className="max-h-40 min-h-11 min-w-0 flex-1 resize-none rounded-xl border border-line-default bg-surface-card px-4 py-2.5 text-body-sm text-ink-strong outline-none placeholder:text-ink-muted focus:border-brand-navy focus:shadow-focus" />
         <Button type="submit" size="md" disabled={!canSend} loading={send.isPending} aria-label="Send">
           <IconSend aria-hidden="true" className="size-4" />
         </Button>
