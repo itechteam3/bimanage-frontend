@@ -183,6 +183,20 @@ describe("notifications", () => {
     await waitFor(() => expect((saved as Record<string, { email: boolean }> | undefined)?.messages?.email).toBe(false));
     expect(await screen.findByText("Saved.")).toBeInTheDocument();
   });
+
+  it("task emails can be turned off (Tasks category)", async () => {
+    const all = { inApp: true, email: true };
+    let saved: unknown;
+    fb.handlers["GET /notifications/preferences"] = () => [200, { preferences: { orders: all, inventory: all, messages: all, tasks: all, subscriptions: all, withdrawals: all }, mandatory: ["security", "payment"], categories: ["orders", "inventory", "messages", "tasks", "subscriptions", "withdrawals"] }];
+    fb.handlers["PUT /notifications/preferences"] = (b) => ((saved = b), [200, { preferences: { ...b } }]);
+    const user = userEvent.setup();
+    renderApp("/notifications/preferences");
+    const email = await screen.findByRole("checkbox", { name: "Tasks assigned to you: email" });
+    expect(email).toBeChecked();
+    await user.click(email);
+    await user.click(screen.getByRole("button", { name: "Save preferences" }));
+    await waitFor(() => expect((saved as Record<string, { email: boolean }> | undefined)?.tasks?.email).toBe(false));
+  });
 });
 
 describe("storefront guest chat (12.03)", () => {
