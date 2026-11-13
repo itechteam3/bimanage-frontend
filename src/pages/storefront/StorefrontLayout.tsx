@@ -134,9 +134,13 @@ function ChatButton() {
   return (
     <Link
       to={`/s/${slug}/chat`}
-      className="fixed bottom-6 right-5 z-30 flex min-h-12 items-center gap-2 rounded-full bg-brand-navy px-5 text-action font-semibold text-ink-on-brand shadow-floating hover:opacity-95 lg:bottom-8 lg:right-8"
+      aria-label="Chat with the store"
+      // Phones: above the bottom navigation, short label. Desktop: bottom corner.
+      className="fixed bottom-28 right-4 z-30 flex min-h-12 items-center gap-2 rounded-full bg-brand-navy px-4 text-action font-semibold text-ink-on-brand shadow-floating hover:opacity-95 lg:bottom-8 lg:right-8 lg:px-5"
     >
-      <IconMessageCircle aria-hidden="true" className="size-5" /> Chat with the store
+      <IconMessageCircle aria-hidden="true" className="size-5" />
+      <span className="lg:hidden">Chat</span>
+      <span className="hidden lg:inline">Chat with the store</span>
     </Link>
   );
 }
