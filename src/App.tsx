@@ -77,6 +77,24 @@ const SubscriptionPaymentPage = sub("SubscriptionPaymentPage");
 const CreditsPage = sub("CreditsPage");
 const TrialPage = sub("TrialPage");
 const BillingPage = sub("BillingPage");
+const msg = (name: keyof typeof import("@/pages/messages/index")) => lazy(() => import("@/pages/messages/index").then((m) => ({ default: m[name] })));
+const MessagesPage = msg("MessagesPage");
+const sup = (name: keyof typeof import("@/pages/support/index")) => lazy(() => import("@/pages/support/index").then((m) => ({ default: m[name] })));
+const SupportCentrePage = sup("SupportCentrePage");
+const TicketsPage = sup("TicketsPage");
+const NewTicketPage = sup("NewTicketPage");
+const TicketDetailPage = sup("TicketDetailPage");
+const HelpCentrePage = sup("HelpCentrePage");
+const HelpArticlePage = sup("HelpArticlePage");
+const NewServiceRequestPage = sup("NewServiceRequestPage");
+const ServiceRequestDetailPage = sup("ServiceRequestDetailPage");
+const rev = (name: keyof typeof import("@/pages/reviews/index")) => lazy(() => import("@/pages/reviews/index").then((m) => ({ default: m[name] })));
+const PublicReviewsPage = rev("PublicReviewsPage");
+const WriteReviewPage = rev("WriteReviewPage");
+const ReviewSubmittedPage = rev("ReviewSubmittedPage");
+const ntf = (name: keyof typeof import("@/pages/notifications/index")) => lazy(() => import("@/pages/notifications/index").then((m) => ({ default: m[name] })));
+const NotificationsPage = ntf("NotificationsPage");
+const NotificationPreferencesPage = ntf("NotificationPreferencesPage");
 const WalletOverviewPage = wal("WalletOverviewPage");
 const BankAccountPage = wal("BankAccountPage");
 const SchedulePage = wal("SchedulePage");
@@ -108,6 +126,7 @@ const CartPage = front("CartPage");
 const StoreCheckoutPage = front("CheckoutPage");
 const StorePaymentPage = front("PaymentPage");
 const TrackOrderPage = front("TrackOrderPage");
+const StoreChatPage = front("StoreChatPage");
 
 /** A group of routes behind one plan feature, with an in-page loading state. */
 const gated = (feature: Feature, title: string) => (
@@ -169,10 +188,7 @@ const comingSoon = (
   [
     ["/bisupplynet/*", "BiSupplyNet"],
     ["/feli", "FELI AI"],
-    ["/support/*", "Support"],
     ["/settings/*", "Settings"],
-    ["/notifications", "Notifications"],
-    ["/messages", "Messages"],
     ["/more", "More"],
   ] as const
 ).map(([path, section]) => ({ path, element: <ComingSoonPage />, handle: { section } }));
@@ -308,6 +324,33 @@ export const routes = [
               { path: "/store/*", element: <Navigate to="/store" replace /> },
             ],
           },
+          // Messages and notifications (Figma 12.01–12.04, 12.08, 12.10, 12.11, 12.13)
+          {
+            element: (
+              <Suspense fallback={<SectionLoading />}>
+                <Outlet />
+              </Suspense>
+            ),
+            children: [
+              { path: "/messages", element: <MessagesPage />, handle: { section: "Messages" } },
+              { path: "/messages/:id", element: <MessagesPage />, handle: { section: "Messages", back: back("/messages", SCREENS.messages) } },
+              { path: "/notifications", element: <NotificationsPage />, handle: { section: "Notifications" } },
+              { path: "/notifications/preferences", element: <NotificationPreferencesPage />, handle: { section: "Notifications", back: back("/notifications", SCREENS.notifications) } },
+              // Support, help centre, service requests (12.05–12.07, 12.09, 12.12, 12.14, 12.17)
+              { path: "/support", element: <SupportCentrePage />, handle: { section: "Support" } },
+              { path: "/support/tickets", element: <TicketsPage />, handle: { section: "Support", back: back("/support", SCREENS.support) } },
+              { path: "/support/tickets/new", element: <NewTicketPage />, handle: { section: "Support", back: back("/support", SCREENS.support) } },
+              { path: "/support/tickets/:id", element: <TicketDetailPage />, handle: { section: "Support", back: back("/support/tickets", SCREENS.support) } },
+              { path: "/support/help", element: <HelpCentrePage />, handle: { section: "Support", back: back("/support", SCREENS.support) } },
+              { path: "/support/help/:id", element: <HelpArticlePage />, handle: { section: "Support", back: back("/support/help", SCREENS.support) } },
+              { path: "/support/service-requests/new", element: <NewServiceRequestPage />, handle: { section: "Support", back: back("/support", SCREENS.support) } },
+              { path: "/support/service-requests/:id", element: <ServiceRequestDetailPage />, handle: { section: "Support", back: back("/support", SCREENS.support) } },
+              { path: "/support/*", element: <Navigate to="/support" replace /> },
+              // Writing a platform review (12.16 / 12.18)
+              { path: "/reviews/write", element: <WriteReviewPage />, handle: { section: "Reviews", back: back("/reviews", SCREENS.reviews) } },
+              { path: "/reviews/submitted", element: <ReviewSubmittedPage />, handle: { section: "Reviews", back: back("/reviews", SCREENS.reviews) } },
+            ],
+          },
           // Subscriptions & usage (Figma 07.01–07.11)
           {
             element: (
@@ -364,7 +407,21 @@ export const routes = [
           { path: "checkout", element: <StoreCheckoutPage />, handle: { back: back("/s/:slug/cart", SCREENS.shop) } },
           { path: "payment", element: <StorePaymentPage />, handle: { back: back("/s/:slug", SCREENS.shop) } },
           { path: "track", element: <TrackOrderPage />, handle: { back: back("/s/:slug", SCREENS.shop) } },
+          { path: "chat", element: <StoreChatPage />, handle: { back: back("/s/:slug", SCREENS.shop) } },
         ],
+      },
+      // Public platform reviews (12.15): readable signed out
+      {
+        path: "/reviews",
+        element: (
+          <Suspense fallback={<Loading />}>
+            <div className="min-h-dvh bg-surface-page">
+              <main className="mx-auto w-full max-w-5xl px-5 py-8 lg:py-12">
+                <PublicReviewsPage />
+              </main>
+            </div>
+          </Suspense>
+        ),
       },
       // Design review
       { path: "/ui-kit/*", element: <UiKitPage /> },

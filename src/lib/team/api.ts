@@ -45,14 +45,15 @@ export const PERMISSIONS: Array<[Permission, string, string]> = [
   ["viewAnalytics", "Analytics", "See sales analytics and reports"],
   ["accessBiSupplyNet", "BiSupplyNet", "Buy from wholesalers"],
   ["manageSettings", "Settings", "Business profile and settings"],
+  ["manageMessages", "Messages", "Read and answer customer and supplier messages"],
   ["manageTeam", "Team", "Invite and manage teammates (owner grants)"],
 ];
 
 /** Defaults per role (mirror of the backend's rolePermissions). */
 export const ROLE_DEFAULTS: Record<InviteRole, Record<Permission, boolean>> = {
-  admin: { viewDashboard: true, manageInventory: true, createOrders: true, deleteOrders: true, manageProjects: true, viewAnalytics: true, manageTeam: true, manageInvoices: true, accessBiSupplyNet: true, manageSettings: true },
-  manager: { viewDashboard: true, manageInventory: true, createOrders: true, deleteOrders: false, manageProjects: true, viewAnalytics: true, manageTeam: false, manageInvoices: true, accessBiSupplyNet: true, manageSettings: false },
-  staff: { viewDashboard: true, manageInventory: false, createOrders: true, deleteOrders: false, manageProjects: true, viewAnalytics: false, manageTeam: false, manageInvoices: false, accessBiSupplyNet: false, manageSettings: false },
+  admin: { viewDashboard: true, manageInventory: true, createOrders: true, deleteOrders: true, manageProjects: true, viewAnalytics: true, manageTeam: true, manageInvoices: true, accessBiSupplyNet: true, manageSettings: true, manageMessages: true },
+  manager: { viewDashboard: true, manageInventory: true, createOrders: true, deleteOrders: false, manageProjects: true, viewAnalytics: true, manageTeam: false, manageInvoices: true, accessBiSupplyNet: true, manageSettings: false, manageMessages: true },
+  staff: { viewDashboard: true, manageInventory: false, createOrders: true, deleteOrders: false, manageProjects: true, viewAnalytics: false, manageTeam: false, manageInvoices: false, accessBiSupplyNet: false, manageSettings: false, manageMessages: false },
 };
 
 /** Figma 04.01 "Permissions overview" and the Access column. */
