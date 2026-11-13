@@ -229,6 +229,21 @@ describe("11.01 action proposal review", () => {
   });
 });
 
+describe("unanswered messages", () => {
+  it("marks a message FELI didn't answer and can send it again", async () => {
+    fb.handlers["GET /feli/history"] = () =>
+      history({ messages: [{ role: "user", content: "first" }, { role: "user", content: "second" }, { role: "assistant", content: "Answer to second" }, { role: "user", content: "hi" }] });
+    fb.handlers["POST /feli/chat"] = () => reply({ reply: "Hello again" });
+    const user = userEvent.setup();
+    renderApp("/feli");
+    await screen.findByText("Answer to second");
+    expect(screen.getAllByText("FELI didn't answer this one.")).toHaveLength(2);
+    const again = screen.getAllByRole("button", { name: "Send again" });
+    await user.click(again[again.length - 1]!);
+    await waitFor(() => expect(last("POST /feli/chat")?.body).toEqual({ message: "hi" }));
+  });
+});
+
 describe("11.02 create task review", () => {
   it("edits the title, picks a project and a teammate, and approves", async () => {
     fb.handlers["GET /feli/history"] = () => history({ proposal: TASK });
