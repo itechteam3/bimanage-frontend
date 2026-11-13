@@ -117,7 +117,7 @@ function ProjectDialog({ project, onClose, onSaved }: { project?: Project; onClo
           <SelectInput {...register("lead")}>
             <option value="">No lead yet</option>
             {(people.data ?? []).map((p) => (
-              <option key={p._id} value={p._id}>{p.name}</option>
+              <option key={p._id} value={p._id}>{p.label ?? p.name}</option>
             ))}
           </SelectInput>
         </Field>
@@ -394,7 +394,7 @@ function TaskForm({ project, task }: { project: Project; task?: Task }) {
           <SelectInput disabled={staffOnly} {...register("assignedTo")}>
             <option value="">Choose team member</option>
             {(people.data ?? []).map((p) => (
-              <option key={p._id} value={p._id}>{p.name}</option>
+              <option key={p._id} value={p._id}>{p.label ?? p.name}</option>
             ))}
           </SelectInput>
         </Field>

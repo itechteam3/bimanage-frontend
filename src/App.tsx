@@ -194,11 +194,14 @@ const comingSoon = (
     ["/more", "More"],
   ] as const
 ).map(([path, section]) => ({ path, element: <ComingSoonPage />, handle: { section } }));
+import { RouteErrorPage } from "@/components/feedback/RouteErrorPage";
+
 const authed = (el: React.ReactNode) => <RequireAuth>{el}</RequireAuth>;
 
 export const routes = [
   {
     element: <RootLayout />,
+    errorElement: <RouteErrorPage />,
     children: [
       { path: "/", element: <Navigate to="/dashboard" replace /> },
       // Authentication (Figma 01.xx)
