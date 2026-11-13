@@ -12,6 +12,7 @@ import {
   isLimitError,
   isLimited,
   lagosTime,
+  proposalsOf,
   tierName,
   useCancelFeliAction,
   useClearFeliHistory,
@@ -26,6 +27,7 @@ import {
   type FeliUsage,
 } from "@/lib/feli/api";
 import { LimitCard, RestrictionCard } from "./FeliStates";
+import { cleanFeliText } from "@/lib/feli/clean";
 import { paramRows, useNameLookup } from "./FeliReviewPage";
 
 // 11.05 FELI assistant: the conversation, suggestions, your access and usage,
@@ -109,14 +111,14 @@ function ChatPanel({
   const [confirmClear, setConfirmClear] = useState(false);
   const clear = useClearFeliHistory();
   const messages = history.data?.messages ?? [];
-  const proposal = history.data?.proposal ?? null;
+  const proposals = proposalsOf(history.data);
   const pending = chat.isPending ? chat.variables : null;
   const endRef = useRef<HTMLDivElement>(null);
 
   // scrollIntoView can return a Promise in Chrome: never return it from the effect.
   useEffect(() => {
     endRef.current?.scrollIntoView?.({ block: "end", behavior: "smooth" });
-  }, [messages.length, pending, proposal?.id]);
+  }, [messages.length, pending, proposals[0]?.id]);
 
   const send = (message: string) => {
     const m = message.trim();
@@ -181,7 +183,13 @@ function ChatPanel({
               </p>
             </>
           )}
-          {proposal && !pending && <ProposalCard proposal={proposal} />}
+          {!pending && proposals.length > 0 && (
+            <div className="flex min-w-0 flex-col gap-3" aria-label="Suggestions to review">
+              {proposals.map((p, i) => (
+                <ProposalCard key={p.id} proposal={p} position={proposals.length > 1 ? `${i + 1} of ${proposals.length}` : undefined} />
+              ))}
+            </div>
+          )}
           <div ref={endRef} />
         </div>
       )}
@@ -331,7 +339,8 @@ function inline(text: string): ReactNode[] {
 
 export function RichText({ text }: { text: string }) {
   const blocks: Array<{ kind: "p" | "ul"; lines: string[] }> = [];
-  for (const raw of text.split(/\r?\n/)) {
+  // Safety net: never show action markup, ids, code or dashes (the server cleans too).
+  for (const raw of cleanFeliText(text).split(/\r?\n/)) {
     const line = raw.trimEnd();
     const bullet = /^\s*[-*•]\s+(.*)$/.exec(line);
     const lastBlock = blocks.at(-1);
@@ -365,14 +374,14 @@ export function RichText({ text }: { text: string }) {
 }
 
 /** A suggestion waiting for review, shown at the end of the chat. */
-function ProposalCard({ proposal }: { proposal: FeliProposal }) {
+function ProposalCard({ proposal, position }: { proposal: FeliProposal; position?: string }) {
   const cancel = useCancelFeliAction();
   const names = useNameLookup(proposal.action === "create_task");
   const rows = paramRows(proposal, names).slice(0, 4);
   return (
     <section aria-label="Suggested action" className="min-w-0 self-stretch rounded-2xl border border-line-strong bg-surface-card p-4">
       <p className="flex items-center gap-2 text-caption font-semibold uppercase text-ink-brand">
-        <IconSparkles aria-hidden="true" className="size-4" /> FELI suggests an action
+        <IconSparkles aria-hidden="true" className="size-4" /> FELI suggests an action{position ? ` · ${position}` : ""}
       </p>
       <h3 className="mt-1 break-words text-body-lg font-semibold text-ink-strong">{proposal.label}</h3>
       {rows.length > 0 && (
@@ -387,10 +396,10 @@ function ProposalCard({ proposal }: { proposal: FeliProposal }) {
       )}
       <p className="mt-2 text-caption text-ink-muted">Nothing changes until you review and approve it.</p>
       <div className="mt-3 flex flex-wrap gap-2">
-        <ButtonLink to="/feli/review" size="md">
+        <ButtonLink to={`/feli/review?id=${encodeURIComponent(proposal.id)}`} size="md">
           Review and approve
         </ButtonLink>
-        <Button variant="outlined" size="md" loading={cancel.isPending} loadingText="Cancelling…" onClick={() => cancel.mutate()}>
+        <Button variant="outlined" size="md" loading={cancel.isPending} loadingText="Cancelling…" onClick={() => cancel.mutate(proposal.id)}>
           Cancel suggestion
         </Button>
       </div>

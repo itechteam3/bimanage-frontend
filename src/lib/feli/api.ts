@@ -50,6 +50,9 @@ export interface FeliMessage {
 
 export interface FeliHistory {
   messages: FeliMessage[];
+  /** Suggestions waiting for review (FELI can propose several in one reply). */
+  proposals?: FeliProposal[];
+  /** First of proposals (older servers send only this). */
   proposal: FeliProposal | null;
   usage: FeliUsage;
 }
@@ -62,6 +65,7 @@ export interface FeliAccess {
 
 export interface FeliReply {
   reply: string;
+  proposals?: FeliProposal[];
   proposal: FeliProposal | null;
   restriction: FeliRestriction | null;
   handoff: FeliHandoff | null;
@@ -96,6 +100,9 @@ export const lagosTime = (iso?: string | null) => {
   const d = new Date(iso);
   return Number.isNaN(d.getTime()) ? "" : d.toLocaleString("en-GB", { weekday: "short", day: "numeric", month: "short", hour: "2-digit", minute: "2-digit", timeZone: "Africa/Lagos" });
 };
+
+/** The suggestions waiting for review (new list, or the older single one). */
+export const proposalsOf = (h?: Pick<FeliHistory, "proposals" | "proposal"> | null): FeliProposal[] => (h?.proposals?.length ? h.proposals : h?.proposal ? [h.proposal] : []);
 
 export const isLimited = (u?: FeliUsage | null) => Boolean(u && !u.unlimited && u.remaining !== null && u.remaining <= 0);
 
@@ -141,8 +148,9 @@ export function useFeliChat() {
       const now = new Date().toISOString();
       qc.setQueryData<FeliHistory>(feliKeys.history, (h) => ({
         messages: [...(h?.messages ?? []), { role: "user", content: message, createdAt: now }, { role: "assistant", content: res.reply, createdAt: now, restriction: res.restriction, handoff: res.handoff }],
-        // A new reply replaces any earlier suggestion (the server keeps only the latest).
-        proposal: res.proposal ?? null,
+        // A new reply replaces any earlier suggestions (the server keeps only the latest reply's).
+        proposals: proposalsOf(res),
+        proposal: proposalsOf(res)[0] ?? null,
         usage: res.usage ?? h?.usage ?? { unlimited: false, limit: FELI_DAILY_MESSAGES, used: 0, remaining: FELI_DAILY_MESSAGES, resetsAt: null },
       }));
       setUsage(res.usage);
@@ -175,8 +183,14 @@ export function useConfirmFeliAction() {
 export function useCancelFeliAction() {
   const qc = useQueryClient();
   return useMutation({
-    mutationFn: () => api<{ cancelled: boolean }>("/feli/actions/pending", { method: "DELETE" }),
-    onSuccess: () => qc.setQueryData<FeliHistory>(feliKeys.history, (h) => (h ? { ...h, proposal: null } : h)),
+    // One suggestion (by id), or all of them.
+    mutationFn: (id?: string) => api<{ cancelled: boolean }>(`/feli/actions/pending${id ? `?id=${encodeURIComponent(id)}` : ""}`, { method: "DELETE" }),
+    onSuccess: (_res, id) =>
+      qc.setQueryData<FeliHistory>(feliKeys.history, (h) => {
+        if (!h) return h;
+        const left = id ? proposalsOf(h).filter((p) => p.id !== id) : [];
+        return { ...h, proposals: left, proposal: left[0] ?? null };
+      }),
   });
 }
 
@@ -184,7 +198,7 @@ export function useClearFeliHistory() {
   const qc = useQueryClient();
   return useMutation({
     mutationFn: () => api<{ message: string }>("/feli/history", { method: "DELETE" }),
-    onSuccess: () => qc.setQueryData<FeliHistory>(feliKeys.history, (h) => (h ? { ...h, messages: [], proposal: null } : h)),
+    onSuccess: () => qc.setQueryData<FeliHistory>(feliKeys.history, (h) => (h ? { ...h, messages: [], proposals: [], proposal: null } : h)),
   });
 }
 
