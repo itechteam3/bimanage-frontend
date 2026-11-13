@@ -6,6 +6,7 @@ import { useBusinessProfile, useOnboardingStatus, useUnreadCounts } from "@/lib/
 import type { NavItem, Permission } from "@/config/navigation";
 import { Spinner } from "@/components/ui";
 import { PhotoDialog } from "@/components/profile/PhotoDialog";
+import { useSubscription } from "@/lib/workspace/subscription";
 
 // Signed-in pages render inside this. Routes declare their breadcrumb with
 // `handle: { section: "Dashboard" }`. Owners who haven't chosen an onboarding
@@ -19,6 +20,9 @@ export function WorkspaceLayout() {
   const onboarding = useOnboardingStatus(isOwner);
   const unread = useUnreadCounts();
   const profile = useBusinessProfile();
+  // Start the plan check now, alongside the other start-up requests, so a
+  // plan-gated page doesn't wait for onboarding first (saved ~1.7s live).
+  useSubscription();
   const [photoOpen, setPhotoOpen] = useState(false);
 
   const section =

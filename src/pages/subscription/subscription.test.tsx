@@ -111,7 +111,7 @@ describe("07.06 plan and usage", () => {
   it("Freemium: credits used today, by action, with the price list from the API", async () => {
     renderApp("/subscription");
     expect(await screen.findByText("Freemium · Free")).toBeInTheDocument();
-    expect(screen.getByText("30 of 100 credits")).toBeInTheDocument();
+    expect(await screen.findByText("30 of 100 credits")).toBeInTheDocument(); // usage may arrive after the plan
     expect(screen.getByText("25 credits")).toBeInTheDocument();
     expect(screen.getByText("5 credits (once a day)")).toBeInTheDocument();
   });
