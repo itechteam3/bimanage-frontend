@@ -54,10 +54,21 @@ export function UpgradeDialog() {
           <Button variant="outlined" onClick={close}>
             Not now
           </Button>
+          {reason.kind === "credits" && (
+            <Button
+              variant="outlined"
+              onClick={() => {
+                close();
+                navigate("/subscription/credits");
+              }}
+            >
+              See today's usage
+            </Button>
+          )}
           <Button
             onClick={() => {
               close();
-              navigate("/subscription");
+              navigate("/subscription/plans");
             }}
           >
             See plans

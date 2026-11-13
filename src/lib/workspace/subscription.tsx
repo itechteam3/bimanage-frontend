@@ -17,7 +17,20 @@ export interface CurrentSubscription {
   isStartupPackageExpired?: boolean;
   access?: { source: "trial" | "startup_package" | "plan"; tier: string; unlimitedCredits: boolean };
   features?: Partial<Record<Feature, Access>>;
-  credits?: { daily: number; used: number; remaining: number; resetsAt: string };
+  credits?: { daily: number; used: number; remaining: number; resetsAt: string; unlimited?: boolean };
+  isTrialUsed?: boolean;
+  // Paid plans (07.xx, backend #33)
+  billingCycle?: "monthly" | "yearly" | null;
+  paymentMode?: "test" | "live" | null;
+  currentPeriodStart?: string | null;
+  currentPeriodEnd?: string | null;
+  cancelAtPeriodEnd?: boolean;
+  pastDueSince?: string | null;
+  graceEndsAt?: string | null;
+  pendingChange?: { plan: "standard" | "premium"; billingCycle: "monthly" | "yearly"; effectiveAt: string } | null;
+  /** What the current paid plan costs per cycle (0 on Freemium); from the server. */
+  price?: number;
+  canManageBilling?: boolean;
 }
 
 export const useSubscription = () =>
@@ -53,7 +66,7 @@ export function FeatureGate({ feature, title, children }: { feature: Feature; ti
         title={`${title} isn't included in your plan`}
         body="Upgrade, or choose a startup package, to unlock it. Everything you've set up so far stays as it is."
         action={
-          <ButtonLink to="/subscription" size="md">
+          <ButtonLink to="/subscription/plans" size="md">
             See plans
           </ButtonLink>
         }
