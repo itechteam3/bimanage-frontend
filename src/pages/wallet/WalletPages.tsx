@@ -4,7 +4,7 @@ import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
 import { IconAlertTriangle, IconCheck, IconDownload, IconLock, IconSearch, IconWallet } from "@tabler/icons-react";
-import { Button, ButtonLink, EmptyState, Field, SelectInput, Spinner, Status, TextInput } from "@/components/ui";
+import { BankPicker, Button, ButtonLink, EmptyState, Field, SelectInput, Spinner, Status, TextInput } from "@/components/ui";
 import { DetailRows, HelpPanel, IntroCard, KpiCard, PageTitle, Panel } from "@/components/page/Blocks";
 import { ErrorNote } from "@/components/feedback/ErrorNote";
 import { ApiError, saveBlob } from "@/lib/api/client";
@@ -236,7 +236,7 @@ function BankAccount({ w }: { w: Wallet }) {
   const [holder, setHolder] = useState<{ state: "idle" | "checking" | "ok" | "failed"; name?: string; message?: string }>({ state: "idle" });
   const [formError, setFormError] = useState<unknown>(null);
   const [saved, setSaved] = useState(false);
-  const { register, handleSubmit, watch, setError, formState, reset } = useForm<z.infer<typeof bankSchema>>({ resolver: zodResolver(bankSchema), defaultValues: { bankCode: w.bank?.bankCode ?? "", accountNumber: "" } });
+  const { register, handleSubmit, watch, setError, setValue, formState, reset } = useForm<z.infer<typeof bankSchema>>({ resolver: zodResolver(bankSchema), defaultValues: { bankCode: w.bank?.bankCode ?? "", accountNumber: "" } });
   const guard = useLeaveGuard(formState.isDirty && !formState.isSubmitSuccessful);
   const bankCode = watch("bankCode");
   const accountNumber = watch("accountNumber");
@@ -288,15 +288,8 @@ function BankAccount({ w }: { w: Wallet }) {
               <p className="text-body-sm text-ink-secondary">Payouts aren&apos;t available yet, so bank accounts can&apos;t be linked. Please check back later.</p>
             ) : (
               <div className="grid gap-4 md:grid-cols-2 md:gap-x-10 md:gap-y-6">
-                <Field label="Bank name" required error={formState.errors.bankCode?.message}>
-                  <SelectInput disabled={banks.isLoading} {...register("bankCode")}>
-                    <option value="">{banks.isLoading ? "Loading banks…" : "Choose your bank"}</option>
-                    {(banks.data ?? []).map((b) => (
-                      <option key={b.code} value={b.code}>
-                        {b.name}
-                      </option>
-                    ))}
-                  </SelectInput>
+                <Field label="Bank name" required error={formState.errors.bankCode?.message} hint="Type to search">
+                  <BankPicker banks={banks.data ?? []} loading={banks.isLoading} disabled={banks.isLoading} value={bankCode} onChange={(code) => setValue("bankCode", code, { shouldDirty: true, shouldValidate: true })} />
                 </Field>
                 <Field label="Account number" required error={formState.errors.accountNumber?.message} hint="10 digits (NUBAN)">
                   <TextInput inputMode="numeric" autoComplete="off" maxLength={10} {...register("accountNumber")} />

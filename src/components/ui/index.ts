@@ -8,3 +8,4 @@ export { OtpInput } from "./OtpInput";
 export { Spinner } from "./Spinner";
 export { Avatar, initialsOf } from "./Avatar";
 export { EmailSuggestion } from "./EmailSuggestion";
+export { BankPicker, type Bank } from "./BankPicker";
