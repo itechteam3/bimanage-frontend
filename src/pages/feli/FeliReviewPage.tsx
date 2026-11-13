@@ -1,5 +1,5 @@
 import { useState, type ReactNode } from "react";
-import { Link, useNavigate } from "react-router-dom";
+import { Link, useNavigate, useSearchParams } from "react-router-dom";
 import { useFieldArray, useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
@@ -15,7 +15,7 @@ import { useProjects } from "@/lib/projects/api";
 import { usePeople } from "@/lib/team/api";
 import { naira, shortDate } from "@/lib/format";
 import { cn } from "@/lib/cn";
-import { actionLabel, restrictionOf, useCancelFeliAction, useConfirmFeliAction, useFeliHistory, type FeliProposal, type FeliResult } from "@/lib/feli/api";
+import { actionLabel, proposalsOf, restrictionOf, useCancelFeliAction, useConfirmFeliAction, useFeliHistory, type FeliProposal, type FeliResult } from "@/lib/feli/api";
 import { RestrictionCard } from "./FeliStates";
 
 // 11.01 Action proposal review, 11.02 Create task review, and the invoice
@@ -111,12 +111,22 @@ export function paramRows(p: FeliProposal, names: NameLookup = {}): Array<[strin
 
 const RESULT_LINK: Record<string, string> = { task: "Open the project", ticket: "View the ticket", invoice: "Open the invoice", order: "View the order" };
 
+/** /feli/review?id=…: one suggestion at a time (a fresh page for each id). */
 export function FeliReviewPage() {
+  const [params] = useSearchParams();
+  const id = params.get("id") ?? "";
+  return <ReviewOne key={id} id={id} />;
+}
+
+function ReviewOne({ id }: { id: string }) {
   const history = useFeliHistory();
   const confirm = useConfirmFeliAction();
   const cancel = useCancelFeliAction();
   const navigate = useNavigate();
-  const proposal = history.data?.proposal ?? null;
+  const all = proposalsOf(history.data);
+  const proposal = (id ? all.find((p) => p.id === id) : all[0]) ?? null;
+  // After approving, offer the next suggestion that's still waiting.
+  const next = all.find((p) => p.id !== id && p.id !== proposal?.id) ?? null;
   const restriction = restrictionOf(confirm.error);
   const handled = confirm.error instanceof ApiError && confirm.error.status === 409;
   const isTask = proposal?.action === "create_task";
@@ -127,7 +137,7 @@ export function FeliReviewPage() {
     setDoneAction(proposal!.action);
     return confirm.mutateAsync({ proposalId: proposal!.id, params });
   };
-  const onCancel = () => cancel.mutate(undefined, { onSuccess: () => navigate("/feli") });
+  const onCancel = () => cancel.mutate(proposal?.id, { onSuccess: () => navigate("/feli") });
 
   const title = isTask ? "FELI task creation review" : isInvoice ? "FELI invoice draft review" : "Review FELI suggested action";
   const header = (
@@ -138,7 +148,7 @@ export function FeliReviewPage() {
   );
 
   let body: ReactNode;
-  if (confirm.data) body = <ResultCard result={confirm.data.result} action={doneAction} />;
+  if (confirm.data) body = <ResultCard result={confirm.data.result} action={doneAction} nextId={next?.id} />;
   else if (restriction) body = <RestrictionCard restriction={restriction} />;
   else if (handled)
     body = (
@@ -553,7 +563,7 @@ function InvoiceReview({ proposal, approve, onCancel, cancelling }: { proposal: 
 }
 
 // ── Done ─────────────────────────────────────────────────────────────────
-function ResultCard({ result, action }: { result: FeliResult; action: string }) {
+function ResultCard({ result, action, nextId }: { result: FeliResult; action: string; nextId?: string }) {
   const to = safeLink(result.link);
   return (
     <section aria-label="Action complete" className="flex min-w-0 flex-col items-start gap-3 rounded-2xl border border-line-card bg-surface-card p-6 shadow-card">
@@ -568,6 +578,11 @@ function ResultCard({ result, action }: { result: FeliResult; action: string }) 
         {to && (
           <ButtonLink to={to} size="md">
             {RESULT_LINK[result.kind] ?? "Open it"}
+          </ButtonLink>
+        )}
+        {nextId && (
+          <ButtonLink to={`/feli/review?id=${encodeURIComponent(nextId)}`} size="md">
+            Review the next suggestion
           </ButtonLink>
         )}
         <ButtonLink to="/feli" size="md" variant="outlined">

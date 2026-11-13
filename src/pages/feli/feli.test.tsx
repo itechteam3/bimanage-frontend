@@ -229,6 +229,55 @@ describe("11.01 action proposal review", () => {
   });
 });
 
+describe("nothing internal is ever shown (safety net)", () => {
+  const ID = "64e000000000000000c3a55d";
+  it("strips cut-off action markup, ids, JSON, model names and dashes from a reply", () => {
+    render(
+      <RichText
+        text={`Here are tasks — one per person.\n- **Dev Elijah** – Draft the email.\nLet me know 9–5.\nRuns on openai/gpt-oss-20b.\n[FELI_ACTION]{"action":"create_task","params":{"projectId":"${ID}","assignedTo":"${ID}","title":"Draft launch email`}
+      />
+    );
+    const text = document.body.textContent ?? "";
+    expect(text).not.toMatch(/FELI_|projectId|assignedTo|[0-9a-f]{24}|[{}]|gpt-oss|openai|[–—]|--/);
+    expect(text).toContain("Here are tasks, one per person.");
+    expect(text).toContain("Draft the email.");
+    expect(text).toContain("9-5");
+  });
+});
+
+describe("several suggestions in one reply", () => {
+  const T2 = { ...TASK, id: "p3", params: { ...TASK.params, title: "Update the catalogue" } };
+  it("shows a review card for each; cancelling one keeps the others", async () => {
+    fb.handlers["GET /feli/history"] = () => history({ messages: [{ role: "assistant", content: "I've prepared these 2 for you to review." }], proposals: [TASK, T2], proposal: TASK });
+    let cancelledId: string | null = "";
+    fb.handlers["DELETE /feli/actions/pending"] = (_b, _h, u) => ((cancelledId = u.searchParams.get("id")), [200, { cancelled: true }]);
+    const user = userEvent.setup();
+    renderApp("/feli");
+    const cards = await screen.findAllByRole("region", { name: "Suggested action" });
+    expect(cards).toHaveLength(2);
+    expect(within(cards[0]!).getByText(/1 of 2/)).toBeInTheDocument();
+    expect(within(cards[1]!).getByRole("link", { name: "Review and approve" })).toHaveAttribute("href", "/feli/review?id=p3");
+    await user.click(within(cards[0]!).getByRole("button", { name: "Cancel suggestion" }));
+    await waitFor(() => expect(screen.getAllByRole("region", { name: "Suggested action" })).toHaveLength(1));
+    expect(cancelledId).toBe("p1");
+    expect(screen.getByText("Update the catalogue")).toBeInTheDocument();
+  });
+
+  it("the review page opens the chosen suggestion and offers the next one after approving", async () => {
+    let waiting = [TASK, T2];
+    fb.handlers["GET /feli/history"] = () => history({ proposals: waiting, proposal: waiting[0] ?? null });
+    fb.handlers["GET /projects"] = () => [200, []];
+    fb.handlers["GET /settings/team/people"] = () => [200, []];
+    fb.handlers["POST /feli/actions/confirm"] = () => ((waiting = [TASK]), [200, { result: { kind: "task", id: "k1", label: "Update the catalogue", link: "/projects/pr1" } }]);
+    const user = userEvent.setup();
+    renderApp("/feli/review?id=p3");
+    expect(await screen.findByLabelText(/Task name/)).toHaveValue("Update the catalogue");
+    await user.click(screen.getByRole("button", { name: "Create task" }));
+    expect(await screen.findByRole("link", { name: "Review the next suggestion" })).toHaveAttribute("href", "/feli/review?id=p1");
+    expect(last("POST /feli/actions/confirm")?.body).toMatchObject({ proposalId: "p3" });
+  });
+});
+
 describe("unanswered messages", () => {
   it("marks a message FELI didn't answer and can send it again", async () => {
     fb.handlers["GET /feli/history"] = () =>
