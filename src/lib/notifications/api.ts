@@ -17,7 +17,7 @@ export interface AppNotification {
   createdAt: string;
 }
 
-export type PreferenceCategory = "orders" | "inventory" | "messages" | "subscriptions" | "withdrawals";
+export type PreferenceCategory = "orders" | "inventory" | "messages" | "tasks" | "subscriptions" | "withdrawals";
 export type Preferences = Record<PreferenceCategory, { inApp: boolean; email: boolean }>;
 
 export const notificationKeys = {
@@ -71,6 +71,7 @@ export const CATEGORY_INFO: Record<PreferenceCategory, { label: string; detail: 
   orders: { label: "New orders and payments", detail: "New order, payment confirmation or order change" },
   inventory: { label: "Inventory and stock", detail: "Low-stock alerts and important sales milestones" },
   messages: { label: "Messages and team", detail: "New messages and team invitation updates" },
+  tasks: { label: "Tasks assigned to you", detail: "When someone gives you a task. Several at once come as one email" },
   subscriptions: { label: "Subscriptions", detail: "Trial reminders and expiry alerts, including the 3-day warning" },
   withdrawals: { label: "Withdrawals and disputes", detail: "Payout status and dispute changes" },
 };

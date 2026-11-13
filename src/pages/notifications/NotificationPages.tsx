@@ -48,6 +48,7 @@ const TYPE_LABEL: Record<string, string> = {
   team: "Team",
   support: "Support",
   review: "Review",
+  task: "Task",
   withdrawal: "Payout",
   security: "Security",
   business_tip: "Tip",
