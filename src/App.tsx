@@ -88,6 +88,9 @@ const HelpCentrePage = sup("HelpCentrePage");
 const HelpArticlePage = sup("HelpArticlePage");
 const NewServiceRequestPage = sup("NewServiceRequestPage");
 const ServiceRequestDetailPage = sup("ServiceRequestDetailPage");
+const feli = (name: keyof typeof import("@/pages/feli/index")) => lazy(() => import("@/pages/feli/index").then((m) => ({ default: m[name] })));
+const FeliAssistantPage = feli("FeliAssistantPage");
+const FeliReviewPage = feli("FeliReviewPage");
 const rev = (name: keyof typeof import("@/pages/reviews/index")) => lazy(() => import("@/pages/reviews/index").then((m) => ({ default: m[name] })));
 const PublicReviewsPage = rev("PublicReviewsPage");
 const WriteReviewPage = rev("WriteReviewPage");
@@ -187,7 +190,6 @@ const guest = (el: React.ReactNode) => <GuestOnly>{el}</GuestOnly>;
 const comingSoon = (
   [
     ["/bisupplynet/*", "BiSupplyNet"],
-    ["/feli", "FELI AI"],
     ["/settings/*", "Settings"],
     ["/more", "More"],
   ] as const
@@ -346,6 +348,10 @@ export const routes = [
               { path: "/support/service-requests/new", element: <NewServiceRequestPage />, handle: { section: "Support", back: back("/support", SCREENS.support) } },
               { path: "/support/service-requests/:id", element: <ServiceRequestDetailPage />, handle: { section: "Support", back: back("/support", SCREENS.support) } },
               { path: "/support/*", element: <Navigate to="/support" replace /> },
+              // FELI AI assistant (11.01–11.05)
+              { path: "/feli", element: <FeliAssistantPage />, handle: { section: "FELI AI" } },
+              { path: "/feli/review", element: <FeliReviewPage />, handle: { section: "FELI AI", back: back("/feli", SCREENS.feli) } },
+              { path: "/feli/*", element: <Navigate to="/feli" replace /> },
               // Writing a platform review (12.16 / 12.18)
               { path: "/reviews/write", element: <WriteReviewPage />, handle: { section: "Reviews", back: back("/reviews", SCREENS.reviews) } },
               { path: "/reviews/submitted", element: <ReviewSubmittedPage />, handle: { section: "Reviews", back: back("/reviews", SCREENS.reviews) } },
