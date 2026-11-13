@@ -73,6 +73,7 @@ export const SCREENS = {
   messages: { label: "Messages", to: "/messages" },
   notifications: { label: "Notifications", to: "/notifications" },
   support: { label: "Support", to: "/support" },
+  feli: { label: "FELI AI", to: "/feli" },
   reviews: { label: "Reviews", to: "/reviews" },
   shop: { label: "Shop", to: "/s/:slug" },
 } satisfies Record<string, Screen>;

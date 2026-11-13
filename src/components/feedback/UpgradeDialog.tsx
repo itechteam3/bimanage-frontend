@@ -1,5 +1,5 @@
-import { useEffect, useState } from "react";
-import { useNavigate } from "react-router-dom";
+import { useEffect, useRef, useState } from "react";
+import { useLocation, useNavigate } from "react-router-dom";
 import { IconBolt, IconLock } from "@tabler/icons-react";
 import { apiEvents, type UpgradeReason } from "@/lib/api/events";
 import { Button, Dialog } from "@/components/ui";
@@ -18,7 +18,12 @@ export function UpgradeDialog() {
   const [reason, setReason] = useState<UpgradeReason | null>(null);
   const navigate = useNavigate();
 
-  useEffect(() => apiEvents.on("upgrade-required", setReason), []);
+  const { pathname } = useLocation();
+  const path = useRef(pathname);
+  path.current = pathname;
+
+  // The FELI screen shows its own daily-limit state (11.03) in place.
+  useEffect(() => apiEvents.on("upgrade-required", (r) => (r.kind === "feli-limit" && path.current.startsWith("/feli") ? undefined : setReason(r))), []);
 
   if (!reason) return null;
   const close = () => setReason(null);

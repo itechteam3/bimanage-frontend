@@ -103,7 +103,7 @@ export const projectKeys = {
   calendar: (from: string, to: string) => ["projects", "calendar", from, to] as const,
 };
 
-export const useProjects = () => useQuery({ queryKey: projectKeys.list, queryFn: () => api<Project[]>("/projects") });
+export const useProjects = (enabled = true) => useQuery({ queryKey: projectKeys.list, queryFn: () => api<Project[]>("/projects"), enabled });
 export const useProjectStats = () => useQuery({ queryKey: projectKeys.stats, queryFn: () => api<ProjectStats>("/projects/stats") });
 export const useProject = (id: string | undefined) =>
   useQuery({ queryKey: projectKeys.one(id ?? ""), queryFn: () => api<Project>(`/projects/${id}`), enabled: Boolean(id) });
