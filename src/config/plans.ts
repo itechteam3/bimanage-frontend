@@ -32,10 +32,15 @@ export type Feature =
 export type Access = boolean | "view_only";
 
 export const PLAN_FEATURES: Record<PlanId, Partial<Record<Feature, Access>>> = {
+  // Figma 07.06 / 07.07 (backend #32): inventory, orders and analytics are
+  // open on Freemium, paid for with daily credits.
   freemium: {
     dashboard: true,
     store: "view_only",
     settings: true,
+    inventory: true,
+    orders: true,
+    analytics: true,
     notifications: true,
     profile: true,
     businessProfile: true,

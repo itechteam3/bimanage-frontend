@@ -69,6 +69,14 @@ const InviteSentPage = work("InviteSentPage");
 // Online store, merchant side (Phase 8, Figma 08.01–08.10) loads as one chunk.
 // Wallet & payouts (Figma 06.01–06.10) loads as one chunk.
 const wal = (name: keyof typeof import("@/pages/wallet/index")) => lazy(() => import("@/pages/wallet/index").then((m) => ({ default: m[name] })));
+const sub = (name: keyof typeof import("@/pages/subscription/index")) => lazy(() => import("@/pages/subscription/index").then((m) => ({ default: m[name] })));
+const SubscriptionOverviewPage = sub("SubscriptionOverviewPage");
+const PlansPage = sub("PlansPage");
+const ChangePlanPage = sub("ChangePlanPage");
+const SubscriptionPaymentPage = sub("SubscriptionPaymentPage");
+const CreditsPage = sub("CreditsPage");
+const TrialPage = sub("TrialPage");
+const BillingPage = sub("BillingPage");
 const WalletOverviewPage = wal("WalletOverviewPage");
 const BankAccountPage = wal("BankAccountPage");
 const SchedulePage = wal("SchedulePage");
@@ -162,7 +170,6 @@ const comingSoon = (
     ["/bisupplynet/*", "BiSupplyNet"],
     ["/feli", "FELI AI"],
     ["/support/*", "Support"],
-    ["/subscription", "Subscription"],
     ["/settings/*", "Settings"],
     ["/notifications", "Notifications"],
     ["/messages", "Messages"],
@@ -299,6 +306,24 @@ export const routes = [
               { path: "/store/orders", element: <StoreOrdersPage />, handle: { section: "Online Store", back: back("/store", SCREENS.store) } },
               { path: "/store/orders/:id", element: <StoreOrderDetailPage />, handle: { section: "Online Store", back: back("/store/orders", SCREENS.store) } },
               { path: "/store/*", element: <Navigate to="/store" replace /> },
+            ],
+          },
+          // Subscriptions & usage (Figma 07.01–07.11)
+          {
+            element: (
+              <Suspense fallback={<SectionLoading />}>
+                <Outlet />
+              </Suspense>
+            ),
+            children: [
+              { path: "/subscription", element: <SubscriptionOverviewPage />, handle: { section: "Subscription" } },
+              { path: "/subscription/plans", element: <PlansPage />, handle: { section: "Subscription", back: back("/subscription", SCREENS.subscription) } },
+              { path: "/subscription/change", element: <ChangePlanPage />, handle: { section: "Subscription", back: back("/subscription/plans", SCREENS.subscription) } },
+              { path: "/subscription/payment", element: <SubscriptionPaymentPage />, handle: { section: "Subscription", back: back("/subscription", SCREENS.subscription) } },
+              { path: "/subscription/credits", element: <CreditsPage />, handle: { section: "Subscription", back: back("/subscription", SCREENS.subscription) } },
+              { path: "/subscription/trial", element: <TrialPage />, handle: { section: "Subscription", back: back("/subscription", SCREENS.subscription) } },
+              { path: "/subscription/billing", element: <BillingPage />, handle: { section: "Subscription", back: back("/subscription", SCREENS.subscription) } },
+              { path: "/subscription/*", element: <Navigate to="/subscription" replace /> },
             ],
           },
           // Wallet & payouts (Figma 06.01–06.10), owner only

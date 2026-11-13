@@ -28,7 +28,8 @@ describe("plan gating config", () => {
   });
   it("freemium store is view-only", () => {
     expect(featureAccess({ plan: "freemium" }, "store")).toBe("view_only");
-    expect(featureAccess({ plan: "freemium" }, "inventory")).toBe(false);
+    expect(featureAccess({ plan: "freemium" }, "inventory")).toBe(true); // with daily credits (Figma 07.06, backend #32)
+    expect(featureAccess({ plan: "freemium" }, "invoices")).toBe(false);
   });
   it("an active trial unlocks everything; a startup package only its own set", () => {
     expect(featureAccess({ plan: "freemium", isTrialActive: true, trialEndDate: future }, "bisupplynet")).toBe(true);

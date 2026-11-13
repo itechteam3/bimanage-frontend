@@ -69,5 +69,6 @@ export const SCREENS = {
   settings: { label: "Settings", to: "/settings" },
   store: { label: "Online Store", to: "/store" },
   wallet: { label: "Wallet", to: "/wallet" },
+  subscription: { label: "Subscription", to: "/subscription" },
   shop: { label: "Shop", to: "/s/:slug" },
 } satisfies Record<string, Screen>;
