@@ -71,7 +71,8 @@ describe("wallet", () => {
     fb.handlers["POST /wallet/setup-bank"] = () => [200, { accountName: "ELIJAH APPAREL LTD", wallet: WALLET }];
     const user = userEvent.setup();
     renderApp("/wallet/bank");
-    await user.selectOptions(await screen.findByLabelText(/bank name/i), "058");
+    await user.type(await screen.findByRole("combobox", { name: /bank name/i }), "gt");
+    await user.click(await screen.findByRole("option", { name: "GTBank" }));
     await user.type(screen.getByLabelText(/account number/i), "0000000000");
     expect(await screen.findByText("We couldn't verify this account")).toBeInTheDocument();
     expect(screen.getByRole("button", { name: "Save bank account" })).toBeDisabled();
