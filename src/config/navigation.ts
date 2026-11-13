@@ -30,7 +30,8 @@ export type Permission =
   | "manageTeam"
   | "manageInvoices"
   | "accessBiSupplyNet"
-  | "manageSettings";
+  | "manageSettings"
+  | "manageMessages";
 
 export interface NavItem {
   label: string;

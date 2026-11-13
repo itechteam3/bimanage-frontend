@@ -19,7 +19,9 @@ export type Topic =
   | "profile"
   | "subscription"
   | "onboarding"
-  | "analytics";
+  | "analytics"
+  | "support"
+  | "reviews";
 
 export interface ChangeEvent {
   topic: Topic;
@@ -48,6 +50,8 @@ export const TOPIC_KEYS: Record<Topic, Key[]> = {
   subscription: [["subscription"]],
   onboarding: [["onboarding"]],
   analytics: [["analytics"], ["store", "analytics"]],
+  support: [["support"]],
+  reviews: [["reviews"]],
 };
 
 /** Reference data that never changes because of a business event. */

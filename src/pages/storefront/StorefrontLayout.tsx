@@ -1,6 +1,6 @@
 import { createContext, useContext, type ReactNode } from "react";
-import { Link, NavLink, Outlet, useParams } from "react-router-dom";
-import { IconBuildingStore, IconHelpCircle, IconSearch, IconShoppingBag } from "@tabler/icons-react";
+import { Link, NavLink, Outlet, useLocation, useParams } from "react-router-dom";
+import { IconBuildingStore, IconHelpCircle, IconMessageCircle, IconSearch, IconShoppingBag } from "@tabler/icons-react";
 import { Spinner } from "@/components/ui";
 import { ErrorNote } from "@/components/feedback/ErrorNote";
 import { BackBar, HeaderBackButton } from "@/components/layout/BackNav";
@@ -126,6 +126,21 @@ function BagCount() {
   return <>{n > 0 ? ` (${n})` : ""}</>;
 }
 
+/** Floating "Chat with the store" (12.03); hidden on the chat page and in preview. */
+function ChatButton() {
+  const { slug, preview } = useStorefront();
+  const { pathname } = useLocation();
+  if (preview || pathname.endsWith("/chat")) return null;
+  return (
+    <Link
+      to={`/s/${slug}/chat`}
+      className="fixed bottom-6 right-5 z-30 flex min-h-12 items-center gap-2 rounded-full bg-brand-navy px-5 text-action font-semibold text-ink-on-brand shadow-floating hover:opacity-95 lg:bottom-8 lg:right-8"
+    >
+      <IconMessageCircle aria-hidden="true" className="size-5" /> Chat with the store
+    </Link>
+  );
+}
+
 function Shell({ children }: { children: ReactNode }) {
   const { slug, store, preview } = useStorefront();
   const base = `/s/${slug}`;
@@ -156,6 +171,9 @@ function Shell({ children }: { children: ReactNode }) {
             <NavLink to={`${base}/track`} className="hover:underline">
               Track order
             </NavLink>
+            <NavLink to={`${base}/chat`} className="hover:underline">
+              Chat
+            </NavLink>
             <Link to={`${base}?focus=search`} className="flex items-center gap-1 hover:underline">
               <IconSearch aria-hidden="true" className="size-4" /> Search
             </Link>
@@ -170,6 +188,7 @@ function Shell({ children }: { children: ReactNode }) {
           </Link>
         </div>
       </header>
+      <ChatButton />
       <main id="shop-main" className="mx-auto w-full max-w-6xl px-5 pb-28 pt-5 lg:pb-12 lg:pt-6">
         <BackBar />
         {children}
