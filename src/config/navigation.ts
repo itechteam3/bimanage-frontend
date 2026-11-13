@@ -30,6 +30,7 @@ export type Permission =
   | "manageTeam"
   | "manageInvoices"
   | "accessBiSupplyNet"
+  | "sellOnBiSupplyNet"
   | "manageSettings"
   | "manageMessages";
 
@@ -37,8 +38,8 @@ export interface NavItem {
   label: string;
   to: string;
   icon: Icon;
-  /** Hidden from team members who lack this permission. */
-  permission?: Permission;
+  /** Hidden from team members who lack this permission (with a list: lack all of them). */
+  permission?: Permission | Permission[];
   /** Shown with a lock when the plan doesn't include it (the page explains the upgrade). */
   feature?: Feature;
   /** Owner only (billing). */
@@ -55,7 +56,7 @@ export const SIDEBAR_NAV: NavItem[] = [
   { label: "Projects", to: "/projects", icon: IconLayoutKanban, feature: "projects" },
   { label: "Team", to: "/settings/team", icon: IconUsersGroup, permission: "manageTeam" },
   { label: "Online Store", to: "/store", icon: IconBuildingStore, feature: "store" },
-  { label: "BiSupplyNet", to: "/bisupplynet", icon: IconTruckDelivery, feature: "bisupplynet", permission: "accessBiSupplyNet" },
+  { label: "BiSupplyNet", to: "/bisupplynet", icon: IconTruckDelivery, feature: "bisupplynet", permission: ["accessBiSupplyNet", "sellOnBiSupplyNet"] },
   { label: "Wallet", to: "/wallet", icon: IconWallet, ownerOnly: true },
   { label: "FELI AI", to: "/feli", icon: IconSparkles },
   { label: "Support", to: "/support", icon: IconLifebuoy },

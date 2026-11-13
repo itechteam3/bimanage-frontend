@@ -3,7 +3,7 @@ import { Navigate, Outlet, useLocation, useMatches, useNavigate } from "react-ro
 import { AppShell } from "./AppShell";
 import { useAuth } from "@/lib/auth/AuthProvider";
 import { useBusinessProfile, useOnboardingStatus, useUnreadCounts } from "@/lib/workspace/api";
-import type { NavItem } from "@/config/navigation";
+import type { NavItem, Permission } from "@/config/navigation";
 import { Spinner } from "@/components/ui";
 import { PhotoDialog } from "@/components/profile/PhotoDialog";
 
@@ -39,7 +39,9 @@ export function WorkspaceLayout() {
 
   const navState = (item: NavItem) => {
     if (item.ownerOnly && !isOwner) return "hidden" as const;
-    if (item.permission && workspace && workspace.permissions[item.permission] === false) return "hidden" as const;
+    // A list (BiSupplyNet: buy or sell) shows when any one of them is allowed.
+    const perms = item.permission ? ([] as Permission[]).concat(item.permission) : [];
+    if (perms.length && workspace && perms.every((p) => workspace.permissions[p] === false)) return "hidden" as const;
     return "visible" as const;
   };
 

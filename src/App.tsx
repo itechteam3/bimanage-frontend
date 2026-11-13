@@ -91,6 +91,32 @@ const ServiceRequestDetailPage = sup("ServiceRequestDetailPage");
 const feli = (name: keyof typeof import("@/pages/feli/index")) => lazy(() => import("@/pages/feli/index").then((m) => ({ default: m[name] })));
 const FeliAssistantPage = feli("FeliAssistantPage");
 const FeliReviewPage = feli("FeliReviewPage");
+// BiSupplyNet (Figma 10.01–10.12) loads as one chunk.
+const bsnChunk = () => import("@/pages/bisupplynet/index");
+const bsn = (name: Exclude<keyof Awaited<ReturnType<typeof bsnChunk>>, "BuyGate" | "EitherGate" | "SellGate">) => lazy(() => bsnChunk().then((m) => ({ default: m[name] })));
+const BsnBuy = lazy(() => bsnChunk().then((m) => ({ default: m.BuyGate })));
+const BsnEither = lazy(() => bsnChunk().then((m) => ({ default: m.EitherGate })));
+const BsnSell = lazy(() => bsnChunk().then((m) => ({ default: m.SellGate })));
+const BsnHome = bsn("BsnHome");
+const SuppliersPage = bsn("SuppliersPage");
+const SupplierProfilePage = bsn("SupplierProfilePage");
+const SupplyProductsPage = bsn("ProductsPage");
+const SupplyCheckoutPage = bsn("CheckoutPage");
+const MySupplyOrdersPage = bsn("MyOrdersPage");
+const SupplyOrderPage = bsn("OrderDetailPage");
+const ConfirmDeliveryPage = bsn("ConfirmDeliveryPage");
+const FileDisputePage = bsn("FileDisputePage");
+const MyDisputesPage = bsn("MyDisputesPage");
+const DisputeDetailPage = bsn("DisputeDetailPage");
+const SellHomePage = bsn("SellHomePage");
+const ApplyPage = bsn("ApplyPage");
+const ApplicationPage = bsn("ApplicationPage");
+const ListingsPage = bsn("ListingsPage");
+const ListingFormPage = bsn("ListingFormPage");
+const SellerOrdersPage = bsn("SellerOrdersPage");
+const ConnectionsPage = bsn("ConnectionsPage");
+const SellerDisputesPage = bsn("SellerDisputesPage");
+const EarningsPage = bsn("EarningsPage");
 const rev = (name: keyof typeof import("@/pages/reviews/index")) => lazy(() => import("@/pages/reviews/index").then((m) => ({ default: m[name] })));
 const PublicReviewsPage = rev("PublicReviewsPage");
 const WriteReviewPage = rev("WriteReviewPage");
@@ -189,7 +215,6 @@ const guest = (el: React.ReactNode) => <GuestOnly>{el}</GuestOnly>;
 // Sections built in later phases: real routes now, so links never 404.
 const comingSoon = (
   [
-    ["/bisupplynet/*", "BiSupplyNet"],
     ["/settings/*", "Settings"],
     ["/more", "More"],
   ] as const
@@ -197,6 +222,9 @@ const comingSoon = (
 import { RouteErrorPage } from "@/components/feedback/RouteErrorPage";
 
 const authed = (el: React.ReactNode) => <RequireAuth>{el}</RequireAuth>;
+const buy = (el: React.ReactNode) => <BsnBuy>{el}</BsnBuy>;
+const either = (el: React.ReactNode) => <BsnEither>{el}</BsnEither>;
+const sell = (el: React.ReactNode) => <BsnSell>{el}</BsnSell>;
 
 export const routes = [
   {
@@ -395,6 +423,39 @@ export const routes = [
               { path: "/wallet/transactions", element: <TransactionsPage />, handle: { section: "Wallet", back: back("/wallet", SCREENS.wallet) } },
               { path: "/wallet/transactions/:id", element: <TransactionDetailPage />, handle: { section: "Wallet", back: back("/wallet/transactions", SCREENS.wallet) } },
               { path: "/wallet/*", element: <Navigate to="/wallet" replace /> },
+            ],
+          },
+          // BiSupplyNet (Figma 10.01–10.12). Standard and up buy; selling needs
+          // Premium and the "Sell on BiSupplyNet" permission (SellGate).
+          {
+            element: gated("bisupplynet", "BiSupplyNet"),
+            children: [
+              { path: "/bisupplynet", element: <BsnHome />, handle: { section: "BiSupplyNet" } },
+              { path: "/bisupplynet/suppliers", element: buy(<SuppliersPage />), handle: { section: "BiSupplyNet" } },
+              { path: "/bisupplynet/suppliers/:id", element: buy(<SupplierProfilePage />), handle: { section: "BiSupplyNet", back: back("/bisupplynet/suppliers", SCREENS.bisupplynet) } },
+              { path: "/bisupplynet/products", element: buy(<SupplyProductsPage />), handle: { section: "BiSupplyNet", back: back("/bisupplynet/suppliers", SCREENS.bisupplynet) } },
+              { path: "/bisupplynet/checkout/:productId", element: buy(<SupplyCheckoutPage />), handle: { section: "BiSupplyNet", back: back("/bisupplynet/products", SCREENS.bisupplynet) } },
+              { path: "/bisupplynet/orders", element: buy(<MySupplyOrdersPage />), handle: { section: "BiSupplyNet", back: back("/bisupplynet/suppliers", SCREENS.bisupplynet) } },
+              // Buyer or seller: notifications and the inbox link here.
+              { path: "/bisupplynet/orders/:id", element: either(<SupplyOrderPage />), handle: { section: "BiSupplyNet", back: back("/bisupplynet/orders", SCREENS.bisupplynet) } },
+              { path: "/bisupplynet/orders/:id/confirm", element: buy(<ConfirmDeliveryPage />), handle: { section: "BiSupplyNet", back: back("/bisupplynet/orders/:id", SCREENS.bisupplynet) } },
+              { path: "/bisupplynet/orders/:id/dispute", element: buy(<FileDisputePage />), handle: { section: "BiSupplyNet", back: back("/bisupplynet/orders/:id", SCREENS.bisupplynet) } },
+              { path: "/bisupplynet/disputes", element: buy(<MyDisputesPage />), handle: { section: "BiSupplyNet", back: back("/bisupplynet/suppliers", SCREENS.bisupplynet) } },
+              { path: "/bisupplynet/disputes/:id", element: either(<DisputeDetailPage />), handle: { section: "BiSupplyNet", back: back("/bisupplynet/disputes", SCREENS.bisupplynet) } },
+              { path: "/bisupplynet/sell", element: sell(<SellHomePage />), handle: { section: "BiSupplyNet", back: back("/bisupplynet/suppliers", SCREENS.bisupplynet) } },
+              { path: "/bisupplynet/sell/apply", element: sell(<ApplyPage />), handle: { section: "BiSupplyNet", back: back("/bisupplynet/suppliers", SCREENS.bisupplynet) } },
+              { path: "/bisupplynet/sell/application", element: sell(<ApplicationPage />), handle: { section: "BiSupplyNet", back: back("/bisupplynet/suppliers", SCREENS.bisupplynet) } },
+              { path: "/bisupplynet/sell/listings", element: sell(<ListingsPage />), handle: { section: "BiSupplyNet", back: back("/bisupplynet/sell/earnings", SCREENS.selling) } },
+              { path: "/bisupplynet/sell/listings/new", element: sell(<ListingFormPage />), handle: { section: "BiSupplyNet", back: back("/bisupplynet/sell/listings", SCREENS.selling) } },
+              { path: "/bisupplynet/sell/listings/:id/edit", element: sell(<ListingFormPage key="edit" />), handle: { section: "BiSupplyNet", back: back("/bisupplynet/sell/listings", SCREENS.selling) } },
+              { path: "/bisupplynet/sell/orders", element: sell(<SellerOrdersPage />), handle: { section: "BiSupplyNet", back: back("/bisupplynet/sell/earnings", SCREENS.selling) } },
+              { path: "/bisupplynet/sell/connections", element: sell(<ConnectionsPage />), handle: { section: "BiSupplyNet", back: back("/bisupplynet/sell/earnings", SCREENS.selling) } },
+              { path: "/bisupplynet/sell/disputes", element: sell(<SellerDisputesPage />), handle: { section: "BiSupplyNet", back: back("/bisupplynet/sell/earnings", SCREENS.selling) } },
+              { path: "/bisupplynet/sell/earnings", element: sell(<EarningsPage />), handle: { section: "BiSupplyNet" } },
+              // Older links in notifications.
+              { path: "/bisupplynet/dashboard", element: <Navigate to="/bisupplynet/sell" replace />, handle: { back: back("/bisupplynet/sell/earnings", SCREENS.selling) } },
+              { path: "/bisupplynet/connections", element: <Navigate to="/bisupplynet/sell/connections" replace />, handle: { back: back("/bisupplynet/sell/earnings", SCREENS.selling) } },
+              { path: "/bisupplynet/*", element: <Navigate to="/bisupplynet" replace /> },
             ],
           },
           // Later phases

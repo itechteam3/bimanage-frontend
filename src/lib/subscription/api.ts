@@ -136,7 +136,8 @@ export const FEATURE_LABELS: Array<[Feature, string]> = [
   ["projects", "Projects and tasks"],
   ["store", "Live online store"],
   ["messages", "Messages"],
-  ["bisupplynet", "BiSupplyNet"],
+  ["bisupplynet", "Buy from wholesalers on BiSupplyNet"],
+  ["bisupplynetSell", "Sell on BiSupplyNet"],
   ["automation", "Automation"],
   ["socialMedia", "Social media tools"],
 ];

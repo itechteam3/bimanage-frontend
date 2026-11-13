@@ -816,7 +816,7 @@ export function TrialPage() {
           title="Personalised next steps"
           tips={[
             { title: "Pick what you use most", body: "Standard covers invoices, projects and your live store." },
-            { title: "Need BiSupplyNet?", body: "Premium adds supplier ordering and automation." },
+            { title: "Need BiSupplyNet?", body: "Standard lets you buy from wholesalers. Premium also lets you sell to other businesses." },
             { title: "Questions?", body: <a className="text-ink-brand underline" href={`mailto:${SUPPORT_EMAIL}`}>{SUPPORT_EMAIL}</a> },
           ]}
         />

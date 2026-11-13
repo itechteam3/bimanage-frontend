@@ -1,20 +1,21 @@
-import { useEffect, useRef, useState, type FormEvent, type ReactNode } from "react";
+import { useEffect, useState, type FormEvent, type ReactNode } from "react";
 import { Link, NavLink, useNavigate, useParams, useSearchParams } from "react-router-dom";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
-import { IconArrowRight, IconBook, IconCircleCheck, IconLifebuoy, IconPaperclip, IconSearch, IconSearchOff, IconThumbDown, IconThumbUp, IconTicket, IconX } from "@tabler/icons-react";
+import { IconArrowRight, IconBook, IconCircleCheck, IconLifebuoy, IconPaperclip, IconSearch, IconSearchOff, IconThumbDown, IconThumbUp, IconTicket } from "@tabler/icons-react";
 import { Button, ButtonLink, Dialog, EmptyState, Field, SelectInput, Spinner, Status, TextArea, TextInput } from "@/components/ui";
 import { DetailRows, HelpPanel, IntroCard, PageTitle, Panel, TipList } from "@/components/page/Blocks";
 import { ErrorNote } from "@/components/feedback/ErrorNote";
-import { applyFieldErrors, errorMessage } from "@/lib/api/errorMessage";
+import { applyFieldErrors } from "@/lib/api/errorMessage";
 import { useAuth } from "@/lib/auth/AuthProvider";
 import { useLeaveGuard } from "@/lib/nav/useLeaveGuard";
 import { useUrlState } from "@/lib/nav/useUrlState";
 import { SUPPORT_EMAIL } from "@/config/links";
 import { shortDate } from "@/lib/format";
 import { cn } from "@/lib/cn";
-import { ATTACHMENT_TYPES, MAX_ATTACHMENTS as ATTACHMENT_MAX_FILES, attachmentProblem, uploadAttachment, type Attachment } from "@/lib/attachments";
+import type { Attachment } from "@/lib/attachments";
+import { AttachmentPicker } from "@/components/attachments/AttachmentPicker";
 import {
   PREFERRED_STARTS,
   PRIORITIES,
@@ -60,8 +61,6 @@ const Loading = ({ label = "Loading…" }: { label?: string }) => (
 const dateTime = (iso?: string | null) =>
   iso ? new Date(iso).toLocaleString("en-NG", { day: "numeric", month: "short", year: "numeric", hour: "numeric", minute: "2-digit" }) : "";
 
-const fileSize = (bytes: number) => (bytes >= 1024 * 1024 ? `${(bytes / (1024 * 1024)).toFixed(1)} MB` : `${Math.max(1, Math.round(bytes / 1024))} KB`);
-
 function SupportTabs() {
   const tabs: Array<[string, string, boolean?]> = [
     ["/support", "Support centre", true],
@@ -101,73 +100,6 @@ function Pager({ page, totalPages, onPage }: { page: number; totalPages: number;
 }
 
 // ── Attachments ──────────────────────────────────────────────────────────
-
-/** Files uploaded one by one to POST /upload/attachment; shown as removable chips. */
-function AttachmentPicker({ value, onChange, onBusy, label = "Attachments" }: { value: Attachment[]; onChange: (next: Attachment[]) => void; onBusy?: (busy: boolean) => void; label?: string }) {
-  const inputRef = useRef<HTMLInputElement>(null);
-  const [busy, setBusy] = useState(false);
-  const [error, setError] = useState<string | null>(null);
-  const full = value.length >= ATTACHMENT_MAX_FILES;
-
-  const add = async (files: FileList | null) => {
-    if (!files?.length) return;
-    setError(null);
-    let list = [...value];
-    setBusy(true);
-    onBusy?.(true);
-    for (const f of Array.from(files)) {
-      if (list.length >= ATTACHMENT_MAX_FILES) {
-        setError(`You can attach up to ${ATTACHMENT_MAX_FILES} files.`);
-        break;
-      }
-      const problem = attachmentProblem(f);
-      if (problem) {
-        setError(problem);
-        continue;
-      }
-      try {
-        const a = await uploadAttachment(f);
-        list = [...list, a];
-        onChange(list);
-      } catch (err) {
-        setError(errorMessage(err, `We couldn't upload ${f.name}. Please try again.`));
-      }
-    }
-    setBusy(false);
-    onBusy?.(false);
-    if (inputRef.current) inputRef.current.value = "";
-  };
-
-  return (
-    <div className="flex flex-col gap-3 rounded-sm bg-surface-pale px-4 py-2.5 lg:bg-transparent lg:p-0">
-      <p className="text-field-label uppercase text-ink-brand lg:text-ink-secondary">{label}</p>
-      <p className="text-body-sm text-ink-muted">Up to {ATTACHMENT_MAX_FILES} files: JPG, PNG, WebP or PDF, 5 MB each.</p>
-      {value.length > 0 && (
-        <ul className="flex flex-wrap gap-2" aria-label="Attached files">
-          {value.map((a, i) => (
-            <li key={`${a.url}-${i}`} className="flex items-center gap-2 rounded-full bg-surface-tint-blue py-1 pl-3 pr-1 text-body-sm text-ink-brand">
-              <IconPaperclip aria-hidden="true" className="size-4 shrink-0" />
-              <span className="max-w-48 truncate">{a.name}</span>
-              <span className="text-ink-muted">{fileSize(a.size)}</span>
-              <button type="button" onClick={() => onChange(value.filter((_, j) => j !== i))} className="flex size-8 items-center justify-center rounded-full hover:bg-surface-card" aria-label={`Remove ${a.name}`}>
-                <IconX aria-hidden="true" className="size-4" />
-              </button>
-            </li>
-          ))}
-        </ul>
-      )}
-      <input ref={inputRef} type="file" multiple accept={ATTACHMENT_TYPES.join(",")} className="sr-only" tabIndex={-1} aria-label={`Add ${label.toLowerCase()}`} onChange={(e) => void add(e.target.files)} />
-      <Button type="button" size="md" variant="outlined" className="self-start" loading={busy} loadingText="Uploading…" disabled={full} onClick={() => inputRef.current?.click()}>
-        <IconPaperclip aria-hidden="true" className="size-4" /> {full ? "File limit reached" : "Add files"}
-      </Button>
-      {error && (
-        <p role="alert" className="text-body-sm text-danger">
-          {error}
-        </p>
-      )}
-    </div>
-  );
-}
 
 function AttachmentLinks({ files }: { files?: Attachment[] }) {
   if (!files?.length) return null;
