@@ -67,8 +67,11 @@ const FIELD_LABELS: Record<string, string> = {
 export const fieldLabel = (k: string) => FIELD_LABELS[k] ?? cap(k.replace(/([a-z])([A-Z])/g, "$1 $2").toLowerCase());
 
 /** FELI's params as readable label/value rows. */
-export type NameLookup = { projects?: Array<{ _id: string; name: string }>; people?: Array<{ _id: string; name: string }> };
-const nameOf = (list: Array<{ _id: string; name: string }> | undefined, id: string) => list?.find((x) => x._id === id)?.name ?? "Chosen by FELI";
+export type NameLookup = { projects?: Array<{ _id: string; name: string }>; people?: Array<{ _id: string; name: string; label?: string }> };
+const nameOf = (list: Array<{ _id: string; name: string; label?: string }> | undefined, id: string) => {
+  const hit = list?.find((x) => x._id === id);
+  return hit ? hit.label ?? hit.name : "Chosen by FELI";
+};
 
 /** The project and teammate lists, for showing names instead of ids. */
 export function useNameLookup(enabled: boolean): NameLookup {
@@ -373,7 +376,7 @@ function TaskForm({
               <option value="">No one yet</option>
               {(people.data ?? []).map((x) => (
                 <option key={x._id} value={x._id}>
-                  {x.name}
+                  {x.label ?? x.name}
                 </option>
               ))}
             </SelectInput>

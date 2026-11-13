@@ -32,6 +32,23 @@ export interface Person {
   name: string;
   avatar: string | null;
   role: TeamRole;
+  joinedAt?: string | null;
+  /** The name, plus what tells two people with the same name apart. */
+  label?: string;
+}
+
+const joined = (iso?: string | null) => (iso ? new Date(iso).toLocaleDateString("en-GB", { day: "numeric", month: "short", year: "numeric", timeZone: "Africa/Lagos" }) : "");
+
+/** Two people called "Dev Elijah" show as "Dev Elijah (joined 26 Apr 2026)" and "Dev Elijah (joined 12 Nov 2026)". */
+export function labelPeople(list: Person[]): Person[] {
+  const count = new Map<string, number>();
+  for (const p of list) count.set(p.name, (count.get(p.name) ?? 0) + 1);
+  return list.map((p) => {
+    if ((count.get(p.name) ?? 0) < 2) return { ...p, label: p.name };
+    const sameRole = list.filter((x) => x.name === p.name && x.role === p.role).length > 1;
+    const extra = sameRole ? (p.role === "owner" ? "owner" : joined(p.joinedAt) ? `joined ${joined(p.joinedAt)}` : p.role) : p.role;
+    return { ...p, label: `${p.name} (${extra})` };
+  });
 }
 
 /** Labels for permissions, in the order shown in the app. */
@@ -74,7 +91,7 @@ export const teamKeys = {
 export const useTeamMembers = (enabled = true) => useQuery({ queryKey: teamKeys.members, queryFn: () => api<TeamMember[]>("/settings/team"), enabled });
 export const useTeamInvites = (enabled = true) => useQuery({ queryKey: teamKeys.invites, queryFn: () => api<TeamInvite[]>("/settings/team/invites"), enabled });
 /** People work can be assigned to (owner + members). */
-export const usePeople = (enabled = true) => useQuery({ queryKey: teamKeys.people, queryFn: () => api<Person[]>("/settings/team/people"), enabled, staleTime: 5 * 60_000 });
+export const usePeople = (enabled = true) => useQuery({ queryKey: teamKeys.people, queryFn: () => api<Person[]>("/settings/team/people"), select: labelPeople, enabled, staleTime: 5 * 60_000 });
 
 const useInvalidateTeam = () => {
   const qc = useQueryClient();
