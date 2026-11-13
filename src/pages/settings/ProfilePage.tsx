@@ -34,7 +34,7 @@ export function ProfilePage() {
   const guard = useLeaveGuard(formState.isDirty);
 
   useEffect(() => {
-    if (user) reset({ name: user.name ?? "", username: user.username ?? "", phone: user.phone ?? "" });
+    if (user) reset({ name: user.name ?? "", username: user.username ?? "", phone: user.phone ?? "" }, { keepDirtyValues: true });
   }, [user, reset]);
 
   const onSubmit = handleSubmit(async (v) => {

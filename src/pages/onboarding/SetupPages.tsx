@@ -115,7 +115,7 @@ export function BusinessIdentityPage() {
       businessPhone: p.businessPhone ?? "",
       businessEmail: p.businessEmail ?? "",
       businessAddress: p.businessAddress ?? "",
-    });
+    }, { keepDirtyValues: true });
   }, [profile.data, reset]);
 
   const onSubmit = handleSubmit(async (values) => {

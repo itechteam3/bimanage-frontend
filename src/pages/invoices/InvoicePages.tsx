@@ -263,7 +263,7 @@ export function InvoiceEditorPage() {
       tax: i.tax ?? 0,
       notes: i.notes ?? "",
       items: i.items.map(({ description, quantity, unitPrice }) => ({ description, quantity, unitPrice })),
-    });
+    }, { keepDirtyValues: true });
   }, [existing.data, reset]);
 
   const submit = (status?: InvoiceStatus) =>
@@ -597,7 +597,7 @@ export function EmailInvoicePage() {
   useEffect(() => {
     const i = inv.data;
     if (!i) return;
-    reset({ to: i.clientEmail ?? "", cc: "", subject: business ? `Invoice ${i.invoiceNumber} from ${business}` : "", message: `Hello ${i.clientName},\n\nPlease find invoice ${i.invoiceNumber} attached.\n\nThank you.` });
+    reset({ to: i.clientEmail ?? "", cc: "", subject: business ? `Invoice ${i.invoiceNumber} from ${business}` : "", message: `Hello ${i.clientName},\n\nPlease find invoice ${i.invoiceNumber} attached.\n\nThank you.` }, { keepDirtyValues: true });
   }, [inv.data, business, reset]);
 
   if (!inv.data) return inv.isLoading ? <Loading /> : <ErrorNote error={inv.error ?? true} fallback="We couldn't load this invoice." onRetry={() => void inv.refetch()} />;

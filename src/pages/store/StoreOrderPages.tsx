@@ -4,6 +4,8 @@ import { IconAlertTriangle, IconCheck, IconMail, IconPhone, IconSearch } from "@
 import { Button, ButtonLink, Dialog, Status } from "@/components/ui";
 import { DetailRows, HelpPanel, IntroCard, PageTitle, Panel } from "@/components/page/Blocks";
 import { ErrorNote } from "@/components/feedback/ErrorNote";
+import { UpdatedNote, newRowClass } from "@/components/feedback/UpdatedNote";
+import { useNewItems } from "@/lib/realtime/useLiveList";
 import { count, naira, shortDate } from "@/lib/format";
 import { cn } from "@/lib/cn";
 import { useCan } from "@/lib/auth/useCan";
@@ -51,6 +53,7 @@ function StoreOrders({ store }: { store: Store }) {
   const page = Math.max(1, Number(pageKey) || 1);
   const orders = useMerchantStoreOrders(status, query, page);
   const data = orders.data;
+  const fresh = useNewItems(data?.orders.map((o) => o._id));
 
   const choose = (k: StoreOrderFilter) => {
     setStatus(k);
@@ -108,12 +111,13 @@ function StoreOrders({ store }: { store: Store }) {
             </div>
           ) : (
             <>
+              <UpdatedNote updatedAt={orders.dataUpdatedAt} className="mt-3" />
               <ul className="mt-4 flex flex-col divide-y divide-line-subtle">
                 {data.orders.map((o) => {
                   const b = badge(o.status);
                   const units = o.items.reduce((s, i) => s + i.quantity, 0);
                   return (
-                    <li key={o._id} className="grid grid-cols-[1fr_auto] items-center gap-x-4 gap-y-1 py-3 md:grid-cols-[1.2fr_1.4fr_auto_auto]">
+                    <li key={o._id} data-new={fresh.has(o._id) || undefined} className={cn("grid grid-cols-[1fr_auto] items-center gap-x-4 gap-y-1 py-3 md:grid-cols-[1.2fr_1.4fr_auto_auto]", fresh.has(o._id) && `-mx-2 rounded-md px-2 ${newRowClass}`)}>
                       <Link to={`/store/orders/${o._id}`} className="font-semibold text-ink-strong hover:underline">
                         {o.trackingNo}
                       </Link>

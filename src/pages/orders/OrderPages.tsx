@@ -7,6 +7,8 @@ import { IconArrowRight, IconPlus, IconSearch, IconTrash } from "@tabler/icons-r
 import { Button, ButtonLink, Field, SelectInput, Spinner, Status, TextInput } from "@/components/ui";
 import { DetailRows, InfoStrip, IntroCard, KpiCard, PageTitle, Panel, TipList } from "@/components/page/Blocks";
 import { ErrorNote } from "@/components/feedback/ErrorNote";
+import { UpdatedNote, newRowClass } from "@/components/feedback/UpdatedNote";
+import { useNewItems } from "@/lib/realtime/useLiveList";
 import { useProducts } from "@/lib/inventory/api";
 import { useUrlState } from "@/lib/nav/useUrlState";
 import {
@@ -48,6 +50,7 @@ const FILTERS: Array<[OrderFilter, string]> = [
 
 /** Striped order table used by 05.01 and 05.02. */
 export function OrderTable({ orders, empty }: { orders: Order[]; empty: React.ReactNode }) {
+  const fresh = useNewItems(orders.map((o) => o._id));
   if (!orders.length) return <div className="py-8 text-center text-body-lg text-ink-secondary">{empty}</div>;
   return (
     <div className="overflow-x-auto">
@@ -64,7 +67,7 @@ export function OrderTable({ orders, empty }: { orders: Order[]; empty: React.Re
           {orders.map((o) => {
             const b = orderBadge(o);
             return (
-              <tr key={o._id} className="border-b border-line-subtle last:border-0">
+              <tr key={o._id} data-new={fresh.has(o._id) || undefined} className={cn("border-b border-line-subtle last:border-0", fresh.has(o._id) && newRowClass)}>
                 <td className="px-3 py-4">
                   <Link to={`/orders/${o._id}`} className="font-semibold text-ink-strong hover:underline">
                     {o.trackingNo}
@@ -154,10 +157,13 @@ export function OrdersPage() {
             ) : orders.error ? (
               <ErrorNote error={orders.error} fallback="We couldn't load your orders. Please try again." onRetry={() => void orders.refetch()} />
             ) : (
+              <>
+              <UpdatedNote updatedAt={orders.dataUpdatedAt} className="mb-2" />
               <OrderTable
                 orders={orders.data ?? []}
                 empty={query || filter !== "all" ? "No orders match this search or filter." : "No orders yet. Record your first sale to see it here."}
               />
+              </>
             )}
           </div>
         </Panel>

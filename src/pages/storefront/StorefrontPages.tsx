@@ -7,6 +7,7 @@ import { useQueryClient } from "@tanstack/react-query";
 import { IconCheck, IconCircle, IconMinus, IconPlus, IconSearch, IconShoppingBag, IconTrash } from "@tabler/icons-react";
 import { Button, ButtonLink, EmailSuggestion, Field, SelectInput, Spinner, Status, TextArea, TextInput } from "@/components/ui";
 import { suggestEmail } from "@/lib/emailTypos";
+import { useOrderLive } from "@/lib/realtime/useOrderLive";
 import { hasInAppHistory } from "@/lib/nav/history";
 import { DetailRows, Panel } from "@/components/page/Blocks";
 import { ErrorNote } from "@/components/feedback/ErrorNote";
@@ -693,6 +694,8 @@ export function PaymentPage() {
     if (reference) void check();
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [reference]);
+  // Still waiting on Paystack: show the result the moment the store hears it.
+  useOrderLive(state.status === "paid" ? null : state.order?.trackingNo, state.order?.customerEmail, () => void check());
 
   const retry = async () => {
     const o = state.order;
@@ -817,7 +820,13 @@ export function TrackOrderPage() {
   const { slug, store } = useStorefront();
   const [orderParam, setOrderParam] = useUrlState<string>("order", "");
   const [result, setResult] = useState<PublicOrder | null>(null);
+  const [trackedEmail, setTrackedEmail] = useState("");
   const [error, setError] = useState<unknown>(null);
+  // Status changes (paid, shipped, delivered…) appear without searching again.
+  useOrderLive(result?.trackingNo, result ? trackedEmail : null, () => {
+    if (!result) return;
+    trackStoreOrder(result.trackingNo, trackedEmail).then(setResult, () => undefined);
+  });
   const { register, handleSubmit, getValues, formState } = useForm<z.infer<typeof trackSchema>>({ resolver: zodResolver(trackSchema), defaultValues: { order: orderParam, email: "" } });
   const navigate = useNavigate();
   const [retrying, setRetrying] = useState(false);
@@ -844,6 +853,7 @@ export function TrackOrderPage() {
         return;
       }
       setOrderParam(o.trackingNo);
+      setTrackedEmail(v.email.trim());
       setResult(o);
     } catch (err) {
       setError(err);

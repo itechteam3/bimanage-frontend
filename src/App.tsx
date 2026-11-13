@@ -9,6 +9,8 @@ import { AuthProvider } from "@/lib/auth/AuthProvider";
 import { GuestOnly, RequireAuth } from "@/lib/auth/guards";
 import { ServerWakeBanner } from "@/components/feedback/ServerWakeBanner";
 import { UpgradeDialog } from "@/components/feedback/UpgradeDialog";
+import { VersionBanner } from "@/components/feedback/VersionBanner";
+import { RealtimeProvider } from "@/lib/realtime/RealtimeProvider";
 import { Spinner } from "@/components/ui";
 import { NotFoundPage } from "@/pages/NotFoundPage";
 import { SignInPage } from "@/pages/auth/SignInPage";
@@ -142,6 +144,7 @@ function RootLayout() {
     <>
       <ServerWakeBanner />
       <UpgradeDialog />
+      <VersionBanner />
       {/* Back (browser, phone or ours) returns to the same scroll position. */}
       <ScrollRestoration />
       <Suspense fallback={<Loading />}>
@@ -351,7 +354,9 @@ export function App() {
   return (
     <QueryClientProvider client={queryClient}>
       <AuthProvider>
-        <RouterProvider router={router} />
+        <RealtimeProvider>
+          <RouterProvider router={router} />
+        </RealtimeProvider>
       </AuthProvider>
     </QueryClientProvider>
   );
