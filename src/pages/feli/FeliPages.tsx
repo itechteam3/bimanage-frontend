@@ -163,7 +163,15 @@ function ChatPanel({
         <div className="flex max-h-[36rem] min-h-48 min-w-0 flex-col gap-3 overflow-y-auto" aria-live="polite">
           {!messages.length && !pending && <EmptyChat onPick={send} disabled={limited || chat.isPending} />}
           {messages.map((m, i) => (
-            <Bubble key={`${i}-${m.role}`} m={m} isLast={m === last} onAskPerson={onAskPerson} />
+            <Bubble
+              key={`${i}-${m.role}`}
+              m={m}
+              isLast={m === last}
+              onAskPerson={onAskPerson}
+              // A message of yours with no reply after it: FELI couldn't answer (busy, timeout…).
+              unanswered={m.role === "user" && (messages[i + 1]?.role === "user" || (m === last && !pending))}
+              onResend={limited || chat.isPending ? undefined : () => send(m.content)}
+            />
           ))}
           {pending && (
             <>
@@ -273,14 +281,36 @@ function EmptyChat({ onPick, disabled }: { onPick: (q: string) => void; disabled
   );
 }
 
-function Bubble({ m, isLast, onAskPerson }: { m: FeliMessage; isLast?: boolean; onAskPerson?: (reason?: string) => void }) {
+function Bubble({
+  m,
+  isLast,
+  onAskPerson,
+  unanswered,
+  onResend,
+}: {
+  m: FeliMessage;
+  isLast?: boolean;
+  onAskPerson?: (reason?: string) => void;
+  unanswered?: boolean;
+  onResend?: () => void;
+}) {
   const mine = m.role === "user";
   return (
-    <div className={cn("flex min-w-0 max-w-[90%] flex-col gap-2", mine ? "self-end" : "self-start")}>
+    <div className={cn("flex min-w-0 max-w-[90%] flex-col gap-2", mine ? "items-end self-end" : "self-start")}>
       <div className={cn("min-w-0 rounded-2xl px-4 py-3", mine ? "bg-surface-pale" : "bg-surface-tint-aqua")}>
         <p className={cn("text-caption font-semibold uppercase", mine ? "text-ink-muted" : "text-success")}>{mine ? "You" : "FELI · Business assistant"}</p>
         {mine ? <p className="mt-1 whitespace-pre-wrap break-words text-body-sm text-ink-strong [overflow-wrap:anywhere]">{m.content}</p> : <RichText text={m.content} />}
       </div>
+      {unanswered && (
+        <p className="flex flex-wrap items-center justify-end gap-x-2 gap-y-1 text-caption text-ink-muted">
+          <span>FELI didn't answer this one.</span>
+          {onResend && (
+            <button type="button" onClick={onResend} className="min-h-8 font-semibold text-ink-brand underline underline-offset-2">
+              Send again
+            </button>
+          )}
+        </p>
+      )}
       {m.restriction && <RestrictionCard restriction={m.restriction} compact />}
       {isLast && m.handoff?.suggested && onAskPerson && (
         <div className="flex flex-wrap items-center gap-3 rounded-xl border border-line-card bg-surface-card px-4 py-3">
