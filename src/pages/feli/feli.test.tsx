@@ -293,6 +293,20 @@ describe("unanswered messages", () => {
   });
 });
 
+describe("busy moments (Groq's shared per-minute limit)", () => {
+  it("a busy answer reads like any reply, never an error, and the allowance isn't used", async () => {
+    fb.handlers["GET /feli/history"] = () => history({ messages: [] });
+    fb.handlers["POST /feli/chat"] = () =>
+      reply({ reply: "I'm answering a lot of questions right now. Please send that again in a minute. This one didn't count towards your messages.", busy: true, usage: { unlimited: false, limit: 20, used: 3, remaining: 17, resetsAt: "2026-11-15T00:00:00+01:00" } });
+    const user = userEvent.setup();
+    renderApp("/feli");
+    await user.type(await screen.findByLabelText("Message FELI"), "How do I withdraw?{Enter}");
+    expect(await screen.findByText(/lot of questions right now/)).toBeInTheDocument();
+    expect(screen.queryByText(/couldn't answer|something went wrong|try again later/i)).not.toBeInTheDocument();
+    expect(screen.getAllByText(/17 of 20 messages left today/).length).toBeGreaterThan(0);
+  });
+});
+
 describe("11.02 create task review", () => {
   it("edits the title, picks a project and a teammate, and approves", async () => {
     fb.handlers["GET /feli/history"] = () => history({ proposal: TASK });

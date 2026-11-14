@@ -70,6 +70,8 @@ export interface FeliReply {
   restriction: FeliRestriction | null;
   handoff: FeliHandoff | null;
   usage: FeliUsage;
+  /** FELI was too busy to answer even after waiting; the message didn't count. */
+  busy?: boolean;
 }
 
 export interface FeliResult {
@@ -139,11 +141,16 @@ function useSetUsage() {
   };
 }
 
+export const FELI_CHAT_TIMEOUT_MS = 60_000;
+
 export function useFeliChat() {
   const qc = useQueryClient();
   const setUsage = useSetUsage();
   return useMutation({
-    mutationFn: (message: string) => api<FeliReply>("/feli/chat", { method: "POST", body: { message } }),
+    // FELI may queue for room in Groq's shared per-minute budget, or wait and
+    // retry once after a busy answer, so the reply can take up to ~50 seconds.
+    // "FELI is thinking…" stays up meanwhile.
+    mutationFn: (message: string) => api<FeliReply>("/feli/chat", { method: "POST", body: { message }, timeoutMs: FELI_CHAT_TIMEOUT_MS }),
     onSuccess: (res, message) => {
       const now = new Date().toISOString();
       qc.setQueryData<FeliHistory>(feliKeys.history, (h) => ({
