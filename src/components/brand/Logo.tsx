@@ -1,21 +1,17 @@
 import { cn } from "@/lib/cn";
+import wordmarkWhite from "@/assets/brand/bimanage-logo-white.png";
+import wordmarkNavy from "@/assets/brand/bimanage-logo-navy.png";
+import markWhite from "@/assets/brand/bimanage-mark-white.png";
+import markNavy from "@/assets/brand/bimanage-mark-navy.png";
 
-// TEMPORARY wordmark. The approved BiManage logo is an image/vector in Figma
-// ("BRAND • Approved … iManage", "LOGO • BiManage / official white wordmark")
-// that can't be exported until the Figma API quota resets. Replace this with
-// the official SVG in src/assets/ — callers won't need to change.
+// The official BiManage logo (Figma "Approved Brand Identity": the white
+// wordmark for dark backgrounds, and the standalone mark for the mobile
+// header). `tone="on-brand"` on the navy sidebar/header; `"brand"` on light
+// backgrounds. `compact` shows the mark only.
 export function Logo({ tone = "brand", compact = false, className }: { tone?: "brand" | "on-brand"; compact?: boolean; className?: string }) {
-  const mark = tone === "on-brand" ? "bg-surface-card text-ink-brand" : "bg-brand-navy text-ink-on-brand";
-  return (
-    <span className={cn("inline-flex items-center gap-2", className)} aria-label="BiManage" role="img">
-      <span aria-hidden="true" className={cn("flex size-9 items-center justify-center rounded-md text-card-heading", mark)}>
-        B
-      </span>
-      {!compact && (
-        <span aria-hidden="true" className={cn("text-section-title", tone === "on-brand" ? "text-ink-on-brand" : "text-ink-brand")}>
-          BiManage
-        </span>
-      )}
-    </span>
-  );
+  const white = tone === "on-brand";
+  if (compact) {
+    return <img src={white ? markWhite : markNavy} alt="BiManage" width={118} height={130} className={cn("h-9 w-auto select-none", className)} draggable={false} />;
+  }
+  return <img src={white ? wordmarkWhite : wordmarkNavy} alt="BiManage" width={300} height={88} className={cn("h-9 w-auto select-none", className)} draggable={false} />;
 }
