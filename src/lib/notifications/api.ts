@@ -65,7 +65,7 @@ export const useSavePreferences = () => {
 export const exportNotifications = (filter: string) => apiDownload("/notifications/export", { query: filter !== "all" ? { filter } : {} });
 
 /** Only follow links inside the app ("/orders/…"), never to another site. */
-export const safeLink = (link: string | null | undefined) => (link && link.startsWith("/") && !link.startsWith("//") ? link : null);
+export const safeLink = (link: string | null | undefined) => (link && link.startsWith("/") && !link.startsWith("//") && !link.includes("\\") ? link : null);
 
 export const CATEGORY_INFO: Record<PreferenceCategory, { label: string; detail: string }> = {
   orders: { label: "New orders and payments", detail: "New order, payment confirmation or order change" },
