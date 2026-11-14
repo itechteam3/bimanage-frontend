@@ -1,4 +1,4 @@
-import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
+import { afterEach, beforeAll, beforeEach, describe, expect, it, vi } from "vitest";
 import { screen, waitFor, within } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { readFileSync, readdirSync } from "node:fs";
@@ -294,12 +294,20 @@ describe("connection requests", () => {
 describe("plans, permissions and navigation", () => {
   const navLink = () => screen.queryAllByRole("link", { name: /^BiSupplyNet/ });
 
+  // Each test here may be the first to open a lazily loaded screen. On a busy
+  // CI machine that first load can take longer than one `findBy` waits
+  // (8 s), so load the chunks once up front, with their own allowance.
+  beforeAll(async () => {
+    await Promise.all([import("@/App"), import("@/pages/bisupplynet/index"), import("@/pages/projects/index"), import("@/pages/subscription/index")]);
+  }, 60_000);
+
   it("a teammate who can only sell sees BiSupplyNet in the menu and lands on selling", async () => {
     fb.handlers["GET /settings/my-role"] = () => [200, { role: "manager", permissions: { viewDashboard: true, accessBiSupplyNet: false, sellOnBiSupplyNet: true }, businessId: "b1" }];
     fb.handlers["GET /bisupplynet/dashboard"] = () => [200, DASH("live")];
     const router = renderApp("/bisupplynet");
     await waitFor(() => expect(router.state.location.pathname).toBe("/bisupplynet/sell/earnings"));
-    expect(navLink().length).toBeGreaterThan(0);
+    // The menu appears once the role has loaded, which can be just after the redirect.
+    await waitFor(() => expect(navLink().length).toBeGreaterThan(0));
     expect(screen.queryByRole("link", { name: "Suppliers" })).toBeNull();
   });
 
