@@ -6,6 +6,7 @@ import { ErrorNote } from "@/components/feedback/ErrorNote";
 import { BackBar, HeaderBackButton } from "@/components/layout/BackNav";
 import { tokenStore } from "@/lib/auth/tokenStore";
 import { cn } from "@/lib/cn";
+import { usePageMeta } from "@/lib/seo/meta";
 import { useCart, useMyStore, usePublicProducts, usePublicStore, useStoreProducts, type PublicProduct, type PublicStore, type StoreProduct } from "@/lib/store/api";
 
 // Public storefront (Figma 08.11–08.20). Shoppers need no account. A draft
@@ -112,11 +113,18 @@ export function StorefrontLayout() {
 
   return (
     <Ctx.Provider value={value}>
+      <StoreMeta store={value.store} />
       <Shell>
         <Outlet />
       </Shell>
     </Ctx.Provider>
   );
+}
+
+/** The store's name, description and logo as the page title and share tags. */
+function StoreMeta({ store }: { store: PublicStore }) {
+  usePageMeta({ title: store.storeName, description: store.description || `Shop ${store.storeName} online. Order and pay securely, powered by BiManage.`, image: store.banner || store.logo || null });
+  return null;
 }
 
 function BagCount() {
