@@ -94,7 +94,8 @@ export function BarChart({ data, format, title }: { data: BarDatum[]; format: (n
   const [active, setActive] = useState<number | null>(null);
   const max = Math.max(...data.map((d) => d.value), 1);
   // Thin labels when there are many bars, so they never collide.
-  const every = data.length > 16 ? Math.ceil(data.length / 8) : data.length > 8 ? 2 : 1;
+  // At most about five labels: they fit a phone-width chart without colliding.
+  const every = data.length > 5 ? Math.ceil(data.length / 5) : 1;
   return (
     <figure className="min-w-0">
       <figcaption className="sr-only">{title}</figcaption>
@@ -120,12 +121,19 @@ export function BarChart({ data, format, title }: { data: BarDatum[]; format: (n
             </div>
           ))}
         </div>
-        <div className="mt-2 flex gap-[2px] md:gap-1">
-          {data.map((d, i) => (
-            <span key={d.key} className="min-w-0 flex-1 truncate text-center text-caption text-ink-muted">
-              {i % every === 0 || i === data.length - 1 ? d.label : ""}
-            </span>
-          ))}
+        {/* Labels sit under their bar but may be wider than it, so they're
+            placed absolutely instead of squeezed (and cut off) into each bar. */}
+        <div className="relative mt-2 h-5">
+          {data.map((d, i) => {
+            const last = i === data.length - 1;
+            if (!last && (i % every !== 0 || data.length - 1 - i < every / 2)) return null;
+            const edge = i === 0 ? "left-0" : last ? "right-0" : "-translate-x-1/2";
+            return (
+              <span key={d.key} data-axis-label className={cn("absolute top-0 whitespace-nowrap text-caption text-ink-muted", edge)} style={i === 0 || last ? undefined : { left: `${((i + 0.5) / data.length) * 100}%` }}>
+                {d.label}
+              </span>
+            );
+          })}
         </div>
       </div>
       <table className="sr-only">
