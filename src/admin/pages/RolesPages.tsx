@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { useSearchParams } from "react-router-dom";
 import { count } from "@/lib/format";
-import { Avatar, Button, Dialog, Field, PasswordInput, SelectInput, TextArea, TextInput } from "@/components/ui";
+import { Avatar, Button, Dialog, Field, SelectInput, TextArea, TextInput } from "@/components/ui";
 import { AdminPage, AdminName, Toolbar, SearchBox, FilterSelect, Metrics, Records, Guidance, Pager, Pill, ErrorBox, dateOnly, dateTime, words, useDebounced, type Column } from "../components/AdminKit";
 import { adminError, fieldOf } from "../lib/api";
 import { useAdminAction, useAdminMe, useAdmins, useAudit, useStoreDomains, type DomainRow } from "../lib/hooks";
@@ -31,7 +31,7 @@ export function RolesPage() {
   const cols: Column<AdminAccount>[] = [
     { key: "name", label: "Administrator", cell: (a) => <span className="inline-flex items-center gap-2"><Avatar name={a.name} src={a.avatar} />{`${a.name}${a._id === me?._id ? " (you)" : ""}`}</span> },
     { key: "role", label: "Role", cell: (a) => a.roleLabel },
-    { key: "state", label: "Access", cell: (a) => (!a.isActive ? <Pill value="suspended" label="Deactivated" /> : a.twoFactorEnabled ? <Pill value="active" label="Two-step on" /> : <Pill value="pending" label="Set-up pending" />) },
+    { key: "state", label: "Access", cell: (a) => (!a.isActive ? <Pill value="suspended" label="Deactivated" /> : a.invite?.status === "pending" ? <Pill value="pending" label={`Invite sent · expires ${dateTime(a.invite.expiresAt)}`} /> : a.invite?.status === "expired" ? <Pill value="failed" label="Invite expired" /> : a.twoFactorEnabled ? <Pill value="active" label="Two-step on" /> : <Pill value="pending" label="Set-up pending" />) },
     { key: "last", label: "Last sign-in", cell: (a) => dateTime(a.lastLogin), desktopOnly: true },
     { key: "act", label: "", cell: (a) => <Button size="md" variant="secondary" onClick={() => (setDone(null), setEditing(a))}>Manage</Button> },
   ];
@@ -42,7 +42,7 @@ export function RolesPage() {
     { key: "n", label: "People", cell: (r) => count((admins.data || []).filter((a) => a.role === r.role && a.isActive).length) },
   ];
   return (
-    <AdminPage title="Admin permissions" intro="Control elevated access and protect sensitive actions." actions={<Button size="md" onClick={() => (setDone(null), setAdding(true))}>Add an admin</Button>}>
+    <AdminPage title="Admin permissions" intro="Control elevated access and protect sensitive actions." actions={<Button size="md" onClick={() => (setDone(null), setAdding(true))}>Invite an admin</Button>}>
       {done && <p className="rounded-lg bg-success-bg px-4 py-3 text-body-lg text-success" role="status">{done}</p>}
       <Toolbar>
         <SearchBox value={q} onChange={setQ} placeholder="Search administrator" />
@@ -64,20 +64,20 @@ export function RolesPage() {
 }
 
 function AddAdminDialog({ open, onClose, onDone }: { open: boolean; onClose: () => void; onDone: (m: string) => void }) {
-  const [f, setF] = useState({ name: "", email: "", role: "support" as AdminRole, password: "" });
+  const [f, setF] = useState({ name: "", email: "", role: "support" as AdminRole });
   const add = useAdminAction<typeof f, { message?: string }>("POST", () => "/admin/admins");
   const field = fieldOf(add.error);
   return (
     <Dialog
       open={open}
       onClose={onClose}
-      title="Add an admin"
-      description="They sign in with this temporary password, set up two-step sign-in and get their own recovery codes. Share the password privately."
+      title="Invite an admin"
+      description="They get an email with a link (valid 48 hours) to choose their own password, set up two-step sign-in with an authenticator app, and save their recovery codes. You never see or send a password."
       actions={
         <>
           <Button variant="secondary" onClick={onClose}>Cancel</Button>
-          <Button loading={add.isPending} disabled={!f.name || !f.email || f.password.length < 12} onClick={() => add.mutate(f, { onSuccess: (r) => (setF({ name: "", email: "", role: "support", password: "" }), onDone(r.message || "Admin added.")) })}>
-            Add admin
+          <Button loading={add.isPending} disabled={!f.name || !/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(f.email)} onClick={() => add.mutate(f, { onSuccess: (r) => (setF({ name: "", email: "", role: "support" }), onDone(r.message || "Invite sent.")) })}>
+            Send invite
           </Button>
         </>
       }
@@ -94,9 +94,6 @@ function AddAdminDialog({ open, onClose, onDone }: { open: boolean; onClose: () 
             {ROLE_INFO.map((r) => <option key={r.role} value={r.role}>{r.label}: {r.privilege}</option>)}
           </SelectInput>
         </Field>
-        <Field label="Temporary password" required hint="At least 12 characters, with letters and numbers." error={field === "password" ? adminError(add.error) : undefined}>
-          <PasswordInput autoComplete="new-password" value={f.password} onChange={(e) => setF({ ...f, password: e.target.value })} />
-        </Field>
         {add.error && !field ? <ErrorBox error={add.error} /> : null}
       </div>
     </Dialog>
@@ -108,10 +105,33 @@ function EditAdminDialog({ admin, self, onClose, onDone }: { admin: AdminAccount
   const [reason, setReason] = useState("");
   const update = useAdminAction<{ role?: AdminRole; isActive?: boolean; resetTwoFactor?: boolean; reason?: string }, { admin?: AdminAccount }>("PUT", (v) => `/admin/admins/${v.id}`);
   const force = useAdminAction<{ reason?: string }>("PUT", (v) => `/admin/admins/${v.id}/force-password-reset`);
+  const resend = useAdminAction("POST", (v) => `/admin/admins/${v.id}/invite/resend`);
+  const expire = useAdminAction("POST", (v) => `/admin/admins/${v.id}/invite/expire`);
+  const inviteOpen = admin.invite && (admin.invite.status === "pending" || admin.invite.status === "expired");
   const run = (body: { role?: AdminRole; isActive?: boolean; resetTwoFactor?: boolean }, msg: string) => update.mutate({ id: admin._id, ...body, reason: reason.trim() || undefined }, { onSuccess: () => onDone(msg) });
   return (
     <Dialog open onClose={onClose} title={`Manage ${admin.name}`} description={`${admin.email} · ${admin.roleLabel}`} actions={<Button variant="secondary" onClick={onClose}>Close</Button>}>
       <div className="flex flex-col gap-4">
+        {inviteOpen && (
+          <section className="flex flex-col gap-2 rounded-lg bg-surface-pale p-3">
+            <p className="text-body-lg text-ink-strong">
+              {admin.invite!.status === "pending" ? `Invite sent ${dateTime(admin.invite!.sentAt)}, expires ${dateTime(admin.invite!.expiresAt)}.` : "The invite expired before they set up their account."}
+              {admin.invite!.invitedBy ? ` Invited by ${admin.invite!.invitedBy}.` : ""}
+            </p>
+            <div className="grid gap-2 md:grid-cols-2">
+              <Button variant="outlined" loading={resend.isPending} onClick={() => resend.mutate({ id: admin._id }, { onSuccess: (r) => onDone(r.message || "Invite sent again.") })}>
+                Resend invite
+              </Button>
+              {admin.invite!.status === "pending" && (
+                <Button variant="secondary" loading={expire.isPending} onClick={() => expire.mutate({ id: admin._id }, { onSuccess: (r) => onDone(r.message || "Invite expired.") })}>
+                  Expire invite
+                </Button>
+              )}
+            </div>
+            {resend.error ? <ErrorBox error={resend.error} /> : null}
+            {expire.error ? <ErrorBox error={expire.error} /> : null}
+          </section>
+        )}
         {self ? (
           <p className="rounded-lg bg-surface-pale px-3 py-2 text-body-sm text-ink-secondary">You can't change your own role or deactivate yourself. Ask another superadmin.</p>
         ) : (

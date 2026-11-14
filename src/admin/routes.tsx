@@ -14,6 +14,7 @@ const shell = () => import("./components/AdminShell");
 const AdminLoginPage = page(auth, "AdminLoginPage");
 const AdminVerifyPage = page(auth, "AdminVerifyPage");
 const AdminEnrolPage = page(auth, "AdminEnrolPage");
+const AdminInvitePage = page(auth, "AdminInvitePage");
 const OverviewPage = page(() => import("./pages/OverviewPage"), "OverviewPage");
 const UsersPage = page(() => import("./pages/UsersPages"), "UsersPage");
 const UserDetailPage = page(() => import("./pages/UsersPages"), "UserDetailPage");
@@ -54,6 +55,7 @@ export const adminRoutes: RouteObject[] = [
   { path: "/admin/login", element: s(<AdminLoginPage />) },
   { path: "/admin/login/verify", element: s(<AdminVerifyPage />) },
   { path: "/admin/login/setup", element: s(<AdminEnrolPage />) },
+  { path: "/admin/invite", element: s(<AdminInvitePage />) },
   { path: "/admin/forgot-password", element: s(<AdminForgotPasswordPage />) },
   { path: "/admin/reset-password", element: s(<AdminResetPasswordPage />) },
   {

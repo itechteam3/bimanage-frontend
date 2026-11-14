@@ -9,6 +9,7 @@ import { adminSession, adminStep } from "../lib/session";
 import { adminKeys } from "../lib/hooks";
 import type { AdminMe } from "../lib/types";
 import { RecoveryCodesPanel, type CodesOwner } from "../components/RecoveryCodesPanel";
+import { AuthenticatorGuide } from "../components/AuthenticatorGuide";
 
 // Admin sign-in (decision A3, 2026-11-14): password, then two-step sign-in
 // (an authenticator app). The first time, the admin scans a QR code and gets
@@ -156,6 +157,9 @@ export function AdminVerifyPage() {
 
 export function AdminEnrolPage() {
   const step = adminStep.get();
+  const [params] = useSearchParams();
+  // Coming from an invite: the step-by-step help starts open.
+  const invited = params.get("invited") === "1";
   const finish = useFinishSignIn();
   const [setup, setSetup] = useState<{ otpauthUrl: string; secret: string } | null>(null);
   const [qr, setQr] = useState<string | null>(null);
@@ -194,6 +198,7 @@ export function AdminEnrolPage() {
   return (
     <AuthLayout panel="security" kicker="Set up two-step sign-in" title="Scan the QR code" subtitle="Use an authenticator app (Google Authenticator, Microsoft Authenticator, 1Password…). Then enter the 6-digit code it shows." mobileSubtitle="Scan with your authenticator app, then enter its code.">
       <form noValidate onSubmit={submit} className="flex flex-col gap-4">
+        <AuthenticatorGuide open={invited} />
         <div className="flex flex-col items-center gap-3 rounded-xl border border-line-card bg-surface-card p-4">
           {qr ? <img src={qr} alt="QR code for your authenticator app" className="size-52" /> : <div className="size-52 animate-pulse rounded-lg bg-surface-pale" aria-label="Preparing the QR code" />}
           {setup && (
@@ -218,6 +223,84 @@ export function RecoveryCodes({ codes, owner, onDone }: { codes: string[]; owner
   return (
     <AuthLayout panel="security" kicker="Two-step sign-in is on" title="Save your recovery codes" subtitle="If you lose your phone, each code lets you sign in once. They won't be shown again.">
       <RecoveryCodesPanel codes={codes} owner={owner} onDone={onDone} />
+    </AuthLayout>
+  );
+}
+
+/** /admin/invite?token=: a new admin chooses their own password, then sets up two-step sign-in. */
+export function AdminInvitePage() {
+  const [params] = useSearchParams();
+  const navigate = useNavigate();
+  const token = params.get("token") || "";
+  const [info, setInfo] = useState<{ name: string; email: string; roleLabel: string; invitedBy: string | null; expiresAt: string } | null>(null);
+  const [problem, setProblem] = useState<unknown>(null);
+  const [password, setPassword] = useState("");
+  const [confirm, setConfirm] = useState("");
+  const [busy, setBusy] = useState(false);
+  const [error, setError] = useState<unknown>(null);
+  useEffect(() => {
+    if (!token) return;
+    adminApi<{ name: string; email: string; roleLabel: string; invitedBy: string | null; expiresAt: string }>("/admin/invite", { query: { token }, anonymous: true }).then(setInfo).catch(setProblem);
+  }, [token]);
+  if (!token) return <Navigate to="/admin/login" replace />;
+  const mismatch = confirm.length > 0 && confirm !== password;
+  const submit = async (e: FormEvent) => {
+    e.preventDefault();
+    if (mismatch) return;
+    setBusy(true);
+    setError(null);
+    try {
+      const r = await adminApi<{ stepToken: string; email: string }>("/admin/invite/accept", { method: "POST", body: { token, newPassword: password }, anonymous: true });
+      adminSession.clear("signed-out");
+      adminStep.set({ token: r.stepToken, kind: "enrol", email: r.email });
+      navigate("/admin/login/setup?invited=1", { replace: true });
+    } catch (err) {
+      setError(err);
+    } finally {
+      setBusy(false);
+    }
+  };
+  if (problem) {
+    return (
+      <AuthLayout panel="security" kicker="BiManage platform admin" title="This invite can't be used" subtitle={adminError(problem)}>
+        <Link to="/admin/login" className="text-center text-body-lg font-semibold text-ink-brand">
+          Go to admin sign-in
+        </Link>
+      </AuthLayout>
+    );
+  }
+  const inviter = info && info.invitedBy ? info.invitedBy.replace(/ \(.*\)$/, "") : "A superadmin";
+  return (
+    <AuthLayout
+      panel="security"
+      kicker="Set up your admin account"
+      title={info ? `Welcome, ${info.name.split(" ")[0]}` : "Set up your admin account"}
+      subtitle={info ? `${inviter} added you as ${info.roleLabel}. Choose your password, then set up two-step sign-in.` : "Checking your invite…"}
+    >
+      <form noValidate onSubmit={submit} className="flex flex-col gap-4">
+        <ol className="flex flex-wrap gap-2 text-body-sm font-semibold">
+          {["1. Choose a password", "2. Two-step sign-in", "3. Save recovery codes"].map((label, i) => (
+            <li key={label} className={i === 0 ? "rounded-full bg-brand-navy px-3 py-1 text-ink-on-brand" : "rounded-full bg-surface-pale px-3 py-1 text-ink-secondary"}>
+              {label}
+            </li>
+          ))}
+        </ol>
+        {info && (
+          <AuthNote>
+            Signing in as <strong>{info.email}</strong>. This link expires {new Date(info.expiresAt).toLocaleString("en-NG", { timeZone: "Africa/Lagos", dateStyle: "medium", timeStyle: "short" })}.
+          </AuthNote>
+        )}
+        <Field label="Choose a password" required hint="At least 12 characters, with letters and numbers. Not a common password, and not one you use elsewhere." error={fieldOf(error) === "newPassword" ? adminError(error) : undefined}>
+          <PasswordInput autoComplete="new-password" value={password} onChange={(e) => setPassword(e.target.value)} />
+        </Field>
+        <Field label="Confirm password" required error={mismatch ? "The passwords don't match." : undefined}>
+          <PasswordInput autoComplete="new-password" value={confirm} onChange={(e) => setConfirm(e.target.value)} />
+        </Field>
+        {error && fieldOf(error) !== "newPassword" ? <AuthNote tone="danger">{adminError(error)}</AuthNote> : null}
+        <Button type="submit" fullWidth loading={busy} disabled={!info || password.length < 12 || password !== confirm}>
+          Continue to two-step sign-in
+        </Button>
+      </form>
     </AuthLayout>
   );
 }

@@ -368,3 +368,49 @@ describe("photos", () => {
     expect(await screen.findByRole("dialog")).toHaveTextContent("Profile photo");
   });
 });
+
+describe("admin invites", () => {
+  it("the invite page: welcome, own password, then two-step set-up with the guide open", async () => {
+    fb.handlers["GET /admin/invite"] = () => [200, { valid: true, name: "Sola Adebanjo", email: "sola@bitechteam.org", role: "support", roleLabel: "Support agent", invitedBy: "BiTechTeam (bitechteamlimited@gmail.com)", expiresAt: "2026-11-16T10:00:00Z" }];
+    fb.handlers["POST /admin/invite/accept"] = () => [200, { enrolRequired: true, stepToken: "step-enrol", email: "sola@bitechteam.org" }];
+    fb.handlers["POST /admin/2fa/setup"] = () => [200, { otpauthUrl: "otpauth://totp/x?secret=ABCD", secret: "ABCDEFGHIJKLMNOP" }];
+    const user = userEvent.setup();
+    renderApp("/admin/invite?token=tok123");
+    expect(await screen.findByRole("heading", { name: "Welcome, Sola" })).toBeInTheDocument();
+    expect(screen.getByText(/BiTechTeam added you as Support agent/)).toBeInTheDocument();
+    await user.type(screen.getByLabelText(/Choose a password/), "Harbour-lantern-58");
+    await user.type(screen.getByLabelText(/Confirm password/), "Harbour-lantern-58");
+    await user.click(screen.getByRole("button", { name: "Continue to two-step sign-in" }));
+    expect(await screen.findByRole("heading", { name: "Scan the QR code" })).toBeInTheDocument();
+    expect(last("POST /admin/invite/accept")?.body).toEqual({ token: "tok123", newPassword: "Harbour-lantern-58" });
+    expect(screen.getByText(/Install an authenticator app/)).toBeVisible();
+    expect(last("POST /admin/2fa/setup")?.body).toEqual({ stepToken: "step-enrol" });
+  });
+
+  it("an expired invite explains itself", async () => {
+    fb.handlers["GET /admin/invite"] = () => [400, { message: "This invite link has expired or was already used. Ask the superadmin who added you to resend it.", valid: false }];
+    renderApp("/admin/invite?token=old");
+    expect(await screen.findByRole("heading", { name: "This invite can't be used" })).toBeInTheDocument();
+  });
+
+  it("inviting sends no password; a pending invite can be resent or expired", async () => {
+    signedInAs("superadmin");
+    fb.handlers["GET /admin/admins"] = () => [200, [{ _id: "a2", name: "Sola", email: "sola@x.com", role: "support", roleLabel: "Support agent", isActive: true, twoFactorEnabled: false, lastLogin: null, createdAt: "2026-11-14T08:00:00Z", invite: { status: "pending", expiresAt: "2026-11-16T08:00:00Z", sentAt: "2026-11-14T08:00:00Z", invitedBy: "BiTechTeam (b@x.com)", acceptedAt: null } }]];
+    fb.handlers["POST /admin/admins"] = () => [201, { message: "Invite sent to kemi@x.com. The link works for 48 hours." }];
+    fb.handlers["POST /admin/admins/a2/invite/resend"] = () => [200, { message: "New invite sent to sola@x.com. The old link no longer works." }];
+    const user = userEvent.setup();
+    renderApp("/admin/roles");
+    expect((await screen.findAllByText(/Invite sent · expires/)).length).toBeGreaterThan(0);
+    await user.click(screen.getByRole("button", { name: "Invite an admin" }));
+    const dialog = await screen.findByRole("dialog");
+    expect(within(dialog).queryByLabelText(/password/i)).not.toBeInTheDocument();
+    await user.type(within(dialog).getByLabelText(/Name/), "Kemi");
+    await user.type(within(dialog).getByLabelText(/Email/), "kemi@x.com");
+    await user.click(within(dialog).getByRole("button", { name: "Send invite" }));
+    expect(await screen.findByText(/Invite sent to kemi@x.com/)).toBeInTheDocument();
+    expect(last("POST /admin/admins")?.body).toEqual({ name: "Kemi", email: "kemi@x.com", role: "support" });
+    await user.click(screen.getAllByRole("button", { name: "Manage" })[0]!);
+    await user.click(await screen.findByRole("button", { name: "Resend invite" }));
+    expect(await screen.findByText(/The old link no longer works/)).toBeInTheDocument();
+  });
+});
