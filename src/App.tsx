@@ -29,6 +29,7 @@ import { FeatureGate } from "@/lib/workspace/subscription";
 import type { Feature } from "@/config/plans";
 import { ProfilePage } from "@/pages/settings/ProfilePage";
 import { AccountClosedPage, AccountClosingPage, SessionExpiredPage } from "@/pages/account/AccountPages";
+import { UnsubscribePage } from "@/pages/account/UnsubscribePage";
 import { StartRedirect } from "@/lib/account/preferences";
 import { adminRoutes } from "@/admin/routes";
 
@@ -260,6 +261,8 @@ export const routes = [
       { path: "/session-expired", element: <SessionExpiredPage /> },
       { path: "/account-closing", element: <AccountClosingPage /> },
       { path: "/account-closed", element: <AccountClosedPage /> },
+      // One-click unsubscribe from announcement emails (no sign-in).
+      { path: "/unsubscribe", element: <UnsubscribePage /> },
       { path: "/invite/accept", element: <InviteAcceptPage /> },
       // Signed in — inside the app shell
       {

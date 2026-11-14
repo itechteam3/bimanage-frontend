@@ -204,6 +204,12 @@ export function AnnouncementEditorPage() {
                   <p className="text-body-lg text-ink-strong">
                     Goes to <strong>{count(preview.data.recipients)}</strong> {preview.data.recipients === 1 ? "person" : "people"}.
                   </p>
+                  {preview.data.byChannel && (
+                    <p className="text-body-sm text-ink-secondary">
+                      {preview.data.inApp ? `In-app: ${count(preview.data.byChannel.inApp)}. ` : ""}
+                      {preview.data.email ? `Email: ${count(preview.data.byChannel.email)} (people who unsubscribed from announcements are left out).` : ""}
+                    </p>
+                  )}
                   {preview.data.inApp && (
                     <div className="rounded-lg border border-line-card bg-surface-pale p-3">
                       <p className="text-caption font-semibold uppercase text-ink-muted">In-app notice</p>

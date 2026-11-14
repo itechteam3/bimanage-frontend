@@ -1,10 +1,9 @@
 import { useState } from "react";
 import { useSearchParams } from "react-router-dom";
 import { count } from "@/lib/format";
-import { Button, Dialog, Field, PasswordInput, SelectInput, TextArea, TextInput } from "@/components/ui";
-import { AdminPage, Toolbar, SearchBox, FilterSelect, Metrics, Records, Guidance, Pager, Section, Pill, ErrorBox, dateOnly, dateTime, words, useDebounced, type Column } from "../components/AdminKit";
-import { adminApi, adminError, fieldOf } from "../lib/api";
-import { adminSession } from "../lib/session";
+import { Avatar, Button, Dialog, Field, PasswordInput, SelectInput, TextArea, TextInput } from "@/components/ui";
+import { AdminPage, AdminName, Toolbar, SearchBox, FilterSelect, Metrics, Records, Guidance, Pager, Pill, ErrorBox, dateOnly, dateTime, words, useDebounced, type Column } from "../components/AdminKit";
+import { adminError, fieldOf } from "../lib/api";
 import { useAdminAction, useAdminMe, useAdmins, useAudit, useStoreDomains, type DomainRow } from "../lib/hooks";
 import type { AdminAccount, AdminRole, AuditEntry } from "../lib/types";
 
@@ -30,7 +29,7 @@ export function RolesPage() {
   const [done, setDone] = useState<string | null>(null);
   const list = (admins.data || []).filter((a) => (!role || a.role === role) && (!q || `${a.name} ${a.email}`.toLowerCase().includes(q.toLowerCase())));
   const cols: Column<AdminAccount>[] = [
-    { key: "name", label: "Administrator", cell: (a) => `${a.name}${a._id === me?._id ? " (you)" : ""}` },
+    { key: "name", label: "Administrator", cell: (a) => <span className="inline-flex items-center gap-2"><Avatar name={a.name} src={a.avatar} />{`${a.name}${a._id === me?._id ? " (you)" : ""}`}</span> },
     { key: "role", label: "Role", cell: (a) => a.roleLabel },
     { key: "state", label: "Access", cell: (a) => (!a.isActive ? <Pill value="suspended" label="Deactivated" /> : a.twoFactorEnabled ? <Pill value="active" label="Two-step on" /> : <Pill value="pending" label="Set-up pending" />) },
     { key: "last", label: "Last sign-in", cell: (a) => dateTime(a.lastLogin), desktopOnly: true },
@@ -108,6 +107,7 @@ function EditAdminDialog({ admin, self, onClose, onDone }: { admin: AdminAccount
   const [role, setRole] = useState<AdminRole>(admin.role);
   const [reason, setReason] = useState("");
   const update = useAdminAction<{ role?: AdminRole; isActive?: boolean; resetTwoFactor?: boolean; reason?: string }, { admin?: AdminAccount }>("PUT", (v) => `/admin/admins/${v.id}`);
+  const force = useAdminAction<{ reason?: string }>("PUT", (v) => `/admin/admins/${v.id}/force-password-reset`);
   const run = (body: { role?: AdminRole; isActive?: boolean; resetTwoFactor?: boolean }, msg: string) => update.mutate({ id: admin._id, ...body, reason: reason.trim() || undefined }, { onSuccess: () => onDone(msg) });
   return (
     <Dialog open onClose={onClose} title={`Manage ${admin.name}`} description={`${admin.email} · ${admin.roleLabel}`} actions={<Button variant="secondary" onClick={onClose}>Close</Button>}>
@@ -139,8 +139,14 @@ function EditAdminDialog({ admin, self, onClose, onDone }: { admin: AdminAccount
             </Button>
           )}
         </div>
-        <p className="text-body-sm text-ink-muted">Use "Reset two-step sign-in" when someone loses their authenticator and has no recovery codes left.</p>
+        {!self && admin.isActive && (
+          <Button variant="secondary" loading={force.isPending} onClick={() => force.mutate({ id: admin._id, reason: reason.trim() || undefined }, { onSuccess: (r) => onDone(r.message || "Password reset sent.") })}>
+            Force a password reset
+          </Button>
+        )}
+        <p className="text-body-sm text-ink-muted">Use "Reset two-step sign-in" when someone loses their authenticator and has no recovery codes left. "Force a password reset" stops their current password straight away, signs them out, and emails them a link to set a new one (valid 24 hours).</p>
         {update.error ? <ErrorBox error={update.error} /> : null}
+        {force.error ? <ErrorBox error={force.error} /> : null}
       </div>
     </Dialog>
   );
@@ -161,7 +167,7 @@ export function AuditPage() {
   const cols: Column<AuditEntry>[] = [
     { key: "when", label: "When", cell: (e) => dateTime(e.at) },
     { key: "action", label: "Action", cell: (e) => <span className="font-mono text-body-sm">{e.action}</span> },
-    { key: "by", label: "By", cell: (e) => <span className="[overflow-wrap:anywhere]">{e.by || "—"}{e.role ? ` (${words(e.role)})` : ""}</span> },
+    { key: "by", label: "By", cell: (e) => <AdminName name={e.byName} email={e.by} avatar={e.avatar} role={e.role} /> },
     { key: "what", label: "Details", cell: (e) => <span>{[e.targetType && `${words(e.targetType)} ${e.targetId || ""}`.trim(), e.summary, e.reason && `Reason: ${e.reason}`].filter(Boolean).join(" · ") || "—"}{e.via !== "admin" && <span className="ml-2"><Pill value="pending" label={e.via === "manual" ? "Recorded by hand" : "Server command"} /></span>}</span> },
   ];
   return (
@@ -250,59 +256,4 @@ export function StoreDomainsPage() {
   );
 }
 
-// ── My account ─────────────────────────────────────────────────────────────
-
-export function AdminAccountPage() {
-  const me = useAdminMe().data;
-  const [current, setCurrent] = useState("");
-  const [next, setNext] = useState("");
-  const [busy, setBusy] = useState(false);
-  const [error, setError] = useState<unknown>(null);
-  const [done, setDone] = useState(false);
-  const change = async () => {
-    setBusy(true);
-    setError(null);
-    try {
-      const r = await adminApi<{ token: string }>("/admin/me/password", { method: "PUT", body: { currentPassword: current, newPassword: next } });
-      adminSession.set(r.token);
-      setCurrent("");
-      setNext("");
-      setDone(true);
-    } catch (err) {
-      setError(err);
-    } finally {
-      setBusy(false);
-    }
-  };
-  const field = fieldOf(error);
-  return (
-    <AdminPage title="My admin account">
-      <div className="grid gap-5 lg:grid-cols-2">
-        <Section title="Profile">
-          <dl className="flex flex-col gap-2 text-body-lg">
-            <div><dt className="text-caption font-semibold uppercase text-ink-muted">Name</dt><dd>{me?.name}</dd></div>
-            <div><dt className="text-caption font-semibold uppercase text-ink-muted">Email</dt><dd>{me?.email}</dd></div>
-            <div><dt className="text-caption font-semibold uppercase text-ink-muted">Role</dt><dd>{me?.roleLabel}</dd></div>
-            <div><dt className="text-caption font-semibold uppercase text-ink-muted">Two-step sign-in</dt><dd>{me?.twoFactorEnabled ? "On" : "Off"}</dd></div>
-          </dl>
-          <p className="mt-3 text-body-sm text-ink-muted">Lost your authenticator? Use a recovery code at sign-in, or ask another superadmin to reset your two-step sign-in.</p>
-        </Section>
-        <Section title="Change password">
-          <div className="flex flex-col gap-3">
-            {done && <p className="rounded-lg bg-success-bg px-3 py-2 text-body-sm text-success" role="status">Password changed. Your other admin sessions ended.</p>}
-            <Field label="Current password" error={field === "currentPassword" ? adminError(error) : undefined}>
-              <PasswordInput autoComplete="current-password" value={current} onChange={(e) => setCurrent(e.target.value)} />
-            </Field>
-            <Field label="New password" hint="At least 12 characters, with letters and numbers." error={field === "newPassword" ? adminError(error) : undefined}>
-              <PasswordInput autoComplete="new-password" value={next} onChange={(e) => setNext(e.target.value)} />
-            </Field>
-            {error && !field ? <ErrorBox error={error} /> : null}
-            <Button onClick={() => void change()} loading={busy} disabled={!current || next.length < 12} className="self-start">
-              Change password
-            </Button>
-          </div>
-        </Section>
-      </div>
-    </AdminPage>
-  );
-}
+// My account (photo, password): AccountPages.tsx.

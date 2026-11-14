@@ -3,7 +3,7 @@ import { Link, useParams, useSearchParams } from "react-router-dom";
 import { count } from "@/lib/format";
 import { Button, Field, SelectInput, TextArea } from "@/components/ui";
 import { cn } from "@/lib/cn";
-import { AdminPage, Toolbar, SearchBox, FilterSelect, Metrics, Records, Guidance, Pager, Section, Facts, Pill, ErrorBox, Loading, dateTime, words, useDebounced, type Column } from "../components/AdminKit";
+import { AdminPage, AdminName, Toolbar, SearchBox, FilterSelect, Metrics, Records, Guidance, Pager, Section, Facts, Pill, ErrorBox, Loading, dateTime, words, useDebounced, type Column } from "../components/AdminKit";
 import { useAdminAction, useAdminMe, useAssignees, useOverview, useServiceRequest, useServiceRequests, useTicket, useTickets } from "../lib/hooks";
 import type { ServiceRequest, Sla, TicketRow } from "../lib/types";
 
@@ -50,7 +50,7 @@ export function SupportPage() {
     { key: "ref", label: "Reference", cell: (t) => t.ticketNumber },
     { key: "subject", label: "Request", cell: (t) => <span className="line-clamp-2">{t.subject}</span> },
     { key: "priority", label: "Priority", cell: (t) => <Pill value={t.priority} /> },
-    { key: "owner", label: "Owner", cell: (t) => t.assignedTo?.name || <span className="text-ink-muted">Unassigned</span>, desktopOnly: true },
+    { key: "owner", label: "Owner", cell: (t) => (t.assignedTo ? <AdminName name={t.assignedTo.name} avatar={t.assignedTo.avatar} /> : <span className="text-ink-muted">Unassigned</span>), desktopOnly: true },
     { key: "sla", label: "Reply target", cell: (t) => <SlaBadge sla={t.sla} /> },
   ];
   const requestCols: Column<ServiceRequest>[] = [
@@ -174,7 +174,9 @@ export function TicketDetailPage() {
               </li>
               {d.replies.map((r) => (
                 <li key={r._id} className={cn("rounded-lg p-3", r.by === "admin" ? "ml-6 bg-surface-tonal" : "mr-6 bg-surface-pale")}>
-                  <p className="text-body-sm text-ink-secondary">{r.by === "admin" ? `${r.name || "BiTechTeam"} (BiTechTeam)` : r.name || "Customer"} · {dateTime(r.createdAt)}</p>
+                  <p className="flex flex-wrap items-center gap-2 text-body-sm text-ink-secondary">
+                    {r.by === "admin" ? <AdminName name={`${r.name || "BiTechTeam"} (BiTechTeam)`} avatar={r.avatar} small /> : r.name || "Customer"} · {dateTime(r.createdAt)}
+                  </p>
                   <p className="mt-1 whitespace-pre-wrap text-body-lg text-ink-strong">{r.message}</p>
                   {r.attachments.map((a, i) => (
                     <a key={i} href={a.url} target="_blank" rel="noreferrer noopener" className="mr-3 text-body-sm font-semibold text-ink-brand underline">{a.name || `Attachment ${i + 1}`}</a>
@@ -222,7 +224,7 @@ export function TicketDetailPage() {
             />
           </Section>
           <Section title="Owner">
-            <p className="text-body-lg text-ink-strong">{d.assignedTo ? `${d.assignedTo.name} (${d.assignedTo.email})` : "Nobody yet"}</p>
+            <div className="text-body-lg text-ink-strong">{d.assignedTo ? <AdminName name={d.assignedTo.name} email={d.assignedTo.email} avatar={d.assignedTo.avatar} /> : "Nobody yet"}</div>
             <div className="mt-3 flex flex-col gap-2">
               {me && d.assignedTo?._id !== me._id && (
                 <Button variant="secondary" fullWidth loading={assign.isPending} onClick={() => assign.mutate({ id, adminId: "me" }, { onSuccess: () => setDone("The ticket is yours.") })}>

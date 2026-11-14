@@ -1,4 +1,4 @@
-import { useEffect, useState, type ReactNode } from "react";
+import { useEffect, useRef, useState, type ReactNode } from "react";
 import { Link, NavLink, Navigate, Outlet, useLocation, useMatches, useNavigate } from "react-router-dom";
 import { useQueryClient } from "@tanstack/react-query";
 import {
@@ -18,6 +18,8 @@ import {
   IconDots,
   IconBriefcase,
   IconUserCircle,
+  IconCamera,
+  IconChevronDown,
   type Icon,
 } from "@tabler/icons-react";
 import { cn } from "@/lib/cn";
@@ -103,7 +105,7 @@ function ProfileBlock({ onNavigate }: { onNavigate?: () => void }) {
   return (
     <div className="mt-3 border-t border-line-on-brand px-2 pt-5">
       <Link to="/admin/account" onClick={onNavigate} className="flex items-center gap-2 rounded-md hover:bg-line-on-brand">
-        <Avatar name={me?.name} className="ring-2 ring-line-on-brand" />
+        <Avatar name={me?.name} src={me?.avatar} className="ring-2 ring-line-on-brand" />
         <span className="min-w-0 flex-1">
           <span className="block truncate text-body-sm font-medium text-ink-on-brand">{me?.name}</span>
           <span className="block truncate text-caption font-medium text-ink-on-brand-soft">{me?.roleLabel} access</span>
@@ -133,6 +135,49 @@ function Sidebar() {
   );
 }
 
+/** Top-bar avatar menu: my account, change photo, sign out. */
+function AvatarMenu() {
+  const me = useAdminMe().data;
+  const signOut = useSignOut();
+  const navigate = useNavigate();
+  const [open, setOpen] = useState(false);
+  const ref = useRef<HTMLDivElement>(null);
+  useEffect(() => {
+    if (!open) return;
+    const close = (e: MouseEvent | KeyboardEvent) => {
+      if (e instanceof KeyboardEvent ? e.key === "Escape" : !ref.current?.contains(e.target as Node)) setOpen(false);
+    };
+    document.addEventListener("mousedown", close);
+    document.addEventListener("keydown", close);
+    return () => {
+      document.removeEventListener("mousedown", close);
+      document.removeEventListener("keydown", close);
+    };
+  }, [open]);
+  return (
+    <div ref={ref} className="relative">
+      <button type="button" aria-haspopup="menu" aria-expanded={open} onClick={() => setOpen((v) => !v)} className="flex items-center gap-2 rounded-lg p-1 pr-2 hover:bg-surface-pale">
+        <Avatar name={me?.name} src={me?.avatar} />
+        <span className="max-w-40 truncate text-body-lg font-medium text-ink-strong">{me?.name}</span>
+        <IconChevronDown aria-hidden="true" className={cn("size-icon-sm text-ink-strong transition-transform", open && "rotate-180")} />
+      </button>
+      {open && (
+        <div role="menu" className="absolute right-0 top-full z-30 mt-2 w-56 rounded-xl border border-line-subtle bg-surface-card p-2 shadow-floating">
+          <button role="menuitem" type="button" onClick={() => (setOpen(false), navigate("/admin/account"))} className="flex w-full items-center gap-2 rounded-md px-3 py-2.5 text-body-lg text-ink-strong hover:bg-surface-pale">
+            <IconUserCircle aria-hidden="true" className="size-icon text-ink-muted" /> My account
+          </button>
+          <button role="menuitem" type="button" onClick={() => (setOpen(false), navigate("/admin/account?photo=1"))} className="flex w-full items-center gap-2 rounded-md px-3 py-2.5 text-body-lg text-ink-strong hover:bg-surface-pale">
+            <IconCamera aria-hidden="true" className="size-icon text-ink-muted" /> Change photo
+          </button>
+          <button role="menuitem" type="button" onClick={() => void signOut()} className="flex w-full items-center gap-2 rounded-md px-3 py-2.5 text-body-lg text-danger hover:bg-danger-bg">
+            <IconLogout aria-hidden="true" className="size-icon" /> Sign out
+          </button>
+        </div>
+      )}
+    </div>
+  );
+}
+
 function TopBar({ section }: { section: string }) {
   const me = useAdminMe().data;
   return (
@@ -148,10 +193,13 @@ function TopBar({ section }: { section: string }) {
           </>
         )}
       </p>
-      <span className="inline-flex h-status items-center gap-2 rounded-full bg-surface-pale px-3 text-body-sm font-semibold text-ink-brand">
-        <span aria-hidden="true" className="size-2 rounded-full bg-success" />
-        Administrative access{me ? ` · ${me.roleLabel}` : ""}
-      </span>
+      <div className="flex items-center gap-4">
+        <span className="inline-flex h-status items-center gap-2 rounded-full bg-surface-pale px-3 text-body-sm font-semibold text-ink-brand">
+          <span aria-hidden="true" className="size-2 rounded-full bg-success" />
+          Administrative access{me ? ` · ${me.roleLabel}` : ""}
+        </span>
+        <AvatarMenu />
+      </div>
     </header>
   );
 }
