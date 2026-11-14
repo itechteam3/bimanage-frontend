@@ -260,6 +260,7 @@ export interface AdminAccount {
   lastLogin: string | null;
   createdAt: string;
   avatar?: string | null;
+  invite?: { status: "pending" | "expired" | "accepted"; expiresAt: string | null; sentAt: string | null; invitedBy: string | null; acceptedAt: string | null } | null;
 }
 
 export interface AuditEntry {
