@@ -3,7 +3,7 @@ import { act, screen, waitFor } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { tokenStore } from "@/lib/auth/tokenStore";
 import { serverStatus } from "@/lib/api/serverStatus";
-import { installFakeBackend, renderApp, testQueryClient, type FakeBackend } from "@/test/fakeBackend";
+import { installFakeBackend, renderApp, testQueryClient, type FakeBackend, listOrPages } from "@/test/fakeBackend";
 import { installFakeSockets } from "@/test/fakeSocket";
 import { matchesTopics } from "./topics";
 import { realtimeConfig } from "./RealtimeProvider";
@@ -48,7 +48,7 @@ beforeEach(() => {
   realtimeConfig.batchMs = 50;
   orders = [ORDER];
   fb.handlers["GET /subscriptions/current"] = () => [200, { plan: "standard", status: "active", features: { orders: true, invoices: true, analytics: true, inventory: true } }];
-  fb.handlers["GET /orders"] = () => [200, orders];
+  fb.handlers["GET /orders"] = (_b, _h, url) => [200, listOrPages("orders", orders, url)];
   fb.handlers["GET /orders/stats"] = () => [200, { all: 1, awaitingPayment: 1, unfulfilled: 1, completed: 0, cancelled: 0, revenue: 0 }];
   fb.handlers["GET /inventory/products"] = () => [200, [SHIRT]];
 });

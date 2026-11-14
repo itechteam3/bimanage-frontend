@@ -1,5 +1,6 @@
 import { useMemo, useState } from "react";
 import { UpdatedNote, newRowClass } from "@/components/feedback/UpdatedNote";
+import { LoadMore } from "@/components/page/LoadMore";
 import { useNewItems } from "@/lib/realtime/useLiveList";
 import { Link, useLocation, useNavigate } from "react-router-dom";
 import { IconDownload, IconPlus, IconSearch, IconScan, IconFileSpreadsheet, IconAlertTriangle } from "@tabler/icons-react";
@@ -25,6 +26,9 @@ const Loading = ({ label = "Loading…" }: { label?: string }) => (
 );
 
 /** Shared download button: saves the CSV and opens the "export ready" page. */
+/** Rows shown at a time in long tables ("Load more"). */
+const PAGE = 50;
+
 export function useInventoryExport() {
   const navigate = useNavigate();
   const [busy, setBusy] = useState(false);
@@ -146,6 +150,7 @@ export function InventoryOverviewPage() {
 // 09.11 Inventory products (register)
 export function ProductsPage() {
   const products = useProducts();
+  const [shown, setShown] = useState(PAGE);
   const fresh = useNewItems(products.data?.map((p) => p._id));
   const canEdit = useCan("manageInventory");
   const exp = useInventoryExport();
@@ -198,7 +203,7 @@ export function ProductsPage() {
                   </tr>
                 </thead>
                 <tbody>
-                  {list.map((p, i) => (
+                  {list.slice(0, shown).map((p, i) => (
                     <tr key={p._id} data-new={fresh.has(p._id) || undefined} className={cn(i % 2 === 1 && "bg-surface-pale", fresh.has(p._id) && newRowClass)}>
                       <td className="rounded-l-lg px-3 py-4">
                         <Link to={`/inventory/products/${p._id}`} className="font-semibold text-ink-strong hover:underline">
@@ -215,6 +220,7 @@ export function ProductsPage() {
                   ))}
                 </tbody>
               </table>
+              <LoadMore shown={Math.min(shown, list.length)} total={list.length} onMore={() => setShown((n) => n + PAGE)} noun="products" />
               {list.length === 0 && <p className="py-8 text-center text-body-lg text-ink-secondary">{q ? `No products match “${q}”.` : "No products yet."}</p>}
             </div>
           )}

@@ -3,7 +3,7 @@ import { act, screen, waitFor } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { tokenStore } from "@/lib/auth/tokenStore";
 import { serverStatus } from "@/lib/api/serverStatus";
-import { installFakeBackend, renderApp, type FakeBackend } from "@/test/fakeBackend";
+import { installFakeBackend, renderApp, type FakeBackend, listOrPages } from "@/test/fakeBackend";
 import { resolveBack, back, SCREENS } from "@/lib/nav/backNav";
 import { record, resetHistory, hasInAppHistory, previousPath } from "@/lib/nav/history";
 import type { UIMatch } from "react-router-dom";
@@ -34,7 +34,7 @@ beforeEach(() => {
   fb = installFakeBackend();
   fb.handlers["GET /subscriptions/current"] = () => [200, { plan: "standard", status: "active", features: { orders: true, invoices: true, analytics: true, inventory: true } }];
   fb.handlers["GET /inventory/products"] = () => [200, []];
-  fb.handlers["GET /orders"] = () => [200, [ORDER]];
+  fb.handlers["GET /orders"] = (_b, _h, url) => [200, listOrPages("orders", [ORDER], url)];
   fb.handlers["GET /orders/stats"] = () => [200, { all: 1, awaitingPayment: 1, unfulfilled: 1, completed: 0, cancelled: 0, revenue: 0 }];
   fb.handlers["GET /orders/o1"] = () => [200, ORDER];
 });

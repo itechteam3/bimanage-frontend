@@ -3,7 +3,7 @@ import { screen, waitFor, within } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { tokenStore } from "@/lib/auth/tokenStore";
 import { serverStatus } from "@/lib/api/serverStatus";
-import { EMPTY_DASHBOARD, installFakeBackend, renderApp, type FakeBackend } from "@/test/fakeBackend";
+import { EMPTY_DASHBOARD, installFakeBackend, renderApp, type FakeBackend, listOrPages } from "@/test/fakeBackend";
 import type { Invoice, Order } from "@/lib/sales/api";
 
 const SHIRT = { _id: "p1", name: "Linen shirt", sellingPrice: 25000, stockQuantity: 18, totalSold: 0 };
@@ -46,7 +46,7 @@ beforeEach(() => {
   fb = installFakeBackend();
   fb.handlers["GET /subscriptions/current"] = () => [200, { plan: "standard", status: "active", features: { orders: true, invoices: true, analytics: true, inventory: true } }];
   fb.handlers["GET /inventory/products"] = () => [200, [SHIRT, TOTE]];
-  fb.handlers["GET /orders"] = () => [200, [ORDER]];
+  fb.handlers["GET /orders"] = (_b, _h, url) => [200, listOrPages("orders", [ORDER], url)];
   fb.handlers["GET /orders/stats"] = () => [200, { all: 1, awaitingPayment: 1, unfulfilled: 1, completed: 0, cancelled: 0, revenue: 0 }];
   fb.handlers["GET /orders/o1"] = () => [200, ORDER];
   fb.handlers["GET /invoices/i1"] = () => [200, INVOICE];
@@ -62,15 +62,32 @@ const last = (key: string) => [...fb.calls].reverse().find((c) => c.key === key)
 describe("orders (05.02 / 05.09 / 05.12 / 05.04 / 05.07 / 05.08)", () => {
   it("lists orders with stats, and filters / searches through the API", async () => {
     const queries: string[] = [];
-    fb.handlers["GET /orders"] = (_b, _h, url) => (queries.push(url.search), [200, [ORDER]]);
+    fb.handlers["GET /orders"] = (_b, _h, url) => (queries.push(url.search), [200, listOrPages("orders", [ORDER], url)]);
     renderApp("/orders");
     expect(await screen.findByText("ORD-7K2Q9M")).toBeInTheDocument();
     expect(screen.getAllByText("Awaiting payment").length).toBeGreaterThan(0);
     const user = userEvent.setup();
     await user.click(screen.getByRole("tab", { name: "Unfulfilled" }));
-    await waitFor(() => expect(queries).toContain("?status=unfulfilled"));
+    await waitFor(() => expect(queries).toContain("?status=unfulfilled&page=1&limit=30"));
     await user.type(screen.getByRole("textbox", { name: /search orders/i }), "amina{Enter}");
-    await waitFor(() => expect(queries).toContain("?status=unfulfilled&q=amina"));
+    await waitFor(() => expect(queries).toContain("?status=unfulfilled&q=amina&page=1&limit=30"));
+  });
+
+  it("long lists: Load more fetches the next page and keeps the first (nothing cut off)", async () => {
+    fb.handlers["GET /orders"] = (_b, _h, url) => {
+      const page = Number(url.searchParams.get("page") || 1);
+      const o = { ...ORDER, _id: `o${page}`, trackingNo: `ORD-PAGE-${page}` };
+      return [200, { orders: [o], total: 2, page, totalPages: 2 }];
+    };
+    const user = userEvent.setup();
+    renderApp("/orders");
+    expect(await screen.findByText("ORD-PAGE-1")).toBeInTheDocument();
+    expect(screen.getByText(/Showing 1 of 2 orders/)).toBeInTheDocument();
+    await user.click(screen.getByRole("button", { name: "Load more" }));
+    expect(await screen.findByText("ORD-PAGE-2")).toBeInTheDocument();
+    expect(screen.getByText("ORD-PAGE-1")).toBeInTheDocument();
+    expect(screen.getByText(/Showing 2 of 2 orders/)).toBeInTheDocument();
+    expect(screen.queryByRole("button", { name: "Load more" })).not.toBeInTheDocument();
   });
 
   it("creates a multi-item order; a stock shortage from the server lands on that line", async () => {

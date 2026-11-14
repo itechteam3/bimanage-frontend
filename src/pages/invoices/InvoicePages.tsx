@@ -1,5 +1,6 @@
 import { useEffect, useState } from "react";
 import { Link, useLocation, useNavigate, useParams } from "react-router-dom";
+import { LoadMore } from "@/components/page/LoadMore";
 import { useFieldArray, useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
@@ -15,7 +16,7 @@ import {
   isEmailUnavailable,
   useDeleteInvoice,
   useInvoice,
-  useInvoices,
+  useInvoicePages,
   useSaveInvoice,
   useSendInvoice,
   useSetInvoiceStatus,
@@ -68,8 +69,9 @@ const TABS: Array<[string, string]> = [
 
 export function InvoicesPage() {
   const [tab, setTab] = useUrlState<string>("status", "all", TABS.map(([k]) => k));
-  const invoices = useInvoices(tab);
-  const list = invoices.data?.invoices ?? [];
+  const invoices = useInvoicePages(tab);
+  const list = invoices.data?.pages.flatMap((p) => p.invoices) ?? [];
+  const listTotal = invoices.data?.pages[0]?.total ?? 0;
   return (
     <div className="flex flex-col gap-6">
       <PageTitle actions={<ButtonLink to="/invoices/new" size="md">Create invoice</ButtonLink>}>Invoices</PageTitle>
@@ -127,6 +129,7 @@ export function InvoicesPage() {
                   ))}
                 </tbody>
               </table>
+              <LoadMore shown={list.length} total={listTotal} onMore={() => void invoices.fetchNextPage()} loading={invoices.isFetchingNextPage} noun="invoices" />
             </div>
           )}
         </div>

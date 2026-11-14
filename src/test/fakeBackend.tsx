@@ -28,6 +28,9 @@ export const EMPTY_DASHBOARD = {
   analytics: { totalOrders: 0, sale: 0, distribute: 0, return: 0 },
 };
 
+/** A list endpoint that pages when asked (?page=): { [key]: items, total, page, totalPages }. */
+export const listOrPages = (key: string, items: unknown[], url?: URL) => (url && url.searchParams.has("page") ? { [key]: items, total: items.length, page: 1, totalPages: 1 } : items);
+
 export function installFakeBackend(): FakeBackend {
   const fb: FakeBackend = {
     calls: [],
