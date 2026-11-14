@@ -17,7 +17,7 @@ export interface AppNotification {
   createdAt: string;
 }
 
-export type PreferenceCategory = "orders" | "inventory" | "messages" | "tasks" | "subscriptions" | "withdrawals";
+export type PreferenceCategory = "orders" | "inventory" | "messages" | "tasks" | "subscriptions" | "withdrawals" | "announcements";
 export type Preferences = Record<PreferenceCategory, { inApp: boolean; email: boolean }>;
 
 export const notificationKeys = {
@@ -74,4 +74,5 @@ export const CATEGORY_INFO: Record<PreferenceCategory, { label: string; detail: 
   tasks: { label: "Tasks assigned to you", detail: "When someone gives you a task. Several at once come as one email" },
   subscriptions: { label: "Subscriptions", detail: "Trial reminders and expiry alerts, including the 3-day warning" },
   withdrawals: { label: "Withdrawals and disputes", detail: "Payout status and dispute changes" },
+  announcements: { label: "News from BiManage", detail: "Product updates and notices from the BiManage team. Security and payment emails always arrive" },
 };

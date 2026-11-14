@@ -78,7 +78,7 @@ export const useAnnouncement = (id: string | undefined) => useQuery({ queryKey: 
 export const useAnnouncementPreview = (id: string | undefined, version: unknown) =>
   useQuery({
     queryKey: k("announcement-preview", id, version),
-    queryFn: () => adminApi<{ recipients: number; inApp: { title: string; message: string; link: string | null } | null; email: { subject: string; html: string } | null; needsApproval: boolean }>(`/admin/announcements/${id}/preview`),
+    queryFn: () => adminApi<{ recipients: number; byChannel?: { inApp: number; email: number }; inApp: { title: string; message: string; link: string | null } | null; email: { subject: string; html: string } | null; needsApproval: boolean }>(`/admin/announcements/${id}/preview`),
     enabled: Boolean(id),
   });
 
