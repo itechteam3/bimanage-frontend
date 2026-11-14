@@ -4,7 +4,25 @@
   "installCommand": "npm ci",
   "buildCommand": "npm run build",
   "outputDirectory": "dist",
-  "rewrites": [{ "source": "/(.*)", "destination": "/index.html" }],
+  "functions": {
+    "api/share.js": { "includeFiles": "dist/index.html", "maxDuration": 10 },
+    "api/sitemap.js": { "maxDuration": 15 }
+  },
+  "rewrites": [
+    {
+      "source": "/s/:slug/products/:productId",
+      "has": [{ "type": "header", "key": "user-agent", "value": ".*(facebookexternalhit|facebookcatalog|Facebot|meta-externalagent|LinkedInBot|WhatsApp|Twitterbot|Slackbot|TelegramBot|Discordbot|Pinterest|redditbot|Embedly|SkypeUriPreview|vkShare|Iframely|Viber|Mastodon|Bluesky|Cardyb).*" }],
+      "destination": "/api/share?slug=:slug&productId=:productId"
+    },
+    {
+      "source": "/s/:slug",
+      "has": [{ "type": "header", "key": "user-agent", "value": ".*(facebookexternalhit|facebookcatalog|Facebot|meta-externalagent|LinkedInBot|WhatsApp|Twitterbot|Slackbot|TelegramBot|Discordbot|Pinterest|redditbot|Embedly|SkypeUriPreview|vkShare|Iframely|Viber|Mastodon|Bluesky|Cardyb).*" }],
+      "destination": "/api/share?slug=:slug"
+    },
+    { "source": "/sitemap.xml", "destination": "/api/sitemap" },
+    { "source": "/robots.txt", "destination": "/api/robots" },
+    { "source": "/((?!api/).*)", "destination": "/index.html" }
+  ],
   "headers": [
     {
       "source": "/assets/(.*)",
@@ -17,6 +35,22 @@
         { "key": "Referrer-Policy", "value": "strict-origin-when-cross-origin" },
         { "key": "X-Frame-Options", "value": "DENY" }
       ]
+    },
+    {
+      "source": "/:section(admin|dashboard|onboarding|inventory|sales|orders|reports|analytics|invoices|projects|settings|social|store|messages|notifications|support|feli|subscription|wallet|bisupplynet|more|verify|forgot-password|reset-password|oauth|session-expired|account-closing|account-closed|invite|unsubscribe|ui-kit)/:rest*",
+      "headers": [{ "key": "X-Robots-Tag", "value": "noindex, nofollow" }]
+    },
+    {
+      "source": "/s/:slug/:page(cart|checkout|payment|track|chat)",
+      "headers": [{ "key": "X-Robots-Tag", "value": "noindex, nofollow" }]
+    },
+    {
+      "source": "/reviews/:page(write|submitted)",
+      "headers": [{ "key": "X-Robots-Tag", "value": "noindex, nofollow" }]
+    },
+    {
+      "source": "/api/(.*)",
+      "headers": [{ "key": "X-Robots-Tag", "value": "noindex" }]
     }
   ]
 }
