@@ -14,6 +14,7 @@ const shell = () => import("./components/AdminShell");
 const AdminLoginPage = page(auth, "AdminLoginPage");
 const AdminVerifyPage = page(auth, "AdminVerifyPage");
 const AdminEnrolPage = page(auth, "AdminEnrolPage");
+const AdminInvitePage = page(auth, "AdminInvitePage");
 const OverviewPage = page(() => import("./pages/OverviewPage"), "OverviewPage");
 const UsersPage = page(() => import("./pages/UsersPages"), "UsersPage");
 const UserDetailPage = page(() => import("./pages/UsersPages"), "UserDetailPage");
@@ -35,7 +36,10 @@ const roles = () => import("./pages/RolesPages");
 const RolesPage = page(roles, "RolesPage");
 const AuditPage = page(roles, "AuditPage");
 const StoreDomainsPage = page(roles, "StoreDomainsPage");
-const AdminAccountPage = page(roles, "AdminAccountPage");
+const account = () => import("./pages/AccountPages");
+const AdminAccountPage = page(account, "AdminAccountPage");
+const AdminForgotPasswordPage = page(account, "AdminForgotPasswordPage");
+const AdminResetPasswordPage = page(account, "AdminResetPasswordPage");
 const AdminMorePage = page(shell, "AdminMorePage");
 const RequireCan = lazy(() => shell().then((m) => ({ default: m.RequireCan as ComponentType<{ can: Capability; children: ReactNode }> })));
 
@@ -51,6 +55,9 @@ export const adminRoutes: RouteObject[] = [
   { path: "/admin/login", element: s(<AdminLoginPage />) },
   { path: "/admin/login/verify", element: s(<AdminVerifyPage />) },
   { path: "/admin/login/setup", element: s(<AdminEnrolPage />) },
+  { path: "/admin/invite", element: s(<AdminInvitePage />) },
+  { path: "/admin/forgot-password", element: s(<AdminForgotPasswordPage />) },
+  { path: "/admin/reset-password", element: s(<AdminResetPasswordPage />) },
   {
     path: "/admin",
     element: s(<Shell />),

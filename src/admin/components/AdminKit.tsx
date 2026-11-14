@@ -2,7 +2,7 @@ import { useEffect, useState, type ReactNode } from "react";
 import { Link } from "react-router-dom";
 import { IconSearch, IconArrowRight, IconAlertTriangle } from "@tabler/icons-react";
 import { cn } from "@/lib/cn";
-import { Button, Dialog, Field, Spinner, Status, TextArea, type StatusTone } from "@/components/ui";
+import { Avatar, Button, Dialog, Field, Spinner, Status, TextArea, type StatusTone } from "@/components/ui";
 import { KpiCard, type KpiTone } from "@/components/page/Blocks";
 import { adminError } from "../lib/api";
 
@@ -318,6 +318,21 @@ export function ReasonDialog({ open, onClose, title, description, label, confirm
         {error ? <ErrorBox error={error} /> : null}
       </div>
     </Dialog>
+  );
+}
+
+/** An admin's photo (or initials on the brand circle) and name. */
+export function AdminName({ name, email, avatar, role, small }: { name?: string | null; email?: string | null; avatar?: string | null; role?: string | null; small?: boolean }) {
+  const label = name || email || "—";
+  return (
+    <span className="inline-flex min-w-0 items-center gap-2">
+      {(name || email) && <Avatar name={name || email} src={avatar} className={small ? "size-6 text-label" : undefined} />}
+      <span className="min-w-0 [overflow-wrap:anywhere]">
+        {label}
+        {role ? ` (${words(role)})` : ""}
+        {name && email ? <span className="block text-body-sm text-ink-muted">{email}</span> : null}
+      </span>
+    </span>
   );
 }
 

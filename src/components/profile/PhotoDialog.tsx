@@ -111,6 +111,26 @@ function renderCrop(img: HTMLImageElement, crop: Crop): Promise<Blob> {
  */
 export function PhotoDialog({ open, onClose }: { open: boolean; onClose: () => void }) {
   const { user, refresh } = useAuth();
+  return (
+    <PhotoEditorDialog
+      open={open}
+      onClose={onClose}
+      name={user?.name}
+      avatar={user?.avatar}
+      onUpload={async (blob) => {
+        await uploadAvatar(blob);
+        await refresh();
+      }}
+      onRemove={async () => {
+        await removeAvatar();
+        await refresh();
+      }}
+    />
+  );
+}
+
+/** The same picker and square cropper, for any account (business users, admins). */
+export function PhotoEditorDialog({ open, onClose, name, avatar, onUpload, onRemove }: { open: boolean; onClose: () => void; name?: string | null; avatar?: string | null; onUpload: (blob: Blob) => Promise<void>; onRemove: () => Promise<void> }) {
   const input = useRef<HTMLInputElement>(null);
   const [img, setImg] = useState<HTMLImageElement | null>(null);
   const [crop, setCrop] = useState<Crop>({ scale: 1, x: 0, y: 0 });
@@ -150,8 +170,7 @@ export function PhotoDialog({ open, onClose }: { open: boolean; onClose: () => v
     try {
       const blob = await renderCrop(img, crop);
       if (blob.size > AVATAR_MAX_UPLOAD_BYTES) throw new Error("too-big");
-      await uploadAvatar(blob);
-      await refresh();
+      await onUpload(blob);
       onClose();
     } catch (err) {
       setError((err as Error).message === "too-big" ? "That photo is still too large after cropping. Try another one." : errorMessage(err, "We couldn't save your photo. Check your connection and try again."));
@@ -163,8 +182,7 @@ export function PhotoDialog({ open, onClose }: { open: boolean; onClose: () => v
     setBusy("remove");
     setError(null);
     try {
-      await removeAvatar();
-      await refresh();
+      await onRemove();
       onClose();
     } catch (err) {
       setError(errorMessage(err, "We couldn't remove your photo. Please try again."));
@@ -206,8 +224,8 @@ export function PhotoDialog({ open, onClose }: { open: boolean; onClose: () => v
           <Cropper img={img} crop={crop} setCrop={setCrop} />
         ) : (
           <>
-            <Avatar name={user?.name} src={user?.avatar} size="large" />
-            {user?.avatar && (
+            <Avatar name={name} src={avatar} size="large" />
+            {avatar && (
               <Button variant="secondary" size="md" onClick={remove} loading={busy === "remove"} loadingText="Removing…" className="text-danger">
                 <IconTrash aria-hidden="true" className="size-icon" /> Remove photo
               </Button>

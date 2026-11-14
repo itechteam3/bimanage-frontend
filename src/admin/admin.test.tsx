@@ -265,3 +265,152 @@ describe("analytics export", () => {
     expect(toCsv([["a", "=SUM(A1)"], ["-5", 'x"y']])).toBe(`a,'=SUM(A1)\n'-5,"x""y"`);
   });
 });
+
+describe("passwords and recovery codes", () => {
+  it("forgot password: the same message for anyone, no session needed", async () => {
+    fb.handlers["POST /admin/password/forgot"] = () => [200, { message: "If that email belongs to a BiManage admin, we've sent a link to set a new password. It expires in 15 minutes." }];
+    const user = userEvent.setup();
+    renderApp("/admin/login");
+    await user.click(await screen.findByRole("link", { name: "Forgot password?" }));
+    await user.type(await screen.findByLabelText(/Admin email/), "boss@bitechteam.test");
+    await user.click(screen.getByRole("button", { name: "Email me a link" }));
+    expect(await screen.findByText(/If that email belongs to a BiManage admin/)).toBeInTheDocument();
+    expect(last("POST /admin/password/forgot")?.headers.Authorization).toBeUndefined();
+  });
+
+  it("the reset link sets a new password, then it's sign-in with two-step", async () => {
+    fb.handlers["POST /admin/password/reset"] = (b) => (b.token === "good" ? [200, { message: "ok", twoFactorRequired: true }] : [400, { message: "This link has expired or was already used. Ask for a new one.", restart: true }]);
+    const user = userEvent.setup();
+    renderApp("/admin/reset-password?token=good");
+    await user.type(await screen.findByLabelText(/^New password/), "Brand-new-pass-1");
+    await user.type(screen.getByLabelText(/Confirm new password/), "Brand-new-pass-1");
+    await user.click(screen.getByRole("button", { name: "Set new password" }));
+    expect(await screen.findByText(/Sign in with your new password and your authenticator app/)).toBeInTheDocument();
+    expect(last("POST /admin/password/reset")?.body).toEqual({ token: "good", newPassword: "Brand-new-pass-1" });
+  });
+
+  it("changing the password asks for a two-step code", async () => {
+    signedInAs("superadmin");
+    fb.handlers["PUT /admin/me/password"] = () => [200, { message: "ok", token: "fresh-admin-token" }];
+    const user = userEvent.setup();
+    renderApp("/admin/account");
+    await user.type(await screen.findByLabelText(/Current password/), "Old-password-123");
+    await user.type(screen.getByLabelText(/^New password/), "New-password-456");
+    const go = screen.getByRole("button", { name: "Change password" });
+    expect(go).toBeDisabled();
+    const section = screen.getByRole("heading", { name: "Change password" }).closest("section")!;
+    const boxes = within(section as HTMLElement).getAllByRole("textbox");
+    await user.click(boxes[0]!);
+    await user.keyboard("123456");
+    await user.click(go);
+    expect(await screen.findByText(/other admin sessions were signed out/)).toBeInTheDocument();
+    expect(last("PUT /admin/me/password")?.body).toEqual({ currentPassword: "Old-password-123", newPassword: "New-password-456", code: "123456" });
+    expect(adminSession.get()).toBe("fresh-admin-token");
+  });
+
+  it("new recovery codes are named after the admin", async () => {
+    signedInAs("superadmin", { name: "Elijah Ayanlere", email: "elijah@bitechteam.test" });
+    fb.handlers["POST /admin/me/recovery-codes"] = () => [200, { recoveryCodes: Array.from({ length: 10 }, (_, i) => `ABCD-EF${i}${i}`), generatedAt: "2026-11-14T10:00:00Z" }];
+    const user = userEvent.setup();
+    renderApp("/admin/account");
+    const box = (await screen.findByRole("heading", { name: "Recovery codes" })).closest("section")! as HTMLElement;
+    await user.click(within(box).getAllByRole("textbox")[0]!);
+    await user.keyboard("123456");
+    await user.click(within(box).getByRole("button", { name: "Generate new recovery codes" }));
+    expect(await screen.findByText("File: elijah-ayanlere-bimanage-admin-recovery-codes-2026-11-14.txt")).toBeInTheDocument();
+    expect(screen.getByText("ABCD-EF00")).toBeInTheDocument();
+  });
+
+  it("file name and header rules", async () => {
+    const { nameSlug, codesFilename, codesText } = await import("./components/RecoveryCodesPanel");
+    expect(nameSlug("  Élijah  O'Ayanlere-Smith ")).toBe("elijah-oayanlere-smith");
+    expect(codesFilename({ name: "Elijah Ayanlere", email: "e@x.com" }, new Date("2026-11-14T23:30:00Z"))).toBe("elijah-ayanlere-bimanage-admin-recovery-codes-2026-11-15.txt");
+    const t = codesText({ name: "Elijah Ayanlere", email: "e@x.com", roleLabel: "Superadmin" }, ["AAAA-BBBB"], new Date("2026-11-14T10:00:00Z"));
+    expect(t).toMatch(/Name:\s+Elijah Ayanlere/);
+    expect(t).toMatch(/Email:\s+e@x\.com/);
+    expect(t).toMatch(/Role:\s+Superadmin/);
+    expect(t).toMatch(/Generated: /);
+    expect(t).toContain("Keep these safe and private. Each code works once. Generating new codes invalidates these.");
+    expect(t).toContain(" 1. AAAA-BBBB");
+  });
+
+  it("a superadmin forces another admin's password reset", async () => {
+    signedInAs("superadmin");
+    fb.handlers["GET /admin/admins"] = () => [200, [{ _id: "a2", name: "Sola", email: "sola@x.com", role: "support", roleLabel: "Support agent", isActive: true, twoFactorEnabled: true, lastLogin: null, createdAt: "2026-11-14T08:00:00Z" }]];
+    fb.handlers["PUT /admin/admins/a2/force-password-reset"] = () => [200, { message: "Sola's password no longer works and they've been signed out. We emailed them a link to set a new one (valid 24 hours)." }];
+    const user = userEvent.setup();
+    renderApp("/admin/roles");
+    await user.click((await screen.findAllByRole("button", { name: "Manage" }))[0]!);
+    await user.click(await screen.findByRole("button", { name: "Force a password reset" }));
+    expect(await screen.findByText(/valid 24 hours/)).toBeInTheDocument();
+  });
+});
+
+describe("photos", () => {
+  it("the photo shows in the header, and beside names in the audit trail", async () => {
+    signedInAs("superadmin", { avatar: "https://res.cloudinary.com/x/bimanage/admin-avatars/me.jpg" });
+    fb.handlers["GET /admin/audit"] = () => [200, { entries: [{ id: "e1", at: "2026-11-14T08:00:00Z", recordedAt: "2026-11-14T08:00:00Z", action: "user.suspend", by: "sola@x.com", byName: "Sola", avatar: "https://res.cloudinary.com/x/bimanage/admin-avatars/sola.jpg", role: "support", via: "admin", targetType: "user", targetId: "u1", summary: null, reason: null }], total: 1, page: 1, totalPages: 1 }];
+    renderApp("/admin/audit");
+    await screen.findByRole("heading", { name: "Audit trail" });
+    await screen.findAllByText("Sola (Support)");
+    const srcs = Array.from(document.querySelectorAll("img")).map((i) => i.getAttribute("src"));
+    expect(srcs).toContain("https://res.cloudinary.com/x/bimanage/admin-avatars/me.jpg");
+    expect(srcs).toContain("https://res.cloudinary.com/x/bimanage/admin-avatars/sola.jpg");
+  });
+
+  it("the avatar menu opens the photo editor", async () => {
+    signedInAs("superadmin");
+    const user = userEvent.setup();
+    renderApp("/admin");
+    await screen.findByRole("heading", { name: "Platform overview" });
+    await user.click(screen.getByRole("button", { name: /Ada superadmin/ }));
+    await user.click(screen.getByRole("menuitem", { name: "Change photo" }));
+    expect(await screen.findByRole("dialog")).toHaveTextContent("Profile photo");
+  });
+});
+
+describe("admin invites", () => {
+  it("the invite page: welcome, own password, then two-step set-up with the guide open", async () => {
+    fb.handlers["GET /admin/invite"] = () => [200, { valid: true, name: "Sola Adebanjo", email: "sola@bitechteam.org", role: "support", roleLabel: "Support agent", invitedBy: "BiTechTeam (bitechteamlimited@gmail.com)", expiresAt: "2026-11-16T10:00:00Z" }];
+    fb.handlers["POST /admin/invite/accept"] = () => [200, { enrolRequired: true, stepToken: "step-enrol", email: "sola@bitechteam.org" }];
+    fb.handlers["POST /admin/2fa/setup"] = () => [200, { otpauthUrl: "otpauth://totp/x?secret=ABCD", secret: "ABCDEFGHIJKLMNOP" }];
+    const user = userEvent.setup();
+    renderApp("/admin/invite?token=tok123");
+    expect(await screen.findByRole("heading", { name: "Welcome, Sola" })).toBeInTheDocument();
+    expect(screen.getByText(/BiTechTeam added you as Support agent/)).toBeInTheDocument();
+    await user.type(screen.getByLabelText(/Choose a password/), "Harbour-lantern-58");
+    await user.type(screen.getByLabelText(/Confirm password/), "Harbour-lantern-58");
+    await user.click(screen.getByRole("button", { name: "Continue to two-step sign-in" }));
+    expect(await screen.findByRole("heading", { name: "Scan the QR code" })).toBeInTheDocument();
+    expect(last("POST /admin/invite/accept")?.body).toEqual({ token: "tok123", newPassword: "Harbour-lantern-58" });
+    expect(screen.getByText(/Install an authenticator app/)).toBeVisible();
+    expect(last("POST /admin/2fa/setup")?.body).toEqual({ stepToken: "step-enrol" });
+  });
+
+  it("an expired invite explains itself", async () => {
+    fb.handlers["GET /admin/invite"] = () => [400, { message: "This invite link has expired or was already used. Ask the superadmin who added you to resend it.", valid: false }];
+    renderApp("/admin/invite?token=old");
+    expect(await screen.findByRole("heading", { name: "This invite can't be used" })).toBeInTheDocument();
+  });
+
+  it("inviting sends no password; a pending invite can be resent or expired", async () => {
+    signedInAs("superadmin");
+    fb.handlers["GET /admin/admins"] = () => [200, [{ _id: "a2", name: "Sola", email: "sola@x.com", role: "support", roleLabel: "Support agent", isActive: true, twoFactorEnabled: false, lastLogin: null, createdAt: "2026-11-14T08:00:00Z", invite: { status: "pending", expiresAt: "2026-11-16T08:00:00Z", sentAt: "2026-11-14T08:00:00Z", invitedBy: "BiTechTeam (b@x.com)", acceptedAt: null } }]];
+    fb.handlers["POST /admin/admins"] = () => [201, { message: "Invite sent to kemi@x.com. The link works for 48 hours." }];
+    fb.handlers["POST /admin/admins/a2/invite/resend"] = () => [200, { message: "New invite sent to sola@x.com. The old link no longer works." }];
+    const user = userEvent.setup();
+    renderApp("/admin/roles");
+    expect((await screen.findAllByText(/Invite sent · expires/)).length).toBeGreaterThan(0);
+    await user.click(screen.getByRole("button", { name: "Invite an admin" }));
+    const dialog = await screen.findByRole("dialog");
+    expect(within(dialog).queryByLabelText(/password/i)).not.toBeInTheDocument();
+    await user.type(within(dialog).getByLabelText(/Name/), "Kemi");
+    await user.type(within(dialog).getByLabelText(/Email/), "kemi@x.com");
+    await user.click(within(dialog).getByRole("button", { name: "Send invite" }));
+    expect(await screen.findByText(/Invite sent to kemi@x.com/)).toBeInTheDocument();
+    expect(last("POST /admin/admins")?.body).toEqual({ name: "Kemi", email: "kemi@x.com", role: "support" });
+    await user.click(screen.getAllByRole("button", { name: "Manage" })[0]!);
+    await user.click(await screen.findByRole("button", { name: "Resend invite" }));
+    expect(await screen.findByText(/The old link no longer works/)).toBeInTheDocument();
+  });
+});

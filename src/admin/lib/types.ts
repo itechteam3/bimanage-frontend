@@ -31,6 +31,8 @@ export interface AdminMe {
   twoFactorEnabled: boolean;
   lastLogin: string | null;
   createdAt?: string;
+  avatar?: string | null;
+  passwordChangedAt?: string | null;
   can: Capability[];
 }
 
@@ -122,7 +124,7 @@ export interface TicketRow {
   priority: string;
   status: string;
   user?: { _id: string; name: string; email: string } | null;
-  assignedTo: { _id: string; name: string; email: string } | null;
+  assignedTo: { _id: string; name: string; email: string; avatar?: string | null } | null;
   sla: Sla;
   createdAt: string;
   updatedAt?: string;
@@ -132,7 +134,7 @@ export interface TicketDetail extends TicketRow {
   relatedReference?: string | null;
   attachments?: Array<{ url: string; name: string; type?: string }>;
   business: { _id: string; name: string | null } | null;
-  replies: Array<{ _id: string; by: "user" | "admin"; name?: string; message: string; attachments: Array<{ url: string; name: string }>; createdAt: string }>;
+  replies: Array<{ _id: string; by: "user" | "admin"; name?: string; avatar?: string | null; message: string; attachments: Array<{ url: string; name: string }>; createdAt: string }>;
   links: { customer: string | null };
 }
 export interface ServiceRequest {
@@ -257,6 +259,8 @@ export interface AdminAccount {
   twoFactorEnabled: boolean;
   lastLogin: string | null;
   createdAt: string;
+  avatar?: string | null;
+  invite?: { status: "pending" | "expired" | "accepted"; expiresAt: string | null; sentAt: string | null; invitedBy: string | null; acceptedAt: string | null } | null;
 }
 
 export interface AuditEntry {
@@ -265,6 +269,8 @@ export interface AuditEntry {
   recordedAt: string;
   action: string;
   by: string | null;
+  byName?: string | null;
+  avatar?: string | null;
   role: string | null;
   via: "admin" | "command" | "manual";
   targetType: string | null;
