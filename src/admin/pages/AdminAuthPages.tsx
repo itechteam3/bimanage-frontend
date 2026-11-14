@@ -8,6 +8,7 @@ import { adminApi, adminError, fieldOf } from "../lib/api";
 import { adminSession, adminStep } from "../lib/session";
 import { adminKeys } from "../lib/hooks";
 import type { AdminMe } from "../lib/types";
+import { RecoveryCodesPanel, type CodesOwner } from "../components/RecoveryCodesPanel";
 
 // Admin sign-in (decision A3, 2026-11-14): password, then two-step sign-in
 // (an authenticator app). The first time, the admin scans a QR code and gets
@@ -75,6 +76,9 @@ export function AdminLoginPage() {
         <Button type="submit" fullWidth loading={busy} loadingText="Checking…" disabled={!email || !password}>
           Continue
         </Button>
+        <Link to="/admin/forgot-password" className="text-center text-body-lg font-semibold text-ink-brand">
+          Forgot password?
+        </Link>
         <AuthNote>Repeated wrong attempts lock the account for 15 minutes. This isn't the business sign-in: <Link to="/login" className="font-semibold text-ink-brand">go to the business sign-in</Link>.</AuthNote>
       </form>
     </AuthLayout>
@@ -172,7 +176,7 @@ export function AdminEnrolPage() {
   }, [step, setup]);
 
   if (!step || step.kind !== "enrol") return done ? null : <Navigate to="/admin/login" replace />;
-  if (done && done.recoveryCodes) return <RecoveryCodes codes={done.recoveryCodes} email={step.email} onDone={() => finish(done)} />;
+  if (done && done.recoveryCodes) return <RecoveryCodes codes={done.recoveryCodes} owner={{ name: done.admin?.name || step.email, email: done.admin?.email || step.email, roleLabel: done.admin?.roleLabel }} onDone={() => finish(done)} />;
 
   const submit = async (e: FormEvent) => {
     e.preventDefault();
@@ -209,53 +213,11 @@ export function AdminEnrolPage() {
   );
 }
 
-/** Shown once: 10 recovery codes. The admin confirms they've saved them. */
-export function RecoveryCodes({ codes, email, onDone }: { codes: string[]; email: string; onDone: () => void }) {
-  const [saved, setSaved] = useState(false);
-  const [copied, setCopied] = useState(false);
-  const text = `BiManage admin recovery codes for ${email}\nEach code works once. Keep them somewhere safe and private.\n\n${codes.join("\n")}\n`;
-  const copy = async () => {
-    try {
-      await navigator.clipboard.writeText(text);
-      setCopied(true);
-    } catch {
-      setCopied(false);
-    }
-  };
-  const download = () => {
-    const url = URL.createObjectURL(new Blob([text], { type: "text/plain" }));
-    const a = document.createElement("a");
-    a.href = url;
-    a.download = "bimanage-admin-recovery-codes.txt";
-    a.click();
-    URL.revokeObjectURL(url);
-  };
+/** Shown once after set-up: 10 recovery codes, named after the admin. */
+export function RecoveryCodes({ codes, owner, onDone }: { codes: string[]; owner: CodesOwner; onDone: () => void }) {
   return (
     <AuthLayout panel="security" kicker="Two-step sign-in is on" title="Save your recovery codes" subtitle="If you lose your phone, each code lets you sign in once. They won't be shown again.">
-      <div className="flex flex-col gap-4">
-        <ol className="grid grid-cols-2 gap-2 rounded-xl border border-line-card bg-surface-card p-4 font-mono text-body-lg text-ink-strong">
-          {codes.map((c) => (
-            <li key={c} className="rounded-md bg-surface-pale px-2 py-1 text-center">
-              {c}
-            </li>
-          ))}
-        </ol>
-        <div className="grid gap-2 md:grid-cols-2">
-          <Button variant="secondary" onClick={() => void copy()}>
-            {copied ? "Copied" : "Copy codes"}
-          </Button>
-          <Button variant="secondary" onClick={download}>
-            Download as a file
-          </Button>
-        </div>
-        <label className="flex items-start gap-3 text-body-lg text-ink-strong">
-          <input type="checkbox" className="mt-1 size-5" checked={saved} onChange={(e) => setSaved(e.target.checked)} />
-          I've saved these codes somewhere safe.
-        </label>
-        <Button fullWidth disabled={!saved} onClick={onDone}>
-          Continue to admin
-        </Button>
-      </div>
+      <RecoveryCodesPanel codes={codes} owner={owner} onDone={onDone} />
     </AuthLayout>
   );
 }
