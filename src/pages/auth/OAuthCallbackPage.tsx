@@ -3,6 +3,7 @@ import { useNavigate } from "react-router-dom";
 import { Spinner } from "@/components/ui";
 import { useAuth } from "@/lib/auth/AuthProvider";
 import { pendingInvite } from "@/lib/auth/pending";
+import { ApiError } from "@/lib/api/client";
 
 // The API redirects here after Google sign-in: /oauth/callback?token=<JWT>.
 // The token is removed from the address bar immediately (so it isn't kept in
@@ -22,8 +23,8 @@ export function OAuthCallbackPage() {
       return;
     }
     signIn(token)
-      .then(() => navigate(pendingInvite.get() ? "/invite/accept" : "/dashboard", { replace: true }))
-      .catch(() => navigate("/login?error=google", { replace: true }));
+      .then(() => navigate(pendingInvite.get() ? "/invite/accept" : "/", { replace: true }))
+      .catch((err) => navigate(err instanceof ApiError && err.data.accountClosing ? "/account-closing" : "/login?error=google", { replace: true }));
   }, [navigate, signIn]);
 
   return (

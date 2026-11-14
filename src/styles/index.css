@@ -43,6 +43,20 @@
     box-shadow: var(--shadow-focus);
   }
 
+  /* Workspace preferences (13.03): set on <html> from the person's settings. */
+  html.larger-text {
+    font-size: 112.5%;
+  }
+
+  html.reduce-motion *,
+  html.reduce-motion *::before,
+  html.reduce-motion *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+
   @media (prefers-reduced-motion: reduce) {
     *,
     *::before,

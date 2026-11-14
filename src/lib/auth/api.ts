@@ -31,6 +31,9 @@ export interface LoginResult {
   name: string;
   email: string;
   token: string;
+  /** The account is in its closure grace period (13.08): it can only be restored. */
+  accountClosing?: boolean;
+  purgeAt?: string;
 }
 
 /** Backend says "OTP has expired…" only for genuinely expired codes;

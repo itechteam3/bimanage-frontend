@@ -3,6 +3,7 @@ import { useQueryClient } from "@tanstack/react-query";
 import { env } from "@/config/env";
 import { useAuth } from "@/lib/auth/AuthProvider";
 import { tokenStore } from "@/lib/auth/tokenStore";
+import { apiEvents } from "@/lib/api/events";
 import { invalidateTopics, type ChangeEvent, type Topic } from "./topics";
 import { transport, type LiveSocket } from "./transport";
 
@@ -107,7 +108,14 @@ export function RealtimeProvider({ children }: { children: ReactNode }) {
     socket.on("connect", onConnect);
     socket.on("disconnect", onDisconnect);
     socket.on("connect_error", onError);
+    // A fresh token (password change, "sign out of all other devices"): the
+    // server dropped every live connection, so reconnect with the new token.
+    const offRenewed = apiEvents.on("session-renewed", () => {
+      socket.disconnect();
+      socket.connect();
+    });
     return () => {
+      offRenewed();
       if (timer) clearTimeout(timer);
       if (retry) clearTimeout(retry);
       socket.off("bm:change", onChange);

@@ -21,6 +21,8 @@ type Values = z.infer<typeof schema>;
 
 const reasonNotice: Record<string, string> = {
   expired: "Your session has expired. Please sign in again.",
+  ended: "You were signed out on this device because the password was changed or all other devices were signed out.",
+  closed: "Your account is closing. Sign in again any time before the removal date to keep it.",
   suspended: "This account has been suspended. Please contact support for help.",
   "signed-out": "You've signed out.",
 };
@@ -28,7 +30,7 @@ const reasonNotice: Record<string, string> = {
 export function SignInPage() {
   const navigate = useNavigate();
   const [params] = useSearchParams();
-  const { signIn, signOutReason } = useAuth();
+  const { signIn, signOutReason, enterClosing } = useAuth();
   const [invalid, setInvalid] = useState<{ attemptsRemaining?: number } | null>(null);
   const [formError, setFormError] = useState<string | null>(null);
 
@@ -52,8 +54,13 @@ export function SignInPage() {
     setFormError(null);
     try {
       const res = await authApi.login(email.trim(), password);
+      if (res.accountClosing) {
+        enterClosing(res.token, res.purgeAt ?? null);
+        navigate("/account-closing", { replace: true });
+        return;
+      }
       await signIn(res.token);
-      navigate(pendingInvite.get() ? "/invite/accept" : safeNext(params.get("next")), { replace: true });
+      navigate(pendingInvite.get() ? "/invite/accept" : safeNext(params.get("next"), "/"), { replace: true });
     } catch (err) {
       if (!(err instanceof ApiError)) return setFormError(errorMessage(err));
       if (err.status === 401) {
