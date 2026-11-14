@@ -25,4 +25,5 @@ export const pendingInvite = {
 
 /** Where to go after signing in (only same-app paths). */
 export const safeNext = (next: string | null | undefined, fallback = "/dashboard") =>
-  next && next.startsWith("/") && !next.startsWith("//") ? next : fallback;
+  // In-app paths only: no "//host", and no backslashes ("/\host" is read as another site).
+  next && next.startsWith("/") && !next.startsWith("//") && !next.includes("\\") ? next : fallback;
