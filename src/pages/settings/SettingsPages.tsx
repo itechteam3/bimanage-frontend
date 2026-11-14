@@ -393,7 +393,7 @@ function SignOutOthers() {
   };
   return (
     <div className="flex flex-col gap-3">
-      <Button variant="outlined" size="md" className="self-start" loading={busy} loadingText="Signing out…" onClick={() => void run()}>
+      <Button variant="outlined" size="md" className="w-full md:w-auto md:self-start" loading={busy} loadingText="Signing out…" onClick={() => void run()}>
         Sign out of all other devices
       </Button>
       {done && <AuthNote tone="success">You've been signed out of all other devices. You're still signed in here.</AuthNote>}
@@ -454,7 +454,9 @@ export function SecurityPage() {
                   <Field label="Current password" required error={formState.errors.currentPassword?.message}>
                     <PasswordInput autoComplete="current-password" {...register("currentPassword")} />
                   </Field>
-                  <div className="grid gap-4 md:grid-cols-2 md:gap-x-10">
+                  {/* Side by side only where the form is wide enough (tablets without
+                      the sidebar, large desktops); between 1024 and 1440 they stack. */}
+                  <div className="grid gap-4 md:grid-cols-2 md:gap-x-6 lg:grid-cols-1 desktop:grid-cols-2 desktop:gap-x-10">
                     <Field label="New password" required error={formState.errors.newPassword?.message} hint={`At least ${MIN_PASSWORD} characters.`}>
                       <PasswordInput autoComplete="new-password" {...register("newPassword")} />
                     </Field>
@@ -468,7 +470,7 @@ export function SecurityPage() {
               {success && <AuthNote tone="success">Password changed. Your other devices have been signed out, and we've emailed you to confirm.</AuthNote>}
               {formError && <AuthNote tone="danger">{formError}</AuthNote>}
               <ErrorNote error={otherError} fallback="We couldn't change your password. Please try again." />
-              <Button type="submit" className="self-end" loading={formState.isSubmitting} loadingText="Updating…">
+              <Button type="submit" className="w-full md:w-auto md:self-end" loading={formState.isSubmitting} loadingText="Updating…">
                 Update password
               </Button>
             </form>
