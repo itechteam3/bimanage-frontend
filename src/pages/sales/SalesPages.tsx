@@ -90,7 +90,7 @@ export interface BarDatum {
   detail?: string;
 }
 
-export function BarChart({ data, format, title }: { data: BarDatum[]; format: (n: number) => string; title: string }) {
+export function BarChart({ data, format, title, valueLabel = "Revenue" }: { data: BarDatum[]; format: (n: number) => string; title: string; valueLabel?: string }) {
   const [active, setActive] = useState<number | null>(null);
   const max = Math.max(...data.map((d) => d.value), 1);
   // Thin labels when there are many bars, so they never collide.
@@ -136,26 +136,29 @@ export function BarChart({ data, format, title }: { data: BarDatum[]; format: (n
           })}
         </div>
       </div>
-      <table className="sr-only">
-        <caption>{title}</caption>
-        <thead>
-          <tr>
-            <th scope="col">Day</th>
-            <th scope="col">Revenue</th>
-          </tr>
-        </thead>
-        <tbody>
-          {data.map((d) => (
-            <tr key={d.key}>
-              <th scope="row">{d.long}</th>
-              <td>
-                {format(d.value)}
-                {d.detail ? ` (${d.detail})` : ""}
-              </td>
+      {/* sr-only on a wrapper: a <table> ignores the 1px width and can widen the page on phones. */}
+      <div className="sr-only">
+        <table>
+          <caption>{title}</caption>
+          <thead>
+            <tr>
+              <th scope="col">Day</th>
+              <th scope="col">{valueLabel}</th>
             </tr>
-          ))}
-        </tbody>
-      </table>
+          </thead>
+          <tbody>
+            {data.map((d) => (
+              <tr key={d.key}>
+                <th scope="row">{d.long}</th>
+                <td>
+                  {format(d.value)}
+                  {d.detail ? ` (${d.detail})` : ""}
+                </td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      </div>
     </figure>
   );
 }

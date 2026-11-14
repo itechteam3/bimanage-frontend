@@ -88,7 +88,7 @@ export function ApplyPage() {
   if (profile.isLoading) return <Loading label="Loading your seller profile…" />;
   const notYet = profile.error && isNotWholesaler(profile.error);
   if (!notYet && !profile.data) return <ErrorNote error={profile.error ?? true} fallback="We couldn't load your seller profile." onRetry={() => void profile.refetch()} />;
-  if (profile.data && profile.data.status !== "rejected") return <Navigate to="/bisupplynet/sell/application" replace />;
+  if (profile.data && profile.data.status !== "rejected" && !profile.data.infoRequest) return <Navigate to="/bisupplynet/sell/application" replace />;
   return <ApplyFormView previous={profile.data ?? null} />;
 }
 
@@ -164,13 +164,15 @@ function ApplyFormView({ previous }: { previous: MyWholesalerProfile | null }) {
   return (
     <div className="flex flex-col gap-6">
       {guard.dialog}
-      <Heading title={previous ? "Apply again as a wholesaler" : "Apply as a wholesaler"} subtitle="Submit your business details for BiSupplyNet verification." />
+      <Heading title={previous?.infoRequest ? "Update your application" : previous ? "Apply again as a wholesaler" : "Apply as a wholesaler"} subtitle="Submit your business details for BiSupplyNet verification." />
       <Intro>Strong, complete profiles with a valid CAC number and a verification document may be approved automatically.</Intro>
-      {previous?.rejectionReason && (
+      {previous?.infoRequest ? (
+        <InfoRequestNote request={previous.infoRequest} />
+      ) : previous?.rejectionReason ? (
         <p role="status" className="break-words rounded-xl bg-surface-tint-warm px-5 py-3 text-body-sm text-ink-strong">
           Your last application wasn't approved: {previous.rejectionReason}
         </p>
-      )}
+      ) : null}
       <div className="grid gap-5 lg:grid-cols-[minmax(0,1.7fr)_minmax(0,1fr)]">
         <form noValidate onSubmit={onSubmit} className="flex min-w-0 flex-col gap-5">
           <Panel title="Business verification" subtitle="Accurate business details improve your trust assessment.">
@@ -315,6 +317,24 @@ function ScoreBreakdown({ score, parts, reasons, title = "Live profile score" }:
 
 const APP_STATUS = { pending: "In review", verified: "Approved", rejected: "Not approved" } as const;
 
+/** BiTechTeam asked for more information: what they need. */
+function InfoRequestNote({ request }: { request: NonNullable<MyWholesalerProfile["infoRequest"]> }) {
+  return (
+    <section role="status" className="break-words rounded-xl bg-surface-tint-warm px-5 py-4 text-body-lg text-ink-strong">
+      <p className="font-semibold">BiTechTeam needs a little more information</p>
+      {request.message && <p className="mt-1">{request.message}</p>}
+      {request.items.length > 0 && (
+        <ul className="mt-2 list-disc pl-5 text-body-sm">
+          {request.items.map((i) => (
+            <li key={i}>{i}</li>
+          ))}
+        </ul>
+      )}
+      <p className="mt-2 text-body-sm text-ink-muted">Update your details below and send the application again. It stays in review until you do.</p>
+    </section>
+  );
+}
+
 export function ApplicationPage() {
   const profile = useMyWholesalerProfile();
   if (profile.isLoading) return <Loading label="Loading your application…" />;
@@ -324,7 +344,11 @@ export function ApplicationPage() {
   const title = a.status === "verified" ? "Application approved" : a.status === "rejected" ? "Application not approved" : "Application in review";
   const card = a.status === "verified" ? "You're a verified wholesaler" : a.status === "rejected" ? "Your application needs changes" : "Wholesaler verification pending";
   const action =
-    a.status === "rejected" ? (
+    a.infoRequest ? (
+      <ButtonLink to="/bisupplynet/sell/apply" size="md">
+        Update application
+      </ButtonLink>
+    ) : a.status === "rejected" ? (
       <ButtonLink to="/bisupplynet/sell/apply" size="md">
         Apply again
       </ButtonLink>
@@ -338,6 +362,7 @@ export function ApplicationPage() {
     <div className="flex flex-col gap-6">
       <Heading title={title} subtitle={a.submittedAt ? `Your wholesaler profile was submitted on ${shortDate(a.submittedAt)}.` : "Your wholesaler profile has been submitted."} action={action} />
       {a.status === "verified" && <SellTabs />}
+      {a.infoRequest && <InfoRequestNote request={a.infoRequest} />}
       <Intro>{a.status === "pending" ? "You will be notified once verification is finished." : a.status === "verified" ? "Buyers can now find you and order your listings." : "Update your details and apply again whenever you're ready."}</Intro>
       <div className="grid gap-5 lg:grid-cols-[minmax(0,1.7fr)_minmax(0,1fr)]">
         <section className="min-w-0 rounded-2xl border border-line-card bg-surface-card p-5 shadow-card lg:p-10">

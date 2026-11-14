@@ -30,6 +30,7 @@ import type { Feature } from "@/config/plans";
 import { ProfilePage } from "@/pages/settings/ProfilePage";
 import { AccountClosedPage, AccountClosingPage, SessionExpiredPage } from "@/pages/account/AccountPages";
 import { StartRedirect } from "@/lib/account/preferences";
+import { adminRoutes } from "@/admin/routes";
 
 const UiKitPage = lazy(() => import("@/pages/dev/UiKitPage"));
 // Settings (13.xx), reports (14.xx) and social (15.01), each its own chunk.
@@ -497,6 +498,8 @@ export const routes = [
               { path: "/bisupplynet/sell/disputes", element: sell(<SellerDisputesPage />), handle: { section: "BiSupplyNet", back: back("/bisupplynet/sell/earnings", SCREENS.selling) } },
               { path: "/bisupplynet/sell/earnings", element: sell(<EarningsPage />), handle: { section: "BiSupplyNet" } },
               // Older links in notifications.
+              // The supplier status emails link here.
+              { path: "/bisupplynet/apply", element: <Navigate to="/bisupplynet/sell/apply" replace /> },
               { path: "/bisupplynet/dashboard", element: <Navigate to="/bisupplynet/sell" replace />, handle: { back: back("/bisupplynet/sell/earnings", SCREENS.selling) } },
               { path: "/bisupplynet/connections", element: <Navigate to="/bisupplynet/sell/connections" replace />, handle: { back: back("/bisupplynet/sell/earnings", SCREENS.selling) } },
               { path: "/bisupplynet/*", element: <Navigate to="/bisupplynet" replace /> },
@@ -539,6 +542,8 @@ export const routes = [
       },
       // Design review
       { path: "/ui-kit/*", element: <UiKitPage /> },
+      // Platform admin (Phase 16): its own session and layout, loaded on demand.
+      ...adminRoutes,
       { path: "*", element: <NotFoundPage /> },
     ],
   },

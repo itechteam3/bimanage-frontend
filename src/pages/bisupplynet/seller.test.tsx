@@ -149,6 +149,19 @@ describe("10.03 / 10.04 wholesaler application", () => {
     await waitFor(() => expect(last("POST /bisupplynet/apply")?.body).toMatchObject({ businessName: "Apex Agro Supplies Ltd", phone: "+2348031234567" }));
     await waitFor(() => expect(router.state.location.pathname).toBe("/bisupplynet/sell/application"));
   });
+
+  it("asked for more information: sees what's needed and sends the application again (Phase 16)", async () => {
+    fb.handlers["GET /bisupplynet/my-profile"] = () => [200, PROFILE({ status: "pending", infoRequest: { message: "Please upload a clear CAC certificate.", items: ["CAC certificate (clear photo or PDF)"], requestedAt: "2026-11-14T08:00:00Z" }, canResubmit: true })];
+    fb.handlers["GET /bisupplynet/application/preview-score"] = () => [200, { profileScore: 76, breakdown: [], autoApprove: false, cacValid: true, documentUploaded: false, threshold: 70, reviewReasons: [] }];
+    fb.handlers["POST /bisupplynet/apply"] = () => [201, { message: "ok", status: "pending", reference: "BSN-APP-0301", profileScore: 76, breakdown: [], reviewReasons: [] }];
+    const user = userEvent.setup();
+    renderApp("/bisupplynet/apply");
+    expect(await screen.findByRole("heading", { name: "Update your application" })).toBeInTheDocument();
+    expect(screen.getByText("Please upload a clear CAC certificate.")).toBeInTheDocument();
+    expect(screen.getByText("CAC certificate (clear photo or PDF)")).toBeInTheDocument();
+    await user.click(screen.getByRole("button", { name: "Submit application" }));
+    await waitFor(() => expect(last("POST /bisupplynet/apply")?.body).toMatchObject({ businessName: "Apex Agro Supplies Ltd" }));
+  });
 });
 
 describe("listings", () => {

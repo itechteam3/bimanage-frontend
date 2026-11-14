@@ -146,11 +146,13 @@ describe("back rules", () => {
     const walk = (list: unknown[]) =>
       list.forEach((r) => {
         const route = r as { path?: string; handle?: { back?: unknown }; children?: unknown[] };
+        // The admin area (/admin) has its own back links, not the business app's Back.
+        if (route.path?.startsWith("/admin")) return;
         all.push(route);
         if (route.children) walk(route.children);
       });
     walk(routes as unknown[]);
-    const starts = new Set(["/", "/login", "/register", "/dashboard", "/onboarding", "/onboarding/trial", "/inventory", "/sales", "/orders", "/projects", "/settings/team", "/store", "/wallet", "/s/:slug", "/oauth/callback", "/invite/accept", "/reset-password/done", "/analytics", "/bisupplynet/suppliers", "/bisupplynet/sell/earnings", "*", "/ui-kit/*"]);
+    const starts = new Set(["/", "/login", "/register", "/dashboard", "/onboarding", "/onboarding/trial", "/inventory", "/sales", "/orders", "/projects", "/settings/team", "/store", "/wallet", "/s/:slug", "/oauth/callback", "/invite/accept", "/reset-password/done", "/analytics", "/bisupplynet/suppliers", "/bisupplynet/sell/earnings", "/bisupplynet/apply", "*", "/ui-kit/*"]);
     const missing = all.filter((r) => r.path && !r.path.endsWith("/*") && !starts.has(r.path) && r.path.split("/").length > 2 && !r.handle?.back).map((r) => r.path);
     expect(missing).toEqual([]);
   });

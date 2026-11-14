@@ -271,6 +271,9 @@ export interface MyWholesalerProfile extends Supplier {
   profileScore: number;
   breakdown: ScorePart[];
   rejectionReason: string | null;
+  /** BiTechTeam asked for more information (Phase 16): update and send it again. */
+  infoRequest?: { message: string | null; items: string[]; requestedAt: string | null } | null;
+  canResubmit?: boolean;
   submittedAt: string | null;
   cacVerified?: boolean;
   cacNumber?: string | null;
