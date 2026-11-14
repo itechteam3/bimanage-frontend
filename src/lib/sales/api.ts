@@ -1,4 +1,4 @@
-import { keepPreviousData, useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import { keepPreviousData, useInfiniteQuery, useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { ApiError, api, apiDownload } from "@/lib/api/client";
 import type { StatusTone } from "@/components/ui/Status";
 
@@ -97,6 +97,16 @@ export const useOrders = (filter: OrderFilter = "all", q = "") =>
   useQuery({
     queryKey: salesKeys.orderList(filter, q),
     queryFn: () => api<Order[]>("/orders", { query: { status: filter === "all" ? undefined : filter, q: q || undefined } }),
+    placeholderData: keepPreviousData,
+  });
+
+/** The Orders list in pages of 30 ("Load more"): nothing is cut off. */
+export const useOrderPages = (filter: OrderFilter = "all", q = "") =>
+  useInfiniteQuery({
+    queryKey: [...salesKeys.orderList(filter, q), "pages"] as const,
+    initialPageParam: 1,
+    queryFn: ({ pageParam }) => api<{ orders: Order[]; total: number; page: number; totalPages: number }>("/orders", { query: { status: filter === "all" ? undefined : filter, q: q || undefined, page: pageParam, limit: 30 } }),
+    getNextPageParam: (last) => (last.page < last.totalPages ? last.page + 1 : undefined),
     placeholderData: keepPreviousData,
   });
 
@@ -204,6 +214,15 @@ export const useInvoices = (status = "all") =>
   useQuery({
     queryKey: salesKeys.invoiceList(status),
     queryFn: () => api<{ invoices: Invoice[]; total: number }>("/invoices", { query: { status: status === "all" ? undefined : status, limit: 100 } }),
+  });
+
+/** The Invoices list in pages of 30 ("Load more"). */
+export const useInvoicePages = (status = "all") =>
+  useInfiniteQuery({
+    queryKey: [...salesKeys.invoiceList(status), "pages"] as const,
+    initialPageParam: 1,
+    queryFn: ({ pageParam }) => api<{ invoices: Invoice[]; total: number; page: number; totalPages: number }>("/invoices", { query: { status: status === "all" ? undefined : status, page: pageParam, limit: 30 } }),
+    getNextPageParam: (last) => (last.page < last.totalPages ? last.page + 1 : undefined),
   });
 
 export const useInvoiceStats = (enabled = true) =>

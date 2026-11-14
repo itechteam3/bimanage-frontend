@@ -1,5 +1,6 @@
 import { useMemo, useState } from "react";
 import { Link, useNavigate, useParams } from "react-router-dom";
+import { LoadMore } from "@/components/page/LoadMore";
 import { useFieldArray, useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
@@ -21,7 +22,7 @@ import {
   useCreateOrder,
   useOrder,
   useOrderStats,
-  useOrders,
+  useOrderPages,
   useUpdateOrderStatus,
   type Order,
   type OrderFilter,
@@ -94,7 +95,9 @@ export function OrdersPage() {
   const [filter, setFilter] = useUrlState<OrderFilter>("status", "all", FILTERS.map(([k]) => k));
   const [query, setQuery] = useUrlState<string>("q", "");
   const [q, setQ] = useState<string>(query);
-  const orders = useOrders(filter, query);
+  const orders = useOrderPages(filter, query);
+  const orderList = orders.data?.pages.flatMap((p) => p.orders) ?? [];
+  const orderTotal = orders.data?.pages[0]?.total ?? 0;
   const stats = useOrderStats();
   const canCreate = useCan("createOrders");
   const s = stats.data;
@@ -160,9 +163,10 @@ export function OrdersPage() {
               <>
               <UpdatedNote updatedAt={orders.dataUpdatedAt} className="mb-2" />
               <OrderTable
-                orders={orders.data ?? []}
+                orders={orderList}
                 empty={query || filter !== "all" ? "No orders match this search or filter." : "No orders yet. Record your first sale to see it here."}
               />
+              <LoadMore shown={orderList.length} total={orderTotal} onMore={() => void orders.fetchNextPage()} loading={orders.isFetchingNextPage} noun="orders" />
               </>
             )}
           </div>
