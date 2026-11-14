@@ -73,6 +73,10 @@ export interface BusinessProfile {
   businessDescription?: string;
   logo?: string | null;
   isOnboarded?: boolean;
+  /** Read-only extras from GET (13.01). */
+  owner?: { name: string } | null;
+  store?: { name?: string; slug?: string; url?: string | null; customDomain?: string | null; published: boolean } | null;
+  completeness?: { completed: number; total: number; percent: number; missing: string[] };
 }
 
 export interface DashboardSummary {
@@ -168,7 +172,9 @@ export function useSaveBusinessProfile() {
   return useMutation({
     mutationFn: (input: BusinessProfile) => api<BusinessProfile>("/business-profile", { method: "PUT", body: input }),
     onSuccess: (data) => {
-      qc.setQueryData(keys.profile, data);
+      // The saved fields now; owner, store link and completeness come with the refetch.
+      qc.setQueryData(keys.profile, (old: BusinessProfile | undefined) => ({ ...old, ...data }));
+      void qc.invalidateQueries({ queryKey: keys.profile });
       void qc.invalidateQueries({ queryKey: keys.steps });
     },
   });

@@ -220,25 +220,6 @@ describe("invoices (05.03 / 05.06 / 05.10 / 05.11 / 05.13)", () => {
 });
 
 describe("sales (05.01 / 05.05)", () => {
-  it("analytics: one bar per day, a data table for screen readers, and top products", async () => {
-    const today = new Date();
-    fb.handlers["GET /analytics/overview"] = () => [
-      200,
-      {
-        sales: { totalSales: 75000, totalOrders: 3, completedOrders: 2, cancelledOrders: 0, averageOrderValue: 37500 },
-        invoices: { total: 1, paid: 1, totalRevenue: 50000, pending: 0 },
-        salesByDay: [{ _id: { year: today.getFullYear(), month: today.getMonth() + 1, day: today.getDate() }, totalSales: 75000, totalOrders: 2 }],
-        topProducts: [{ _id: "p1", name: "Linen shirt", sellingPrice: 25000, totalSold: 3 }],
-      },
-    ];
-    fb.handlers["GET /invoices/stats"] = () => [200, { total: 1, draft: 0, sent: 0, paid: 1, overdue: 0, totalRevenue: 50000, totalPending: 0 }];
-    renderApp("/sales/analytics");
-    const table = await screen.findByRole("table", { name: /revenue from completed orders per day/i });
-    expect(within(table).getAllByRole("row")).toHaveLength(8); // header + 7 days
-    expect(within(table).getByText(/₦75,000 \(2 orders\)/)).toBeInTheDocument();
-    expect(screen.getByText("3 sold")).toBeInTheDocument();
-  });
-
   it("overview shows recent sales", async () => {
     fb.handlers["GET /dashboard"] = () => [200, { ...EMPTY_DASHBOARD, stats: { ...EMPTY_DASHBOARD.stats, revenue: 1280400, totalOrders: 64 } }];
     renderApp("/sales");

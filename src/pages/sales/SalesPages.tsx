@@ -1,17 +1,15 @@
 import { useState } from "react";
 import { Link } from "react-router-dom";
-import { IconArrowRight, IconDownload } from "@tabler/icons-react";
-import { Button, ButtonLink, Spinner } from "@/components/ui";
+import { IconArrowRight } from "@tabler/icons-react";
+import { ButtonLink, Spinner } from "@/components/ui";
 import { IntroCard, KpiCard, PageTitle, Panel } from "@/components/page/Blocks";
 import { ErrorNote } from "@/components/feedback/ErrorNote";
 import { OrderTable } from "@/pages/orders/OrderPages";
 import { useDashboard } from "@/lib/workspace/api";
 import { useFeature } from "@/lib/workspace/subscription";
-import { downloadSalesCsv, useInvoiceStats, useOrders, useSalesAnalytics, type AnalyticsRange } from "@/lib/sales/api";
-import { saveBlob } from "@/lib/api/client";
-import { count, naira, nairaCompact } from "@/lib/format";
+import { useOrders } from "@/lib/sales/api";
+import { count, nairaCompact } from "@/lib/format";
 import { cn } from "@/lib/cn";
-import { useUrlState } from "@/lib/nav/useUrlState";
 
 const Loading = () => (
   <div className="flex justify-center py-16 text-ink-brand" role="status">
@@ -66,15 +64,15 @@ export function SalesOverviewPage() {
               </div>
             )}
             <div>
-              <dt><Link to="/sales/analytics" className="text-body-lg font-semibold text-ink-brand hover:underline">Sales analytics and reports</Link></dt>
-              <dd className="mt-1 text-body-sm text-ink-muted">Revenue by day, top products and CSV export.</dd>
+              <dt><Link to="/reports" className="text-body-lg font-semibold text-ink-brand hover:underline">Reports and analytics</Link></dt>
+              <dd className="mt-1 text-body-sm text-ink-muted">Revenue, stock and invoice reports with CSV export.</dd>
             </div>
           </dl>
         </Panel>
       </div>
       <div className="grid gap-3 rounded-2xl bg-surface-pale p-4 md:grid-cols-2">
         <ButtonLink to="/orders/new" fullWidth>Create an order →</ButtonLink>
-        {invoicesOn ? <ButtonLink to="/invoices/new" fullWidth>Create invoice →</ButtonLink> : <ButtonLink to="/sales/analytics" fullWidth>Sales analytics →</ButtonLink>}
+        {invoicesOn ? <ButtonLink to="/invoices/new" fullWidth>Create invoice →</ButtonLink> : <ButtonLink to="/reports" fullWidth>Reports →</ButtonLink>}
       </div>
     </div>
   );
@@ -96,7 +94,8 @@ export function BarChart({ data, format, title }: { data: BarDatum[]; format: (n
   const [active, setActive] = useState<number | null>(null);
   const max = Math.max(...data.map((d) => d.value), 1);
   // Thin labels when there are many bars, so they never collide.
-  const every = data.length > 16 ? Math.ceil(data.length / 8) : data.length > 8 ? 2 : 1;
+  // At most about five labels: they fit a phone-width chart without colliding.
+  const every = data.length > 5 ? Math.ceil(data.length / 5) : 1;
   return (
     <figure className="min-w-0">
       <figcaption className="sr-only">{title}</figcaption>
@@ -122,12 +121,19 @@ export function BarChart({ data, format, title }: { data: BarDatum[]; format: (n
             </div>
           ))}
         </div>
-        <div className="mt-2 flex gap-[2px] md:gap-1">
-          {data.map((d, i) => (
-            <span key={d.key} className="min-w-0 flex-1 truncate text-center text-caption text-ink-muted">
-              {i % every === 0 || i === data.length - 1 ? d.label : ""}
-            </span>
-          ))}
+        {/* Labels sit under their bar but may be wider than it, so they're
+            placed absolutely instead of squeezed (and cut off) into each bar. */}
+        <div className="relative mt-2 h-5">
+          {data.map((d, i) => {
+            const last = i === data.length - 1;
+            if (!last && (i % every !== 0 || data.length - 1 - i < every / 2)) return null;
+            const edge = i === 0 ? "left-0" : last ? "right-0" : "-translate-x-1/2";
+            return (
+              <span key={d.key} data-axis-label className={cn("absolute top-0 whitespace-nowrap text-caption text-ink-muted", edge)} style={i === 0 || last ? undefined : { left: `${((i + 0.5) / data.length) * 100}%` }}>
+                {d.label}
+              </span>
+            );
+          })}
         </div>
       </div>
       <table className="sr-only">
@@ -151,145 +157,5 @@ export function BarChart({ data, format, title }: { data: BarDatum[]; format: (n
         </tbody>
       </table>
     </figure>
-  );
-}
-
-const RANGES: Array<[AnalyticsRange, string, number]> = [
-  ["7days", "7 days", 7],
-  ["30days", "30 days", 30],
-  ["3months", "3 months", 90],
-];
-
-/** Fill missing days with zero so the axis is continuous. */
-function dailySeries(rows: Array<{ _id: { year: number; month: number; day: number }; totalSales: number; totalOrders: number }>, days: number): BarDatum[] {
-  const byKey = new Map(rows.map((r) => [`${r._id.year}-${r._id.month}-${r._id.day}`, r]));
-  const out: BarDatum[] = [];
-  const today = new Date();
-  for (let i = days - 1; i >= 0; i--) {
-    const d = new Date(today.getFullYear(), today.getMonth(), today.getDate() - i);
-    const r = byKey.get(`${d.getFullYear()}-${d.getMonth() + 1}-${d.getDate()}`);
-    out.push({
-      key: d.toISOString().slice(0, 10),
-      label: days <= 7 ? d.toLocaleDateString("en-NG", { weekday: "short" }) : d.toLocaleDateString("en-NG", { day: "numeric", month: "short" }),
-      long: d.toLocaleDateString("en-NG", { weekday: "short", day: "numeric", month: "short" }),
-      value: r?.totalSales ?? 0,
-      detail: r ? `${count(r.totalOrders)} order${r.totalOrders === 1 ? "" : "s"}` : "No sales",
-    });
-  }
-  return out;
-}
-
-// 05.05 Sales analytics
-export function SalesAnalyticsPage() {
-  const [range, setRange] = useUrlState<AnalyticsRange>("range", "7days", RANGES.map(([r]) => r));
-  const analytics = useSalesAnalytics(range);
-  const invoicesOn = useFeature("invoices").access === true;
-  const invoiceStats = useInvoiceStats(invoicesOn);
-  const [exporting, setExporting] = useState(false);
-  const [exportError, setExportError] = useState<unknown>(null);
-  const a = analytics.data;
-  const days = RANGES.find(([r]) => r === range)![2];
-
-  const exportCsv = async () => {
-    setExporting(true);
-    setExportError(null);
-    try {
-      const { blob, filename } = await downloadSalesCsv();
-      saveBlob(blob, filename === "download" ? "sales-report.csv" : filename);
-    } catch (err) {
-      setExportError(err);
-    } finally {
-      setExporting(false);
-    }
-  };
-
-  return (
-    <div className="flex flex-col gap-6">
-      <PageTitle
-        actions={
-          <Button size="md" variant="secondary" loading={exporting} loadingText="Preparing…" onClick={() => void exportCsv()}>
-            <IconDownload aria-hidden="true" className="size-icon" /> Export sales CSV
-          </Button>
-        }
-      >
-        Sales analytics
-      </PageTitle>
-      <IntroCard eyebrow="Select a date range" title="Understand your sales, not just your totals.">
-        Revenue, orders, invoice collections and products — with exports.
-      </IntroCard>
-      <ErrorNote error={exportError} fallback="We couldn't prepare the export. Please try again." />
-      {analytics.isLoading ? (
-        <Loading />
-      ) : analytics.error || !a ? (
-        <ErrorNote error={analytics.error ?? true} fallback="We couldn't load your analytics. Please try again." onRetry={() => void analytics.refetch()} />
-      ) : (
-        <>
-          <div className="grid grid-cols-2 gap-3 lg:grid-cols-4 lg:gap-4">
-            <KpiCard tone="orders" label="Revenue" value={nairaCompact(a.sales.totalSales)} caption={`Last ${RANGES.find(([r]) => r === range)![1]}`} />
-            <KpiCard tone="revenue" label="Orders" value={count(a.sales.totalOrders)} caption={`${count(a.sales.completedOrders)} completed`} />
-            <KpiCard tone="invoices" label="Paid invoices" value={count(invoiceStats.data?.paid ?? a.invoices.paid)} caption="Payment status" />
-            <KpiCard tone="stock" label="Pending" value={count(invoiceStats.data ? invoiceStats.data.sent + invoiceStats.data.overdue : a.invoices.pending)} caption="Awaiting collection" />
-          </div>
-          <div className="grid gap-5 lg:grid-cols-[minmax(0,2fr)_minmax(0,1fr)]">
-            <Panel title="Sales revenue by day">
-              <div role="tablist" aria-label="Date range" className="-mt-2 mb-6 flex flex-wrap gap-1 text-body-sm">
-                {RANGES.map(([r, l]) => (
-                  <button
-                    key={r}
-                    role="tab"
-                    type="button"
-                    aria-selected={range === r}
-                    onClick={() => setRange(r)}
-                    className={cn("rounded-sm px-2.5 py-1", range === r ? "bg-surface-tint-blue font-semibold text-ink-brand" : "text-ink-secondary hover:text-ink-brand")}
-                  >
-                    {l}
-                  </button>
-                ))}
-              </div>
-              <BarChart data={dailySeries(a.salesByDay, days)} format={naira} title={`Revenue from completed orders per day, last ${days} days`} />
-            </Panel>
-            {invoicesOn && (
-              <Panel tone="pale" title="Invoice health">
-                <dl className="flex flex-col gap-3">
-                  {(
-                    [
-                      ["Paid", invoiceStats.data?.paid],
-                      ["Sent", invoiceStats.data?.sent],
-                      ["Overdue", invoiceStats.data?.overdue],
-                      ["Draft", invoiceStats.data?.draft],
-                    ] as const
-                  ).map(([k, v]) => (
-                    <div key={k} className="flex items-center justify-between rounded-md bg-surface-card px-4 py-5">
-                      <dt className="text-body-lg text-ink-strong">{k}</dt>
-                      <dd className="text-title-md text-ink-brand">{count(v)}</dd>
-                    </div>
-                  ))}
-                </dl>
-              </Panel>
-            )}
-          </div>
-          <Panel title="Top-selling products">
-            {a.topProducts.filter((p) => p.totalSold > 0).length === 0 ? (
-              <p className="py-4 text-body-lg text-ink-secondary">No products sold yet.</p>
-            ) : (
-              <ul className="flex flex-col gap-2">
-                {a.topProducts
-                  .filter((p) => p.totalSold > 0)
-                  .map((p) => (
-                    <li key={p._id} className="grid grid-cols-[minmax(0,1fr)_auto] items-center gap-3 rounded-md bg-surface-pale px-4 py-3 text-body-sm md:grid-cols-[minmax(0,2fr)_minmax(0,1fr)_minmax(0,1fr)]">
-                      <span className="truncate font-medium text-ink-strong">{p.name}</span>
-                      <span className="text-ink-muted">{count(p.totalSold)} sold</span>
-                      <span className="col-span-2 font-semibold text-ink-brand md:col-span-1">{naira(p.totalSold * p.sellingPrice)}</span>
-                    </li>
-                  ))}
-              </ul>
-            )}
-            {invoicesOn && (
-              <ButtonLink to="/invoices/new" size="md" className="mt-5">Create invoice</ButtonLink>
-            )}
-          </Panel>
-        </>
-      )}
-    </div>
   );
 }

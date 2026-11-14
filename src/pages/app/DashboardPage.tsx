@@ -1,4 +1,4 @@
-import { Link } from "react-router-dom";
+import { Link, useLocation } from "react-router-dom";
 import { IconArrowRight, IconFileCheck, IconListCheck } from "@tabler/icons-react";
 import { ButtonLink, Spinner } from "@/components/ui";
 import { IntroCard, KpiCard, PageTitle, Panel } from "@/components/page/Blocks";
@@ -80,6 +80,9 @@ function SalesTrend({ data }: { data: Array<{ label: string; value: number }> })
 const barTones = ["bg-kpi-revenue-line", "bg-kpi-orders-line", "bg-brand-navy"];
 
 export function DashboardPage() {
+  // Just restored from account closure (13.08).
+  const state = useLocation().state as { restored?: boolean; planNote?: string | null } | null;
+  const restored = state?.restored ? state : null;
   const dash = useDashboard();
   const s = dash.data?.stats;
   const orders = dash.data?.recentOrders ?? [];
@@ -90,6 +93,11 @@ export function DashboardPage() {
   return (
     <div className="flex flex-col gap-5">
       <PageTitle>Business dashboard</PageTitle>
+      {restored && (
+        <AuthNote tone="success">
+          Welcome back. Your account is restored.{restored.planNote ? ` ${restored.planNote}` : ""}
+        </AuthNote>
+      )}
       <SetupBanner />
       <IntroCard eyebrow="Workspace overview" title="Your entire business at a glance.">
         Follow orders, revenue, stock and invoices in one view.
@@ -159,7 +167,7 @@ export function DashboardPage() {
                 {[
                   ["Create and track orders", "Sales adjust inventory levels.", "/orders"],
                   ["Follow invoice payments", "Draft, Sent, Paid and Overdue.", "/invoices"],
-                  ["Export your reports", "Filter sales by date and export CSV.", "/analytics"],
+                  ["Export your reports", "Filter sales by date and export CSV.", "/reports"],
                 ].map(([t, b, to]) => (
                   <li key={t}>
                     <Link to={to!} className="text-body-lg-medium font-semibold text-ink-brand hover:underline">

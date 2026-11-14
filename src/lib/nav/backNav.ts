@@ -67,6 +67,7 @@ export const SCREENS = {
   projects: { label: "Projects", to: "/projects" },
   team: { label: "Team", to: "/settings/team" },
   settings: { label: "Settings", to: "/settings" },
+  reports: { label: "Reports", to: "/reports" },
   store: { label: "Online Store", to: "/store" },
   wallet: { label: "Wallet", to: "/wallet" },
   subscription: { label: "Subscription", to: "/subscription" },

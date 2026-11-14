@@ -28,8 +28,25 @@ import { BusinessIdentityPage, ChecklistPage, TrialStartedPage } from "@/pages/o
 import { FeatureGate } from "@/lib/workspace/subscription";
 import type { Feature } from "@/config/plans";
 import { ProfilePage } from "@/pages/settings/ProfilePage";
+import { AccountClosedPage, AccountClosingPage, SessionExpiredPage } from "@/pages/account/AccountPages";
+import { StartRedirect } from "@/lib/account/preferences";
 
 const UiKitPage = lazy(() => import("@/pages/dev/UiKitPage"));
+// Settings (13.xx), reports (14.xx) and social (15.01), each its own chunk.
+const settings = (name: keyof typeof import("@/pages/settings/SettingsPages")) => lazy(() => import("@/pages/settings/SettingsPages").then((m) => ({ default: m[name] as React.ComponentType })));
+const SettingsHubPage = settings("SettingsHubPage");
+const BusinessProfilePage = settings("BusinessProfilePage");
+const EditBusinessProfilePage = settings("EditBusinessProfilePage");
+const WorkspacePreferencesPage = settings("WorkspacePreferencesPage");
+const SecurityPage = settings("SecurityPage");
+const SessionsPage = settings("SessionsPage");
+const CloseAccountPage = settings("CloseAccountPage");
+const reports = (name: keyof typeof import("@/pages/reports/ReportPages")) => lazy(() => import("@/pages/reports/ReportPages").then((m) => ({ default: m[name] })));
+const ReportsOverviewPage = reports("ReportsOverviewPage");
+const SalesLedgerPage = reports("SalesLedgerPage");
+const InventoryReportPage = reports("InventoryReportPage");
+const InvoiceReportPage = reports("InvoiceReportPage");
+const SocialPage = lazy(() => import("@/pages/social/SocialPage").then((m) => ({ default: m.SocialPage })));
 // Inventory screens load as one chunk on first visit.
 const inventory = (name: keyof typeof import("@/pages/inventory")) => lazy(() => import("@/pages/inventory").then((m) => ({ default: m[name] })));
 const InventoryOverviewPage = inventory("InventoryOverviewPage");
@@ -42,7 +59,6 @@ const BarcodeLookupPage = inventory("BarcodeLookupPage");
 // Sales, orders and invoices (Phase 5) load as one chunk.
 const sales = (name: keyof typeof import("@/pages/sales/index")) => lazy(() => import("@/pages/sales/index").then((m) => ({ default: m[name] })));
 const SalesOverviewPage = sales("SalesOverviewPage");
-const SalesAnalyticsPage = sales("SalesAnalyticsPage");
 const OrdersPage = sales("OrdersPage");
 const CreateOrderPage = sales("CreateOrderPage");
 const OrderCreatedPage = sales("OrderCreatedPage");
@@ -214,10 +230,7 @@ const guest = (el: React.ReactNode) => <GuestOnly>{el}</GuestOnly>;
 
 // Sections built in later phases: real routes now, so links never 404.
 const comingSoon = (
-  [
-    ["/settings/*", "Settings"],
-    ["/more", "More"],
-  ] as const
+  [["/more", "More"]] as const
 ).map(([path, section]) => ({ path, element: <ComingSoonPage />, handle: { section } }));
 import { RouteErrorPage } from "@/components/feedback/RouteErrorPage";
 
@@ -231,7 +244,8 @@ export const routes = [
     element: <RootLayout />,
     errorElement: <RouteErrorPage />,
     children: [
-      { path: "/", element: <Navigate to="/dashboard" replace /> },
+      // After sign-in: the person's chosen start page (13.03)
+      { path: "/", element: authed(<StartRedirect />) },
       // Authentication (Figma 01.xx)
       { path: "/login", element: guest(<SignInPage />) },
       { path: "/register", element: guest(<RegisterPage />) },
@@ -241,6 +255,10 @@ export const routes = [
       { path: "/reset-password", element: guest(<NewPasswordPage />), handle: { back: back("/forgot-password/code", SCREENS.signIn) } },
       { path: "/reset-password/done", element: <PasswordChangedPage /> },
       { path: "/oauth/callback", element: <OAuthCallbackPage /> },
+      // Session ended elsewhere (13.07) and account closure (13.08): public
+      { path: "/session-expired", element: <SessionExpiredPage /> },
+      { path: "/account-closing", element: <AccountClosingPage /> },
+      { path: "/account-closed", element: <AccountClosedPage /> },
       { path: "/invite/accept", element: <InviteAcceptPage /> },
       // Signed in — inside the app shell
       {
@@ -290,10 +308,15 @@ export const routes = [
             ],
           },
           {
-            element: gated("analytics", "Sales analytics"),
+            element: gated("analytics", "Reports"),
             children: [
-              { path: "/sales/analytics", element: <SalesAnalyticsPage />, handle: { section: "Sales", back: back("/sales", SCREENS.sales) } },
-              { path: "/analytics", element: <Navigate to="/sales/analytics" replace /> },
+              // Reports (Figma 14.01–14.04); the older analytics links land here.
+              { path: "/reports", element: <ReportsOverviewPage />, handle: { section: "Reports" } },
+              { path: "/reports/sales", element: <SalesLedgerPage />, handle: { section: "Reports", back: back("/reports", SCREENS.reports) } },
+              { path: "/reports/inventory", element: <InventoryReportPage />, handle: { section: "Reports", back: back("/reports", SCREENS.reports) } },
+              { path: "/reports/invoices", element: <InvoiceReportPage />, handle: { section: "Reports", back: back("/reports", SCREENS.reports) } },
+              { path: "/sales/analytics", element: <Navigate to="/reports" replace />, handle: { back: back("/reports", SCREENS.reports) } },
+              { path: "/analytics", element: <Navigate to="/reports" replace /> },
             ],
           },
           {
@@ -335,6 +358,27 @@ export const routes = [
           },
           // Settings
           { path: "/settings/profile", element: <ProfilePage />, handle: { section: "Settings", back: back("/settings", SCREENS.settings) } },
+          // Account & settings (Figma 13.01–13.08) and social media (15.01)
+          {
+            element: (
+              <Suspense fallback={<SectionLoading />}>
+                <Outlet />
+              </Suspense>
+            ),
+            children: [
+              { path: "/settings", element: <SettingsHubPage />, handle: { section: "Settings" } },
+              { path: "/settings/business", element: <BusinessProfilePage />, handle: { section: "Settings", back: back("/settings", SCREENS.settings) } },
+              { path: "/settings/business/edit", element: <EditBusinessProfilePage />, handle: { section: "Settings", back: back("/settings/business", SCREENS.settings) } },
+              { path: "/settings/preferences", element: <WorkspacePreferencesPage />, handle: { section: "Settings", back: back("/settings", SCREENS.settings) } },
+              { path: "/settings/security", element: <SecurityPage />, handle: { section: "Settings", back: back("/settings", SCREENS.settings) } },
+              { path: "/settings/sessions", element: <SessionsPage />, handle: { section: "Settings", back: back("/settings", SCREENS.settings) } },
+              { path: "/settings/notifications", element: <Navigate to="/notifications/preferences" replace />, handle: { back: back("/settings", SCREENS.settings) } },
+              { path: "/settings/close-account", element: <CloseAccountPage />, handle: { section: "Settings", back: back("/settings", SCREENS.settings) } },
+              { path: "/settings/*", element: <Navigate to="/settings" replace /> },
+              // Coming soon on every plan (decision D5)
+              { path: "/social", element: <SocialPage />, handle: { section: "Social media" } },
+            ],
+          },
           // Online store (Figma 08.01–08.10). Freemium has the store "view only":
           // it can build and preview; publishing is refused by plan.
           {

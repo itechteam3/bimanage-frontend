@@ -11,14 +11,19 @@ const FullPageSpinner = () => (
   </div>
 );
 
-/** Signed-in pages. Anonymous visitors go to sign in and come back afterwards. */
+/**
+ * Signed-in pages. Anonymous visitors go to sign in and come back afterwards.
+ * A session ended from another device shows "Session expired" (13.07); an
+ * account in its closure grace period shows "Account closing".
+ */
 export function RequireAuth({ children }: { children: ReactNode }) {
-  const { status } = useAuth();
+  const { status, signOutReason } = useAuth();
   const location = useLocation();
   if (status === "loading") return <FullPageSpinner />;
+  if (status === "closing") return <Navigate to="/account-closing" replace />;
   if (status === "anonymous") {
-    const next = location.pathname + location.search;
-    return <Navigate to={`/login?next=${encodeURIComponent(next)}`} replace />;
+    const next = encodeURIComponent(location.pathname + location.search);
+    return <Navigate to={signOutReason === "ended" ? `/session-expired?next=${next}` : `/login?next=${next}`} replace />;
   }
   return <>{children}</>;
 }
@@ -28,7 +33,7 @@ export function GuestOnly({ children }: { children: ReactNode }) {
   const { status } = useAuth();
   if (status === "loading") return <FullPageSpinner />;
   if (status === "authenticated") {
-    return <Navigate to={pendingInvite.get() ? "/invite/accept" : "/dashboard"} replace />;
+    return <Navigate to={pendingInvite.get() ? "/invite/accept" : "/"} replace />;
   }
   return <>{children}</>;
 }

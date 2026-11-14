@@ -7,6 +7,7 @@ import type { NavItem, Permission } from "@/config/navigation";
 import { Spinner } from "@/components/ui";
 import { PhotoDialog } from "@/components/profile/PhotoDialog";
 import { useSubscription } from "@/lib/workspace/subscription";
+import { DisplayPreferences } from "@/lib/account/preferences";
 
 // Signed-in pages render inside this. Routes declare their breadcrumb with
 // `handle: { section: "Dashboard" }`. Owners who haven't chosen an onboarding
@@ -63,6 +64,7 @@ export function WorkspaceLayout() {
       onLogout={() => void signOut().then(() => navigate("/login", { replace: true }))}
       onChangePhoto={() => setPhotoOpen(true)}
     >
+      <DisplayPreferences />
       <Outlet />
       <PhotoDialog open={photoOpen} onClose={() => setPhotoOpen(false)} />
     </AppShell>

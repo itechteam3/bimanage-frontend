@@ -7,8 +7,13 @@ export type UpgradeReason =
 
 export interface ApiEventMap {
   "upgrade-required": UpgradeReason;
-  "session-expired": { message: string };
+  /** `ended`: signed out on purpose elsewhere (password change, "sign out of all other devices"). */
+  "session-expired": { message: string; ended?: boolean };
   suspended: { message: string };
+  /** The account is in its closure grace period: only restore is possible. */
+  "account-closing": { purgeAt: string | null };
+  /** This device was given a fresh session token (the live connection reconnects with it). */
+  "session-renewed": Record<string, never>;
 }
 
 type Handler<K extends keyof ApiEventMap> = (detail: ApiEventMap[K]) => void;

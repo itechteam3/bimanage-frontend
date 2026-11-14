@@ -87,7 +87,10 @@ function signal(status: number, data: Record<string, unknown>, sentToken: boolea
   const message = typeof data.message === "string" ? data.message : "";
   if (status === 401 && sentToken && !quiet401) {
     tokenStore.clear();
-    apiEvents.emit("session-expired", { message: message || "Your session has expired. Please sign in again." });
+    apiEvents.emit("session-expired", { message: message || "Your session has expired. Please sign in again.", ended: data.sessionEnded === true });
+  }
+  if (status === 403 && data.accountClosing && sentToken) {
+    apiEvents.emit("account-closing", { purgeAt: typeof data.purgeAt === "string" ? data.purgeAt : null });
   }
   if (status === 403 && data.suspended) {
     tokenStore.clear();

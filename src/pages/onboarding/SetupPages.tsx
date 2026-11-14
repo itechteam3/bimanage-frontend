@@ -1,24 +1,12 @@
-import { useEffect, useRef, useState } from "react";
-import { useForm } from "react-hook-form";
-import { zodResolver } from "@hookform/resolvers/zod";
-import { z } from "zod";
 import { Link, useNavigate } from "react-router-dom";
-import { IconArrowRight, IconCheck, IconPhoto } from "@tabler/icons-react";
-import { Button, ButtonLink, Field, SelectInput, Spinner, TextInput, buttonClasses } from "@/components/ui";
+import { IconArrowRight, IconCheck } from "@tabler/icons-react";
+import { ButtonLink, Spinner, buttonClasses } from "@/components/ui";
 import { InfoStrip, IntroCard, PageTitle, Panel, Stepper, TipList } from "@/components/page/Blocks";
 import { AuthNote } from "@/components/layout/AuthLayout";
-import {
-  BUSINESS_CATEGORIES,
-  BUSINESS_TYPES,
-  useBusinessProfile,
-  useOnboardingStatus,
-  useSaveBusinessProfile,
-  useSetupSteps,
-  useUploadLogo,
-} from "@/lib/workspace/api";
+import { BusinessProfileForm } from "@/components/business/BusinessProfileForm";
+import { useBusinessProfile, useOnboardingStatus, useSetupSteps } from "@/lib/workspace/api";
 import { errorMessage } from "@/lib/api/errorMessage";
 import { cn } from "@/lib/cn";
-import { useLeaveGuard } from "@/lib/nav/useLeaveGuard";
 
 const Loading = () => (
   <div className="flex justify-center py-16 text-ink-brand" role="status">
@@ -82,68 +70,11 @@ export function TrialStartedPage() {
 }
 
 // 02.03 Complete business identity (Figma 1897:2548)
-const schema = z.object({
-  businessName: z.string().trim().min(2, "Enter your legal business name.").max(100, "Keep it under 100 characters."),
-  businessType: z.string().min(1, "Choose your business type."),
-  businessCategory: z.string().min(1, "Choose a category."),
-  cacNumber: z.string().trim().max(30).optional(),
-  businessPhone: z.string().trim().min(7, "Enter a phone number.").max(20, "That phone number looks too long."),
-  businessEmail: z.string().trim().min(1, "Enter a business email.").email("Enter a valid email address."),
-  businessAddress: z.string().trim().max(200).optional(),
-});
-type Values = z.infer<typeof schema>;
-
 export function BusinessIdentityPage() {
   const navigate = useNavigate();
   const profile = useBusinessProfile();
-  const save = useSaveBusinessProfile();
-  const upload = useUploadLogo();
-  const fileRef = useRef<HTMLInputElement>(null);
-  const [formError, setFormError] = useState<string | null>(null);
-  const [logoError, setLogoError] = useState<string | null>(null);
-  const { register, handleSubmit, reset, formState } = useForm<Values>({ resolver: zodResolver(schema) });
-  const guard = useLeaveGuard(formState.isDirty && !formState.isSubmitSuccessful);
-
-  useEffect(() => {
-    if (!profile.data) return;
-    const p = profile.data;
-    reset({
-      businessName: p.businessName ?? "",
-      businessType: p.businessType ?? "",
-      businessCategory: p.businessCategory ?? "",
-      cacNumber: p.cacNumber ?? "",
-      businessPhone: p.businessPhone ?? "",
-      businessEmail: p.businessEmail ?? "",
-      businessAddress: p.businessAddress ?? "",
-    }, { keepDirtyValues: true });
-  }, [profile.data, reset]);
-
-  const onSubmit = handleSubmit(async (values) => {
-    setFormError(null);
-    const body = Object.fromEntries(Object.entries(values).filter(([, v]) => v !== "" && v !== undefined));
-    try {
-      await save.mutateAsync(body);
-      guard.allow();
-      navigate("/onboarding/checklist");
-    } catch (err) {
-      setFormError(errorMessage(err));
-    }
-  });
-
-  const onLogo = async (file: File | undefined) => {
-    setLogoError(null);
-    if (!file) return;
-    if (!/^image\/(png|jpe?g|webp|svg\+xml)$/.test(file.type)) return setLogoError("Use a PNG, JPG, WebP or SVG image.");
-    if (file.size > 2 * 1024 * 1024) return setLogoError("Keep the logo under 2 MB.");
-    try {
-      await upload.mutateAsync(file);
-    } catch (err) {
-      setLogoError(errorMessage(err));
-    }
-  };
 
   if (profile.isLoading) return <Loading />;
-  const logo = profile.data?.logo;
 
   return (
     <div className="flex flex-col gap-6">
@@ -156,77 +87,20 @@ export function BusinessIdentityPage() {
       >
         Tell us about your business
       </PageTitle>
-      {guard.dialog}
       <p className="-mt-4 text-body-sm text-ink-muted">Set up your identity for orders, invoices and your online store.</p>
       <IntroCard eyebrow="Workspace / Onboarding" title="The same information is reused across BiManage modules." />
       <div className="grid gap-5 lg:grid-cols-[minmax(0,1.7fr)_minmax(0,1fr)]">
-        <form noValidate onSubmit={onSubmit} className="flex flex-col gap-5">
-          <Panel title="Business identity setup" subtitle="Required details are marked with an asterisk.">
-            <div className="grid gap-4 md:grid-cols-2 md:gap-x-10 md:gap-y-6">
-              <Field label="Legal business name" required error={formState.errors.businessName?.message}>
-                <TextInput autoComplete="organization" placeholder="Elijah Apparel Ltd" {...register("businessName")} />
-              </Field>
-              <Field label="Business type" required error={formState.errors.businessType?.message}>
-                <SelectInput {...register("businessType")}>
-                  <option value="">Choose…</option>
-                  {BUSINESS_TYPES.map(([v, l]) => (
-                    <option key={v} value={v}>
-                      {l}
-                    </option>
-                  ))}
-                </SelectInput>
-              </Field>
-              <Field label="Business category" required error={formState.errors.businessCategory?.message}>
-                <SelectInput {...register("businessCategory")}>
-                  <option value="">Choose…</option>
-                  {BUSINESS_CATEGORIES.map(([v, l]) => (
-                    <option key={v} value={v}>
-                      {l}
-                    </option>
-                  ))}
-                </SelectInput>
-              </Field>
-              <Field label="CAC number" error={formState.errors.cacNumber?.message}>
-                <TextInput placeholder="RC 1234567" {...register("cacNumber")} />
-              </Field>
-              <Field label="Phone number" required error={formState.errors.businessPhone?.message}>
-                <TextInput type="tel" autoComplete="tel" inputMode="tel" placeholder="+234 803 555 0190" {...register("businessPhone")} />
-              </Field>
-              <Field label="Email address" required error={formState.errors.businessEmail?.message}>
-                <TextInput type="email" autoComplete="email" inputMode="email" placeholder="hello@yourbusiness.com" {...register("businessEmail")} />
-              </Field>
-              <Field label="Business address" error={formState.errors.businessAddress?.message}>
-                <TextInput autoComplete="street-address" placeholder="14 Adebayo St, Yaba" {...register("businessAddress")} />
-              </Field>
-              <Field label="Business logo" error={logoError ?? undefined} hint={upload.isPending ? "Uploading…" : logo ? "Logo uploaded." : undefined}>
-                <div className="flex items-center gap-3 lg:h-control-lg lg:rounded-sm lg:border lg:border-line-default lg:bg-surface-card lg:pl-2 lg:pr-1.5">
-                  {logo ? (
-                    <img src={logo} alt="Current logo" className="size-9 rounded-md object-contain" />
-                  ) : (
-                    <IconPhoto aria-hidden="true" className="size-6 text-ink-muted" />
-                  )}
-                  <button type="button" onClick={() => fileRef.current?.click()} className="flex-1 text-left text-input font-normal text-ink-strong lg:font-medium" disabled={upload.isPending}>
-                    {upload.isPending ? "Uploading…" : logo ? "Replace logo" : "Upload brand logo"}
-                  </button>
-                  <input ref={fileRef} type="file" accept="image/png,image/jpeg,image/webp,image/svg+xml" className="sr-only" tabIndex={-1} onChange={(e) => void onLogo(e.target.files?.[0])} />
-                </div>
-              </Field>
-            </div>
-            <div className="mt-6 rounded-xl bg-surface-pale p-4">
-              <p className="text-caption font-semibold uppercase text-ink-brand">Setup progress</p>
-              <p className="mt-2 text-body-lg text-ink-strong">Complete your business identity before publishing or billing.</p>
-              <ol className="mt-2 flex flex-col gap-1 text-body-sm text-ink-strong">
-                <li>01 Complete business profile</li>
-                <li>02 Verify contact and registration</li>
-                <li>03 Continue setup checklist</li>
-              </ol>
-            </div>
-          </Panel>
-          {formError && <AuthNote tone="danger">{formError}</AuthNote>}
-          <Button type="submit" className="self-end" loading={formState.isSubmitting} loadingText="Saving…">
-            Save and continue
-          </Button>
-        </form>
+        <BusinessProfileForm profile={profile.data} title="Business identity setup" submitLabel="Save and continue" onSaved={() => navigate("/onboarding/checklist")}>
+          <div className="mt-6 rounded-xl bg-surface-pale p-4">
+            <p className="text-caption font-semibold uppercase text-ink-brand">Setup progress</p>
+            <p className="mt-2 text-body-lg text-ink-strong">Complete your business identity before publishing or billing.</p>
+            <ol className="mt-2 flex flex-col gap-1 text-body-sm text-ink-strong">
+              <li>01 Complete business profile</li>
+              <li>02 Verify contact and registration</li>
+              <li>03 Continue setup checklist</li>
+            </ol>
+          </div>
+        </BusinessProfileForm>
         <Panel tone="pale" title="Help and requirements">
           <dl className="flex flex-col gap-4">
             {[
