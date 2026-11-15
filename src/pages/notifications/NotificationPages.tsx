@@ -180,7 +180,7 @@ export function NotificationsPage() {
           <ErrorNote error={exportError ?? markAll.error ?? remove.error ?? clear.error} />
         </div>
       </Panel>
-      <div className="grid gap-4 md:grid-cols-3">
+      <div className="grid grid-cols-[minmax(0,1fr)] gap-4 md:grid-cols-3">
         <Panel tone="pale" title="Orders and payments">
           <p className="text-body-sm text-ink-secondary">New orders, payment confirmations and payouts.</p>
           <Link to="/orders" className="mt-2 inline-block text-body-sm font-semibold text-ink-brand">Orders →</Link>
@@ -245,7 +245,7 @@ export function NotificationPreferencesPage() {
       <IntroCard eyebrow="Account / Stay informed" title="Choose the alerts that matter most.">
         Critical payment and security notifications always stay on.
       </IntroCard>
-      <div className="grid gap-5 lg:grid-cols-[minmax(0,1.7fr)_minmax(0,1fr)]">
+      <div className="grid grid-cols-[minmax(0,1fr)] gap-5 lg:grid-cols-[minmax(0,1.7fr)_minmax(0,1fr)]">
         <Panel title="Notification channels" subtitle="In-app alerts appear in the bell; email goes to your account email.">
           <form
             onSubmit={(e) => {
@@ -271,7 +271,8 @@ export function NotificationPreferencesPage() {
                       <span className="text-caption text-ink-muted">{CATEGORY_INFO[c].detail}</span>
                     </th>
                     {(["inApp", "email"] as const).map((ch) => (
-                      <td key={ch} className="py-3 text-center">
+                      <td key={ch} className="py-1 text-center">
+                        <label className="inline-flex size-11 items-center justify-center">
                         <input
                           type="checkbox"
                           className="size-5 accent-[var(--color-brand-navy)]"
@@ -279,6 +280,7 @@ export function NotificationPreferencesPage() {
                           onChange={() => toggle(c, ch)}
                           aria-label={`${CATEGORY_INFO[c].label}: ${ch === "inApp" ? "in-app" : "email"}`}
                         />
+                        </label>
                       </td>
                     ))}
                   </tr>

@@ -195,7 +195,7 @@ function MembersPanel({ compact = false }: { compact?: boolean }) {
 /** Role + module access checkboxes (invite form and edit dialog). */
 function PermissionPicker({ value, onChange, disabled }: { value: Record<Permission, boolean>; onChange: (v: Record<Permission, boolean>) => void; disabled?: (p: Permission) => boolean }) {
   return (
-    <fieldset className="grid gap-2 md:grid-cols-2">
+    <fieldset className="grid grid-cols-[minmax(0,1fr)] gap-2 md:grid-cols-2">
       <legend className="sr-only">Module access</legend>
       {PERMISSIONS.map(([key, label, hint]) => {
         const off = disabled?.(key) && !value[key];
@@ -334,7 +334,7 @@ export function TeamDirectoryPage() {
       <IntroCard eyebrow="Team management / Access control" title="Control who works with your business and what they can access.">
         Owner, Admin, Manager and Staff roles are supported.
       </IntroCard>
-      <div className="grid gap-5 lg:grid-cols-[minmax(0,1.7fr)_minmax(0,1fr)]">
+      <div className="grid grid-cols-[minmax(0,1fr)] gap-5 lg:grid-cols-[minmax(0,1.7fr)_minmax(0,1fr)]">
         <MembersPanel />
         <PermissionsOverview />
       </div>
@@ -390,7 +390,7 @@ export function InvitePage() {
       <IntroCard eyebrow="Team management / Access control" title="Invite securely by email and configure the right access.">
         Owner, Admin, Manager and Staff roles are supported.
       </IntroCard>
-      <div className="grid gap-5 lg:grid-cols-[minmax(0,1.5fr)_minmax(0,1fr)]">
+      <div className="grid grid-cols-[minmax(0,1fr)] gap-5 lg:grid-cols-[minmax(0,1.5fr)_minmax(0,1fr)]">
         <div className="order-2 lg:order-1">
           <MembersPanel compact />
         </div>
@@ -483,9 +483,9 @@ export function InviteSentPage() {
         <h2 className="mt-2 text-section-title text-ink-strong">We emailed {invite.name || invite.email} an invitation.</h2>
         <p className="mt-2 text-body-sm text-ink-muted">They get access as {ROLE_INFO[invite.role].label} once they accept. The link expires {shortDate(invite.expiresAt)}.</p>
       </section>
-      <div className="grid gap-5 lg:grid-cols-[minmax(0,1.6fr)_minmax(0,1fr)]">
+      <div className="grid grid-cols-[minmax(0,1fr)] gap-5 lg:grid-cols-[minmax(0,1.6fr)_minmax(0,1fr)]">
         <Panel title="Invitation details">
-          <dl className="grid grid-cols-[minmax(0,8rem)_1fr] gap-x-4 gap-y-3 text-body-lg">
+          <dl className="grid grid-cols-[fit-content(8rem)_minmax(0,1fr)] gap-x-4 gap-y-3 text-body-lg">
             {invite.name && (
               <>
                 <dt className="text-ink-muted">Name</dt>

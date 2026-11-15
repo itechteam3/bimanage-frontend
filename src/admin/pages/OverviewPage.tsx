@@ -95,7 +95,7 @@ export function OverviewPage() {
             }
           />
           {o.revenue && <MoneyBlocks o={o} />}
-          <div className="grid gap-5 lg:grid-cols-2">
+          <div className="grid grid-cols-[minmax(0,1fr)] gap-5 lg:grid-cols-2">
             <Section title="Businesses by plan">
               <Facts rows={[["Freemium", count(o.businesses.freemium)], ["Free trial", count(o.businesses.trial)], ["Standard", count(o.businesses.standard)], ["Premium", count(o.businesses.premium)], ["Startup package", count(o.businesses.startupPackage)], ["Suspended accounts", count(o.users.suspended)]]} />
             </Section>
@@ -122,7 +122,7 @@ export function OverviewPage() {
 function MoneyBlocks({ o }: { o: Overview }) {
   const r = o.revenue!;
   return (
-    <div className="grid gap-5 lg:grid-cols-2">
+    <div className="grid grid-cols-[minmax(0,1fr)] gap-5 lg:grid-cols-2">
       <Section title="BiTechTeam revenue (live)">
         <p className="text-title-lg text-ink-strong">{naira(r.total)}</p>
         <p className="text-body-sm text-ink-muted">{r.change != null ? `${r.change > 0 ? "+" : ""}${r.change}% on the period before (${naira(r.previous)})` : "No revenue in the period before to compare."}</p>

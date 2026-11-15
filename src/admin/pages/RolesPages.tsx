@@ -118,7 +118,7 @@ function EditAdminDialog({ admin, self, onClose, onDone }: { admin: AdminAccount
               {admin.invite!.status === "pending" ? `Invite sent ${dateTime(admin.invite!.sentAt)}, expires ${dateTime(admin.invite!.expiresAt)}.` : "The invite expired before they set up their account."}
               {admin.invite!.invitedBy ? ` Invited by ${admin.invite!.invitedBy}.` : ""}
             </p>
-            <div className="grid gap-2 md:grid-cols-2">
+            <div className="grid grid-cols-[minmax(0,1fr)] gap-2 md:grid-cols-2">
               <Button variant="outlined" loading={resend.isPending} onClick={() => resend.mutate({ id: admin._id }, { onSuccess: (r) => onDone(r.message || "Invite sent again.") })}>
                 Resend invite
               </Button>
@@ -149,7 +149,7 @@ function EditAdminDialog({ admin, self, onClose, onDone }: { admin: AdminAccount
         <Field label="Reason (kept in the audit trail)">
           <TextArea rows={2} value={reason} onChange={(e) => setReason(e.target.value)} maxLength={500} />
         </Field>
-        <div className="grid gap-2 md:grid-cols-2">
+        <div className="grid grid-cols-[minmax(0,1fr)] gap-2 md:grid-cols-2">
           <Button variant="secondary" loading={update.isPending} disabled={!admin.twoFactorEnabled} onClick={() => run({ resetTwoFactor: true }, `Two-step sign-in reset for ${admin.name}. They set it up again at their next sign-in.`)}>
             Reset two-step sign-in
           </Button>
@@ -232,7 +232,7 @@ function ManualEntryDialog({ open, onClose }: { open: boolean; onClose: () => vo
         <Field label="What was done" required error={field === "summary" ? adminError(add.error) : undefined}>
           <TextArea rows={3} value={f.summary} onChange={(e) => setF({ ...f, summary: e.target.value })} maxLength={1000} />
         </Field>
-        <div className="grid gap-3 md:grid-cols-2">
+        <div className="grid grid-cols-[minmax(0,1fr)] gap-3 md:grid-cols-2">
           <Field label="About (type)">
             <TextInput value={f.targetType} onChange={(e) => setF({ ...f, targetType: e.target.value })} placeholder="admin, user…" />
           </Field>

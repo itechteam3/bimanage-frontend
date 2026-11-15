@@ -30,7 +30,7 @@ export function AdminPage({ title, intro, eyebrow = "Operations", actions, child
 }
 
 export function Toolbar({ children, className }: { children: ReactNode; className?: string }) {
-  return <div className={cn("grid gap-3 rounded-xl border border-line-card bg-surface-card p-3 shadow-card md:grid-cols-2 lg:flex lg:flex-wrap lg:items-center", className)}>{children}</div>;
+  return <div className={cn("grid grid-cols-[minmax(0,1fr)] gap-3 rounded-xl border border-line-card bg-surface-card p-3 shadow-card md:grid-cols-2 lg:flex lg:flex-wrap lg:items-center", className)}>{children}</div>;
 }
 
 export function SearchBox({ value, onChange, placeholder, label }: { value: string; onChange: (v: string) => void; placeholder: string; label?: string }) {
@@ -60,7 +60,7 @@ export function FilterSelect<T extends string>({ label, value, onChange, options
 
 export function Metrics({ items }: { items: Array<{ tone: KpiTone; label: string; value: ReactNode; caption: string; badge?: string; note?: ReactNode }> }) {
   return (
-    <div className={cn("grid gap-3 md:grid-cols-2", items.length >= 3 && "lg:grid-cols-3", items.length >= 4 && "desktop:grid-cols-4")}>
+    <div className={cn("grid grid-cols-[minmax(0,1fr)] gap-3 md:grid-cols-2", items.length >= 3 && "lg:grid-cols-3", items.length >= 4 && "desktop:grid-cols-4")}>
       {items.map((m) => (
         <KpiCard key={m.label} {...m} />
       ))}
@@ -178,7 +178,7 @@ export function Records<T>({ title, subtitle, columns, rows, rowKey, rowLink, em
   );
   if (!side) return card;
   return (
-    <div className="grid gap-5 desktop:grid-cols-[minmax(0,2.15fr)_minmax(0,1fr)]">
+    <div className="grid grid-cols-[minmax(0,1fr)] gap-5 desktop:grid-cols-[minmax(0,2.15fr)_minmax(0,1fr)]">
       {card}
       {side}
     </div>
@@ -258,7 +258,7 @@ export function Section({ title, children, actions, className }: { title: string
 
 export function Facts({ rows }: { rows: Array<[string, ReactNode] | null | false> }) {
   return (
-    <dl className="grid gap-x-6 gap-y-3 md:grid-cols-2">
+    <dl className="grid grid-cols-[minmax(0,1fr)] gap-x-6 gap-y-3 md:grid-cols-2">
       {rows.filter(Boolean).map((r) => {
         const [k, v] = r as [string, ReactNode];
         return (
@@ -327,7 +327,7 @@ export function AdminName({ name, email, avatar, role, small }: { name?: string 
   return (
     <span className="inline-flex min-w-0 items-center gap-2">
       {(name || email) && <Avatar name={name || email} src={avatar} className={small ? "size-6 text-label" : undefined} />}
-      <span className="min-w-0 [overflow-wrap:anywhere]">
+      <span className="min-w-0 break-words">
         {label}
         {role ? ` (${words(role)})` : ""}
         {name && email ? <span className="block text-body-sm text-ink-muted">{email}</span> : null}

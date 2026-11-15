@@ -74,10 +74,10 @@ export function SocialPage() {
       <IntroCard eyebrow="Coming soon / Meta platform approval" title="A calmer way to plan your business content.">
         Scheduling to connected Facebook and Instagram accounts is planned. Publishing isn't available yet.
       </IntroCard>
-      <div className="grid gap-5 lg:grid-cols-[minmax(0,1.7fr)_minmax(0,1fr)]">
+      <div className="grid grid-cols-[minmax(0,1fr)] gap-5 lg:grid-cols-[minmax(0,1.7fr)_minmax(0,1fr)]">
         <div className="flex min-w-0 flex-col gap-5">
           <Panel title="Content planner preview" subtitle="A look at how you'll draft posts. These fields aren't active yet.">
-            <fieldset disabled aria-label="Scheduling preview (not available yet)" className="grid gap-4 md:grid-cols-2 md:gap-x-10">
+            <fieldset disabled aria-label="Scheduling preview (not available yet)" className="grid min-w-0 grid-cols-[minmax(0,1fr)] gap-4 md:grid-cols-2 md:gap-x-10">
               <Field label="Channel">
                 <SelectInput defaultValue="">
                   <option value="">Facebook or Instagram (planned)</option>

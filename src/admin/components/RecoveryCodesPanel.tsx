@@ -89,7 +89,7 @@ export function RecoveryCodesPanel({ codes, owner, generatedAt, onDone, doneLabe
           </li>
         ))}
       </ol>
-      <div className="grid gap-2 md:grid-cols-3">
+      <div className="grid grid-cols-[minmax(0,1fr)] gap-2 md:grid-cols-3">
         <Button variant="secondary" onClick={() => void copy()}>
           {copied ? "Copied" : "Copy"}
         </Button>

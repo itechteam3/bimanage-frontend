@@ -83,7 +83,7 @@ export function OtpInput({
   };
 
   return (
-    <div role="group" aria-label={label} aria-describedby={describedBy} className="flex gap-2 lg:gap-3">
+    <div role="group" aria-label={label} aria-describedby={describedBy} className="flex min-w-0 gap-1 md:gap-2 lg:gap-3">
       {digits.map((d, i) => (
         <input
           key={i}
@@ -105,7 +105,7 @@ export function OtpInput({
           aria-invalid={invalid || undefined}
           className={cn(
             "h-14 min-w-0 flex-1 rounded-lg border bg-surface-otp-cell text-center text-title-md text-ink-brand caret-brand-navy",
-            "lg:h-otp-cell-h lg:w-otp-cell-w lg:flex-none lg:text-otp",
+            "lg:h-otp-cell-h lg:w-otp-cell-w lg:flex-initial lg:text-otp",
             "focus:border-brand-navy disabled:opacity-60",
             invalid ? "border-danger" : "border-line-default"
           )}

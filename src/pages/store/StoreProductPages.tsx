@@ -83,13 +83,13 @@ function Catalogue({ store }: { store: Store }) {
       <StoreTabs />
       {/* Counts only once the list has loaded (it used to flash "0 products"). */}
       <IntroCard eyebrow={opsEyebrow(store)} title={products.isLoading ? "Loading your products…" : products.error ? "Store products" : `${count(all.length)} ${all.length === 1 ? "product" : "products"} · ${count(published)} published`} />
-      <div className="grid gap-5 lg:grid-cols-[minmax(0,2.3fr)_minmax(0,1fr)]">
+      <div className="grid grid-cols-[minmax(0,1fr)] gap-5 lg:grid-cols-[minmax(0,2.3fr)_minmax(0,1fr)]">
         <Panel>
-          <div className="flex flex-col gap-3 md:flex-row">
-            <label className="flex h-control-lg flex-1 items-center gap-2 rounded-md bg-surface-pale px-3">
+          <div className="flex flex-col gap-3 md:flex-row md:flex-wrap">
+            <label className="flex h-control-lg min-w-0 grow basis-64 items-center gap-2 rounded-md bg-surface-pale px-3">
               <IconSearch aria-hidden="true" className="size-icon text-ink-muted" />
               <span className="sr-only">Search store products</span>
-              <input value={q} onChange={(e) => setQ(e.target.value)} placeholder="Search name, SKU, category…" className="h-full flex-1 bg-transparent text-input text-ink-strong outline-none placeholder:text-ink-muted" />
+              <input value={q} onChange={(e) => setQ(e.target.value)} placeholder="Search name, SKU, category…" className="h-full min-h-11 min-w-0 flex-1 bg-transparent text-input text-ink-strong outline-none placeholder:text-ink-muted" />
             </label>
             <div role="tablist" aria-label="Show" className="flex items-center gap-1 rounded-md bg-surface-pale p-1">
               {(["all", "published", "draft"] as const).map((k) => (
@@ -116,7 +116,7 @@ function Catalogue({ store }: { store: Store }) {
               {list.map((p) => {
                 const v = visibility(p);
                 return (
-                  <li key={p._id} className="grid grid-cols-[3rem_1fr_auto] items-center gap-3 py-3">
+                  <li key={p._id} className="grid grid-cols-[3rem_minmax(0,1fr)_auto] items-center gap-3 py-3">
                     {p.images[0] ? <img src={p.images[0]} alt="" className="size-12 rounded-md object-cover" /> : <span aria-hidden="true" className="size-12 rounded-md bg-surface-tint-blue" />}
                     <div className="min-w-0">
                       <Link to={`/store/products/${p._id}`} className="block truncate font-semibold text-ink-strong hover:underline">
@@ -271,10 +271,10 @@ function ProductFormInner({ store, product }: { store: Store; product?: StorePro
       </PageTitle>
       <p className="-mt-4 text-body-sm text-ink-muted">Create a complete listing from one place.</p>
       <IntroCard eyebrow={opsEyebrow(store)} title={linked ? "Stock for this product comes from Inventory. Set a storefront price here." : "Set a storefront price, photos and stock."} />
-      <div className="grid gap-5 lg:grid-cols-[minmax(0,1.7fr)_minmax(0,1fr)]">
+      <div className="grid grid-cols-[minmax(0,1fr)] gap-5 lg:grid-cols-[minmax(0,1.7fr)_minmax(0,1fr)]">
         <form noValidate onSubmit={submit("keep")} className="flex flex-col gap-5">
           <Panel title="Product details" subtitle="Photos and category are required to publish.">
-            <div className="grid gap-4 md:grid-cols-2 md:gap-x-10 md:gap-y-6">
+            <div className="grid grid-cols-[minmax(0,1fr)] gap-4 md:grid-cols-2 md:gap-x-10 md:gap-y-6">
               <Field label="Product name" required error={formState.errors.name?.message}>
                 <TextInput placeholder="Classic linen shirt" {...register("name")} />
               </Field>
@@ -318,7 +318,7 @@ function ProductFormInner({ store, product }: { store: Store; product?: StorePro
                 {images.map((src, i) => (
                   <li key={src} className="relative">
                     <img src={src} alt={`Product photo ${i + 1}`} className="size-24 rounded-lg object-cover" />
-                    <button type="button" aria-label={`Remove photo ${i + 1}`} onClick={() => setImages((prev) => prev.filter((x) => x !== src))} className="absolute -right-2 -top-2 flex size-8 items-center justify-center rounded-full bg-surface-card text-danger shadow-card">
+                    <button type="button" aria-label={`Remove photo ${i + 1}`} onClick={() => setImages((prev) => prev.filter((x) => x !== src))} className="absolute right-1 top-1 flex size-8 items-center justify-center rounded-full bg-surface-card text-danger shadow-card">
                       <IconX aria-hidden="true" className="size-4" />
                     </button>
                   </li>
@@ -394,7 +394,7 @@ function ProductDetail({ store, id }: { store: Store; id: string }) {
     <div className="flex flex-col gap-6">
       <PageTitle actions={canEdit && <Button size="md" onClick={() => navigate(`/store/products/${p._id}/edit`)}>Edit product</Button>}>{p.name}</PageTitle>
       <IntroCard eyebrow={opsEyebrow(store)} title={<span className="flex flex-wrap items-center gap-2">{categoryLabel(p.category)} <Status tone={v.tone}>{v.label}</Status></span>} />
-      <div className="grid gap-5 lg:grid-cols-[minmax(0,1.7fr)_minmax(0,1fr)]">
+      <div className="grid grid-cols-[minmax(0,1fr)] gap-5 lg:grid-cols-[minmax(0,1.7fr)_minmax(0,1fr)]">
         <Panel title="Product details">
           {p.images.length > 0 && (
             <ul className="mb-5 flex gap-3 overflow-x-auto">
@@ -625,7 +625,7 @@ function BulkUpload({ store }: { store: Store }) {
       </PageTitle>
       <p className="-mt-4 text-body-sm text-ink-muted">Add up to {MAX_ROWS} products from a spreadsheet.</p>
       <IntroCard eyebrow={opsEyebrow(store)} title="Each row is checked on its own. Good rows are added; you'll see what to fix in the others." />
-      <div className="grid gap-5 lg:grid-cols-[minmax(0,1.7fr)_minmax(0,1fr)]">
+      <div className="grid grid-cols-[minmax(0,1fr)] gap-5 lg:grid-cols-[minmax(0,1.7fr)_minmax(0,1fr)]">
         <div className="flex flex-col gap-5">
           <Panel title="Import file" subtitle="CSV with the template's columns. Categories use the keys in the template (e.g. fashion_men).">
             <div className="flex flex-col gap-3 md:flex-row md:items-center">
@@ -751,7 +751,7 @@ function SyncInventory({ store }: { store: Store }) {
       </PageTitle>
       <p className="-mt-4 text-body-sm text-ink-muted">Bring products over from Inventory. Price and stock stay in step with it.</p>
       <IntroCard eyebrow={opsEyebrow(store)} title="Synced products use your inventory stock, so you never sell what you don't have." />
-      <div className="grid gap-5 lg:grid-cols-[minmax(0,2.3fr)_minmax(0,1fr)]">
+      <div className="grid grid-cols-[minmax(0,1fr)] gap-5 lg:grid-cols-[minmax(0,2.3fr)_minmax(0,1fr)]">
         <Panel>
           <label className="flex h-control-lg items-center gap-2 rounded-md bg-surface-pale px-3">
             <IconSearch aria-hidden="true" className="size-icon text-ink-muted" />
@@ -771,7 +771,7 @@ function SyncInventory({ store }: { store: Store }) {
             <ul className="mt-4 flex flex-col divide-y divide-line-subtle">
               {list.map((p) => (
                 <li key={p._id}>
-                  <label className="grid min-h-14 cursor-pointer grid-cols-[auto_1fr_auto] items-center gap-3 py-2">
+                  <label className="grid min-h-14 cursor-pointer grid-cols-[auto_minmax(0,1fr)_auto] items-center gap-3 py-2">
                     <input type="checkbox" className="size-5 accent-brand-navy" checked={selected.has(p._id)} onChange={() => toggle(p._id)} />
                     <span className="min-w-0">
                       <span className="block truncate font-semibold text-ink-strong">{p.name}</span>

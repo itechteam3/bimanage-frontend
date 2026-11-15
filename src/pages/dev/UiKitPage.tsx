@@ -43,7 +43,7 @@ function Gallery() {
       </header>
 
       <Section title="Buttons (2154:205)">
-        <div className="grid gap-3 md:grid-cols-3">
+        <div className="grid grid-cols-[minmax(0,1fr)] gap-3 md:grid-cols-3">
           <Button>Continue</Button>
           <Button variant="tonal">Continue</Button>
           <Button variant="outlined">Go back</Button>
@@ -60,7 +60,7 @@ function Gallery() {
       </Section>
 
       <Section title="Fields (1850:1352) — filled on mobile, outlined from lg">
-        <div className="grid gap-4 md:grid-cols-2">
+        <div className="grid grid-cols-[minmax(0,1fr)] gap-4 md:grid-cols-2">
           <Field label="Email address" required>
             <TextInput type="email" placeholder="Enter your email" autoComplete="email" />
           </Field>
@@ -96,7 +96,7 @@ function Gallery() {
       </Section>
 
       <Section title="Cards (1917:1431)">
-        <div className="grid gap-4 md:grid-cols-3">
+        <div className="grid grid-cols-[minmax(0,1fr)] gap-4 md:grid-cols-3">
           <MetricCard label="Net revenue" value="₦1,280,400" change={{ value: "12.8% this month", direction: "up" }} footnote="Compared with the previous month" />
           <InfoCard eyebrow="Online store" title="Your business, open 24/7." body="Publish products and securely accept customer orders without friction." action={{ label: "Open storefront", to: "/ui-kit" }} />
           <EmptyState icon={<IconSparkles className="size-7" />} title="Ready when you are." body="Your next step is one click away." action={<Button size="md" variant="tonal">Get started →</Button>} />
@@ -152,7 +152,7 @@ function AppDemo() {
     <AppShell section="Dashboard" user={{ name: "Samuel Inyima", businessName: "Elijah Apparel" }} unread={{ notifications: 3, messages: 1 }}>
       <h1 className="text-title-lg lg:text-page-title">Business overview</h1>
       <p className="mt-1 text-body text-ink-muted">Revenue, orders and operations at a glance.</p>
-      <div className="mt-6 grid gap-4 md:grid-cols-2 lg:grid-cols-3">
+      <div className="mt-6 grid grid-cols-[minmax(0,1fr)] gap-4 md:grid-cols-2 lg:grid-cols-3">
         <MetricCard label="Revenue" value="₦198,000" change={{ value: "37.8% this month", direction: "up" }} />
         <MetricCard label="Net sales" value="₦2,400" change={{ value: "2% this month", direction: "down" }} />
         <MetricCard label="Receivables" value="₦89,000" change={{ value: "11% this week", direction: "up" }} />

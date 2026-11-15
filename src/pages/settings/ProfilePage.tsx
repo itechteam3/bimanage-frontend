@@ -67,7 +67,7 @@ export function ProfilePage() {
 
       <form noValidate onSubmit={onSubmit} className="flex flex-col gap-5">
         <Panel title="Personal details">
-          <div className="grid gap-4 md:grid-cols-2 md:gap-x-10 md:gap-y-6">
+          <div className="grid grid-cols-[minmax(0,1fr)] gap-4 md:grid-cols-2 md:gap-x-10 md:gap-y-6">
             <Field label="Full name" required error={formState.errors.name?.message}>
               <TextInput autoComplete="name" {...register("name")} />
             </Field>

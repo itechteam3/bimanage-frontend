@@ -80,7 +80,7 @@ export function SettingsHubPage() {
     <div className="flex flex-col gap-6">
       <PageTitle>Settings</PageTitle>
       <IntroCard eyebrow="Workspace / Account settings" title="Your account, your business and how BiManage works for you." />
-      <ul className="grid gap-3 md:grid-cols-2">
+      <ul className="grid grid-cols-[minmax(0,1fr)] gap-3 md:grid-cols-2">
         <HubLink to="/settings/profile" icon={<IconUserCircle className="size-icon" />} title="Profile" body="Your name, photo and contact details." />
         <HubLink to="/settings/business" icon={<IconBuildingStore className="size-icon" />} title="Business profile" body="The details on your invoices, store and supplier profile." />
         <HubLink to="/settings/preferences" icon={<IconAdjustments className="size-icon" />} title="Workspace preferences" body="Start page, larger text and reduced motion." />
@@ -140,11 +140,11 @@ export function BusinessProfilePage() {
       <PageTitle actions={canEdit && <ButtonLink to="/settings/business/edit" size="md">Edit business profile</ButtonLink>}>Business profile</PageTitle>
       <p className="-mt-4 text-body-sm text-ink-muted">Your registered business identity across BiManage.</p>
       <IntroCard eyebrow="Workspace / Account settings" title="These details also appear on invoices, the store and BiSupplyNet." />
-      <div className="grid gap-5 lg:grid-cols-[minmax(0,1.7fr)_minmax(0,1fr)]">
+      <div className="grid grid-cols-[minmax(0,1fr)] gap-5 lg:grid-cols-[minmax(0,1.7fr)_minmax(0,1fr)]">
         <Panel title="Business registration and contact details" subtitle={c ? `Profile completeness: ${c.percent}%.` : undefined}>
           <dl className="flex flex-col overflow-hidden rounded-xl">
             {rows.map(([k, v], i) => (
-              <div key={k} className={cn("grid gap-1 px-3 py-3 text-body-sm md:grid-cols-[minmax(0,12rem)_minmax(0,1fr)] md:gap-3", i % 2 === 0 && "bg-surface-pale")}>
+              <div key={k} className={cn("grid grid-cols-[minmax(0,1fr)] gap-1 px-3 py-3 text-body-sm md:grid-cols-[fit-content(12rem)_minmax(0,1fr)] md:gap-3", i % 2 === 0 && "bg-surface-pale")}>
                 <dt className="font-semibold text-ink-strong">{k}</dt>
                 <dd className="min-w-0 break-words text-ink-secondary">{v}</dd>
               </div>
@@ -234,7 +234,7 @@ export function EditBusinessProfilePage() {
     <div className="flex flex-col gap-6">
       <PageTitle>Edit business details</PageTitle>
       <p className="-mt-4 text-body-sm text-ink-muted">Update the information shown throughout your business tools.</p>
-      <div className="grid gap-5 lg:grid-cols-[minmax(0,1.7fr)_minmax(0,1fr)]">
+      <div className="grid grid-cols-[minmax(0,1fr)] gap-5 lg:grid-cols-[minmax(0,1.7fr)_minmax(0,1fr)]">
         <BusinessProfileForm
           profile={profile.data}
           extended
@@ -278,7 +278,7 @@ export function WorkspacePreferencesPage() {
     <div className="flex flex-col gap-6">
       <PageTitle>Workspace preferences</PageTitle>
       <p className="-mt-4 text-body-sm text-ink-muted">Personalise how BiManage works for you. These settings are yours alone.</p>
-      <div className="grid gap-5 lg:grid-cols-[minmax(0,1.7fr)_minmax(0,1fr)]">
+      <div className="grid grid-cols-[minmax(0,1fr)] gap-5 lg:grid-cols-[minmax(0,1.7fr)_minmax(0,1fr)]">
         <form
           className="flex min-w-0 flex-col gap-5"
           onSubmit={(e) => {
@@ -317,7 +317,7 @@ export function WorkspacePreferencesPage() {
             </div>
           </Panel>
           <Panel title="Business settings" subtitle="The same for every BiManage account for now.">
-            <dl className="grid gap-3 md:grid-cols-2">
+            <dl className="grid grid-cols-[minmax(0,1fr)] gap-3 md:grid-cols-2">
               {(
                 [
                   ["Business timezone", p.timezone === "Africa/Lagos" ? "Africa/Lagos (Nigeria, UTC+1)" : p.timezone],
@@ -440,7 +440,7 @@ export function SecurityPage() {
         When your password changes, we email you and sign out your other devices.
       </IntroCard>
       <ErrorNote error={profile.error} fallback="We couldn't load your security details. Please try again." onRetry={() => void profile.refetch()} />
-      <div className="grid gap-5 lg:grid-cols-[minmax(0,1.7fr)_minmax(0,1fr)]">
+      <div className="grid grid-cols-[minmax(0,1fr)] gap-5 lg:grid-cols-[minmax(0,1.7fr)_minmax(0,1fr)]">
         <div className="flex min-w-0 flex-col gap-5">
           {p && !p.hasPassword ? (
             <Panel title="You sign in with Google">
@@ -456,7 +456,7 @@ export function SecurityPage() {
                   </Field>
                   {/* Side by side only where the form is wide enough (tablets without
                       the sidebar, large desktops); between 1024 and 1440 they stack. */}
-                  <div className="grid gap-4 md:grid-cols-2 md:gap-x-6 lg:grid-cols-1 desktop:grid-cols-2 desktop:gap-x-10">
+                  <div className="grid grid-cols-[minmax(0,1fr)] gap-4 md:grid-cols-2 md:gap-x-6 lg:grid-cols-1 desktop:grid-cols-2 desktop:gap-x-10">
                     <Field label="New password" required error={formState.errors.newPassword?.message} hint={`At least ${MIN_PASSWORD} characters.`}>
                       <PasswordInput autoComplete="new-password" {...register("newPassword")} />
                     </Field>
@@ -507,7 +507,7 @@ export function SessionsPage() {
     <div className="flex flex-col gap-6">
       <PageTitle>Sessions and devices</PageTitle>
       <p className="-mt-4 text-body-sm text-ink-muted">Where your BiManage account is signed in.</p>
-      <div className="grid gap-5 lg:grid-cols-[minmax(0,1.7fr)_minmax(0,1fr)]">
+      <div className="grid grid-cols-[minmax(0,1fr)] gap-5 lg:grid-cols-[minmax(0,1.7fr)_minmax(0,1fr)]">
         <div className="flex min-w-0 flex-col gap-5">
           <Panel title="This device">
             <div className="flex min-w-0 items-center gap-3 rounded-md bg-surface-pale px-4 py-3">
@@ -597,7 +597,7 @@ export function CloseAccountPage() {
     <div className="flex flex-col gap-6">
       <PageTitle>Close account</PageTitle>
       <p className="-mt-4 text-body-sm text-ink-muted">Closing a business is a serious step. Read what happens first.</p>
-      <div className="grid gap-5 lg:grid-cols-[minmax(0,1.7fr)_minmax(0,1fr)]">
+      <div className="grid grid-cols-[minmax(0,1fr)] gap-5 lg:grid-cols-[minmax(0,1.7fr)_minmax(0,1fr)]">
         <div className="flex min-w-0 flex-col gap-5">
           <Panel title={`Close ${c.businessName || "your business"}?`} subtitle={blocked ? "A few things need sorting out before the account can close." : "Nothing is stopping the account from closing."}>
             {blocked ? (

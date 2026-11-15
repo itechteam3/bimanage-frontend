@@ -80,7 +80,7 @@ function StartChat({ slug, ended, onStarted }: { slug: string; ended: boolean; o
   return (
     <form onSubmit={onSubmit} noValidate className="flex flex-col gap-4 rounded-2xl border border-line-card bg-surface-card p-5">
       {ended && <p className="rounded-xl bg-surface-pale p-3 text-body-sm text-ink-secondary">That chat has ended or the link expired. Start a new one below.</p>}
-      <div className="grid gap-4 md:grid-cols-2">
+      <div className="grid grid-cols-[minmax(0,1fr)] gap-4 md:grid-cols-2">
         <Field label="Your name" required error={formState.errors.name?.message}>
           <TextInput autoComplete="name" {...register("name")} />
         </Field>
@@ -89,7 +89,7 @@ function StartChat({ slug, ended, onStarted }: { slug: string; ended: boolean; o
         </Field>
       </div>
       <EmailSuggestion value={email} onAccept={(e) => setValue("email", e, { shouldValidate: true })} />
-      <div className="grid gap-4 md:grid-cols-2">
+      <div className="grid grid-cols-[minmax(0,1fr)] gap-4 md:grid-cols-2">
         <Field label="Topic">
           <SelectInput {...register("topic")}>
             {TOPICS.map((t) => (

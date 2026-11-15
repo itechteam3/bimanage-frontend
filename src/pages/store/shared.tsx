@@ -26,7 +26,7 @@ const TABS: Array<[string, string, boolean?]> = [
 export function StoreTabs() {
   return (
     <nav aria-label="Online store" className="-mx-5 overflow-x-auto px-5 lg:mx-0 lg:px-0">
-      <ul className="flex w-max gap-1 rounded-md bg-surface-pale p-1">
+      <ul className="flex w-fit max-w-full flex-wrap gap-1 rounded-md bg-surface-pale p-1">
         {TABS.map(([to, label, end]) => (
           <li key={to}>
             <NavLink

@@ -28,7 +28,7 @@ const bars = [26, 36, 31, 43, 38, 47, 55]; // showcase chart heights (data), Fig
 
 function ShowcasePanel() {
   return (
-    <aside aria-hidden="true" className="relative hidden w-auth-panel shrink-0 overflow-hidden bg-gradient-brand-panel px-12 py-10 text-ink-on-brand lg:flex lg:flex-col">
+    <aside aria-hidden="true" className="relative hidden w-2/5 shrink-0 desktop:w-auth-panel overflow-hidden bg-gradient-brand-panel px-12 py-10 text-ink-on-brand lg:flex lg:flex-col">
       <Logo tone="on-brand" size="panel" />
       <p className="mt-5 text-body-sm font-semibold uppercase text-ink-on-brand-accent">Your business. One workspace.</p>
       <h2 className="mt-14 text-hero">
@@ -40,7 +40,7 @@ function ShowcasePanel() {
         From the first sale to the next milestone — stay in control, beautifully.
       </p>
       <div className="mt-14 flex flex-col gap-6 text-ink-strong">
-        <div className="w-showcase-sales rounded-3xl bg-surface-card p-5 shadow-floating">
+        <div className="w-showcase-sales max-w-full rounded-3xl bg-surface-card p-5 shadow-floating">
           <div className="flex items-start justify-between">
             <div>
               <p className="text-caption font-semibold uppercase text-ink-muted">Sales this month</p>
@@ -48,7 +48,7 @@ function ShowcasePanel() {
             </div>
             <Status tone="success">↗ 12.8%</Status>
           </div>
-          <div className="mt-3 flex h-14 items-end gap-7">
+          <div className="mt-3 flex h-14 items-end gap-3 desktop:gap-7">
             {bars.map((h, i) => (
               <span
                 key={i}
@@ -58,12 +58,12 @@ function ShowcasePanel() {
             ))}
           </div>
         </div>
-        <div className="ml-16 w-showcase-store rounded-2xl bg-surface-card p-5 shadow-floating">
+        <div className="w-showcase-store max-w-full rounded-2xl desktop:ml-16 bg-surface-card p-5 shadow-floating">
           <div className="flex items-start gap-4">
             <span className="flex size-feature-icon items-center justify-center rounded-xl bg-surface-tint-blue text-ink-brand">
               <IconDiamond className="size-icon" />
             </span>
-            <div className="flex-1">
+            <div className="min-w-0 flex-1">
               <p className="text-card-heading">Online store</p>
               <p className="text-body-sm text-ink-muted">38 orders · 24 products live</p>
             </div>
@@ -73,7 +73,7 @@ function ShowcasePanel() {
             View your shop, products and payments at a glance <IconArrowUpRight className="size-4" />
           </p>
         </div>
-        <div className="-ml-3 w-showcase-feli rounded-icon bg-surface-tint-feli p-5 shadow-floating">
+        <div className="w-showcase-feli max-w-full rounded-icon desktop:-ml-3 bg-surface-tint-feli p-5 shadow-floating">
           <div className="flex items-center gap-4">
             <span className="flex size-feature-icon items-center justify-center rounded-xl bg-surface-tint-lavender text-brand-violet">
               <IconSparkles className="size-icon" />
@@ -91,7 +91,7 @@ function ShowcasePanel() {
 
 function SecurityPanel() {
   return (
-    <aside aria-hidden="true" className="hidden w-auth-panel shrink-0 bg-brand-navy-panel px-12 py-10 text-ink-on-brand lg:flex lg:flex-col">
+    <aside aria-hidden="true" className="hidden w-2/5 shrink-0 desktop:w-auth-panel bg-brand-navy-panel px-12 py-10 text-ink-on-brand lg:flex lg:flex-col">
       <Logo tone="on-brand" size="panel" />
       <p className="mt-5 text-body-sm font-semibold uppercase text-ink-on-brand-accent">Security &amp; account</p>
       <h2 className="mt-14 text-hero">
@@ -135,7 +135,7 @@ export function AuthLayout({
         <Logo tone="on-brand" compact />
       </header>
       {panel === "showcase" ? <ShowcasePanel /> : <SecurityPanel />}
-      <main className="flex flex-1 justify-center px-5 py-8 lg:px-20 lg:py-16">
+      <main className="flex min-w-0 flex-1 justify-center px-5 py-8 lg:px-12 lg:py-16 desktop:px-20">
         <div className="flex w-full max-w-mobile-content flex-col gap-4 lg:max-w-auth-form lg:gap-0">
           <BackBar className="mb-0 lg:mb-6" />
           <p className="text-action font-semibold uppercase text-ink-brand lg:mb-20">

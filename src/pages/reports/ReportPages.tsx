@@ -120,7 +120,7 @@ function PeriodPicker({ value, onChange }: { value: Period; onChange: (p: Period
       </div>
       {custom && (
         <form
-          className="grid min-w-0 gap-3 md:grid-cols-[minmax(0,1fr)_minmax(0,1fr)_auto] md:items-end"
+          className="grid grid-cols-[minmax(0,1fr)] min-w-0 gap-3 md:grid-cols-[minmax(0,1fr)_minmax(0,1fr)_auto] md:items-end"
           onSubmit={(e) => {
             e.preventDefault();
             if (from && to) onChange({ range: "custom", from: from <= to ? from : to, to: from <= to ? to : from });
@@ -292,7 +292,7 @@ function Overview() {
               <p className="text-body-sm text-ink-muted">Not real money, and not added to revenue or orders above.</p>
             </section>
           )}
-          <div className="grid gap-5 lg:grid-cols-[minmax(0,2fr)_minmax(0,1fr)]">
+          <div className="grid grid-cols-[minmax(0,1fr)] gap-5 lg:grid-cols-[minmax(0,2fr)_minmax(0,1fr)]">
             <Panel title="Revenue trend" subtitle="Money taken each day: direct sales and live online store payments.">
               {series.length ? <BarChart data={series} format={naira} title="Revenue per day in the selected period" /> : <p className="py-6 text-body-lg text-ink-secondary">No days in this period.</p>}
             </Panel>
@@ -312,7 +312,7 @@ function Overview() {
               </ul>
             </Panel>
           </div>
-          <div className="grid gap-5 lg:grid-cols-[minmax(0,2fr)_minmax(0,1fr)]">
+          <div className="grid grid-cols-[minmax(0,1fr)] gap-5 lg:grid-cols-[minmax(0,2fr)_minmax(0,1fr)]">
             <Panel title="Best sellers" subtitle="By units sold in the period, both channels.">
               {a.bestSellers.length === 0 ? (
                 <p className="py-4 text-body-lg text-ink-secondary">No products sold in this period.</p>
@@ -402,7 +402,7 @@ function Ledger() {
               reset();
             }}
           />
-          <div className="grid min-w-0 gap-3 md:grid-cols-2 lg:grid-cols-[minmax(0,2fr)_minmax(0,1fr)_minmax(0,1fr)]">
+          <div className="grid grid-cols-[minmax(0,1fr)] min-w-0 gap-3 md:grid-cols-2 lg:grid-cols-[minmax(0,2fr)_minmax(0,1fr)_minmax(0,1fr)]">
             <SearchBox
               label="Search"
               placeholder="Order or customer"
@@ -461,7 +461,7 @@ function Ledger() {
       ) : ledger.error || !d ? (
         <ErrorNote error={ledger.error ?? true} fallback="We couldn't load the sales ledger. Please try again." onRetry={() => void ledger.refetch()} />
       ) : (
-        <div className="grid gap-5 lg:grid-cols-[minmax(0,2fr)_minmax(0,1fr)]">
+        <div className="grid grid-cols-[minmax(0,1fr)] gap-5 lg:grid-cols-[minmax(0,2fr)_minmax(0,1fr)]">
           <Panel title="Orders and transaction values" subtitle={d.period ? periodText(d.period) : undefined}>
             {d.rows.length === 0 ? (
               <p className="py-6 text-body-lg text-ink-secondary">No orders match these filters.</p>
@@ -490,7 +490,8 @@ function Ledger() {
                     </li>
                   ))}
                 </ul>
-                <table className="hidden w-full table-fixed text-left text-body-sm md:table">
+                <div className="hidden overflow-x-auto md:block">
+                  <table className="w-full min-w-[30rem] table-fixed text-left text-body-sm">
                   <caption className="sr-only">Sales ledger</caption>
                   <thead className="bg-surface-pale text-caption font-semibold uppercase text-ink-muted">
                     <tr>
@@ -523,6 +524,7 @@ function Ledger() {
                     ))}
                   </tbody>
                 </table>
+                </div>
               </>
             )}
             <Pager page={d.page} totalPages={d.totalPages} onPage={setPage} />
@@ -594,13 +596,13 @@ function InventoryReport() {
             <KpiCard tone="invoices" label="Stock value" value={nairaCompact(s.stockValue)} caption="At selling price" />
             <KpiCard tone="stock" label="Low stock" value={count(s.low + s.out)} caption={`${count(s.out)} out of stock`} />
           </div>
-          <div className="grid gap-5 lg:grid-cols-[minmax(0,2fr)_minmax(0,1fr)]">
+          <div className="grid grid-cols-[minmax(0,1fr)] gap-5 lg:grid-cols-[minmax(0,2fr)_minmax(0,1fr)]">
             <Panel title="Stock health">
               <MixBar
                 label="Stock health"
                 items={(["healthy", "low", "out"] as Health[]).map((h) => ({ key: h, label: HEALTH[h].label, count: s[h], tone: HEALTH[h].tone }))}
               />
-              <div className="mt-5 grid min-w-0 gap-3 md:grid-cols-3">
+              <div className="mt-5 grid grid-cols-[minmax(0,1fr)] min-w-0 gap-3 md:grid-cols-3">
                 <SearchBox
                   label="Search"
                   placeholder="Product or SKU"
@@ -649,7 +651,7 @@ function InventoryReport() {
               ) : (
                 <ul className="mt-4 flex flex-col gap-2">
                   {d.rows.map((r) => (
-                    <li key={r.id} className="grid min-w-0 gap-2 rounded-md bg-surface-pale px-4 py-3 text-body-sm md:grid-cols-[minmax(0,2fr)_minmax(0,1fr)_minmax(0,1fr)_auto] md:items-center">
+                    <li key={r.id} className="grid grid-cols-[minmax(0,1fr)] min-w-0 gap-2 rounded-md bg-surface-pale px-4 py-3 text-body-sm md:grid-cols-[minmax(0,2fr)_minmax(0,1fr)_minmax(0,1fr)_auto] md:items-center">
                       <span className="min-w-0">
                         <Link to={productLink(r.id)} className="block break-words font-semibold text-ink-strong hover:underline">
                           {r.name}
@@ -766,7 +768,7 @@ function InvoiceReport() {
           </div>
           <Panel title="Customer invoice records">
             <MixBar label="Invoice status" items={(["paid", "open", "overdue", "draft"] as InvoiceState[]).map((k) => ({ key: k, label: INVOICE_STATE[k].label, count: s[k].count, tone: INVOICE_STATE[k].tone }))} />
-            <div className="mt-5 grid min-w-0 gap-3 md:grid-cols-[minmax(0,2fr)_minmax(0,1fr)]">
+            <div className="mt-5 grid grid-cols-[minmax(0,1fr)] min-w-0 gap-3 md:grid-cols-[minmax(0,2fr)_minmax(0,1fr)]">
               <SearchBox
                 label="Search"
                 placeholder="Invoice or customer"
@@ -798,7 +800,7 @@ function InvoiceReport() {
             ) : (
               <ul className="mt-4 flex flex-col gap-2">
                 {d.rows.map((r) => (
-                  <li key={r.id} className="grid min-w-0 gap-2 rounded-md bg-surface-pale px-4 py-3 text-body-sm md:grid-cols-[minmax(0,2fr)_minmax(0,1fr)_minmax(0,1fr)_auto] md:items-center">
+                  <li key={r.id} className="grid grid-cols-[minmax(0,1fr)] min-w-0 gap-2 rounded-md bg-surface-pale px-4 py-3 text-body-sm md:grid-cols-[minmax(0,2fr)_minmax(0,1fr)_minmax(0,1fr)_auto] md:items-center">
                     <span className="min-w-0">
                       <Link to={r.link} className="block break-words font-semibold text-ink-strong hover:underline">
                         {r.invoiceNumber}

@@ -173,7 +173,7 @@ function ApplyFormView({ previous }: { previous: MyWholesalerProfile | null }) {
           Your last application wasn't approved: {previous.rejectionReason}
         </p>
       ) : null}
-      <div className="grid gap-5 lg:grid-cols-[minmax(0,1.7fr)_minmax(0,1fr)]">
+      <div className="grid grid-cols-[minmax(0,1fr)] gap-5 lg:grid-cols-[minmax(0,1.7fr)_minmax(0,1fr)]">
         <form noValidate onSubmit={onSubmit} className="flex min-w-0 flex-col gap-5">
           <Panel title="Business verification" subtitle="Accurate business details improve your trust assessment.">
             <div className="grid grid-cols-[minmax(0,1fr)] gap-4 md:grid-cols-[minmax(0,1fr)_minmax(0,1fr)] md:gap-x-10 md:gap-y-6">
@@ -364,7 +364,7 @@ export function ApplicationPage() {
       {a.status === "verified" && <SellTabs />}
       {a.infoRequest && <InfoRequestNote request={a.infoRequest} />}
       <Intro>{a.status === "pending" ? "You will be notified once verification is finished." : a.status === "verified" ? "Buyers can now find you and order your listings." : "Update your details and apply again whenever you're ready."}</Intro>
-      <div className="grid gap-5 lg:grid-cols-[minmax(0,1.7fr)_minmax(0,1fr)]">
+      <div className="grid grid-cols-[minmax(0,1fr)] gap-5 lg:grid-cols-[minmax(0,1.7fr)_minmax(0,1fr)]">
         <section className="min-w-0 rounded-2xl border border-line-card bg-surface-card p-5 shadow-card lg:p-10">
           <h2 className="text-title-md text-ink-strong lg:text-page-title">{card}</h2>
           <p className="mt-3 text-body-lg text-ink-muted">{a.status === "pending" ? "We are checking your business profile and supporting information." : a.status === "verified" ? "Add wholesale listings to start taking orders." : "BiTechTeam reviewed your details and couldn't approve them yet."}</p>
@@ -646,7 +646,7 @@ function ListingFormView({ existing }: { existing: SupplyProduct | null }) {
       {guard.dialog}
       <Heading title={existing ? `Edit ${existing.name}` : "Add a wholesale listing"} subtitle="Set the bulk price, minimum order and stock buyers see." />
       <Intro>Stock is held for a buyer when they order, and comes back if they don't pay within 24 hours.</Intro>
-      <div className="grid gap-5 lg:grid-cols-[minmax(0,1.7fr)_minmax(0,1fr)]">
+      <div className="grid grid-cols-[minmax(0,1fr)] gap-5 lg:grid-cols-[minmax(0,1.7fr)_minmax(0,1fr)]">
         <form noValidate onSubmit={onSubmit} className="flex min-w-0 flex-col gap-5">
           <Panel title="Listing details" subtitle="Fields marked * are required.">
             <div className="grid grid-cols-[minmax(0,1fr)] gap-4 md:grid-cols-[minmax(0,1fr)_minmax(0,1fr)] md:gap-x-10 md:gap-y-6">
@@ -890,7 +890,7 @@ export function EarningsPage() {
         <KpiCard tone="invoices" label="Escrow held" value={nairaCompact(book.held)} caption="Awaiting buyer" badge={badge} />
         <KpiCard tone="stock" label="Paid out" value={nairaCompact(book.released.allTime)} caption="Net earnings" badge={badge} />
       </div>
-      <div className="grid gap-5 lg:grid-cols-[minmax(0,1.7fr)_minmax(0,1fr)]">
+      <div className="grid grid-cols-[minmax(0,1fr)] gap-5 lg:grid-cols-[minmax(0,1.7fr)_minmax(0,1fr)]">
         <Panel title="Recent supplier payout activity" subtitle="Latest paid orders and where the money is.">
           {book.recentPayouts.length === 0 ? (
             <p className="text-body-sm text-ink-muted">No paid orders yet. When a buyer pays, it shows here.</p>

@@ -29,7 +29,7 @@ export function AdminAccountPage() {
   const refresh = () => qc.invalidateQueries({ queryKey: adminKeys.all });
   return (
     <AdminPage title="My admin account">
-      <div className="grid gap-5 lg:grid-cols-2">
+      <div className="grid grid-cols-[minmax(0,1fr)] gap-5 lg:grid-cols-2">
         <Section title="Profile">
           <div className="flex flex-wrap items-center gap-4">
             <Avatar name={me?.name} src={me?.avatar} size="large" />

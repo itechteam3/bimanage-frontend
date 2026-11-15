@@ -66,7 +66,7 @@ export function PackagesPage() {
       </IntroCard>
       {packages.isLoading && <Loading />}
       {packages.error && <AuthNote tone="danger">{errorMessage(packages.error)}</AuthNote>}
-      <div className="grid gap-4 lg:grid-cols-3">
+      <div className="grid grid-cols-[minmax(0,1fr)] gap-4 lg:grid-cols-3">
         {packages.data?.map((p) => {
           const d = DETAILS[p.id];
           return (
@@ -94,7 +94,7 @@ export function PackagesPage() {
         })}
       </div>
       <Panel tone="pale" title="Getting started, step by step">
-        <div className="grid gap-4 md:grid-cols-3">
+        <div className="grid grid-cols-[minmax(0,1fr)] gap-4 md:grid-cols-3">
           {[
             ["Choose a package", "Review the features and one-time price before proceeding to checkout."],
             ["Set up your business", "Follow the seven-step onboarding tracker: profile, logo, products, orders and online store."],
@@ -156,7 +156,7 @@ export function CheckoutPage() {
         {pkg.name} package · Everything important, in one place.
       </IntroCard>
       <Stepper steps={["Choose package", "Review details", "Secure payment", "Activate access"]} current={1} />
-      <div className="grid gap-5 lg:grid-cols-[minmax(0,1.7fr)_minmax(0,1fr)]">
+      <div className="grid grid-cols-[minmax(0,1fr)] gap-5 lg:grid-cols-[minmax(0,1.7fr)_minmax(0,1fr)]">
         <Panel title="Your package, at a glance" subtitle="One-time startup package · Selected for this checkout">
           <div className="flex flex-col gap-5">
             <PriceBox label="One-time package price" value={naira(pkg.amount)} />
@@ -276,7 +276,7 @@ export function PaymentStatusPage() {
           Your {pkg?.name} package is active — here's how to make the most of it.
         </IntroCard>
         <Stepper steps={["Selected", "Paid", "Verified", "Start building"]} current={3} />
-        <div className="grid gap-5 lg:grid-cols-[minmax(0,1.7fr)_minmax(0,1fr)]">
+        <div className="grid grid-cols-[minmax(0,1fr)] gap-5 lg:grid-cols-[minmax(0,1.7fr)_minmax(0,1fr)]">
           <Panel title="Your access is ready" subtitle={`${pkg?.name} · One-time startup package`}>
             <div className="flex flex-col gap-5">
               <PriceBox label="Package access" value={`${pkg?.days ?? 30} days`} />
@@ -314,7 +314,7 @@ export function PaymentStatusPage() {
           Your payment hasn't been confirmed, so no package has been activated.
         </IntroCard>
         <Stepper steps={["Selected", "Checkout", "Not confirmed", "Resolve"]} current={2} />
-        <div className="grid gap-5 lg:grid-cols-[minmax(0,1.7fr)_minmax(0,1fr)]">
+        <div className="grid grid-cols-[minmax(0,1fr)] gap-5 lg:grid-cols-[minmax(0,1.7fr)_minmax(0,1fr)]">
           <Panel title="Payment needs attention" subtitle="Your package choice is saved.">
             <div className="flex flex-col gap-5">
               <div className="flex items-center gap-3 rounded-xl bg-danger-bg px-4 py-4 text-danger">
@@ -365,7 +365,7 @@ export function PaymentStatusPage() {
         You can leave this screen and come back — we'll keep the result.
       </IntroCard>
       <Stepper steps={["Select", "Checkout", "Verify", "Access"]} current={2} />
-      <div className="grid gap-5 lg:grid-cols-[minmax(0,1.7fr)_minmax(0,1fr)]">
+      <div className="grid grid-cols-[minmax(0,1fr)] gap-5 lg:grid-cols-[minmax(0,1.7fr)_minmax(0,1fr)]">
         <Panel title="Payment verification" subtitle="We are waiting for a confirmed transaction result.">
           <div className="flex flex-col gap-5">
             <div className="flex items-center gap-3 rounded-xl bg-surface-pale px-4 py-4 text-ink-brand" role="status">

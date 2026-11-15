@@ -161,7 +161,7 @@ export function TicketDetailPage() {
         <Link to="/admin/support/tickets" className="text-body-sm font-semibold text-ink-brand">← Support queue</Link>
       </p>
       {done && <p className="rounded-lg bg-success-bg px-4 py-3 text-body-lg text-success" role="status">{done}</p>}
-      <div className="grid gap-5 lg:grid-cols-[minmax(0,1.6fr)_minmax(0,1fr)]">
+      <div className="grid grid-cols-[minmax(0,1fr)] gap-5 lg:grid-cols-[minmax(0,1.6fr)_minmax(0,1fr)]">
         <div className="flex min-w-0 flex-col gap-5">
           <Section title="Conversation">
             <ol className="flex flex-col gap-3">
@@ -190,7 +190,7 @@ export function TicketDetailPage() {
               <Field label="Your reply (the customer gets it by email and in the app)">
                 <TextArea rows={5} value={message} onChange={(e) => setMessage(e.target.value)} maxLength={5000} />
               </Field>
-              <div className="grid gap-3 md:grid-cols-2">
+              <div className="grid grid-cols-[minmax(0,1fr)] gap-3 md:grid-cols-2">
                 <Field label="Status">
                   <SelectInput value={status} onChange={(e) => setStatus(e.target.value)}>
                     {TICKET_STATUS.map(([v, l]) => <option key={v} value={v}>{l}</option>)}
@@ -277,7 +277,7 @@ export function ServiceRequestDetailPage() {
         <Link to="/admin/support/tickets?tab=requests" className="text-body-sm font-semibold text-ink-brand">← Service requests</Link>
       </p>
       {done && <p className="rounded-lg bg-success-bg px-4 py-3 text-body-lg text-success" role="status">{done}</p>}
-      <div className="grid gap-5 lg:grid-cols-[minmax(0,1.6fr)_minmax(0,1fr)]">
+      <div className="grid grid-cols-[minmax(0,1fr)] gap-5 lg:grid-cols-[minmax(0,1.6fr)_minmax(0,1fr)]">
         <Section title="The request">
           <Facts
             rows={[

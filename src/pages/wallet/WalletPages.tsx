@@ -147,7 +147,7 @@ function Overview({ w }: { w: Wallet }) {
         <KpiCard tone="orders" label="Payouts" value={count(w.payoutsCount ?? 0)} caption="Completed transfers" />
       </div>
       <TestMoneyNote w={w} />
-      <div className="grid gap-5 lg:grid-cols-[minmax(0,2fr)_minmax(0,1fr)]">
+      <div className="grid grid-cols-[minmax(0,1fr)] gap-5 lg:grid-cols-[minmax(0,2fr)_minmax(0,1fr)]">
         <Panel title="Transaction activity" subtitle="Latest money in and out.">
           {txs.isLoading ? <Loading /> : txs.error ? <ErrorNote error={txs.error} fallback="We couldn't load your transactions." onRetry={() => void txs.refetch()} /> : <TxList items={txs.data?.transactions ?? []} empty="No transactions yet. Store sales appear here." />}
           <Link to="/wallet/transactions" className="mt-3 inline-block text-action font-semibold text-ink-brand hover:underline">
@@ -200,7 +200,7 @@ function TxList({ items, empty }: { items: WalletTx[]; empty: string }) {
         const s = txStatus(t);
         const out = t.type === "withdrawal" || t.type === "commission" || t.type === "debit" || t.type === "refund";
         return (
-          <li key={t._id} className="grid grid-cols-[1fr_auto] items-center gap-x-4 gap-y-1 py-3 md:grid-cols-[1.2fr_1fr_auto_auto]">
+          <li key={t._id} className="grid grid-cols-[minmax(0,1fr)_auto] items-center gap-x-4 gap-y-1 py-3 md:grid-cols-[1.2fr_minmax(0,1fr)_auto_auto]">
             <Link to={`/wallet/transactions/${t._id}`} className="truncate font-semibold text-ink-strong hover:underline">
               {t.order && typeof t.order === "object" ? t.order.trackingNo : t.reference || TX_TYPE[t.type]}
             </Link>
@@ -284,13 +284,13 @@ function BankAccount({ w }: { w: Wallet }) {
       <p className="-mt-4 text-body-sm text-ink-muted">Where your payouts are sent. We check the account name with your bank.</p>
       <WalletTabs />
       <IntroCard eyebrow={EYEBROW} title={w.bank ? `Payouts go to ${masked(w)} (${w.bank.accountName}).` : "Add the account your payouts should go to."} />
-      <div className="grid gap-5 lg:grid-cols-[minmax(0,1.7fr)_minmax(0,1fr)]">
+      <div className="grid grid-cols-[minmax(0,1fr)] gap-5 lg:grid-cols-[minmax(0,1.7fr)_minmax(0,1fr)]">
         <form noValidate onSubmit={onSubmit} className="flex flex-col gap-5">
           <Panel title={w.bank ? "Change bank account" : "Bank details"} subtitle="Nigerian bank accounts in naira.">
             {paymentsOff ? (
               <p className="text-body-sm text-ink-secondary">Payouts aren&apos;t available yet, so bank accounts can&apos;t be linked. Please check back later.</p>
             ) : (
-              <div className="grid gap-4 md:grid-cols-2 md:gap-x-10 md:gap-y-6">
+              <div className="grid grid-cols-[minmax(0,1fr)] gap-4 md:grid-cols-2 md:gap-x-10 md:gap-y-6">
                 <Field label="Bank name" required error={formState.errors.bankCode?.message} hint="Type to search">
                   <BankPicker banks={banks.data ?? []} loading={banks.isLoading} disabled={banks.isLoading} value={bankCode} onChange={(code) => setValue("bankCode", code, { shouldDirty: true, shouldValidate: true })} />
                 </Field>
@@ -391,10 +391,10 @@ function Schedule({ w }: { w: Wallet }) {
       <p className="-mt-4 text-body-sm text-ink-muted">Choose how often you can request a payout.</p>
       <WalletTabs />
       <IntroCard eyebrow={EYEBROW} title="A minimum seven-day interval protects against customer disputes." />
-      <div className="grid gap-5 lg:grid-cols-[minmax(0,1.7fr)_minmax(0,1fr)]">
+      <div className="grid grid-cols-[minmax(0,1fr)] gap-5 lg:grid-cols-[minmax(0,1.7fr)_minmax(0,1fr)]">
         <form noValidate onSubmit={onSubmit} className="flex flex-col gap-5">
           <Panel title="Withdrawal timing" subtitle="Only available (completed-order) money can be paid out.">
-            <div className="grid gap-4 md:grid-cols-2 md:gap-x-10 md:gap-y-6">
+            <div className="grid grid-cols-[minmax(0,1fr)] gap-4 md:grid-cols-2 md:gap-x-10 md:gap-y-6">
               <Field label="Payout interval" required>
                 <SelectInput {...register("interval")}>
                   <option value="weekly">Every 7 days</option>
@@ -487,7 +487,7 @@ function Withdraw({ w }: { w: Wallet }) {
       <WalletTabs />
       <IntroCard eyebrow={EYEBROW} title="Money on hold and test money can't be withdrawn." />
       <TestMoneyNote w={w} />
-      <div className="grid gap-5 lg:grid-cols-[minmax(0,1.7fr)_minmax(0,1fr)]">
+      <div className="grid grid-cols-[minmax(0,1fr)] gap-5 lg:grid-cols-[minmax(0,1.7fr)_minmax(0,1fr)]">
         <form
           noValidate
           onSubmit={(e) => {
@@ -497,7 +497,7 @@ function Withdraw({ w }: { w: Wallet }) {
           className="flex flex-col gap-5"
         >
           <Panel title="Withdrawal details" subtitle="Confirm the amount, fees and recipient.">
-            <div className="grid gap-4 md:grid-cols-2 md:gap-x-10 md:gap-y-6">
+            <div className="grid grid-cols-[minmax(0,1fr)] gap-4 md:grid-cols-2 md:gap-x-10 md:gap-y-6">
               <Field label="Available to withdraw" hint={walletFigures(w).testTotal > 0 ? `Test money (${naira(walletFigures(w).testTotal)}) can't be withdrawn.` : undefined}>
                 <TextInput readOnly value={naira(w.balance)} />
               </Field>
@@ -723,12 +723,12 @@ function Transactions({ w }: { w: Wallet }) {
       <WalletTabs />
       <IntroCard eyebrow={EYEBROW} title="Download complete transaction records for reconciliation." />
       <ErrorNote error={exportError} fallback="We couldn't prepare the CSV. Please try again." />
-      <div className="grid gap-5 lg:grid-cols-[minmax(0,2.3fr)_minmax(0,1fr)]">
+      <div className="grid grid-cols-[minmax(0,1fr)] gap-5 lg:grid-cols-[minmax(0,2.3fr)_minmax(0,1fr)]">
         <Panel title="Transaction ledger">
-          <div className="flex flex-col gap-3 md:flex-row">
+          <div className="flex flex-col gap-3 md:flex-row md:flex-wrap">
             <form
               role="search"
-              className="flex-1"
+              className="min-w-0 grow basis-64"
               onSubmit={(e) => {
                 e.preventDefault();
                 setSearch(typed.trim());

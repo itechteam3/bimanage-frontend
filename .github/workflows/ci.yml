@@ -34,3 +34,32 @@ jobs:
       - run: npm run typecheck
       - run: npm test
       - run: npm run build
+
+  # Responsive layout check: every route at 360–1440px against the local
+  # fixture API with long data (scripts/check-layout.mjs). Fails on sideways
+  # scroll, overflow, cut-off text, overlaps, oversized dialogs or small tap
+  # targets; screenshots of failures are uploaded as an artifact.
+  layout:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+
+      - run: npm ci
+      - run: npm run build:layout
+      - name: Check every screen at 360, 390, 768, 1024, 1280 and 1440px
+        run: npm run check:layout
+        env:
+          CHROME_PATH: /usr/bin/google-chrome
+      - name: Upload screenshots of layout failures
+        if: failure()
+        uses: actions/upload-artifact@v4
+        with:
+          name: layout-check
+          path: layout-check/
+          retention-days: 7

@@ -83,7 +83,7 @@ function RatingCard({ stats }: { stats: ReviewStats }) {
         </div>
         <ul className="flex flex-1 flex-col gap-2" aria-label="Rating breakdown">
           {counts.map(([n, c]) => (
-            <li key={n} className="grid grid-cols-[2.5rem_1fr_2.5rem] items-center gap-3 text-body-sm">
+            <li key={n} className="grid grid-cols-[2.5rem_minmax(0,1fr)_2.5rem] items-center gap-3 text-body-sm">
               <span className="text-ink-strong" aria-hidden="true">
                 {n}★
               </span>
@@ -180,7 +180,7 @@ export function PublicReviewsPage() {
           <RatingCard stats={data.stats} />
           <Panel title="Discover reviews">
             <div className="flex flex-col gap-4">
-              <div className="grid gap-4 md:grid-cols-[minmax(0,2fr)_minmax(0,1fr)_minmax(0,1fr)]">
+              <div className="grid grid-cols-[minmax(0,1fr)] gap-4 md:grid-cols-[minmax(0,2fr)_minmax(0,1fr)_minmax(0,1fr)]">
                 <Field label="Search reviews">
                   <TextInput type="search" value={text} onChange={(e) => setText(e.target.value)} placeholder="Search by keyword" />
                 </Field>
@@ -353,10 +353,10 @@ function ReviewEditor({ existing }: { existing: MyReview | null }) {
           {existing.hiddenReason ? `${existing.hiddenReason} ` : ""}Editing publishes it again.
         </InfoStrip>
       )}
-      <div className="grid gap-5 lg:grid-cols-[minmax(0,1.7fr)_minmax(0,1fr)]">
+      <div className="grid grid-cols-[minmax(0,1fr)] gap-5 lg:grid-cols-[minmax(0,1.7fr)_minmax(0,1fr)]">
         <form noValidate onSubmit={onSubmit} className="flex flex-col gap-5">
           <Panel title="Your review" subtitle="Fields marked * are required.">
-            <div className="grid gap-4 md:grid-cols-2 md:gap-x-10 md:gap-y-6">
+            <div className="grid grid-cols-[minmax(0,1fr)] gap-4 md:grid-cols-2 md:gap-x-10 md:gap-y-6">
               <Field label="Review headline" required error={e.headline?.message} className="md:col-span-2">
                 <TextInput maxLength={120} placeholder="For example: Orders and stock in one place" {...register("headline")} />
               </Field>
@@ -403,7 +403,7 @@ function ReviewEditor({ existing }: { existing: MyReview | null }) {
               </Field>
               <fieldset className="flex flex-col gap-2 rounded-sm bg-surface-pale px-4 py-2.5 md:col-span-2 lg:bg-transparent lg:p-0">
                 <legend className="text-field-label uppercase text-ink-brand lg:text-ink-secondary">Features used</legend>
-                <div className="mt-2 grid gap-2 md:grid-cols-3">
+                <div className="mt-2 grid grid-cols-[minmax(0,1fr)] gap-2 md:grid-cols-3">
                   {REVIEW_FEATURES.map(([k, l]) => (
                     <label key={k} className="flex min-h-11 items-center gap-2 text-body-lg text-ink-strong">
                       <input type="checkbox" value={k} className="size-5 accent-brand-navy" {...register("featuresUsed")} />
@@ -487,7 +487,7 @@ export function ReviewSubmittedPage() {
   return (
     <div className="flex flex-col gap-6">
       <PageTitle>Review submitted</PageTitle>
-      <div className="grid gap-5 lg:grid-cols-[minmax(0,1.7fr)_minmax(0,1fr)]">
+      <div className="grid grid-cols-[minmax(0,1fr)] gap-5 lg:grid-cols-[minmax(0,1.7fr)_minmax(0,1fr)]">
         <Panel title="Thank you for sharing your experience" subtitle={r.headline}>
           <div className="flex flex-col gap-5">
             <div className="flex items-center gap-3 rounded-xl bg-success-bg px-4 py-4 text-success">

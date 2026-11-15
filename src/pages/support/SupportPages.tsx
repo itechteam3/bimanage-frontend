@@ -123,7 +123,7 @@ function TicketRow({ t }: { t: TicketSummary }) {
   const st = ticketStatus(t.status);
   return (
     <li>
-      <Link to={`/support/tickets/${t._id}`} className="grid grid-cols-[1fr_auto] items-center gap-x-4 gap-y-1 py-3 hover:bg-surface-pale md:px-2">
+      <Link to={`/support/tickets/${t._id}`} className="grid grid-cols-[minmax(0,1fr)_auto] items-center gap-x-4 gap-y-1 py-3 hover:bg-surface-pale md:px-2">
         <span className="min-w-0">
           <span className="block text-caption font-semibold text-ink-brand">{t.ticketNumber}</span>
           <span className="block truncate font-semibold text-ink-strong">{t.subject}</span>
@@ -141,7 +141,7 @@ function RequestRow({ r }: { r: ServiceRequest }) {
   const st = requestStatus(r.status);
   return (
     <li>
-      <Link to={`/support/service-requests/${r._id}`} className="grid grid-cols-[1fr_auto] items-center gap-x-4 gap-y-1 py-3 hover:bg-surface-pale md:px-2">
+      <Link to={`/support/service-requests/${r._id}`} className="grid grid-cols-[minmax(0,1fr)_auto] items-center gap-x-4 gap-y-1 py-3 hover:bg-surface-pale md:px-2">
         <span className="min-w-0">
           <span className="block text-caption font-semibold text-ink-brand">{r.requestNumber}</span>
           <span className="block truncate font-semibold text-ink-strong">{r.projectTitle}</span>
@@ -196,7 +196,7 @@ export function SupportCentrePage() {
         <h2 id="topics-title" className="text-title-sm text-ink-strong">
           Popular help topics
         </h2>
-        <ul className="grid gap-3 md:grid-cols-2 lg:grid-cols-3">
+        <ul className="grid grid-cols-[minmax(0,1fr)] gap-3 md:grid-cols-2 lg:grid-cols-3">
           {TOPICS.map(([cat, title, body]) => (
             <li key={cat}>
               <Link to={`/support/help?category=${cat}`} className="flex h-full items-start gap-3 rounded-2xl border border-line-card bg-surface-card p-4 shadow-card hover:border-brand-navy">
@@ -210,7 +210,7 @@ export function SupportCentrePage() {
           ))}
         </ul>
       </section>
-      <div className="grid gap-5 lg:grid-cols-[minmax(0,1.7fr)_minmax(0,1fr)]">
+      <div className="grid grid-cols-[minmax(0,1fr)] gap-5 lg:grid-cols-[minmax(0,1.7fr)_minmax(0,1fr)]">
         <Panel title="My support requests" subtitle="Your latest tickets and where they stand.">
           {tickets.isLoading ? (
             <Loading label="Loading your tickets…" />
@@ -400,10 +400,10 @@ export function NewTicketPage() {
       <IntroCard eyebrow="Support / New ticket" title="Tell us what's happening.">
         The more detail you share, the faster the team can help.
       </IntroCard>
-      <div className="grid gap-5 lg:grid-cols-[minmax(0,1.7fr)_minmax(0,1fr)]">
+      <div className="grid grid-cols-[minmax(0,1fr)] gap-5 lg:grid-cols-[minmax(0,1.7fr)_minmax(0,1fr)]">
         <form noValidate onSubmit={onSubmit} className="flex flex-col gap-5">
           <Panel title="Request details" subtitle="Fields marked * are required.">
-            <div className="grid gap-4 md:grid-cols-2 md:gap-x-10 md:gap-y-6">
+            <div className="grid grid-cols-[minmax(0,1fr)] gap-4 md:grid-cols-2 md:gap-x-10 md:gap-y-6">
               <Field label="Request title" required error={e.subject?.message} className="md:col-span-2">
                 <TextInput maxLength={150} placeholder="For example: My withdrawal hasn't arrived" {...register("subject")} />
               </Field>
@@ -480,7 +480,7 @@ function TicketDetail({ t, created }: { t: Ticket; created: boolean }) {
     <div className="flex flex-col gap-6">
       <PageTitle actions={t.status !== "closed" ? <Button size="md" variant="outlined" onClick={() => setConfirmClose(true)}>Close ticket</Button> : undefined}>Support ticket {t.ticketNumber}</PageTitle>
       {created && (
-        <div className="grid gap-5 lg:grid-cols-[minmax(0,1.7fr)_minmax(0,1fr)]">
+        <div className="grid grid-cols-[minmax(0,1fr)] gap-5 lg:grid-cols-[minmax(0,1.7fr)_minmax(0,1fr)]">
           <Panel title="Your request is in the right hands." subtitle="The BiManage support team has your ticket.">
             <div className="flex flex-col gap-5">
               <div className="flex items-center gap-3 rounded-xl bg-success-bg px-4 py-4 text-success">
@@ -507,7 +507,7 @@ function TicketDetail({ t, created }: { t: Ticket; created: boolean }) {
           />
         </div>
       )}
-      <div className="grid gap-5 lg:grid-cols-[minmax(0,1.7fr)_minmax(0,1fr)]">
+      <div className="grid grid-cols-[minmax(0,1fr)] gap-5 lg:grid-cols-[minmax(0,1.7fr)_minmax(0,1fr)]">
         <div className="flex min-w-0 flex-col gap-5">
           <Panel title={t.subject}>
             <ol className="flex flex-col gap-4" aria-label="Conversation">
@@ -835,10 +835,10 @@ export function NewServiceRequestPage() {
       <IntroCard eyebrow="Support / Custom service" title="Let BiTechTeam build it with you.">
         Tell us what you need. The team follows up within 48 hours.
       </IntroCard>
-      <div className="grid gap-5 lg:grid-cols-[minmax(0,1.7fr)_minmax(0,1fr)]">
+      <div className="grid grid-cols-[minmax(0,1fr)] gap-5 lg:grid-cols-[minmax(0,1.7fr)_minmax(0,1fr)]">
         <form noValidate onSubmit={onSubmit} className="flex flex-col gap-5">
           <Panel title="Project details" subtitle="Fields marked * are required.">
-            <div className="grid gap-4 md:grid-cols-2 md:gap-x-10 md:gap-y-6">
+            <div className="grid grid-cols-[minmax(0,1fr)] gap-4 md:grid-cols-2 md:gap-x-10 md:gap-y-6">
               <Field label="Project title" required error={e.projectTitle?.message} className="md:col-span-2">
                 <TextInput maxLength={150} placeholder="For example: New website for my shop" {...register("projectTitle")} />
               </Field>
@@ -926,7 +926,7 @@ export function ServiceRequestDetailPage() {
           <p className="text-body-lg font-semibold">BiTechTeam will follow up with you within 48 hours.</p>
         </div>
       )}
-      <div className="grid gap-5 lg:grid-cols-[minmax(0,1.7fr)_minmax(0,1fr)]">
+      <div className="grid grid-cols-[minmax(0,1fr)] gap-5 lg:grid-cols-[minmax(0,1.7fr)_minmax(0,1fr)]">
         <Panel title={created ? r.projectTitle : "Request details"}>
           <div className="flex flex-col gap-5">
             <DetailRows

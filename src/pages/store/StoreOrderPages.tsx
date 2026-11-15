@@ -66,7 +66,7 @@ function StoreOrders({ store }: { store: Store }) {
       <p className="-mt-4 text-body-sm text-ink-muted">Orders customers placed in your online store.</p>
       <StoreTabs />
       <IntroCard eyebrow={opsEyebrow(store)} title="Paid orders move from New to Completed. Completing an order releases your earnings to your wallet." />
-      <div className="grid gap-5 lg:grid-cols-[minmax(0,2.3fr)_minmax(0,1fr)]">
+      <div className="grid grid-cols-[minmax(0,1fr)] gap-5 lg:grid-cols-[minmax(0,2.3fr)_minmax(0,1fr)]">
         <Panel>
           <form
             role="search"
@@ -92,7 +92,7 @@ function StoreOrders({ store }: { store: Store }) {
             </label>
           </form>
           <div className="-mx-5 mt-3 overflow-x-auto px-5 lg:mx-0 lg:px-0">
-            <div role="tablist" aria-label="Filter by status" className="flex w-max items-center gap-1 rounded-md bg-surface-pale p-1">
+            <div role="tablist" aria-label="Filter by status" className="flex w-fit max-w-full flex-wrap items-center gap-1 rounded-md bg-surface-pale p-1">
               {FILTERS.map(([k, label]) => (
                 <button key={k} type="button" role="tab" aria-selected={status === k} onClick={() => choose(k)} className={cn("min-h-11 whitespace-nowrap rounded-sm px-3 text-action font-semibold", status === k ? "bg-surface-card text-ink-brand shadow-card" : "text-ink-muted")}>
                   {label}
@@ -117,7 +117,7 @@ function StoreOrders({ store }: { store: Store }) {
                   const b = badge(o.status);
                   const units = o.items.reduce((s, i) => s + i.quantity, 0);
                   return (
-                    <li key={o._id} data-new={fresh.has(o._id) || undefined} className={cn("grid grid-cols-[1fr_auto] items-center gap-x-4 gap-y-1 py-3 md:grid-cols-[1.2fr_1.4fr_auto_auto]", fresh.has(o._id) && `-mx-2 rounded-md px-2 ${newRowClass}`)}>
+                    <li key={o._id} data-new={fresh.has(o._id) || undefined} className={cn("grid grid-cols-[minmax(0,1fr)_auto] items-center gap-x-4 gap-y-1 py-3 md:grid-cols-[1.2fr_1.4fr_auto_auto]", fresh.has(o._id) && `-mx-2 rounded-md px-2 ${newRowClass}`)}>
                       <Link to={`/store/orders/${o._id}`} className="font-semibold text-ink-strong hover:underline">
                         {o.trackingNo}
                       </Link>
@@ -237,12 +237,12 @@ function StoreOrderDetail({ store, id }: { store: Store; id: string }) {
       {o.status === "cancelled" && o.isPaid && o.earningsReversed && !refund && (
         <p className="rounded-xl bg-surface-tint-warm px-5 py-3 text-body-sm text-ink-strong">This paid order was cancelled. If you haven't yet, refund the customer from your Paystack dashboard.</p>
       )}
-      <div className="grid gap-5 lg:grid-cols-[minmax(0,1.7fr)_minmax(0,1fr)]">
+      <div className="grid grid-cols-[minmax(0,1fr)] gap-5 lg:grid-cols-[minmax(0,1.7fr)_minmax(0,1fr)]">
         <div className="flex flex-col gap-5">
           <Panel title="Items">
             <ul className="flex flex-col divide-y divide-line-subtle">
               {o.items.map((i, n) => (
-                <li key={`${i.product}-${n}`} className="grid grid-cols-[3rem_1fr_auto] items-center gap-3 py-3">
+                <li key={`${i.product}-${n}`} className="grid grid-cols-[3rem_minmax(0,1fr)_auto] items-center gap-3 py-3">
                   {i.productImage ? <img src={i.productImage} alt="" className="size-12 rounded-md object-cover" /> : <span aria-hidden="true" className="size-12 rounded-md bg-surface-tint-blue" />}
                   <span className="min-w-0">
                     <Link to={`/store/products/${i.product}`} className="block truncate font-semibold text-ink-strong hover:underline">
@@ -325,12 +325,12 @@ function StoreOrderDetail({ store, id }: { store: Store; id: string }) {
               ]}
             />
             <div className="mt-4 flex flex-col gap-2">
-              <ButtonLink to={`mailto:${o.customerEmail}?subject=${encodeURIComponent(`Your order ${o.trackingNo} from ${store.storeName}`)}`} reloadDocument variant="secondary" size="md">
-                <IconMail aria-hidden="true" className="size-4" /> Email {o.customerEmail}
+              <ButtonLink to={`mailto:${o.customerEmail}?subject=${encodeURIComponent(`Your order ${o.trackingNo} from ${store.storeName}`)}`} reloadDocument variant="secondary" size="md" className="max-w-full">
+                <IconMail aria-hidden="true" className="size-4 shrink-0" /> <span className="min-w-0 truncate">Email {o.customerEmail}</span>
               </ButtonLink>
               {o.customerPhone && (
-                <ButtonLink to={`tel:${o.customerPhone.replace(/\s+/g, "")}`} reloadDocument variant="secondary" size="md">
-                  <IconPhone aria-hidden="true" className="size-4" /> Call {o.customerPhone}
+                <ButtonLink to={`tel:${o.customerPhone.replace(/\s+/g, "")}`} reloadDocument variant="secondary" size="md" className="max-w-full">
+                  <IconPhone aria-hidden="true" className="size-4 shrink-0" /> <span className="min-w-0 truncate">Call {o.customerPhone}</span>
                 </ButtonLink>
               )}
             </div>

@@ -26,14 +26,14 @@ export function TrialStartedPage() {
         Explore BiManage with {days} days of full-feature trial access.
       </IntroCard>
       <Stepper steps={["Account", "Business profile", "First product", "Online store"]} current={0} />
-      <div className="grid gap-5 lg:grid-cols-[minmax(0,1.7fr)_minmax(0,1fr)]">
+      <div className="grid grid-cols-[minmax(0,1fr)] gap-5 lg:grid-cols-[minmax(0,1.7fr)_minmax(0,1fr)]">
         <Panel title="Your first steps" subtitle="Work through the built-in seven-step setup tracker.">
           <div className="flex flex-col gap-4">
             <div className="rounded-xl bg-surface-pale px-4 py-4">
               <p className="text-caption font-semibold uppercase text-ink-brand">Free exploration period</p>
               <p className="mt-2 text-title-md text-ink-brand lg:text-metric">{days} days</p>
             </div>
-            <ol className="grid grid-cols-[3rem_1fr] gap-y-3 text-body-lg">
+            <ol className="grid grid-cols-[3rem_minmax(0,1fr)] gap-y-3 text-body-lg">
               {["Create and verify your account", "Add your business profile and logo", "Add a product and create an order", "Set up your online store"].map((s, i) => (
                 <li key={s} className="contents">
                   <span className="text-ink-muted">{String(i + 1).padStart(2, "0")}</span>
@@ -89,7 +89,7 @@ export function BusinessIdentityPage() {
       </PageTitle>
       <p className="-mt-4 text-body-sm text-ink-muted">Set up your identity for orders, invoices and your online store.</p>
       <IntroCard eyebrow="Workspace / Onboarding" title="The same information is reused across BiManage modules." />
-      <div className="grid gap-5 lg:grid-cols-[minmax(0,1.7fr)_minmax(0,1fr)]">
+      <div className="grid grid-cols-[minmax(0,1fr)] gap-5 lg:grid-cols-[minmax(0,1.7fr)_minmax(0,1fr)]">
         <BusinessProfileForm profile={profile.data} title="Business identity setup" submitLabel="Save and continue" onSaved={() => navigate("/onboarding/checklist")}>
           <div className="mt-6 rounded-xl bg-surface-pale p-4">
             <p className="text-caption font-semibold uppercase text-ink-brand">Setup progress</p>
@@ -133,7 +133,7 @@ export function ChecklistPage() {
       <IntroCard eyebrow="Welcome to BiManage" title="Seven small steps. One ready-to-run business.">
         Your progress updates automatically as you finish the steps.
       </IntroCard>
-      <div className="grid gap-5 lg:grid-cols-[minmax(0,1.6fr)_minmax(0,1fr)]">
+      <div className="grid grid-cols-[minmax(0,1fr)] gap-5 lg:grid-cols-[minmax(0,1.6fr)_minmax(0,1fr)]">
         <Panel title="Setup progress" subtitle={steps.data ? `${steps.data.completedCount} of ${steps.data.totalSteps} complete — finish each step when you're ready.` : "Complete each step when you're ready."}>
           {steps.isLoading && <Loading />}
           {steps.error && <AuthNote tone="danger">{errorMessage(steps.error)}</AuthNote>}

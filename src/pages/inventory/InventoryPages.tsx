@@ -88,13 +88,13 @@ export function InventoryOverviewPage() {
         <KpiCard tone="stock" label="Out of stock" value={outOfStock ? count(outOfStock) : "—"} caption={outOfStock ? "Sold out" : "Nothing sold out"} />
       </div>
 
-      <div className="grid gap-5 lg:grid-cols-[minmax(0,1.7fr)_minmax(0,1fr)]">
+      <div className="grid grid-cols-[minmax(0,1fr)] gap-5 lg:grid-cols-[minmax(0,1.7fr)_minmax(0,1fr)]">
         <Panel title="Stock health" subtitle="Products that need attention, sold-out first.">
           {s?.lowStockProducts.length ? (
             <ul className="flex flex-col">
               {s.lowStockProducts.slice(0, 6).map((p, i) => (
                 <li key={p._id}>
-                  <Link to={`/inventory/products/${p._id}/adjust`} className={cn("grid grid-cols-[1fr_auto] items-center gap-3 rounded-lg px-3 py-4 md:grid-cols-[2fr_1fr_1fr_auto]", i % 2 === 0 && "bg-surface-pale")}>
+                  <Link to={`/inventory/products/${p._id}/adjust`} className={cn("grid grid-cols-[minmax(0,1fr)_auto] items-center gap-3 rounded-lg px-3 py-4 md:grid-cols-[2fr_minmax(0,1fr)_minmax(0,1fr)_auto]", i % 2 === 0 && "bg-surface-pale")}>
                     <span className="text-body font-semibold text-ink-strong">{p.name}</span>
                     <span className="hidden text-body-sm text-ink-muted md:block">{p.sku ?? "—"}</span>
                     <span className="hidden text-body-sm text-ink-strong md:block">
@@ -180,7 +180,7 @@ export function ProductsPage() {
       <p className="-mt-4 text-body-sm text-ink-muted">Update quantities, pricing, barcodes and categories.</p>
       <IntroCard eyebrow="Inventory" title={`${count(all.length)} products · ${count(needRestock)} need restocking`} />
 
-      <div className="grid gap-5 lg:grid-cols-[minmax(0,2fr)_minmax(0,1fr)]">
+      <div className="grid grid-cols-[minmax(0,1fr)] gap-5 lg:grid-cols-[minmax(0,2fr)_minmax(0,1fr)]">
         <Panel title="Inventory product register" subtitle="Search, edit, export or restock products.">
           <div className="max-w-sm">
             <Field label="Search">
@@ -273,7 +273,7 @@ export function LowStockPage() {
       <p className="-mt-4 text-body-sm text-ink-muted">Find sold-out and below-threshold products.</p>
       <IntroCard eyebrow="Workspace / Inventory" title="Inventory alerts use each product's configured stock threshold." />
       {exp.error && <AuthNote tone="danger">{exp.error}</AuthNote>}
-      <div className="grid gap-5 lg:grid-cols-[minmax(0,2fr)_minmax(0,1fr)]">
+      <div className="grid grid-cols-[minmax(0,1fr)] gap-5 lg:grid-cols-[minmax(0,2fr)_minmax(0,1fr)]">
         <Panel title="Items needing attention" subtitle="Restock or adjust each product.">
           <div className="max-w-sm">
             <Field label="Search">
@@ -283,7 +283,7 @@ export function LowStockPage() {
           {stats.isLoading && <Loading />}
           <ul className="mt-4 flex flex-col">
             {items.map((p, i) => (
-              <li key={p._id} className={cn("grid grid-cols-[1fr_auto] items-center gap-3 rounded-lg px-3 py-4 md:grid-cols-[2fr_1fr_1fr_auto]", i % 2 === 1 && "bg-surface-pale")}>
+              <li key={p._id} className={cn("grid grid-cols-[minmax(0,1fr)_auto] items-center gap-3 rounded-lg px-3 py-4 md:grid-cols-[2fr_minmax(0,1fr)_minmax(0,1fr)_auto]", i % 2 === 1 && "bg-surface-pale")}>
                 <span className="text-body font-semibold text-ink-strong">{p.name}</span>
                 <span className="hidden text-body-sm text-ink-strong md:block">{count(p.stock)} available</span>
                 <span className="hidden text-body-sm text-ink-muted md:block">Threshold {count(p.threshold)}</span>
@@ -331,7 +331,7 @@ export function ExportReadyPage() {
       <p className="-mt-4 text-body-sm text-ink-muted">Your stock records are ready.</p>
       <IntroCard eyebrow="Workspace / Inventory" title="The CSV export includes quantities, SKU, barcode, price, threshold and category." />
       {exp.error && <AuthNote tone="danger">{exp.error}</AuthNote>}
-      <div className="grid gap-5 lg:grid-cols-[minmax(0,1.7fr)_minmax(0,1fr)]">
+      <div className="grid grid-cols-[minmax(0,1fr)] gap-5 lg:grid-cols-[minmax(0,1.7fr)_minmax(0,1fr)]">
         <Panel title="CSV report prepared" subtitle="Open it in Excel, Google Sheets or another spreadsheet app.">
           <div className="flex items-center gap-4 rounded-xl bg-surface-pale p-4">
             <IconFileSpreadsheet aria-hidden="true" className="size-10 text-kpi-revenue-fg" stroke={1.5} />

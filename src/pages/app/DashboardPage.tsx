@@ -120,7 +120,7 @@ export function DashboardPage() {
             <KpiCard tone="stock" label="Low stock" value={count(s?.lowStock ?? 0)} caption="Restock reminders" />
           </div>
 
-          <div className="grid gap-5 lg:grid-cols-[minmax(0,1.95fr)_minmax(0,1fr)]">
+          <div className="grid grid-cols-[minmax(0,1fr)] gap-5 lg:grid-cols-[minmax(0,1.95fr)_minmax(0,1fr)]">
             <Panel title={orders.length ? "Recent orders" : "Recent orders • Empty"}>
               <div className="overflow-x-auto">
                 <table className="w-full min-w-[32rem] border-separate border-spacing-0 text-left">
@@ -180,7 +180,7 @@ export function DashboardPage() {
             </Panel>
           </div>
 
-          <div className="grid gap-4 rounded-2xl bg-surface-pale p-4 md:grid-cols-2">
+          <div className="grid grid-cols-[minmax(0,1fr)] gap-4 rounded-2xl bg-surface-pale p-4 md:grid-cols-2">
             <ButtonLink to="/orders" size="md">
               Create an order →
             </ButtonLink>
@@ -201,7 +201,7 @@ export function DashboardPage() {
               </>
             ) : (
               <>
-                <ol className="grid gap-3 md:grid-cols-3">
+                <ol className="grid grid-cols-[minmax(0,1fr)] gap-3 md:grid-cols-3">
                   {top.map((p, i) => (
                     <li key={p._id} className="flex items-start gap-3 rounded-lg border border-line-card bg-surface-pale p-3">
                       <span className="flex size-7 shrink-0 items-center justify-center rounded-full bg-surface-card text-caption font-semibold text-ink-brand">

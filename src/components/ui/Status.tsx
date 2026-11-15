@@ -16,7 +16,8 @@ export function Status({ tone = "neutral", children, className }: { tone?: Statu
   return (
     <span
       className={cn(
-        "inline-flex h-status items-center gap-1.5 whitespace-nowrap rounded-full px-3 text-body-sm font-semibold",
+        // One line normally; wraps (never overflows) when its column is narrower than the label.
+        "inline-flex min-h-status max-w-full items-center gap-1.5 rounded-full px-3 py-0.5 text-body-sm font-semibold",
         tones[tone],
         className
       )}
