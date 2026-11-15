@@ -25,6 +25,7 @@ import {
   IconX,
 } from "@tabler/icons-react";
 import { Logo } from "@/components/brand/Logo";
+import { Avatar } from "@/components/ui/Avatar";
 import { Button, ButtonLink } from "@/components/ui/Button";
 import { Dialog } from "@/components/ui/Dialog";
 import { Field, SelectInput, TextArea, TextInput } from "@/components/ui/Field";
@@ -209,6 +210,18 @@ const BASE_FAQS = [
 
 // ── Sections ──────────────────────────────────────────────────────────────
 
+/** Sign up + Sign in for visitors; "Go to dashboard" for signed-in people. */
+function AuthCtas({ size, className }: { size?: "md" | "lg"; className?: string }) {
+  const signedIn = useAuth().status === "authenticated";
+  if (signedIn) return <ButtonLink to="/start" variant="tonal" size={size} className={className}>Go to dashboard</ButtonLink>;
+  return (
+    <>
+      <ButtonLink to="/register" variant="tonal" size={size} className={className}>Get started free</ButtonLink>
+      <ButtonLink to="/login" variant="secondary" size={size} className={className}>Sign in</ButtonLink>
+    </>
+  );
+}
+
 function Container({ children, className }: { children: ReactNode; className?: string }) {
   return <div className={cn("mx-auto w-full max-w-[75rem] px-5 md:px-8", className)}>{children}</div>;
 }
@@ -240,7 +253,7 @@ function NavBar({ onContact }: { onContact: () => void }) {
         </nav>
         <div className="hidden items-center gap-3 lg:flex">
           {signedIn ? (
-            <ButtonLink to="/dashboard" variant="tonal" size="md">Go to dashboard</ButtonLink>
+            <ButtonLink to="/start" variant="tonal" size="md">Go to dashboard</ButtonLink>
           ) : (
             <>
               <ButtonLink to="/login" variant="secondary" size="md">Sign in</ButtonLink>
@@ -261,7 +274,7 @@ function NavBar({ onContact }: { onContact: () => void }) {
             <button type="button" onClick={() => { setOpen(false); onContact(); }} className="flex min-h-11 items-center text-nav text-ink-on-brand">Contact us</button>
             <div className="mt-3 flex w-full max-w-[20rem] flex-col gap-3">
               {signedIn ? (
-                <ButtonLink to="/dashboard" variant="tonal" fullWidth>Go to dashboard</ButtonLink>
+                <ButtonLink to="/start" variant="tonal" fullWidth>Go to dashboard</ButtonLink>
               ) : (
                 <>
                   <ButtonLink to="/register" variant="tonal" fullWidth>Get started</ButtonLink>
@@ -295,8 +308,7 @@ function Hero() {
             Sales, inventory, invoices, your online store, customers, payouts and wholesale buying — in one dashboard built for Nigerian businesses.
           </p>
           <div className="lp-rise mt-6 flex flex-wrap gap-3" style={{ ["--lp-delay" as string]: "260ms" }}>
-            <ButtonLink to="/register" variant="tonal">Get started free</ButtonLink>
-            <ButtonLink to="/login" variant="secondary">Sign in</ButtonLink>
+            <AuthCtas />
           </div>
         </div>
         <div className="lp-preview mx-auto mt-12 max-w-[62rem] md:mt-16">
@@ -541,7 +553,14 @@ function Reviews() {
                 <p className="text-card-heading text-ink-strong">{r.headline}</p>
                 <p className="mt-2 text-body-sm text-ink-muted">{r.review}</p>
               </blockquote>
-              <figcaption className="mt-4 text-body-sm font-semibold text-ink-secondary">{r.reviewer?.name}{r.businessName ? ` · ${r.businessName}` : ""}</figcaption>
+              <figcaption className="mt-4 flex items-center gap-3">
+                {/* The photo they uploaded in BiManage (initials if none). */}
+                <Avatar name={r.reviewer?.name || r.businessName || "BiManage user"} src={r.reviewer?.avatar} />
+                <span className="min-w-0">
+                  <span className="block text-body-sm font-semibold text-ink-strong">{r.reviewer?.name || "BiManage user"}</span>
+                  {r.businessName && <span className="block text-caption text-ink-muted">{r.businessName}</span>}
+                </span>
+              </figcaption>
             </figure>
           ))}
         </div>
@@ -582,8 +601,7 @@ function FinalCta() {
           <h2 className="text-title-lg md:text-page-title">Ready to simplify your business?</h2>
           <p className="mx-auto mt-3 max-w-[36rem] text-body-lg text-ink-on-brand-muted">Set up in minutes and run sales, stock, payments and customers from one place.</p>
           <div className="mt-6 flex flex-wrap justify-center gap-3">
-            <ButtonLink to="/register" variant="tonal">Get started free</ButtonLink>
-            <ButtonLink to="/login" variant="secondary">Sign in</ButtonLink>
+            <AuthCtas />
           </div>
           {/* Figma collage (stock photos). */}
           <div className="mt-10 flex justify-center gap-3" aria-hidden="true">
@@ -608,7 +626,7 @@ function Footer() {
           <Logo tone="on-brand" size="panel" />
           <p className="mt-4 max-w-[26rem] text-body text-ink-on-brand-muted">Run your whole business in one place: sales, inventory, invoices, your online store, customers and payouts.</p>
           <nav aria-label="Footer" className="mt-6 flex flex-wrap gap-x-6 gap-y-1">
-            {([["Sign in", "/login"], ["Create an account", "/register"], ["Reviews", "/reviews"]] as const).map(([l, to]) => (
+            {(useAuth().status === "authenticated" ? ([["Go to dashboard", "/start"], ["Reviews", "/reviews"]] as const) : ([["Sign in", "/login"], ["Create an account", "/register"], ["Reviews", "/reviews"]] as const)).map(([l, to]) => (
               <Link key={to} to={to} className="inline-flex min-h-11 items-center text-body text-ink-on-brand-muted hover:text-ink-on-brand">{l}</Link>
             ))}
             <a href="#faq" className="inline-flex min-h-11 items-center text-body text-ink-on-brand-muted hover:text-ink-on-brand">FAQ</a>

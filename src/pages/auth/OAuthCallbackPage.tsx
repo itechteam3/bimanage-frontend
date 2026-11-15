@@ -23,7 +23,7 @@ export function OAuthCallbackPage() {
       return;
     }
     signIn(token)
-      .then(() => navigate(pendingInvite.get() ? "/invite/accept" : "/", { replace: true }))
+      .then(() => navigate(pendingInvite.get() ? "/invite/accept" : "/start", { replace: true }))
       .catch((err) => navigate(err instanceof ApiError && err.data.accountClosing ? "/account-closing" : "/login?error=google", { replace: true }));
   }, [navigate, signIn]);
 
