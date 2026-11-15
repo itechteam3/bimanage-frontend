@@ -34,7 +34,7 @@ const IDS = [
 ];
 
 // Signed-out screens (guest-only pages redirect when signed in).
-const GUEST = new Set(["/", "/home", "/newsletter/confirm", "/newsletter/unsubscribe", "/login", "/register", "/verify", "/forgot-password", "/forgot-password/code", "/reset-password", "/reset-password/done",
+const GUEST = new Set(["/", "/home", "/newsletter/confirm", "/newsletter/unsubscribe", "/contact", "/login", "/register", "/verify", "/forgot-password", "/forgot-password/code", "/reset-password", "/reset-password/done",
   "/oauth/callback", "/session-expired", "/account-closing", "/account-closed", "/invite/accept", "/unsubscribe", "/reviews",
   "/admin/login", "/admin/login/verify", "/admin/login/setup", "/admin/invite", "/admin/forgot-password", "/admin/reset-password"]);
 // Not product screens.

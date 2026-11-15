@@ -36,6 +36,7 @@ The component gallery lives at `/ui-kit` (plus `/ui-kit/auth` and `/ui-kit/app`)
 | `VITE_API_BASE_URL` | `https://bimanage-backend.onrender.com/api` | API base, including `/api`. Defaults to `http://localhost:5000/api`. |
 | `VITE_SOCKET_URL` | `https://bimanage-backend.onrender.com` | Server root for Socket.io and the health check. Defaults to the API URL without `/api`. |
 | `VITE_BASE_PATH` | `/` | Only needed if the app is hosted under a sub-path. |
+| `VITE_SUPPORT_EMAIL` | `support@bimanage.com` | Support address shown on `/contact` and in error notes. Defaults to `support@bimanage.com`. |
 
 These are **public**: Vite compiles them into the JavaScript bundle. Never put secrets in them;
 the frontend holds none.

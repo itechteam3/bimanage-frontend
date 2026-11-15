@@ -37,6 +37,7 @@ import { StartRedirect } from "@/lib/account/preferences";
 // Public landing page (signed-out "/") and newsletter links: their own chunks.
 const LandingPage = lazy(() => import("@/pages/landing/LandingPage"));
 const NewsletterPage = lazy(() => import("@/pages/landing/NewsletterPage"));
+const ContactPage = lazy(() => import("@/pages/landing/ContactPage"));
 
 /** "/": always the landing page (signed-in people see "Go to dashboard" in its navbar). */
 function HomeRoute() {
@@ -270,6 +271,8 @@ export const routes = [
       { path: "/start", element: authed(<StartRedirect />) },
       // Old link to the landing page.
       { path: "/home", element: <Navigate to="/" replace /> },
+      // Public contact page: for everyone, signed in or out.
+      { path: "/contact", element: <ContactPage />, handle: { meta: { title: "Contact us", description: "Questions about BiManage, a demo for your team or help with your account? Send us a message and we'll reply by email." } } },
       { path: "/newsletter/confirm", element: <NewsletterPage action="confirm" /> },
       { path: "/newsletter/unsubscribe", element: <NewsletterPage action="unsubscribe" /> },
       // Authentication (Figma 01.xx)

@@ -185,7 +185,7 @@ describe("13.03 workspace preferences", () => {
 
   it("opens the chosen start page after sign-in", async () => {
     fb.handlers["GET /profile/preferences"] = () => [200, { ...PREFS, startPage: "orders" }];
-    const router = renderApp("/");
+    const router = renderApp("/start");
     await waitFor(() => expect(router.state.location.pathname).toBe("/orders"));
   });
 });

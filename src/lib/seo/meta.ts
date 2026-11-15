@@ -17,7 +17,7 @@ export type PageMeta = { title?: string; description?: string; image?: string | 
 
 // Pages search engines may index. Everything else (the signed-in app,
 // /admin, checkout, payment, tracking, chat) is noindex.
-const PUBLIC = [/^\/$/, /^\/login\/?$/, /^\/register\/?$/, /^\/reviews\/?$/, /^\/s\/[^/]+\/?$/, /^\/s\/[^/]+\/products\/[^/]+\/?$/];
+const PUBLIC = [/^\/$/, /^\/login\/?$/, /^\/register\/?$/, /^\/reviews\/?$/, /^\/contact\/?$/, /^\/s\/[^/]+\/?$/, /^\/s\/[^/]+\/products\/[^/]+\/?$/];
 export const isIndexable = (pathname: string) => PUBLIC.some((r) => r.test(pathname));
 
 const clip = (s: string, n: number) => {

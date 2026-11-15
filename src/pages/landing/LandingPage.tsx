@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState, type ReactNode } from "react";
+import { useEffect, useRef, useState } from "react";
 import { Link } from "react-router-dom";
 import {
   IconBarcode,
@@ -11,10 +11,8 @@ import {
   IconKey,
   IconLayoutKanban,
   IconLock,
-  IconMenu2,
   IconMessageCircle,
   IconReceipt,
-  IconSend,
   IconShieldCheck,
   IconSparkles,
   IconStarFilled,
@@ -22,22 +20,17 @@ import {
   IconUsers,
   IconUsersGroup,
   IconWallet,
-  IconX,
 } from "@tabler/icons-react";
-import { Logo } from "@/components/brand/Logo";
-import { Avatar } from "@/components/ui/Avatar";
-import { Button, ButtonLink } from "@/components/ui/Button";
-import { Dialog } from "@/components/ui/Dialog";
-import { Field, SelectInput, TextArea, TextInput } from "@/components/ui/Field";
+import { ButtonLink } from "@/components/ui/Button";
 import { ErrorNote } from "@/components/feedback/ErrorNote";
 import { cn } from "@/lib/cn";
 import { naira } from "@/lib/format";
 import { FEATURE_LABELS } from "@/lib/subscription/api";
 import { usePublicReviews } from "@/lib/reviews/api";
 import { useFaqs } from "@/lib/support/api";
-import { useAuth } from "@/lib/auth/AuthProvider";
-import { useContactRequest, useNewsletterSignup, usePublicPlans, usePublicStats, type ContactTopic } from "@/lib/landing/api";
-import "./landing.css";
+import { usePublicPlans, usePublicStats } from "@/lib/landing/api";
+import { AuthCtas, Container, PublicLayout, reducedMotion } from "./PublicLayout";
+import { Avatar } from "@/components/ui/Avatar";
 
 import heroImg from "@/assets/landing/hero.webp";
 import heroSmImg from "@/assets/landing/hero-sm.webp";
@@ -90,9 +83,6 @@ function useReveal(root: React.RefObject<HTMLElement>) {
     return () => { io.disconnect(); mo.disconnect(); };
   }, [root]);
 }
-
-const reducedMotion = () =>
-  typeof window !== "undefined" && (window.matchMedia?.("(prefers-reduced-motion: reduce)").matches || document.documentElement.classList.contains("reduce-motion"));
 
 /** Counts up to a REAL number once visible (instant for reduced motion). */
 function CountUp({ to, suffix = "" }: { to: number; suffix?: string }) {
@@ -161,13 +151,6 @@ function PhoneFrame({ name, alt, className }: { name: string; alt: string; class
 
 // ── Content (true claims only: what BiManage does today) ─────────────────
 
-const NAV = [
-  ["Features", "#features"],
-  ["Pricing", "#pricing"],
-  ["How it works", "#how-it-works"],
-  ["FAQ", "#faq"],
-] as const;
-
 const FEATURES = [
   { key: "inventory", icon: IconBarcode, title: "Inventory and barcode", body: "Track stock across products, scan or type barcodes, get low-stock alerts and keep a full adjustment history.", path: "/inventory" },
   { key: "orders", icon: IconReceipt, title: "Sales, orders and invoices", body: "Record sales, follow payment and fulfilment, and send branded invoices as PDF or email.", path: "/orders", extra: "invoice" },
@@ -210,22 +193,6 @@ const BASE_FAQS = [
 
 // ── Sections ──────────────────────────────────────────────────────────────
 
-/** Sign up + Sign in for visitors; "Go to dashboard" for signed-in people. */
-function AuthCtas({ size, className }: { size?: "md" | "lg"; className?: string }) {
-  const signedIn = useAuth().status === "authenticated";
-  if (signedIn) return <ButtonLink to="/start" variant="tonal" size={size} className={className}>Go to dashboard</ButtonLink>;
-  return (
-    <>
-      <ButtonLink to="/register" variant="tonal" size={size} className={className}>Get started free</ButtonLink>
-      <ButtonLink to="/login" variant="secondary" size={size} className={className}>Sign in</ButtonLink>
-    </>
-  );
-}
-
-function Container({ children, className }: { children: ReactNode; className?: string }) {
-  return <div className={cn("mx-auto w-full max-w-[75rem] px-5 md:px-8", className)}>{children}</div>;
-}
-
 function SectionTitle({ eyebrow, title, subtitle, light }: { eyebrow?: string; title: string; subtitle?: string; light?: boolean }) {
   return (
     <div className="mx-auto max-w-[44rem] text-center" data-reveal>
@@ -233,59 +200,6 @@ function SectionTitle({ eyebrow, title, subtitle, light }: { eyebrow?: string; t
       <h2 className={cn("mt-2 text-title-lg md:text-page-title", light ? "text-ink-on-brand" : "text-ink-strong")}>{title}</h2>
       {subtitle && <p className={cn("mt-3 text-body-lg", light ? "text-ink-on-brand-muted" : "text-ink-muted")}>{subtitle}</p>}
     </div>
-  );
-}
-
-function NavBar({ onContact }: { onContact: () => void }) {
-  const [open, setOpen] = useState(false);
-  const signedIn = useAuth().status === "authenticated";
-  return (
-    <header className="sticky top-0 z-30 bg-brand-navy/95 backdrop-blur">
-      <Container className="flex h-mobile-header items-center justify-between gap-4 lg:h-header">
-        <Link to="/" aria-label="BiManage home" className="shrink-0">
-          <Logo tone="on-brand" />
-        </Link>
-        <nav aria-label="Main" className="hidden items-center gap-8 lg:flex">
-          {NAV.map(([label, href]) => (
-            <a key={href} href={href} className="text-nav text-ink-on-brand-muted transition-colors hover:text-ink-on-brand">{label}</a>
-          ))}
-          <button type="button" onClick={onContact} className="text-nav text-ink-on-brand-muted transition-colors hover:text-ink-on-brand">Contact us</button>
-        </nav>
-        <div className="hidden items-center gap-3 lg:flex">
-          {signedIn ? (
-            <ButtonLink to="/start" variant="tonal" size="md">Go to dashboard</ButtonLink>
-          ) : (
-            <>
-              <ButtonLink to="/login" variant="secondary" size="md">Sign in</ButtonLink>
-              <ButtonLink to="/register" variant="tonal" size="md">Get started</ButtonLink>
-            </>
-          )}
-        </div>
-        <button type="button" className="flex size-11 items-center justify-center rounded-md text-ink-on-brand lg:hidden" aria-expanded={open} aria-controls="lp-menu" aria-label={open ? "Close menu" : "Open menu"} onClick={() => setOpen((v) => !v)}>
-          {open ? <IconX className="size-6" aria-hidden="true" /> : <IconMenu2 className="size-6" aria-hidden="true" />}
-        </button>
-      </Container>
-      {open && (
-        <div id="lp-menu" className="border-t border-line-on-brand bg-brand-navy lg:hidden">
-          <Container className="flex flex-col items-center gap-2 py-6">
-            {NAV.map(([label, href]) => (
-              <a key={href} href={href} onClick={() => setOpen(false)} className="flex min-h-11 items-center text-nav text-ink-on-brand">{label}</a>
-            ))}
-            <button type="button" onClick={() => { setOpen(false); onContact(); }} className="flex min-h-11 items-center text-nav text-ink-on-brand">Contact us</button>
-            <div className="mt-3 flex w-full max-w-[20rem] flex-col gap-3">
-              {signedIn ? (
-                <ButtonLink to="/start" variant="tonal" fullWidth>Go to dashboard</ButtonLink>
-              ) : (
-                <>
-                  <ButtonLink to="/register" variant="tonal" fullWidth>Get started</ButtonLink>
-                  <ButtonLink to="/login" variant="secondary" fullWidth>Sign in</ButtonLink>
-                </>
-              )}
-            </div>
-          </Container>
-        </div>
-      )}
-    </header>
   );
 }
 
@@ -615,116 +529,24 @@ function FinalCta() {
   );
 }
 
-function Footer() {
-  const signup = useNewsletterSignup();
-  const [email, setEmail] = useState("");
-  const [website, setWebsite] = useState("");
-  return (
-    <footer className="bg-brand-navy text-ink-on-brand">
-      <Container className="grid grid-cols-[minmax(0,1fr)] gap-10 py-12 md:grid-cols-2">
-        <div>
-          <Logo tone="on-brand" size="panel" />
-          <p className="mt-4 max-w-[26rem] text-body text-ink-on-brand-muted">Run your whole business in one place: sales, inventory, invoices, your online store, customers and payouts.</p>
-          <nav aria-label="Footer" className="mt-6 flex flex-wrap gap-x-6 gap-y-1">
-            {(useAuth().status === "authenticated" ? ([["Go to dashboard", "/start"], ["Reviews", "/reviews"]] as const) : ([["Sign in", "/login"], ["Create an account", "/register"], ["Reviews", "/reviews"]] as const)).map(([l, to]) => (
-              <Link key={to} to={to} className="inline-flex min-h-11 items-center text-body text-ink-on-brand-muted hover:text-ink-on-brand">{l}</Link>
-            ))}
-            <a href="#faq" className="inline-flex min-h-11 items-center text-body text-ink-on-brand-muted hover:text-ink-on-brand">FAQ</a>
-          </nav>
-        </div>
-        <div>
-          <h2 className="text-title-sm">Join our newsletter</h2>
-          <p className="mt-2 text-body text-ink-on-brand-muted">Business tips and product updates, now and then. We'll ask you to confirm by email.</p>
-          {signup.isSuccess ? (
-            <p className="mt-4 rounded-lg bg-brand-navy-panel p-4 text-body" role="status">{signup.data.message}</p>
-          ) : (
-            <form
-              className="mt-4 flex flex-col gap-3 md:flex-row"
-              onSubmit={(e) => { e.preventDefault(); if (email.trim()) signup.mutate({ email: email.trim(), website }); }}
-            >
-              <label className="sr-only" htmlFor="lp-newsletter">Email address</label>
-              <input id="lp-newsletter" type="email" required autoComplete="email" placeholder="Enter your email" value={email} onChange={(e) => setEmail(e.target.value)} className="h-control-lg min-h-11 w-full min-w-0 shrink-0 rounded-md border border-line-on-brand bg-brand-navy-panel md:w-auto md:flex-1 px-4 text-input text-ink-on-brand outline-none placeholder:text-ink-on-brand-soft focus:border-ink-on-brand" />
-              {/* Honeypot: hidden from people and assistive tech. */}
-              <input type="text" name="website" tabIndex={-1} autoComplete="off" aria-hidden="true" value={website} onChange={(e) => setWebsite(e.target.value)} className="absolute left-[-9999px] h-px w-px opacity-0" />
-              <Button type="submit" variant="tonal" loading={signup.isPending} loadingText="Sending…" icon={<IconSend className="size-4" aria-hidden="true" />}>Subscribe</Button>
-            </form>
-          )}
-          <ErrorNote error={signup.error} fallback="We couldn't sign you up. Please try again." className="mt-3" />
-        </div>
-      </Container>
-      <div className="border-t border-line-on-brand">
-        <Container className="py-5">
-          <p className="text-body-sm text-ink-on-brand-muted">© {new Date().getFullYear()} BiManage by BiTechTeam. All rights reserved.</p>
-        </Container>
-      </div>
-    </footer>
-  );
-}
-
-const TOPICS: Array<[ContactTopic, string]> = [["demo", "Book a demo"], ["sales", "Plans and pricing"], ["support", "Help with my account"], ["partnership", "Partnership"], ["other", "Something else"]];
-
-function ContactDialog({ open, onClose }: { open: boolean; onClose: () => void }) {
-  const send = useContactRequest();
-  const [form, setForm] = useState({ name: "", email: "", company: "", phone: "", topic: "demo" as ContactTopic, message: "", website: "" });
-  const set = (k: keyof typeof form) => (e: { target: { value: string } }) => setForm((f) => ({ ...f, [k]: e.target.value }));
-  const close = () => { onClose(); if (send.isSuccess) { send.reset(); setForm((f) => ({ ...f, message: "" })); } };
-  return (
-    <Dialog open={open} onClose={close} title={send.isSuccess ? "Message sent" : "Contact us"} description={send.isSuccess ? send.data.message : "Ask a question or book a demo. We reply by email."}
-      actions={send.isSuccess ? <Button onClick={close}>Done</Button> : undefined}>
-      {!send.isSuccess && (
-        <form
-          noValidate
-          className="flex flex-col gap-4"
-          onSubmit={(e) => {
-            e.preventDefault();
-            send.mutate({ ...form, company: form.company || undefined, phone: form.phone || undefined });
-          }}
-        >
-          <Field label="Your name" required><TextInput value={form.name} onChange={set("name")} autoComplete="name" maxLength={80} /></Field>
-          <Field label="Email" required><TextInput type="email" value={form.email} onChange={set("email")} autoComplete="email" /></Field>
-          <Field label="Business name"><TextInput value={form.company} onChange={set("company")} autoComplete="organization" maxLength={100} /></Field>
-          <Field label="Phone"><TextInput type="tel" value={form.phone} onChange={set("phone")} autoComplete="tel" maxLength={30} /></Field>
-          <Field label="What can we help with?" required>
-            <SelectInput value={form.topic} onChange={set("topic")}>{TOPICS.map(([v, l]) => <option key={v} value={v}>{l}</option>)}</SelectInput>
-          </Field>
-          <Field label="Message" required hint="At least 10 characters."><TextArea rows={4} value={form.message} onChange={set("message")} maxLength={2000} /></Field>
-          <input type="text" name="website" tabIndex={-1} autoComplete="off" aria-hidden="true" value={form.website} onChange={set("website")} className="absolute left-[-9999px] h-px w-px opacity-0" />
-          <ErrorNote error={send.error} fallback="We couldn't send your message. Please try again." />
-          <div className="flex flex-col-reverse gap-3 md:flex-row [&>*]:flex-1">
-            <Button type="button" variant="secondary" onClick={close}>Cancel</Button>
-            <Button type="submit" loading={send.isPending} loadingText="Sending…">Send message</Button>
-          </div>
-        </form>
-      )}
-    </Dialog>
-  );
-}
-
 export default function LandingPage() {
   const root = useRef<HTMLDivElement>(null);
-  const [contact, setContact] = useState(false);
   useReveal(root);
   return (
-    <div ref={root} className="lp-root min-h-dvh bg-surface-page font-sans text-ink-strong">
-      <a href="#main" className="sr-only focus:not-sr-only focus:fixed focus:left-3 focus:top-3 focus:z-50 focus:rounded-md focus:bg-surface-card focus:px-4 focus:py-2">Skip to content</a>
-      <NavBar onContact={() => setContact(true)} />
-      <main id="main">
-        <Hero />
-        <RealNumbers />
-        <Features />
-        <HowItWorks />
-        <WhyBiManage />
-        <Pricing />
-        <Trust />
-        <Reviews />
-        <Faq />
-        <FinalCta />
-      </main>
-      <Footer />
-      <button type="button" onClick={() => setContact(true)} aria-label="Contact us" className="fixed bottom-5 right-5 z-20 flex size-14 items-center justify-center rounded-full bg-brand-navy text-ink-on-brand shadow-floating transition-transform hover:scale-105">
+    <PublicLayout rootRef={root}>
+      <Hero />
+      <RealNumbers />
+      <Features />
+      <HowItWorks />
+      <WhyBiManage />
+      <Pricing />
+      <Trust />
+      <Reviews />
+      <Faq />
+      <FinalCta />
+      <Link to="/contact" aria-label="Contact us" className="fixed bottom-5 right-5 z-20 flex size-14 items-center justify-center rounded-full bg-brand-navy text-ink-on-brand shadow-floating transition-transform hover:scale-105">
         <IconMessageCircle className="size-7" aria-hidden="true" />
-      </button>
-      <ContactDialog open={contact} onClose={() => setContact(false)} />
-    </div>
+      </Link>
+    </PublicLayout>
   );
 }
