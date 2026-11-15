@@ -20,6 +20,7 @@ import { ForgotPasswordPage, NewPasswordPage, PasswordChangedPage, ResetCodePage
 import { OAuthCallbackPage } from "@/pages/auth/OAuthCallbackPage";
 import { InviteAcceptPage } from "@/pages/auth/InviteAcceptPage";
 import { WorkspaceLayout } from "@/components/layout/WorkspaceLayout";
+import { useRouteMeta } from "@/lib/seo/meta";
 import { DashboardPage } from "@/pages/app/DashboardPage";
 import { ComingSoonPage } from "@/pages/app/ComingSoonPage";
 import { PathPage } from "@/pages/onboarding/PathPage";
@@ -214,6 +215,7 @@ const SectionLoading = () => (
 
 function RootLayout() {
   useTrackHistory();
+  useRouteMeta();
   return (
     <>
       <ServerWakeBanner />
@@ -249,8 +251,8 @@ export const routes = [
       // After sign-in: the person's chosen start page (13.03)
       { path: "/", element: authed(<StartRedirect />) },
       // Authentication (Figma 01.xx)
-      { path: "/login", element: guest(<SignInPage />) },
-      { path: "/register", element: guest(<RegisterPage />) },
+      { path: "/login", element: guest(<SignInPage />), handle: { meta: { title: "Sign in", description: "Sign in to BiManage to manage your sales, inventory, invoices, online store and suppliers." } } },
+      { path: "/register", element: guest(<RegisterPage />), handle: { meta: { title: "Create your free account", description: "Start free on BiManage: track sales and stock, send invoices, open your own online store and find trusted suppliers on BiSupplyNet." } } },
       { path: "/verify", element: guest(<VerifyEmailPage />), handle: { back: back("/register", SCREENS.createAccount) } },
       { path: "/forgot-password", element: guest(<ForgotPasswordPage />), handle: { back: back("/login", SCREENS.signIn) } },
       { path: "/forgot-password/code", element: guest(<ResetCodePage />), handle: { back: back("/forgot-password", SCREENS.signIn) } },
@@ -422,7 +424,7 @@ export const routes = [
               { path: "/support/tickets", element: <TicketsPage />, handle: { section: "Support", back: back("/support", SCREENS.support) } },
               { path: "/support/tickets/new", element: <NewTicketPage />, handle: { section: "Support", back: back("/support", SCREENS.support) } },
               { path: "/support/tickets/:id", element: <TicketDetailPage />, handle: { section: "Support", back: back("/support/tickets", SCREENS.support) } },
-              { path: "/support/help", element: <HelpCentrePage />, handle: { section: "Support", back: back("/support", SCREENS.support) } },
+              { path: "/support/help", element: <HelpCentrePage />, handle: { meta: { title: "Help centre", description: "Guides and answers for getting the most out of BiManage." }, section: "Support", back: back("/support", SCREENS.support) } },
               { path: "/support/help/:id", element: <HelpArticlePage />, handle: { section: "Support", back: back("/support/help", SCREENS.support) } },
               { path: "/support/service-requests/new", element: <NewServiceRequestPage />, handle: { section: "Support", back: back("/support", SCREENS.support) } },
               { path: "/support/service-requests/:id", element: <ServiceRequestDetailPage />, handle: { section: "Support", back: back("/support", SCREENS.support) } },
@@ -533,6 +535,7 @@ export const routes = [
       // Public platform reviews (12.15): readable signed out
       {
         path: "/reviews",
+        handle: { meta: { title: "Reviews from businesses", description: "What Nigerian businesses say about BiManage: verified reviews from real users." } },
         element: (
           <Suspense fallback={<Loading />}>
             <div className="min-h-dvh bg-surface-page">

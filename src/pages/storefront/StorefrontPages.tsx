@@ -1,4 +1,5 @@
 import { useEffect, useRef, useState, type ReactNode } from "react";
+import { usePageMeta } from "@/lib/seo/meta";
 import { Link, useNavigate, useParams, useSearchParams } from "react-router-dom";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -253,6 +254,7 @@ export function StorefrontProductPage() {
   const pub = usePublicProduct(slug, productId);
   const own = useShopProduct(productId);
   const p = preview ? own : pub.data;
+  usePageMeta(p ? { title: `${p.name} · ${store.storeName}`, description: p.description || `Buy ${p.name} from ${store.storeName}.`, image: p.images?.[0] ?? store.logo ?? null } : null);
   const { add } = useCartActions(slug);
   const block = useBuyBlock();
   const [qty, setQty] = useState(1);

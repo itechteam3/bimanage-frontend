@@ -7,6 +7,11 @@ import { fileURLToPath, URL } from "node:url";
 // is ever hosted under a sub-path.
 const base = process.env.VITE_BASE_PATH ?? "/";
 
+// The public site address (share tags, canonical links, sitemap): ONE
+// setting. index.html reads it as %VITE_PUBLIC_SITE_URL%; set it on Vercel
+// to move domains. No trailing slash.
+process.env.VITE_PUBLIC_SITE_URL = (process.env.VITE_PUBLIC_SITE_URL || "https://bimanage-frontend.vercel.app").replace(/\/+$/, "");
+
 // Build id: the deployed commit on Vercel, else the build time. The app
 // compares it with /version.json to offer a reload after a deploy.
 const buildVersion = (process.env.VERCEL_GIT_COMMIT_SHA ?? "").slice(0, 12) || `b${Date.now().toString(36)}`;
