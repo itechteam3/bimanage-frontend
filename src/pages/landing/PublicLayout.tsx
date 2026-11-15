@@ -26,16 +26,22 @@ const NAV = [
   ["FAQ", "#faq"],
 ] as const;
 
-/**
- * Where the landing page's #sections live: in-page on the landing page itself,
- * otherwise "/" (or "/home" when signed in, since "/" sends signed-in people
- * to their dashboard).
- */
+/** Where the landing page's #sections live: in-page on "/", otherwise "/" (the landing page for everyone). */
 function useSectionBase() {
   const { pathname } = useLocation();
+  return pathname === "/" ? "" : "/";
+}
+
+/** Sign up + Sign in for visitors; "Go to dashboard" for signed-in people. */
+export function AuthCtas({ size, className }: { size?: "md" | "lg"; className?: string }) {
   const signedIn = useAuth().status === "authenticated";
-  if (pathname === "/" || pathname === "/home") return "";
-  return signedIn ? "/home" : "/";
+  if (signedIn) return <ButtonLink to="/start" variant="tonal" size={size} className={className}>Go to dashboard</ButtonLink>;
+  return (
+    <>
+      <ButtonLink to="/register" variant="tonal" size={size} className={className}>Get started free</ButtonLink>
+      <ButtonLink to="/login" variant="secondary" size={size} className={className}>Sign in</ButtonLink>
+    </>
+  );
 }
 
 /** Matches the menu's CSS transition (landing.css .lp-menu). */
@@ -108,7 +114,7 @@ export function NavBar() {
           </nav>
           <div className="hidden items-center gap-3 lg:flex">
             {signedIn ? (
-              <ButtonLink to="/dashboard" variant="tonal" size="md">Go to dashboard</ButtonLink>
+              <ButtonLink to="/start" variant="tonal" size="md">Go to dashboard</ButtonLink>
             ) : (
               <>
                 <ButtonLink to="/login" variant="secondary" size="md">Sign in</ButtonLink>
@@ -144,7 +150,7 @@ export function NavBar() {
               <Link to="/contact" onClick={close} {...item(NAV.length)}>Contact us</Link>
               <div className="lp-menu-item mt-4 flex w-full max-w-[20rem] flex-col gap-3" style={{ ["--lp-i" as string]: NAV.length + 1 }}>
                 {signedIn ? (
-                  <ButtonLink to="/dashboard" variant="tonal" fullWidth onClick={close}>Go to dashboard</ButtonLink>
+                  <ButtonLink to="/start" variant="tonal" fullWidth onClick={close}>Go to dashboard</ButtonLink>
                 ) : (
                   <>
                     <ButtonLink to="/register" variant="tonal" fullWidth onClick={close}>Get started</ButtonLink>
@@ -173,7 +179,7 @@ export function Footer() {
           <Logo tone="on-brand" size="panel" />
           <p className="mt-4 max-w-[26rem] text-body text-ink-on-brand-muted">Run your whole business in one place: sales, inventory, invoices, your online store, customers and payouts.</p>
           <nav aria-label="Footer" className="mt-6 flex flex-wrap gap-x-6 gap-y-1">
-            {([["Sign in", "/login"], ["Create an account", "/register"], ["Reviews", "/reviews"]] as const).map(([l, to]) => (
+            {(useAuth().status === "authenticated" ? ([["Go to dashboard", "/start"], ["Reviews", "/reviews"]] as const) : ([["Sign in", "/login"], ["Create an account", "/register"], ["Reviews", "/reviews"]] as const)).map(([l, to]) => (
               <Link key={to} to={to} className={linkClass}>{l}</Link>
             ))}
             <a href={`${base}#faq`} className={linkClass}>FAQ</a>

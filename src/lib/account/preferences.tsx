@@ -44,7 +44,7 @@ export function DisplayPreferences() {
   return null;
 }
 
-/** "/" after sign-in: open the chosen start page (the dashboard if none or it can't load). */
+/** "/start" after sign-in: open the chosen start page (the dashboard if none or it can't load). */
 export function StartRedirect() {
   const prefs = useWorkspacePreferences();
   if (prefs.isLoading) {

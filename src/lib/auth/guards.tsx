@@ -33,7 +33,7 @@ export function GuestOnly({ children }: { children: ReactNode }) {
   const { status } = useAuth();
   if (status === "loading") return <FullPageSpinner />;
   if (status === "authenticated") {
-    return <Navigate to={pendingInvite.get() ? "/invite/accept" : "/"} replace />;
+    return <Navigate to={pendingInvite.get() ? "/invite/accept" : "/start"} replace />;
   }
   return <>{children}</>;
 }

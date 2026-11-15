@@ -29,7 +29,8 @@ import { FEATURE_LABELS } from "@/lib/subscription/api";
 import { usePublicReviews } from "@/lib/reviews/api";
 import { useFaqs } from "@/lib/support/api";
 import { usePublicPlans, usePublicStats } from "@/lib/landing/api";
-import { Container, PublicLayout, reducedMotion } from "./PublicLayout";
+import { AuthCtas, Container, PublicLayout, reducedMotion } from "./PublicLayout";
+import { Avatar } from "@/components/ui/Avatar";
 
 import heroImg from "@/assets/landing/hero.webp";
 import heroSmImg from "@/assets/landing/hero-sm.webp";
@@ -221,8 +222,7 @@ function Hero() {
             Sales, inventory, invoices, your online store, customers, payouts and wholesale buying — in one dashboard built for Nigerian businesses.
           </p>
           <div className="lp-rise mt-6 flex flex-wrap gap-3" style={{ ["--lp-delay" as string]: "260ms" }}>
-            <ButtonLink to="/register" variant="tonal">Get started free</ButtonLink>
-            <ButtonLink to="/login" variant="secondary">Sign in</ButtonLink>
+            <AuthCtas />
           </div>
         </div>
         <div className="lp-preview mx-auto mt-12 max-w-[62rem] md:mt-16">
@@ -467,7 +467,14 @@ function Reviews() {
                 <p className="text-card-heading text-ink-strong">{r.headline}</p>
                 <p className="mt-2 text-body-sm text-ink-muted">{r.review}</p>
               </blockquote>
-              <figcaption className="mt-4 text-body-sm font-semibold text-ink-secondary">{r.reviewer?.name}{r.businessName ? ` · ${r.businessName}` : ""}</figcaption>
+              <figcaption className="mt-4 flex items-center gap-3">
+                {/* The photo they uploaded in BiManage (initials if none). */}
+                <Avatar name={r.reviewer?.name || r.businessName || "BiManage user"} src={r.reviewer?.avatar} />
+                <span className="min-w-0">
+                  <span className="block text-body-sm font-semibold text-ink-strong">{r.reviewer?.name || "BiManage user"}</span>
+                  {r.businessName && <span className="block text-caption text-ink-muted">{r.businessName}</span>}
+                </span>
+              </figcaption>
             </figure>
           ))}
         </div>
@@ -508,8 +515,7 @@ function FinalCta() {
           <h2 className="text-title-lg md:text-page-title">Ready to simplify your business?</h2>
           <p className="mx-auto mt-3 max-w-[36rem] text-body-lg text-ink-on-brand-muted">Set up in minutes and run sales, stock, payments and customers from one place.</p>
           <div className="mt-6 flex flex-wrap justify-center gap-3">
-            <ButtonLink to="/register" variant="tonal">Get started free</ButtonLink>
-            <ButtonLink to="/login" variant="secondary">Sign in</ButtonLink>
+            <AuthCtas />
           </div>
           {/* Figma collage (stock photos). */}
           <div className="mt-10 flex justify-center gap-3" aria-hidden="true">

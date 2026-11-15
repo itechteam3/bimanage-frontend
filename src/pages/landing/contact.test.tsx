@@ -56,7 +56,7 @@ describe("contact page (/contact)", () => {
     const router = renderApp("/contact");
     expect(await screen.findByRole("heading", { level: 1, name: "Contact us" })).toBeInTheDocument();
     expect(router.state.location.pathname).toBe("/contact");
-    expect(within(screen.getByRole("navigation", { name: "Main" })).getByRole("link", { name: "Pricing" })).toHaveAttribute("href", "/home#pricing");
+    expect(within(screen.getByRole("navigation", { name: "Main" })).getByRole("link", { name: "Pricing" })).toHaveAttribute("href", "/#pricing");
   });
 
   it("posts the form with an empty honeypot and shows the server's message", async () => {

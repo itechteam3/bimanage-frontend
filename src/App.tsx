@@ -33,18 +33,14 @@ import { ProfilePage } from "@/pages/settings/ProfilePage";
 import { AccountClosedPage, AccountClosingPage, SessionExpiredPage } from "@/pages/account/AccountPages";
 import { UnsubscribePage } from "@/pages/account/UnsubscribePage";
 import { StartRedirect } from "@/lib/account/preferences";
-import { useAuth } from "@/lib/auth/AuthProvider";
 
 // Public landing page (signed-out "/") and newsletter links: their own chunks.
 const LandingPage = lazy(() => import("@/pages/landing/LandingPage"));
 const NewsletterPage = lazy(() => import("@/pages/landing/NewsletterPage"));
 const ContactPage = lazy(() => import("@/pages/landing/ContactPage"));
 
-/** "/": the landing page for visitors; signed-in people go straight to their start page (the dashboard by default). */
+/** "/": always the landing page (signed-in people see "Go to dashboard" in its navbar). */
 function HomeRoute() {
-  const { status } = useAuth();
-  if (status === "authenticated") return authed(<StartRedirect />);
-  if (status === "loading") return <Loading />;
   return <LandingPage />;
 }
 import { adminRoutes } from "@/admin/routes";
@@ -271,8 +267,10 @@ export const routes = [
         element: <HomeRoute />,
         handle: { meta: { description: "Run your whole business in one place: sales, inventory, invoices, your own online store, customers, payouts, wholesale buying on BiSupplyNet and FELI, your AI assistant. Start free." } },
       },
-      // The landing page for everyone (signed-in people can still view it; noindex — "/" is canonical).
-      { path: "/home", element: <LandingPage /> },
+      // After sign-in: the person's chosen start page (the dashboard by default).
+      { path: "/start", element: authed(<StartRedirect />) },
+      // Old link to the landing page.
+      { path: "/home", element: <Navigate to="/" replace /> },
       // Public contact page: for everyone, signed in or out.
       { path: "/contact", element: <ContactPage />, handle: { meta: { title: "Contact us", description: "Questions about BiManage, a demo for your team or help with your account? Send us a message and we'll reply by email." } } },
       { path: "/newsletter/confirm", element: <NewsletterPage action="confirm" /> },

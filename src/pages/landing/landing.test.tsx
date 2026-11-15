@@ -47,10 +47,26 @@ describe("landing page (/)", () => {
     expect(document.body.textContent).not.toMatch(/(^|[^B])iManage/); // never the Figma typo "iManage"
   });
 
-  it("signed-in people go straight to the dashboard", async () => {
+  it("signed-in people still see the landing page at /, with Go to dashboard instead of sign-in buttons", async () => {
     tokenStore.set("tok");
     const router = renderApp("/");
+    expect(await screen.findByRole("heading", { level: 1, name: /smart business starts with bimanage/i })).toBeInTheDocument();
+    await waitFor(() => expect(screen.getAllByRole("link", { name: "Go to dashboard" }).length).toBeGreaterThan(1));
+    for (const a of screen.getAllByRole("link", { name: "Go to dashboard" })) expect(a).toHaveAttribute("href", "/start");
+    expect(screen.queryByRole("link", { name: "Sign in" })).toBeNull();
+    expect(screen.queryByRole("link", { name: /get started free/i })).toBeNull();
+    expect(router.state.location.pathname).toBe("/");
+  });
+
+  it("/start opens the signed-in start page (the dashboard by default)", async () => {
+    tokenStore.set("tok");
+    const router = renderApp("/start");
     await waitFor(() => expect(router.state.location.pathname).toBe("/dashboard"));
+  });
+
+  it("/home redirects to /", async () => {
+    const router = renderApp("/home");
+    await waitFor(() => expect(router.state.location.pathname).toBe("/"));
   });
 
   it("never links to the internal admin area", async () => {
@@ -97,9 +113,10 @@ describe("landing page (/)", () => {
   });
 
   it("shows approved reviews from the public API when there are some", async () => {
-    fb.handlers["GET /reviews"] = () => [200, { reviews: [{ _id: "r1", headline: "Saves me hours", rating: 5, review: "Orders and stock in one place.", reviewer: { name: "Tola" }, businessName: "Tola Foods" }], total: 1, page: 1, totalPages: 1, stats: { averageRating: 5, totalReviews: 1, ratingBreakdown: {} } }];
+    fb.handlers["GET /reviews"] = () => [200, { reviews: [{ _id: "r1", headline: "Saves me hours", rating: 5, review: "Orders and stock in one place.", reviewer: { name: "Tola", avatar: "https://res.cloudinary.com/x/image/upload/tola.jpg" }, businessName: "Tola Foods" }], total: 1, page: 1, totalPages: 1, stats: { averageRating: 5, totalReviews: 1, ratingBreakdown: {} } }];
     renderApp("/");
     expect(await screen.findByText("Saves me hours")).toBeInTheDocument();
+    expect(document.querySelector('img[src="https://res.cloudinary.com/x/image/upload/tola.jpg"]')).toBeTruthy(); // their BiManage photo
     expect(screen.getByRole("link", { name: /read all reviews/i })).toHaveAttribute("href", "/reviews");
   });
 
