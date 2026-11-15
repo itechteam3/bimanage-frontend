@@ -1,0 +1,58 @@
+/* Landing page motion (loaded only with the landing chunk). CSS only, no
+   animation library. Everything is transform/opacity (no layout shift) and is
+   switched off for prefers-reduced-motion and the app's "Reduce motion"
+   preference (html.reduce-motion). */
+
+/* Scroll reveal: elements start hidden ONLY once JS has marked the page
+   (no-JS and crawlers see everything). */
+.lp-js [data-reveal] {
+  opacity: 0;
+  transform: translateY(24px);
+  transition: opacity 700ms ease, transform 700ms cubic-bezier(0.2, 0.7, 0.2, 1);
+  transition-delay: var(--lp-delay, 0ms);
+}
+.lp-js [data-reveal].lp-in {
+  opacity: 1;
+  transform: none;
+}
+
+/* Hero entrance. */
+@keyframes lp-rise {
+  from { opacity: 0; transform: translateY(18px); }
+  to { opacity: 1; transform: none; }
+}
+@keyframes lp-preview {
+  from { opacity: 0; transform: translateY(40px) scale(0.97); }
+  to { opacity: 1; transform: none; }
+}
+@keyframes lp-float {
+  0%, 100% { transform: translateY(0); }
+  50% { transform: translateY(-8px); }
+}
+.lp-rise { animation: lp-rise 700ms cubic-bezier(0.2, 0.7, 0.2, 1) both; animation-delay: var(--lp-delay, 0ms); }
+.lp-preview { animation: lp-preview 1000ms cubic-bezier(0.2, 0.7, 0.2, 1) 250ms both; }
+.lp-float { animation: lp-float 6s ease-in-out 1.4s infinite; }
+
+/* Feature showcase: the screenshot fades when the tab changes. */
+@keyframes lp-fade { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: none; } }
+.lp-fade { animation: lp-fade 450ms ease both; }
+
+/* Hover lift for cards. */
+.lp-lift { transition: transform 250ms ease, box-shadow 250ms ease; }
+.lp-lift:hover { transform: translateY(-4px); }
+
+@media (prefers-reduced-motion: reduce) {
+  .lp-js [data-reveal] { opacity: 1; transform: none; transition: none; }
+  .lp-rise, .lp-preview, .lp-float, .lp-fade { animation: none; }
+  .lp-lift:hover { transform: none; }
+}
+html.reduce-motion .lp-js [data-reveal] { opacity: 1; transform: none; transition: none; }
+html.reduce-motion .lp-rise,
+html.reduce-motion .lp-preview,
+html.reduce-motion .lp-float,
+html.reduce-motion .lp-fade { animation: none; }
+
+/* Smooth scrolling to #sections (not for reduced motion). */
+@media (prefers-reduced-motion: no-preference) {
+  html:has(.lp-root) { scroll-behavior: smooth; }
+}

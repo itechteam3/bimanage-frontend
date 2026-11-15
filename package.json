@@ -18,7 +18,8 @@
     "preview": "vite preview",
     "typecheck": "tsc -b",
     "test": "vitest run",
-    "test:watch": "vitest"
+    "test:watch": "vitest",
+    "screenshots:marketing": "node scripts/marketing/screenshots.mjs"
   },
   "dependencies": {
     "@fontsource/poppins": "5.1.0",
