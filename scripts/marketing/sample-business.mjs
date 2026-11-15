@@ -5,6 +5,32 @@
 // +234 800 555 01xx range, not real subscribers). Never put a real
 // customer's data in this file.
 
+import { readFileSync } from "node:fs";
+
+// Product photos for the sample store (Pexels, see docs/image-credits.md):
+// product-only shots, no faces or brand marks. Used ONLY in these screenshots.
+const photo = (f) => `data:image/webp;base64,${readFileSync(new URL(`./products/${f}.webp`, import.meta.url)).toString("base64")}`;
+const PRODUCTS = {
+  p1: { name: "Classic linen shirt", img: photo("linen-shirt") },
+  p2: { name: "Cotton co-ord set", img: photo("co-ord-set") },
+  p3: { name: "Everyday tote bag", img: photo("tote-bag") },
+  p4: { name: "Beaded bracelet", img: photo("beaded-bracelet") },
+  p5: { name: "Leather sandals", img: photo("leather-sandals") },
+  p6: { name: "Leather barrel bag", img: photo("barrel-bag") },
+};
+const PRODUCT_RENAMES = [["Minimalist watch", "Beaded bracelet"], ["Leather cardholder", "Leather sandals"], ["Canvas weekend bag", "Leather barrel bag"]];
+/** Replace the fixtures' flat colour placeholders with the product photos. */
+function withPhotos(v) {
+  if (Array.isArray(v)) return v.map(withPhotos);
+  if (!v || typeof v !== "object") return v;
+  const o = Object.fromEntries(Object.entries(v).map(([k, x]) => [k, withPhotos(x)]));
+  const id = typeof o._id === "string" ? o._id : typeof o.product === "string" ? o.product : null;
+  const p = id && PRODUCTS[id];
+  if (p && Array.isArray(o.images) && o.images.some((s) => typeof s === "string" && s.startsWith("data:image/svg"))) o.images = [p.img];
+  if (p && typeof o.productImage === "string" && o.productImage.startsWith("data:image/svg")) o.productImage = p.img;
+  return o;
+}
+
 export const SAMPLE = {
   business: "Adunni Fashion House",
   owner: "Adunni Bello",
@@ -26,6 +52,7 @@ const RENAMES = [
   ["Samuel Adebayo", SAMPLE.owner],
   ["sam@x.com", "adunni@adunnifashion.example"],
   ["@x.com", "@example.com"],
+  ...PRODUCT_RENAMES,
   // Layout stress text in the base fixtures is not for marketing.
   [", averyveryverylongwordwithoutanyspacesthatcouldbreakthelayout", ""],
   [": averyveryverylongwordwithoutanyspacesthatcouldbreakthelayout", ""],
@@ -120,10 +147,10 @@ export function apply(routes) {
     { _id: "t3", type: "withdrawal", amount: 214950, grossAmount: 215000, fee: 50, paystackFee: 50, description: "Payout to GTBank •••• 4417", reference: "BMW-0118", status: "completed", mode: "live", order: null, createdAt: daysAgo(5) },
     { _id: "t4", type: "credit", amount: 43650, fee: 0, description: "Store order", reference: "BMS-2032", status: "completed", mode: "live", order: { _id: "o4", trackingNo: "BM-7K2Q-2032" }, createdAt: daysAgo(6) },
   ], total: 4, page: 1, totalPages: 1 };
-  // Rename everything (keys too: storefront routes contain the slug).
+  // Rename everything (keys too: storefront routes contain the slug); real product photos.
   for (const [k, v] of Object.entries(routes)) {
     const nk = renameText(k);
-    const nv = k === "__dashboard" ? v : rename(v);
+    const nv = k === "__dashboard" ? v : withPhotos(rename(v));
     if (nk !== k) delete routes[k];
     routes[nk] = nv;
   }
