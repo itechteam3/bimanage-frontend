@@ -595,7 +595,7 @@ function Footer() {
               onSubmit={(e) => { e.preventDefault(); if (email.trim()) signup.mutate({ email: email.trim(), website }); }}
             >
               <label className="sr-only" htmlFor="lp-newsletter">Email address</label>
-              <input id="lp-newsletter" type="email" required autoComplete="email" placeholder="Enter your email" value={email} onChange={(e) => setEmail(e.target.value)} className="h-control-lg min-w-0 flex-1 rounded-md border border-line-on-brand bg-brand-navy-panel px-4 text-input text-ink-on-brand outline-none placeholder:text-ink-on-brand-soft focus:border-ink-on-brand" />
+              <input id="lp-newsletter" type="email" required autoComplete="email" placeholder="Enter your email" value={email} onChange={(e) => setEmail(e.target.value)} className="h-control-lg min-h-11 min-w-0 flex-1 rounded-md border border-line-on-brand bg-brand-navy-panel px-4 text-input text-ink-on-brand outline-none placeholder:text-ink-on-brand-soft focus:border-ink-on-brand" />
               {/* Honeypot: hidden from people and assistive tech. */}
               <input type="text" name="website" tabIndex={-1} autoComplete="off" aria-hidden="true" value={website} onChange={(e) => setWebsite(e.target.value)} className="absolute left-[-9999px] h-px w-px opacity-0" />
               <Button type="submit" variant="tonal" loading={signup.isPending} loadingText="Sending…" icon={<IconSend className="size-4" aria-hidden="true" />}>Subscribe</Button>
