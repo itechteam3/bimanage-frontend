@@ -686,7 +686,7 @@ function TagInput({ value, onChange, error }: { value: string[]; onChange: (tags
   };
   return (
     <Field label="Tags" hint="Press Enter or comma to add a tag, e.g. VIP, wholesale." error={error}>
-      <div className="flex flex-col gap-2">
+      <div className="flex flex-col gap-3">
         {value.length > 0 && (
           <ul className="flex flex-wrap gap-2" aria-label="Tags">
             {value.map((t) => (

@@ -270,6 +270,8 @@ http.createServer((req, res) => {
   if (path === "/__mode/populated") populated = true;
   if (path.startsWith("/__feli/")) feliMode = path.slice(8);
   const key = `${req.method} ${path}`;
+  // Like the real API: no token, no session (signed-out pages stay signed out).
+  if (key === "GET /api/auth/me" && !req.headers.authorization) { res.writeHead(401, cors); return res.end(JSON.stringify({ message: "Not authorized" })); }
   // PAGED: list endpoints that page when asked (?page=)
   const qs = new URL(req.url, "http://x").searchParams;
   if (qs.has("page") && (key === "GET /api/orders" || key === "GET /api/inventory/products")) { const items = Array.from({ length: 3 }, () => routes[key]).flat().map((o, i) => ({ ...o, _id: `${o._id}-${i}` })); const name = key.endsWith("orders") ? "orders" : "products"; res.writeHead(200, cors); return res.end(JSON.stringify({ [name]: items.slice(0, 30), total: items.length + 12, page: Number(qs.get("page")), totalPages: 2 })); }

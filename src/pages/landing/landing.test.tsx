@@ -109,13 +109,13 @@ describe("landing page (/)", () => {
     expect(screen.getByText("Is there a free plan?")).toBeInTheDocument();
   });
 
-  it("product screenshots are labelled as sample data, with alt text", async () => {
+  it('product screenshots have alt text and no "Sample data" badge', async () => {
     renderApp("/");
     await screen.findByRole("heading", { level: 1 });
-    expect(screen.getAllByText("Sample data").length).toBeGreaterThan(1);
+    expect(screen.queryByText("Sample data")).toBeNull();
     const shots = screen.getAllByRole("img").filter((i) => (i.getAttribute("src") ?? "").includes("screens/") || /screens/.test(i.getAttribute("src") ?? ""));
     expect(shots.length).toBeGreaterThan(1);
-    for (const img of shots) expect(img.getAttribute("alt")).toMatch(/sample data/i);
+    for (const img of shots) expect(img.getAttribute("alt")).toMatch(/bimanage/i);
   });
 
   it("contact form sends the request with an empty honeypot and confirms", async () => {
