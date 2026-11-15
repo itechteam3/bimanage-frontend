@@ -35,6 +35,41 @@
     <link rel="icon" type="image/png" sizes="16x16" href="/favicon-16x16.png" />
     <link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png" />
     <link rel="manifest" href="/site.webmanifest" />
+
+    <!-- Structured data: who we are, with the logo (landing page and search results). -->
+    <script type="application/ld+json">
+      {
+        "@context": "https://schema.org",
+        "@graph": [
+          {
+            "@type": "Organization",
+            "@id": "%VITE_PUBLIC_SITE_URL%/#organization",
+            "name": "BiManage",
+            "legalName": "BiTechTeam Limited",
+            "url": "%VITE_PUBLIC_SITE_URL%/",
+            "logo": "%VITE_PUBLIC_SITE_URL%/icon-512.png",
+            "image": "%VITE_PUBLIC_SITE_URL%/og-image.png"
+          },
+          {
+            "@type": "WebSite",
+            "@id": "%VITE_PUBLIC_SITE_URL%/#website",
+            "name": "BiManage",
+            "url": "%VITE_PUBLIC_SITE_URL%/",
+            "inLanguage": "en-NG",
+            "publisher": { "@id": "%VITE_PUBLIC_SITE_URL%/#organization" }
+          },
+          {
+            "@type": "SoftwareApplication",
+            "name": "BiManage",
+            "applicationCategory": "BusinessApplication",
+            "operatingSystem": "Web",
+            "description": "Sales, inventory, invoices, an online store, customers, payouts and wholesale buying in one place for Nigerian businesses.",
+            "offers": { "@type": "Offer", "price": "0", "priceCurrency": "NGN", "description": "Freemium plan" },
+            "publisher": { "@id": "%VITE_PUBLIC_SITE_URL%/#organization" }
+          }
+        ]
+      }
+    </script>
   </head>
   <body>
     <noscript>BiManage needs JavaScript to run.</noscript>

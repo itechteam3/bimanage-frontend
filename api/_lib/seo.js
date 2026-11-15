@@ -89,7 +89,7 @@ export const minimalHtml = (m, site) =>
   injectMeta(`<!doctype html><html lang="en-NG"><head><meta charset="UTF-8" /></head><body><a href="${escapeHtml(m?.url || site)}">Open on BiManage</a></body></html>`, m, site);
 
 // ── sitemap.xml ──
-export const STATIC_PAGES = ["/login", "/register", "/reviews"];
+export const STATIC_PAGES = ["/", "/login", "/register", "/reviews"];
 const day = (d) => {
   const t = d ? new Date(d) : null;
   return t && !Number.isNaN(t.getTime()) ? t.toISOString().slice(0, 10) : null;
@@ -99,7 +99,7 @@ export function sitemapXml(site, data) {
   const url = (loc, lastmod, priority) =>
     `  <url><loc>${escapeHtml(loc)}</loc>${lastmod ? `<lastmod>${lastmod}</lastmod>` : ""}${priority ? `<priority>${priority}</priority>` : ""}</url>`;
   const rows = [
-    ...STATIC_PAGES.map((p) => url(`${site}${p}`, null, p === "/register" ? "0.9" : "0.6")),
+    ...STATIC_PAGES.map((p) => url(`${site}${p}`, null, p === "/" ? "1.0" : p === "/register" ? "0.9" : "0.6")),
     ...(data?.stores || []).filter((s) => s && s.slug).map((s) => url(`${site}/s/${encodeURIComponent(s.slug)}`, day(s.updatedAt), "0.8")),
     ...(data?.products || []).filter((p) => p && p.slug && p.id).map((p) => url(`${site}/s/${encodeURIComponent(p.slug)}/products/${encodeURIComponent(p.id)}`, day(p.updatedAt), "0.7")),
   ];

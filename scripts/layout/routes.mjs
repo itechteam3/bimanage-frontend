@@ -8,6 +8,7 @@ import { readFileSync } from "node:fs";
 const IDS = [
   [/^\/onboarding\/packages\//, { packageId: "starter" }],
   [/^\/inventory\//, { id: "p1" }],
+  [/^\/customers\//, { id: "c1" }],
   [/^\/orders\//, { id: "o1" }],
   [/^\/invoices\//, { id: "i1" }],
   [/^\/projects\//, { id: "p1", taskId: "t1" }],
@@ -33,15 +34,15 @@ const IDS = [
 ];
 
 // Signed-out screens (guest-only pages redirect when signed in).
-const GUEST = new Set(["/login", "/register", "/verify", "/forgot-password", "/forgot-password/code", "/reset-password", "/reset-password/done",
+const GUEST = new Set(["/", "/newsletter/confirm", "/newsletter/unsubscribe", "/login", "/register", "/verify", "/forgot-password", "/forgot-password/code", "/reset-password", "/reset-password/done",
   "/oauth/callback", "/session-expired", "/account-closing", "/account-closed", "/invite/accept", "/unsubscribe", "/reviews",
   "/admin/login", "/admin/login/verify", "/admin/login/setup", "/admin/invite", "/admin/forgot-password", "/admin/reset-password"]);
 // Not product screens.
-const SKIP = new Set(["/", "/ui-kit", "/more"]);
+const SKIP = new Set(["/ui-kit"]);
 
 const STOREFRONT = ["/s/elijahapparel", "/s/elijahapparel/products/p1", "/s/elijahapparel/cart", "/s/elijahapparel/checkout", "/s/elijahapparel/payment", "/s/elijahapparel/track", "/s/elijahapparel/chat"];
 // Query strings some screens need to show their real content.
-const QUERY = { "/reset-password": "?token=x", "/admin/reset-password": "?token=x", "/admin/invite": "?token=x", "/invite/accept": "?token=x", "/unsubscribe": "?u=u1&topic=announcements&t=s" };
+const QUERY = { "/newsletter/confirm": "?e=a&t=b", "/newsletter/unsubscribe": "?e=a&t=b", "/reset-password": "?token=x", "/admin/reset-password": "?token=x", "/admin/invite": "?token=x", "/invite/accept": "?token=x", "/unsubscribe": "?u=u1&topic=announcements&t=s" };
 
 export function allRoutes(root = ".") {
   const app = readFileSync(`${root}/src/App.tsx`, "utf8");
