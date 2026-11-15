@@ -1,5 +1,5 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
-import { screen, waitFor, within } from "@testing-library/react";
+import { cleanup, screen, waitFor, within } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { tokenStore } from "@/lib/auth/tokenStore";
 import { serverStatus } from "@/lib/api/serverStatus";
@@ -355,6 +355,50 @@ describe("storefront (guest, no sign-in)", () => {
     expect(await screen.findByText(/^Dispatched/)).toHaveTextContent(/Dispatched.*done/);
   });
 
+  it("tracking a delivered order: the customer confirms they received it", async () => {
+    const delivered = { ...ORDER, status: "delivered", delivery: { confirmed: false, confirmedAt: null, problemReported: false, problemOpen: false, canConfirm: true, canReport: true } };
+    fb.handlers["GET /store-orders/track"] = () => [200, delivered];
+    fb.handlers["POST /store-orders/track/confirm-delivery"] = () => [200, { result: "confirmed", message: "Thanks for confirming you received your order.", order: { ...delivered, status: "completed", delivery: { ...delivered.delivery, confirmed: true, canConfirm: false, canReport: false } } }];
+    const user = userEvent.setup();
+    renderApp("/s/elijahapparel/track?order=BM-7K2Q-9MXA");
+    await user.type(await screen.findByLabelText(/email used/i), "ada@example.com");
+    await user.click(screen.getByRole("button", { name: "Track" }));
+    expect(await screen.findByRole("heading", { name: "Did your order arrive?" })).toBeInTheDocument();
+    await user.click(screen.getByRole("button", { name: "Yes, I received my order" }));
+    await waitFor(() => expect(last("POST /store-orders/track/confirm-delivery")?.body).toEqual({ orderNumber: "BM-7K2Q-9MXA", email: "ada@example.com" }));
+    expect(await screen.findByText("You confirmed you received this order")).toBeInTheDocument();
+    expect(screen.queryByRole("button", { name: "Yes, I received my order" })).toBeNull();
+  });
+
+  it("tracking: the customer reports a problem (reason and details required)", async () => {
+    const delivered = { ...ORDER, status: "delivered", delivery: { confirmed: false, confirmedAt: null, problemReported: false, problemOpen: false, canConfirm: true, canReport: true } };
+    fb.handlers["GET /store-orders/track"] = () => [200, delivered];
+    fb.handlers["POST /store-orders/track/report-problem"] = () => [200, { result: "reported", message: "Thanks. We've told BiManage support and the store. We'll be in touch by email.", order: { ...delivered, delivery: { ...delivered.delivery, problemReported: true, problemOpen: true, canConfirm: false, canReport: false } } }];
+    const user = userEvent.setup();
+    renderApp("/s/elijahapparel/track?order=BM-7K2Q-9MXA");
+    await user.type(await screen.findByLabelText(/email used/i), "ada@example.com");
+    await user.click(screen.getByRole("button", { name: "Track" }));
+    await user.click(await screen.findByRole("button", { name: "Report a problem" }));
+    await user.click(screen.getByRole("button", { name: "Send report" }));
+    expect(await screen.findByText("Choose what went wrong.")).toBeInTheDocument();
+    expect(last("POST /store-orders/track/report-problem")).toBeUndefined();
+    await user.selectOptions(screen.getByLabelText(/what went wrong/i), "damaged");
+    await user.type(screen.getByLabelText(/tell us what happened/i), "The shirt arrived torn at the seam.");
+    await user.click(screen.getByRole("button", { name: "Send report" }));
+    await waitFor(() => expect(last("POST /store-orders/track/report-problem")?.body).toEqual({ orderNumber: "BM-7K2Q-9MXA", email: "ada@example.com", reason: "damaged", message: "The shirt arrived torn at the seam." }));
+    expect(await screen.findByText("You reported a problem with this order")).toBeInTheDocument();
+  });
+
+  it("tracking an order that hasn't been sent: no confirm button", async () => {
+    fb.handlers["GET /store-orders/track"] = () => [200, { ...ORDER, status: "processing", delivery: { confirmed: false, confirmedAt: null, problemReported: false, problemOpen: false, canConfirm: false, canReport: true } }];
+    const user = userEvent.setup();
+    renderApp("/s/elijahapparel/track?order=BM-7K2Q-9MXA");
+    await user.type(await screen.findByLabelText(/email used/i), "ada@example.com");
+    await user.click(screen.getByRole("button", { name: "Track" }));
+    expect(await screen.findByRole("heading", { name: "Something wrong with this order?" })).toBeInTheDocument();
+    expect(screen.queryByRole("button", { name: "Yes, I received my order" })).toBeNull();
+  });
+
   it("a draft store is private, but its owner gets a read-only preview", async () => {
     fb.handlers["GET /store/elijahapparel"] = () => [404, { message: "Store not found" }];
     renderApp("/s/elijahapparel");
@@ -372,6 +416,7 @@ describe("storefront (guest, no sign-in)", () => {
 });
 
 describe("merchant store orders", () => {
+  const HELD = { status: "held", holdDays: 7, holdEndsAt: null, customerConfirmed: false, disputeOpen: false, releasedAt: null, releaseReason: null, refundStatus: null };
   const ORDER = {
     _id: "o1",
     trackingNo: "BM-7K2Q-9MXA",
@@ -426,19 +471,54 @@ describe("merchant store orders", () => {
     expect(await screen.findByRole("button", { name: "Mark delivered" })).toBeInTheDocument();
   });
 
-  it("cancelling a paid order confirms first, returns stock and flags the refund", async () => {
-    fb.handlers["GET /store-orders/o1"] = () => [200, ORDER];
-    fb.handlers["PUT /store-orders/o1/status"] = () => [200, { ...ORDER, status: "cancelled", earningsReversed: true, nextStatuses: [], refundNeeded: true }];
+  it("cancelling a paid order confirms first, returns stock and refunds the customer automatically", async () => {
+    let current: Record<string, unknown> = ORDER;
+    fb.handlers["GET /store-orders/o1"] = () => [200, current];
+    fb.handlers["PUT /store-orders/o1/status"] = () => ((current = { ...ORDER, status: "cancelled", earningsReversed: true, nextStatuses: [], payout: { ...HELD, status: "reversed", refundStatus: "pending" } }), [200, { ...current, refund: "pending" }]);
     const user = userEvent.setup();
     renderApp("/store/orders/o1");
     await user.click(await screen.findByRole("button", { name: "Cancel order" }));
     const dialog = await screen.findByRole("dialog");
-    expect(within(dialog).getByText(/back into stock.*refund them from your Paystack dashboard/)).toBeInTheDocument();
+    expect(within(dialog).getByText(/back into stock.*we refund them in full through Paystack/)).toBeInTheDocument();
     expect(last("PUT /store-orders/o1/status")).toBeUndefined();
     await user.click(within(dialog).getByRole("button", { name: "Cancel order" }));
     await waitFor(() => expect(last("PUT /store-orders/o1/status")?.body).toEqual({ status: "cancelled" }));
-    expect(await screen.findByText("Refund needed")).toBeInTheDocument();
-    expect(screen.getByText(/Refund ₦47,500 to Ada Nwosu/)).toBeInTheDocument();
+    expect(await screen.findByText(/₦47,500 is being refunded to the customer through Paystack/)).toBeInTheDocument();
+  });
+
+  it("a refund Paystack refused is flagged (support retries it)", async () => {
+    fb.handlers["GET /store-orders/o1"] = () => [200, ORDER];
+    fb.handlers["PUT /store-orders/o1/status"] = () => [200, { ...ORDER, status: "cancelled", nextStatuses: [], refund: "failed", message: "Order cancelled. The refund didn't go through yet: BiManage support has been alerted and will retry it.", payout: { ...HELD, status: "reversed", refundStatus: "failed" } }];
+    const user = userEvent.setup();
+    renderApp("/store/orders/o1");
+    await user.click(await screen.findByRole("button", { name: "Cancel order" }));
+    await user.click(within(await screen.findByRole("dialog")).getByRole("button", { name: "Cancel order" }));
+    expect(await screen.findByText("Refund not sent yet")).toBeInTheDocument();
+    expect(screen.getByText(/support has been alerted/)).toBeInTheDocument();
+  });
+
+  it("earnings: on hold until a date or the customer confirms; a reported problem keeps them held", async () => {
+    let current: Record<string, unknown> = { ...ORDER, status: "delivered", deliveredAt: "2026-11-12T10:00:00Z", nextStatuses: ["completed"], payout: { ...HELD, holdEndsAt: "2026-11-19T10:00:00Z" } };
+    fb.handlers["GET /store-orders/o1"] = () => [200, current];
+    renderApp("/store/orders/o1");
+    expect(await screen.findByText("₦46,075 on hold")).toBeInTheDocument();
+    expect(screen.getByText("Earnings on hold until 19 Nov 2026 or the customer confirms delivery, whichever comes first.")).toBeInTheDocument();
+    cleanup();
+    current = { ...current, payout: { ...HELD, holdEndsAt: "2026-11-19T10:00:00Z", disputeOpen: true } };
+    renderApp("/store/orders/o1");
+    expect(await screen.findByText(/customer reported a problem. Your earnings stay on hold/)).toBeInTheDocument();
+  });
+
+  it("earnings: before delivery the hold explains both ways out; released shows available", async () => {
+    let current: Record<string, unknown> = { ...ORDER, payout: HELD };
+    fb.handlers["GET /store-orders/o1"] = () => [200, current];
+    renderApp("/store/orders/o1");
+    expect(await screen.findByText("Earnings on hold until the customer confirms delivery, or 7 days after you mark the order delivered.")).toBeInTheDocument();
+    cleanup();
+    current = { ...ORDER, status: "completed", nextStatuses: [], payout: { ...HELD, status: "released", releaseReason: "customer_confirmed" } };
+    renderApp("/store/orders/o1");
+    expect(await screen.findByText("₦46,075 available")).toBeInTheDocument();
+    expect(screen.getByText(/customer confirmed delivery/)).toBeInTheDocument();
   });
 
   it("an unpaid order warns not to send anything and only offers cancel", async () => {

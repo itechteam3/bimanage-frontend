@@ -25,6 +25,9 @@ const DisputesPage = page(disputes, "DisputesPage");
 const DisputeDetailPage = page(disputes, "DisputeDetailPage");
 const SupplyOrdersPage = page(disputes, "SupplyOrdersPage");
 const SupplyOrderDetailPage = page(disputes, "SupplyOrderDetailPage");
+const storeOrders = () => import("./pages/StoreOrdersPages");
+const StoreOrdersAttentionPage = page(storeOrders, "StoreOrdersAttentionPage");
+const StoreOrderMoneyPage = page(storeOrders, "StoreOrderMoneyPage");
 const support = () => import("./pages/SupportPages");
 const SupportPage = page(support, "SupportPage");
 const TicketDetailPage = page(support, "TicketDetailPage");
@@ -71,6 +74,8 @@ export const adminRoutes: RouteObject[] = [
       { path: "bisupplynet/disputes/:id", element: gate("disputes.read", <DisputeDetailPage />), handle: { section: "Disputes" } },
       { path: "bisupplynet/orders", element: gate("orders.read", <SupplyOrdersPage />), handle: { section: "Disputes" } },
       { path: "bisupplynet/orders/:id", element: gate("orders.read", <SupplyOrderDetailPage />), handle: { section: "Disputes" } },
+      { path: "store-orders", element: gate("orders.read", <StoreOrdersAttentionPage />), handle: { section: "Store orders" } },
+      { path: "store-orders/:orderNumber", element: gate("orders.read", <StoreOrderMoneyPage />), handle: { section: "Store orders" } },
       { path: "support/tickets", element: gate("support.manage", <SupportPage />), handle: { section: "Support" } },
       { path: "support/tickets/:id", element: gate("support.manage", <TicketDetailPage />), handle: { section: "Support" } },
       { path: "support/service-requests", element: <Navigate to="/admin/support/tickets?tab=requests" replace /> },
