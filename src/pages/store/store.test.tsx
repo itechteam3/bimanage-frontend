@@ -521,6 +521,17 @@ describe("merchant store orders", () => {
     expect(screen.getByText(/customer confirmed delivery/)).toBeInTheDocument();
   });
 
+  it("test-mode guard: paid in test mode (or unknown mode) says don't ship; live and unpaid don't", async () => {
+    fb.handlers["GET /store-orders/my-orders"] = () => [200, { orders: [{ ...ORDER, paymentMode: "test" }, { ...ORDER, _id: "o2", trackingNo: "BM-LIVE-0001", paymentMode: "live" }, { ...ORDER, _id: "o3", trackingNo: "BM-UNPD-0001", isPaid: false, paymentMode: null, status: "pending" }], total: 3, page: 1, totalPages: 1 }];
+    renderApp("/store/orders");
+    await screen.findByRole("link", { name: "BM-LIVE-0001" });
+    expect(screen.getAllByText("Test payment — don't ship")).toHaveLength(1);
+    cleanup();
+    fb.handlers["GET /store-orders/o1"] = () => [200, { ...ORDER, paymentMode: null }];
+    renderApp("/store/orders/o1");
+    expect(await screen.findByRole("note")).toHaveTextContent(/paid with a Paystack test payment.*Don't send the goods/);
+  });
+
   it("an unpaid order warns not to send anything and only offers cancel", async () => {
     fb.handlers["GET /store-orders/o1"] = () => [200, { ...ORDER, status: "pending", isPaid: false, paidAt: null, nextStatuses: ["cancelled"] }];
     renderApp("/store/orders/o1");
@@ -641,7 +652,7 @@ describe("merchant store polish", () => {
   it("a test-mode payment is labelled on the order", async () => {
     fb.handlers["GET /store-orders/o1"] = () => [200, { _id: "o1", trackingNo: "BM-WYYZ-KJDF", customerName: "Elijah", customerEmail: "e@x.com", deliveryAddress: "x", items: [], subtotal: 5000, deliveryFee: 0, total: 5000, status: "shipped", isPaid: true, paymentMode: "test", statusHistory: [], createdAt: "2026-11-12T21:57:00Z", nextStatuses: ["delivered"] }];
     renderApp("/store/orders/o1");
-    expect(await screen.findByText("Test payment (no money moved)")).toBeInTheDocument();
+    expect(await screen.findByText("Test payment — don't ship")).toBeInTheDocument();
   });
 });
 

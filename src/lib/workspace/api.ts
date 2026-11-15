@@ -58,6 +58,8 @@ export interface PaymentState {
   activated: boolean;
   paidAt?: string | null;
   message?: string;
+  /** "test_payment": a test-mode payment refused in production (backend P0-3). */
+  failureReason?: string | null;
 }
 
 export interface BusinessProfile {
