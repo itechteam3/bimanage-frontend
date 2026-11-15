@@ -29,7 +29,7 @@ const bars = [26, 36, 31, 43, 38, 47, 55]; // showcase chart heights (data), Fig
 function ShowcasePanel() {
   return (
     <aside aria-hidden="true" className="relative hidden w-auth-panel shrink-0 overflow-hidden bg-gradient-brand-panel px-12 py-10 text-ink-on-brand lg:flex lg:flex-col">
-      <Logo tone="on-brand" />
+      <Logo tone="on-brand" size="panel" />
       <p className="mt-5 text-body-sm font-semibold uppercase text-ink-on-brand-accent">Your business. One workspace.</p>
       <h2 className="mt-14 text-hero">
         Business feels lighter
@@ -92,7 +92,7 @@ function ShowcasePanel() {
 function SecurityPanel() {
   return (
     <aside aria-hidden="true" className="hidden w-auth-panel shrink-0 bg-brand-navy-panel px-12 py-10 text-ink-on-brand lg:flex lg:flex-col">
-      <Logo tone="on-brand" />
+      <Logo tone="on-brand" size="panel" />
       <p className="mt-5 text-body-sm font-semibold uppercase text-ink-on-brand-accent">Security &amp; account</p>
       <h2 className="mt-14 text-hero">
         Secure access
