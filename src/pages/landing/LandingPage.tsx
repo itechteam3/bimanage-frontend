@@ -34,6 +34,7 @@ import { naira } from "@/lib/format";
 import { FEATURE_LABELS } from "@/lib/subscription/api";
 import { usePublicReviews } from "@/lib/reviews/api";
 import { useFaqs } from "@/lib/support/api";
+import { useAuth } from "@/lib/auth/AuthProvider";
 import { useContactRequest, useNewsletterSignup, usePublicPlans, usePublicStats, type ContactTopic } from "@/lib/landing/api";
 import "./landing.css";
 
@@ -56,24 +57,37 @@ const collage = Object.entries(import.meta.glob<string>("../../assets/landing/co
 
 // ── Motion helpers ────────────────────────────────────────────────────────
 
-/** Adds .lp-in to [data-reveal] elements as they scroll into view. */
+/**
+ * Adds .lp-in to [data-reveal] elements as they scroll into view — including
+ * elements added later (pricing, FAQ and reviews arrive from the API), so
+ * nothing can stay hidden.
+ */
 function useReveal(root: React.RefObject<HTMLElement>) {
   useEffect(() => {
     const el = root.current;
     if (!el) return;
-    el.classList.add("lp-js");
-    const items = [...el.querySelectorAll<HTMLElement>("[data-reveal]")];
-    if (typeof IntersectionObserver === "undefined") {
-      items.forEach((i) => i.classList.add("lp-in"));
-      return;
+    const all = () => [...el.querySelectorAll<HTMLElement>("[data-reveal]:not(.lp-in)")];
+    if (typeof IntersectionObserver === "undefined" || typeof MutationObserver === "undefined" || reducedMotion()) {
+      el.classList.add("lp-js");
+      const show = () => all().forEach((i) => i.classList.add("lp-in"));
+      show();
+      if (typeof MutationObserver === "undefined") return;
+      const mo = new MutationObserver(show);
+      mo.observe(el, { childList: true, subtree: true });
+      return () => mo.disconnect();
     }
+    el.classList.add("lp-js");
+    const seen = new WeakSet<Element>();
     const io = new IntersectionObserver(
       (entries) => entries.forEach((e) => { if (e.isIntersecting) { e.target.classList.add("lp-in"); io.unobserve(e.target); } }),
-      { rootMargin: "0px 0px -8% 0px", threshold: 0.12 }
+      { rootMargin: "0px 0px -5% 0px", threshold: 0.05 }
     );
-    items.forEach((i) => io.observe(i));
-    return () => io.disconnect();
-  });
+    const watch = () => all().forEach((i) => { if (!seen.has(i)) { seen.add(i); io.observe(i); } });
+    watch();
+    const mo = new MutationObserver(watch);
+    mo.observe(el, { childList: true, subtree: true });
+    return () => { io.disconnect(); mo.disconnect(); };
+  }, [root]);
 }
 
 const reducedMotion = () =>
@@ -118,10 +132,6 @@ function Shot({ name, kind, alt, eager }: { name: string; kind: "desktop" | "pho
   );
 }
 
-const SampleBadge = () => (
-  <span className="absolute right-3 top-3 z-10 rounded-full bg-surface-card/90 px-2.5 py-1 text-caption font-semibold text-ink-secondary shadow-card">Sample data</span>
-);
-
 function BrowserFrame({ name, alt, path, eager, className }: { name: string; alt: string; path: string; eager?: boolean; className?: string }) {
   return (
     <figure className={cn("relative overflow-hidden rounded-xl border border-line-card bg-surface-card shadow-floating", className)}>
@@ -129,10 +139,9 @@ function BrowserFrame({ name, alt, path, eager, className }: { name: string; alt
         <span className="size-2.5 rounded-full bg-danger/70" />
         <span className="size-2.5 rounded-full bg-warning/70" />
         <span className="size-2.5 rounded-full bg-success/70" />
-        <span className="ml-2 min-w-0 truncate rounded-sm bg-surface-card px-2 py-0.5 text-micro text-ink-muted">bimanage-frontend.vercel.app{path}</span>
+        <span className="ml-2 min-w-0 truncate rounded-sm bg-surface-card px-2 py-0.5 text-micro text-ink-muted">bimanage.com{path}</span>
       </div>
       <div className="relative">
-        <SampleBadge />
         <Shot name={name} kind="desktop" alt={alt} eager={eager} />
       </div>
     </figure>
@@ -143,7 +152,6 @@ function PhoneFrame({ name, alt, className }: { name: string; alt: string; class
   return (
     <figure className={cn("relative mx-auto w-full max-w-[17rem] overflow-hidden rounded-[2.25rem] border-[6px] border-ink-strong bg-ink-strong shadow-floating", className)}>
       <div className="relative overflow-hidden rounded-[1.75rem]">
-        <SampleBadge />
         <Shot name={name} kind="phone" alt={alt} />
       </div>
     </figure>
@@ -217,6 +225,7 @@ function SectionTitle({ eyebrow, title, subtitle, light }: { eyebrow?: string; t
 
 function NavBar({ onContact }: { onContact: () => void }) {
   const [open, setOpen] = useState(false);
+  const signedIn = useAuth().status === "authenticated";
   return (
     <header className="sticky top-0 z-30 bg-brand-navy/95 backdrop-blur">
       <Container className="flex h-mobile-header items-center justify-between gap-4 lg:h-header">
@@ -230,8 +239,14 @@ function NavBar({ onContact }: { onContact: () => void }) {
           <button type="button" onClick={onContact} className="text-nav text-ink-on-brand-muted transition-colors hover:text-ink-on-brand">Contact us</button>
         </nav>
         <div className="hidden items-center gap-3 lg:flex">
-          <ButtonLink to="/login" variant="secondary" size="md">Sign in</ButtonLink>
-          <ButtonLink to="/register" variant="tonal" size="md">Get started</ButtonLink>
+          {signedIn ? (
+            <ButtonLink to="/dashboard" variant="tonal" size="md">Go to dashboard</ButtonLink>
+          ) : (
+            <>
+              <ButtonLink to="/login" variant="secondary" size="md">Sign in</ButtonLink>
+              <ButtonLink to="/register" variant="tonal" size="md">Get started</ButtonLink>
+            </>
+          )}
         </div>
         <button type="button" className="flex size-11 items-center justify-center rounded-md text-ink-on-brand lg:hidden" aria-expanded={open} aria-controls="lp-menu" aria-label={open ? "Close menu" : "Open menu"} onClick={() => setOpen((v) => !v)}>
           {open ? <IconX className="size-6" aria-hidden="true" /> : <IconMenu2 className="size-6" aria-hidden="true" />}
@@ -245,8 +260,14 @@ function NavBar({ onContact }: { onContact: () => void }) {
             ))}
             <button type="button" onClick={() => { setOpen(false); onContact(); }} className="flex min-h-11 items-center text-nav text-ink-on-brand">Contact us</button>
             <div className="mt-3 flex w-full max-w-[20rem] flex-col gap-3">
-              <ButtonLink to="/register" variant="tonal" fullWidth>Get started</ButtonLink>
-              <ButtonLink to="/login" variant="secondary" fullWidth>Sign in</ButtonLink>
+              {signedIn ? (
+                <ButtonLink to="/dashboard" variant="tonal" fullWidth>Go to dashboard</ButtonLink>
+              ) : (
+                <>
+                  <ButtonLink to="/register" variant="tonal" fullWidth>Get started</ButtonLink>
+                  <ButtonLink to="/login" variant="secondary" fullWidth>Sign in</ButtonLink>
+                </>
+              )}
             </div>
           </Container>
         </div>
@@ -257,33 +278,31 @@ function NavBar({ onContact }: { onContact: () => void }) {
 
 function Hero() {
   return (
-    <section className="relative overflow-hidden bg-brand-navy pb-16 pt-10 text-ink-on-brand lg:pb-24 lg:pt-16">
-      <Container>
-        {/* Figma hero: the city photo with the headline in a cut-out corner. */}
-        <div className="relative overflow-hidden rounded-3xl">
-          <picture>
-            <source media="(min-width: 768px)" srcSet={heroImg} />
-            <img src={heroSmImg} alt="" width={1600} height={809} className="h-[22rem] w-full object-cover md:h-[34rem] lg:h-[38rem]" fetchPriority="high" />
-          </picture>
-          <div className="absolute inset-0 bg-gradient-to-t from-brand-navy/80 via-brand-navy/20 to-transparent md:bg-none" aria-hidden="true" />
-          <div className="absolute inset-x-0 bottom-0 rounded-tr-3xl bg-brand-navy p-5 md:right-auto md:w-[58%] md:p-8 md:pl-0 lg:w-[52%]">
-            <h1 className="lp-rise text-title-lg md:text-display lg:text-hero" style={{ ["--lp-delay" as string]: "60ms" }}>
-              Smart business starts with BiManage
-            </h1>
-            <p className="lp-rise mt-3 text-body-lg text-ink-on-brand-muted md:mt-4" style={{ ["--lp-delay" as string]: "160ms" }}>
-              Sales, inventory, invoices, your online store, customers, payouts and wholesale buying — in one dashboard built for Nigerian businesses.
-            </p>
-            <div className="lp-rise mt-5 flex flex-wrap gap-3 md:mt-6" style={{ ["--lp-delay" as string]: "260ms" }}>
-              <ButtonLink to="/register" variant="tonal">Get started free</ButtonLink>
-              <ButtonLink to="/login" variant="secondary">Sign in</ButtonLink>
-            </div>
+    // Full-bleed hero: the Figma city photo across the whole width, navy shade
+    // for legible text, then the real dashboard rising in below the buttons.
+    <section className="relative isolate overflow-hidden bg-brand-navy text-ink-on-brand">
+      <picture>
+        <source media="(min-width: 768px)" srcSet={heroImg} />
+        <img src={heroSmImg} alt="" width={1600} height={809} fetchPriority="high" decoding="async" className="absolute inset-0 -z-20 h-full w-full object-cover" />
+      </picture>
+      <div className="lp-hero-shade absolute inset-0 -z-10" aria-hidden="true" />
+      <Container className="pb-14 pt-14 md:pb-20 md:pt-20 lg:pt-24">
+        <div className="max-w-[42rem]">
+          <h1 className="lp-rise text-title-lg md:text-display lg:text-hero" style={{ ["--lp-delay" as string]: "60ms" }}>
+            Smart business starts with BiManage
+          </h1>
+          <p className="lp-rise mt-4 text-body-lg text-ink-on-brand-muted" style={{ ["--lp-delay" as string]: "160ms" }}>
+            Sales, inventory, invoices, your online store, customers, payouts and wholesale buying — in one dashboard built for Nigerian businesses.
+          </p>
+          <div className="lp-rise mt-6 flex flex-wrap gap-3" style={{ ["--lp-delay" as string]: "260ms" }}>
+            <ButtonLink to="/register" variant="tonal">Get started free</ButtonLink>
+            <ButtonLink to="/login" variant="secondary">Sign in</ButtonLink>
           </div>
         </div>
-        {/* The real dashboard (sample data) rising into view. */}
-        <div className="lp-preview relative z-10 mx-auto -mt-4 max-w-[60rem] md:-mt-10 lg:-mt-16">
+        <div className="lp-preview mx-auto mt-12 max-w-[62rem] md:mt-16">
           <div className="lp-float">
-            <BrowserFrame name="dashboard" path="/dashboard" alt="The BiManage business dashboard with sample data: revenue, orders, open invoices, low stock and recent orders." eager className="hidden md:block" />
-            <PhoneFrame name="dashboard" alt="The BiManage dashboard on a phone, with sample data." className="md:hidden" />
+            <BrowserFrame name="dashboard" path="/dashboard" alt="The BiManage business dashboard: revenue, orders, open invoices, low stock and recent orders." eager className="hidden md:block" />
+            <PhoneFrame name="dashboard" alt="The BiManage dashboard on a phone." className="md:hidden" />
           </div>
         </div>
       </Container>
@@ -349,9 +368,9 @@ function Features() {
             })}
           </div>
           <div id="lp-feature-panel" role="tabpanel" aria-labelledby={`lp-tab-${f.key}`} className="min-w-0">
-            <div key={f.key} className="lp-fade grid grid-cols-[minmax(0,1fr)] items-end gap-6 md:grid-cols-[minmax(0,1fr)_minmax(0,13rem)]">
-              <BrowserFrame name={f.key} path={f.path} alt={`${f.title} in BiManage, with sample data.`} className="hidden md:block" />
-              <PhoneFrame name={"phone" in f ? f.phone : f.key} alt={`${f.title} on a phone, with sample data.`} />
+            <div key={f.key} className="lp-fade">
+              <BrowserFrame name={f.key} path={f.path} alt={`${f.title} in BiManage.`} className="hidden md:block" />
+              <PhoneFrame name={"phone" in f ? f.phone : f.key} alt={`${f.title} in BiManage on a phone.`} className="md:hidden" />
             </div>
           </div>
         </div>
@@ -419,7 +438,18 @@ function Pricing() {
             ))}
           </div>
         </div>
-        {isLoading && <p className="mt-10 text-center text-body text-ink-muted" role="status">Loading plans…</p>}
+        {isLoading && (
+          <div className="mt-10 grid grid-cols-[minmax(0,1fr)] gap-5 md:grid-cols-3" role="status" aria-label="Loading plans">
+            {[0, 1, 2].map((i) => (
+              <div key={i} className="flex h-[26rem] animate-pulse flex-col gap-4 rounded-2xl border border-line-card bg-surface-card p-6">
+                <div className="h-6 w-1/3 rounded-sm bg-surface-pale" />
+                <div className="h-4 w-2/3 rounded-sm bg-surface-pale" />
+                <div className="h-9 w-1/2 rounded-sm bg-surface-pale" />
+                <div className="mt-2 flex flex-col gap-2">{[0, 1, 2, 3].map((j) => <div key={j} className="h-4 rounded-sm bg-surface-pale" />)}</div>
+              </div>
+            ))}
+          </div>
+        )}
         <ErrorNote error={error} fallback="We couldn't load the plans right now." onRetry={() => void refetch()} className="mx-auto mt-10 max-w-[32rem]" />
         {plans.length > 0 && (
           <div className="mt-10 grid grid-cols-[minmax(0,1fr)] gap-5 md:grid-cols-3">
@@ -595,7 +625,7 @@ function Footer() {
               onSubmit={(e) => { e.preventDefault(); if (email.trim()) signup.mutate({ email: email.trim(), website }); }}
             >
               <label className="sr-only" htmlFor="lp-newsletter">Email address</label>
-              <input id="lp-newsletter" type="email" required autoComplete="email" placeholder="Enter your email" value={email} onChange={(e) => setEmail(e.target.value)} className="h-control-lg min-h-11 min-w-0 flex-1 rounded-md border border-line-on-brand bg-brand-navy-panel px-4 text-input text-ink-on-brand outline-none placeholder:text-ink-on-brand-soft focus:border-ink-on-brand" />
+              <input id="lp-newsletter" type="email" required autoComplete="email" placeholder="Enter your email" value={email} onChange={(e) => setEmail(e.target.value)} className="h-control-lg min-h-11 w-full min-w-0 shrink-0 rounded-md border border-line-on-brand bg-brand-navy-panel md:w-auto md:flex-1 px-4 text-input text-ink-on-brand outline-none placeholder:text-ink-on-brand-soft focus:border-ink-on-brand" />
               {/* Honeypot: hidden from people and assistive tech. */}
               <input type="text" name="website" tabIndex={-1} autoComplete="off" aria-hidden="true" value={website} onChange={(e) => setWebsite(e.target.value)} className="absolute left-[-9999px] h-px w-px opacity-0" />
               <Button type="submit" variant="tonal" loading={signup.isPending} loadingText="Sending…" icon={<IconSend className="size-4" aria-hidden="true" />}>Subscribe</Button>

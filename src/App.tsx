@@ -270,6 +270,8 @@ export const routes = [
         element: <HomeRoute />,
         handle: { meta: { description: "Run your whole business in one place: sales, inventory, invoices, your own online store, customers, payouts, wholesale buying on BiSupplyNet and FELI, your AI assistant. Start free." } },
       },
+      // The landing page for everyone (signed-in people can still view it; noindex — "/" is canonical).
+      { path: "/home", element: <LandingPage /> },
       { path: "/newsletter/confirm", element: <NewsletterPage action="confirm" /> },
       { path: "/newsletter/unsubscribe", element: <NewsletterPage action="unsubscribe" /> },
       // Authentication (Figma 01.xx)

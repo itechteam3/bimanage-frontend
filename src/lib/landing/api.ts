@@ -35,11 +35,28 @@ export interface PublicStats {
   updatedAt?: string;
 }
 
+/**
+ * Same-origin edge copy first (api/public.js on Vercel, cached so it answers
+ * instantly while the backend wakes), then the backend directly.
+ */
+async function edgeFirst<T>(resource: "plans" | "stats", path: string): Promise<T> {
+  try {
+    const ctl = new AbortController();
+    const timer = setTimeout(() => ctl.abort(), 4000);
+    const r = await fetch(`/api/public?r=${resource}`, { signal: ctl.signal, headers: { accept: "application/json" } });
+    clearTimeout(timer);
+    if (r.ok && (r.headers.get("content-type") ?? "").includes("json")) return (await r.json()) as T;
+  } catch {
+    /* fall through to the backend */
+  }
+  return api<T>(path, { auth: false });
+}
+
 export const usePublicPlans = () =>
-  useQuery({ queryKey: ["public", "plans"], queryFn: () => api<PublicPlans>("/public/plans", { auth: false }), staleTime: 5 * 60_000 });
+  useQuery({ queryKey: ["public", "plans"], queryFn: () => edgeFirst<PublicPlans>("plans", "/public/plans"), staleTime: 5 * 60_000 });
 
 export const usePublicStats = () =>
-  useQuery({ queryKey: ["public", "stats"], queryFn: () => api<PublicStats>("/public/stats", { auth: false }), staleTime: 10 * 60_000, retry: false });
+  useQuery({ queryKey: ["public", "stats"], queryFn: () => edgeFirst<PublicStats>("stats", "/public/stats"), staleTime: 10 * 60_000, retry: false });
 
 export type ContactTopic = "demo" | "sales" | "support" | "partnership" | "other";
 
