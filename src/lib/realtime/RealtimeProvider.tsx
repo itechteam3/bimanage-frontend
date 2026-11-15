@@ -93,6 +93,11 @@ export function RealtimeProvider({ children }: { children: ReactNode }) {
       if (everConnected) void qc.refetchQueries({ type: "active" });
       everConnected = true;
     };
+    // Customers (09.xx): the backend also names the record that changed.
+    const onCustomer = () => {
+      pending.add("customers");
+      if (!timer) timer = setTimeout(flush, realtimeConfig.batchMs);
+    };
     const onDisconnect = () => setConnected(false);
     const onError = (err: Error) => {
       setConnected(false);
@@ -105,6 +110,7 @@ export function RealtimeProvider({ children }: { children: ReactNode }) {
       }
     };
     socket.on("bm:change", onChange);
+    socket.on("customer:updated", onCustomer);
     socket.on("connect", onConnect);
     socket.on("disconnect", onDisconnect);
     socket.on("connect_error", onError);
@@ -119,6 +125,7 @@ export function RealtimeProvider({ children }: { children: ReactNode }) {
       if (timer) clearTimeout(timer);
       if (retry) clearTimeout(retry);
       socket.off("bm:change", onChange);
+      socket.off("customer:updated", onCustomer);
       socket.off("connect", onConnect);
       socket.off("disconnect", onDisconnect);
       socket.off("connect_error", onError);

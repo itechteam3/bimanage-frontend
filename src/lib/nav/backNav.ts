@@ -64,6 +64,7 @@ export const SCREENS = {
   inventory: { label: "Inventory", to: "/inventory" },
   sales: { label: "Sales", to: "/sales" },
   orders: { label: "Orders", to: "/orders" },
+  customers: { label: "Customers", to: "/customers" },
   projects: { label: "Projects", to: "/projects" },
   team: { label: "Team", to: "/settings/team" },
   settings: { label: "Settings", to: "/settings" },

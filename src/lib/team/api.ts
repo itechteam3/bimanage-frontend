@@ -57,6 +57,8 @@ export const PERMISSIONS: Array<[Permission, string, string]> = [
   ["manageInventory", "Inventory", "Add, edit and adjust products"],
   ["createOrders", "Create orders", "Record sales"],
   ["deleteOrders", "Cancel orders", "Cancel unfulfilled orders"],
+  ["viewCustomers", "See customers", "Open the customer directory and history"],
+  ["manageCustomers", "Manage customers", "Add, edit, merge and delete customers"],
   ["manageInvoices", "Invoices", "Create, send and track invoices"],
   ["manageProjects", "Projects", "Work on projects and tasks"],
   ["viewAnalytics", "Analytics", "See sales analytics and reports"],
@@ -69,9 +71,9 @@ export const PERMISSIONS: Array<[Permission, string, string]> = [
 
 /** Defaults per role (mirror of the backend's rolePermissions). */
 export const ROLE_DEFAULTS: Record<InviteRole, Record<Permission, boolean>> = {
-  admin: { viewDashboard: true, manageInventory: true, createOrders: true, deleteOrders: true, manageProjects: true, viewAnalytics: true, manageTeam: true, manageInvoices: true, accessBiSupplyNet: true, sellOnBiSupplyNet: true, manageSettings: true, manageMessages: true },
-  manager: { viewDashboard: true, manageInventory: true, createOrders: true, deleteOrders: false, manageProjects: true, viewAnalytics: true, manageTeam: false, manageInvoices: true, accessBiSupplyNet: true, sellOnBiSupplyNet: true, manageSettings: false, manageMessages: true },
-  staff: { viewDashboard: true, manageInventory: false, createOrders: true, deleteOrders: false, manageProjects: true, viewAnalytics: false, manageTeam: false, manageInvoices: false, accessBiSupplyNet: false, sellOnBiSupplyNet: false, manageSettings: false, manageMessages: false },
+  admin: { viewCustomers: true, manageCustomers: true, viewDashboard: true, manageInventory: true, createOrders: true, deleteOrders: true, manageProjects: true, viewAnalytics: true, manageTeam: true, manageInvoices: true, accessBiSupplyNet: true, sellOnBiSupplyNet: true, manageSettings: true, manageMessages: true },
+  manager: { viewCustomers: true, manageCustomers: true, viewDashboard: true, manageInventory: true, createOrders: true, deleteOrders: false, manageProjects: true, viewAnalytics: true, manageTeam: false, manageInvoices: true, accessBiSupplyNet: true, sellOnBiSupplyNet: true, manageSettings: false, manageMessages: true },
+  staff: { viewCustomers: true, manageCustomers: false, viewDashboard: true, manageInventory: false, createOrders: true, deleteOrders: false, manageProjects: true, viewAnalytics: false, manageTeam: false, manageInvoices: false, accessBiSupplyNet: false, sellOnBiSupplyNet: false, manageSettings: false, manageMessages: false },
 };
 
 /** Figma 04.01 "Permissions overview" and the Access column. */
