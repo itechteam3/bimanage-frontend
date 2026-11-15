@@ -60,7 +60,7 @@ export function SignInPage() {
         return;
       }
       await signIn(res.token);
-      navigate(pendingInvite.get() ? "/invite/accept" : safeNext(params.get("next"), "/"), { replace: true });
+      navigate(pendingInvite.get() ? "/invite/accept" : safeNext(params.get("next"), "/start"), { replace: true });
     } catch (err) {
       if (!(err instanceof ApiError)) return setFormError(errorMessage(err));
       if (err.status === 401) {
