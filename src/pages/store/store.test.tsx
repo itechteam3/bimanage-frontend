@@ -102,6 +102,45 @@ describe("merchant store", () => {
     await waitFor(() => expect(last("POST /store/publish")).toBeTruthy());
   });
 
+  it("08.02: publishing and switching back to draft update the overview straight away (no reload)", async () => {
+    let status: "draft" | "published" = "draft";
+    fb.handlers["GET /store/launch-checklist"] = () => [200, { ...CHECKLIST, status }];
+    fb.handlers["POST /store/publish"] = () => ((status = "published"), [200, { message: "Your store is live" }]);
+    fb.handlers["POST /store/unpublish"] = () => ((status = "draft"), [200, { message: "Your store is now a draft" }]);
+    const user = userEvent.setup();
+    renderApp("/store");
+    await user.click(await screen.findByRole("button", { name: "Publish store" }));
+    expect(await screen.findByRole("heading", { name: "Your store is live" })).toBeInTheDocument();
+    expect(screen.getByRole("link", { name: /visit store/i })).toBeInTheDocument();
+
+    await user.click(screen.getByRole("button", { name: "Switch back to draft" }));
+    const dialog = await screen.findByRole("dialog", { name: /switch your store back to draft/i });
+    await user.click(within(dialog).getByRole("button", { name: "Switch to draft" }));
+    expect(await screen.findByRole("heading", { name: "Ready to launch?" })).toBeInTheDocument();
+    expect(screen.queryByRole("dialog", { name: /switch your store back to draft/i })).toBeNull();
+    expect(screen.getByRole("link", { name: /preview store/i })).toBeInTheDocument();
+  });
+
+  it("08.02: the overview still updates when the refresh after switching to draft fails (slow server)", async () => {
+    let failRefresh = false;
+    fb.handlers["GET /store/launch-checklist"] = () => (failRefresh ? [400, { message: "Something went wrong" }] : [200, { ...CHECKLIST, status: "published" }]);
+    fb.handlers["POST /store/unpublish"] = () => ((failRefresh = true), [200, { message: "Your store is now a draft" }]);
+    const user = userEvent.setup();
+    renderApp("/store");
+    await user.click(await screen.findByRole("button", { name: "Switch back to draft" }));
+    const dialog = await screen.findByRole("dialog", { name: /switch your store back to draft/i });
+    await user.click(within(dialog).getByRole("button", { name: "Switch to draft" }));
+    expect(await screen.findByRole("heading", { name: "Ready to launch?" })).toBeInTheDocument();
+  });
+
+  it("08.02: a live store never shows 'Ready to launch?' while the checklist loads", async () => {
+    fb.handlers["GET /store/my-store"] = () => [200, { ...STORE, status: "published", isPublished: true }];
+    fb.handlers["GET /store/launch-checklist"] = () => new Promise(() => {});
+    renderApp("/store");
+    expect(await screen.findByRole("heading", { name: "Your store is live" })).toBeInTheDocument();
+    expect(screen.queryByRole("heading", { name: "Ready to launch?" })).toBeNull();
+  });
+
   it("08.02: a plan that can't publish explains why and links to plans", async () => {
     fb.handlers["GET /store/launch-checklist"] = () => [200, { ...CHECKLIST, canPublish: false, plan: { tier: "freemium", name: "Freemium", canPublish: false }, blockers: ["Upgrade to Standard or a startup package to publish your store."] }];
     renderApp("/store");

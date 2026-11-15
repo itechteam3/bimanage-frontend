@@ -12,7 +12,7 @@ export let testQueryClient: QueryClient | null = null;
 
 // A fake BiManage API for flow tests: "METHOD /path" → handler returning
 // [status, json]. Every call is recorded for assertions.
-export type Handler = (body: Record<string, unknown>, headers: Record<string, string>, url: URL) => [number, unknown];
+export type Handler = (body: Record<string, unknown>, headers: Record<string, string>, url: URL) => [number, unknown] | Promise<[number, unknown]>;
 export interface FakeBackend {
   handlers: Record<string, Handler>;
   calls: Array<{ key: string; body: Record<string, unknown>; headers: Record<string, string> }>;
@@ -54,7 +54,7 @@ export function installFakeBackend(): FakeBackend {
       const headers = (init.headers ?? {}) as Record<string, string>;
       fb.calls.push({ key, body, headers });
       const h = fb.handlers[key];
-      const [status, json] = h ? h(body, headers, u) : [404, { message: `no handler for ${key}` }];
+      const [status, json] = h ? await h(body, headers, u) : [404, { message: `no handler for ${key}` }];
       return new Response(JSON.stringify(json), { status, headers: { "content-type": "application/json" } });
     })
   );

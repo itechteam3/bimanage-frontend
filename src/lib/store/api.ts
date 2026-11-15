@@ -329,9 +329,23 @@ export function useUpdateStore() {
 
 export const useLaunchChecklist = (enabled = true) => useQuery({ queryKey: storeKeys.checklist, queryFn: () => api<LaunchChecklist>("/store/launch-checklist"), enabled });
 
+/**
+ * Publish or switch back to draft. Once the server confirms, the new status
+ * is written into the cache straight away, so the overview updates even if
+ * the follow-up refetch is slow or fails (e.g. a cold Render instance);
+ * then everything under "store" is refreshed in the background.
+ */
 export function usePublish() {
-  const done = useInvalidateStore();
-  return useMutation({ mutationFn: (publish: boolean) => api<{ message: string }>(publish ? "/store/publish" : "/store/unpublish", { method: "POST" }), onSuccess: done });
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: (publish: boolean) => api<{ message: string }>(publish ? "/store/publish" : "/store/unpublish", { method: "POST" }),
+    onSuccess: (_res, publish) => {
+      const status = publish ? "published" : "draft";
+      qc.setQueryData<LaunchChecklist>(storeKeys.checklist, (c) => (c ? { ...c, status } : c));
+      qc.setQueryData<Store | null>(storeKeys.mine, (s) => (s ? { ...s, status, isPublished: publish } : s));
+      void qc.invalidateQueries({ queryKey: ["store"] });
+    },
+  });
 }
 
 export const useTemplates = () => useQuery({ queryKey: storeKeys.templates, queryFn: () => api<{ current: TemplateKey | null; plan: string; templates: TemplateOption[] }>("/store/templates") });
