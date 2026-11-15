@@ -56,3 +56,15 @@ html.reduce-motion .lp-fade { animation: none; }
 @media (prefers-reduced-motion: no-preference) {
   html:has(.lp-root) { scroll-behavior: smooth; }
 }
+
+/* Full-bleed hero shade: solid navy behind the text, the photo showing through on the right. */
+.lp-hero-shade {
+  background: linear-gradient(180deg, color-mix(in srgb, var(--color-brand-navy) 78%, transparent) 0%, var(--color-brand-navy) 70%);
+}
+@media (min-width: 768px) {
+  .lp-hero-shade {
+    background:
+      linear-gradient(90deg, var(--color-brand-navy) 0%, color-mix(in srgb, var(--color-brand-navy) 88%, transparent) 45%, color-mix(in srgb, var(--color-brand-navy) 35%, transparent) 100%),
+      linear-gradient(180deg, transparent 55%, var(--color-brand-navy) 92%);
+  }
+}
