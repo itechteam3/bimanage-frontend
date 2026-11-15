@@ -114,7 +114,7 @@ export function OrdersPage() {
         <KpiCard tone="invoices" label="Unfulfilled" value={count(s?.unfulfilled)} caption="Eligible for cancellation" />
         <KpiCard tone="stock" label="Completed" value={count(s?.completed)} caption={s ? `${naira(s.revenue)} revenue` : "—"} />
       </div>
-      <div className="grid gap-5 lg:grid-cols-[minmax(0,2.3fr)_minmax(0,1fr)]">
+      <div className="grid grid-cols-[minmax(0,1fr)] gap-5 lg:grid-cols-[minmax(0,2.3fr)_minmax(0,1fr)]">
         <Panel>
           <div className="flex flex-col gap-3 md:flex-row">
             <form
@@ -295,9 +295,9 @@ export function CreateOrderPage() {
           Orders are made from your inventory products, so stock stays accurate.
         </InfoStrip>
       ) : (
-        <form noValidate onSubmit={onSubmit} className="grid gap-5 lg:grid-cols-[minmax(0,1.9fr)_minmax(0,1fr)]">
+        <form noValidate onSubmit={onSubmit} className="grid grid-cols-[minmax(0,1fr)] gap-5 lg:grid-cols-[minmax(0,1.9fr)_minmax(0,1fr)]">
           <Panel title="Customer and items">
-            <div className="grid gap-4 md:grid-cols-2 md:gap-x-8 md:gap-y-5">
+            <div className="grid grid-cols-[minmax(0,1fr)] gap-4 md:grid-cols-2 md:gap-x-8 md:gap-y-5">
               <Field label="Customer name">
                 <TextInput autoComplete="off" placeholder="Amina Yusuf" {...register("customerName")} />
               </Field>
@@ -341,7 +341,7 @@ export function CreateOrderPage() {
                 const err = formState.errors.items?.[n];
                 return (
                   <li key={f.id} className="rounded-lg bg-surface-pale p-4">
-                    <div className="grid gap-3 md:grid-cols-[minmax(0,2fr)_minmax(0,1fr)_auto] md:items-end">
+                    <div className="grid grid-cols-[minmax(0,1fr)] gap-3 md:grid-cols-[minmax(0,2fr)_minmax(0,1fr)_auto] md:items-end">
                       <Field label="Product" error={err?.productId?.message}>
                         <SelectInput {...register(`items.${n}.productId` as const)}>
                           <option value="">Choose a product…</option>
@@ -482,7 +482,7 @@ export function OrderCreatedPage() {
     <div className="flex flex-col gap-6">
       <PageTitle>Order created</PageTitle>
       <Banner tone="success" eyebrow={b.label} title="Your order is in the system." body="Sale details are recorded. Fulfilment and payment can now be managed." />
-      <div className="grid gap-5 lg:grid-cols-[minmax(0,1.7fr)_minmax(0,1fr)]">
+      <div className="grid grid-cols-[minmax(0,1fr)] gap-5 lg:grid-cols-[minmax(0,1.7fr)_minmax(0,1fr)]">
         <Panel title="Record summary" subtitle="See the important details without leaving this page.">
           <div className="rounded-xl bg-success-bg px-4 py-4">
             <p className="text-caption font-semibold uppercase text-success">{b.label}</p>
@@ -562,7 +562,7 @@ export function OrderDetailsPage() {
       <IntroCard eyebrow="Order detail" title="A complete view of this sale.">
         Follow the payment, items and fulfilment status in one place.
       </IntroCard>
-      <div className="grid gap-5 lg:grid-cols-[minmax(0,1.7fr)_minmax(0,1fr)]">
+      <div className="grid grid-cols-[minmax(0,1fr)] gap-5 lg:grid-cols-[minmax(0,1.7fr)_minmax(0,1fr)]">
         <Panel title="Products in this order" subtitle={`Customer: ${customerName(o)} · Created ${shortDate(o.createdAt)}`}>
           <div className="overflow-x-auto rounded-lg bg-surface-pale p-3">
             <table className="w-full min-w-[30rem] text-left text-body-sm">
@@ -682,7 +682,7 @@ export function CancelOrderPage() {
       {guard.dialog}
       <PageTitle>Order cancellation</PageTitle>
       <Banner tone="danger" eyebrow="Review required" title="Cancel this unfulfilled order?" body="Review the order and inventory changes before confirming." />
-      <div className="grid gap-5 lg:grid-cols-[minmax(0,1.7fr)_minmax(0,1fr)]">
+      <div className="grid grid-cols-[minmax(0,1fr)] gap-5 lg:grid-cols-[minmax(0,1.7fr)_minmax(0,1fr)]">
         <Panel title={`Order ${o.trackingNo} · ${customerName(o)}`} subtitle="Check the fulfilment status and expected stock changes.">
           {o.canCancel ? (
             <div className="rounded-lg bg-danger-bg px-4 py-3">
@@ -758,7 +758,7 @@ export function OrderCancelledPage() {
     <div className="flex flex-col gap-6">
       <PageTitle>Order cancelled</PageTitle>
       <Banner tone="brand" eyebrow="Cancellation complete" title="The order was cancelled and stock restored." body="The order stays in your records as Cancelled." />
-      <div className="grid gap-5 lg:grid-cols-[minmax(0,1.7fr)_minmax(0,1fr)]">
+      <div className="grid grid-cols-[minmax(0,1fr)] gap-5 lg:grid-cols-[minmax(0,1.7fr)_minmax(0,1fr)]">
         <Panel title="What changed">
           <DetailRows
             rows={[

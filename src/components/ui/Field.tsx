@@ -86,9 +86,13 @@ export function Field({ label, required = false, hint, hintTone = "muted", error
   );
 }
 
+/** Phones: the input/select fills a 44px-tall tap area that overlaps the
+ * filled block's padding (negative margin), so the field keeps its Figma size. */
+const tapArea = "min-h-11 -my-2.5 lg:my-0 lg:min-h-0 lg:self-stretch";
+
 const controlBox = cn(
   // mobile: borderless inside the filled block
-  "flex items-center gap-2",
+  "flex min-w-0 items-center gap-2",
   // desktop: outlined control
   "lg:h-control-lg lg:rounded-sm lg:border lg:border-line-default lg:bg-surface-card lg:pl-4 lg:pr-1.5",
   "lg:focus-within:border-brand-navy lg:focus-within:shadow-focus"
@@ -122,6 +126,8 @@ export const TextInput = forwardRef<HTMLInputElement, TextInputProps>(function T
         aria-required={field?.required || undefined}
         className={cn(
           "min-w-0 flex-1 bg-transparent text-input font-normal text-ink-strong outline-none lg:font-medium",
+          // phones: a 44px tap area inside the filled block's padding (same look)
+          field ? tapArea : "min-h-11 lg:min-h-0",
           "placeholder:text-ink-muted disabled:cursor-not-allowed disabled:text-ink-muted",
           // the control box shows focus on desktop; keep a ring on mobile
           "focus-visible:shadow-none"
@@ -197,7 +203,7 @@ export const SelectInput = forwardRef<HTMLSelectElement, SelectHTMLAttributes<HT
         aria-invalid={field?.invalid || undefined}
         aria-describedby={field?.describedBy}
         aria-required={field?.required || undefined}
-        className="min-w-0 flex-1 appearance-none bg-transparent pr-6 text-input font-normal text-ink-strong outline-none lg:font-medium"
+        className={cn("w-full min-w-0 flex-1 appearance-none bg-transparent pr-6 text-input font-normal text-ink-strong outline-none lg:font-medium", field ? tapArea : "min-h-11 lg:min-h-0")}
         {...rest}
       >
         {children}

@@ -184,7 +184,7 @@ function InvoiceDocument({
       <p className="mt-1 text-body-sm text-ink-muted">
         {number} · {invoiceBadge[status].label} · Issued {issued}
       </p>
-      <div className="mt-5 grid gap-4 rounded-lg bg-surface-pale p-4 md:grid-cols-2">
+      <div className="mt-5 grid grid-cols-[minmax(0,1fr)] gap-4 rounded-lg bg-surface-pale p-4 md:grid-cols-2">
         <div>
           <p className="text-caption font-semibold uppercase text-ink-muted">Bill to</p>
           <p className="mt-2 text-body-lg text-ink-strong">{client.name || "Customer name"}</p>
@@ -302,10 +302,11 @@ export function InvoiceEditorPage() {
       {guard.dialog}
       <PageTitle>{editing ? `Edit invoice ${existing.data?.invoiceNumber}` : "Create an invoice"}</PageTitle>
       <p className="-mt-4 text-body-sm text-ink-muted">Prepare a branded invoice, review totals, then send or download a PDF.</p>
-      <div className="grid gap-5 lg:grid-cols-[minmax(0,1.4fr)_minmax(0,1fr)]">
+      {/* Form and live preview side by side from desktop (1440); stacked below, so the preview table never gets squeezed. */}
+      <div className="grid grid-cols-[minmax(0,1fr)] gap-5 desktop:grid-cols-[minmax(0,1.4fr)_minmax(0,1fr)]">
         <form noValidate onSubmit={submit()} className="flex flex-col gap-5">
           <Panel title="Invoice details" subtitle="Business identity is pulled from your profile. Review before sending.">
-            <div className="grid gap-4 md:grid-cols-2 md:gap-x-8 md:gap-y-5">
+            <div className="grid grid-cols-[minmax(0,1fr)] gap-4 md:grid-cols-2 md:gap-x-8 md:gap-y-5">
               <Field label="Invoice number">
                 <TextInput value={existing.data?.invoiceNumber ?? "Assigned when saved"} readOnly disabled />
               </Field>
@@ -337,7 +338,7 @@ export function InvoiceEditorPage() {
               {fields.map((f, n) => {
                 const e = formState.errors.items?.[n];
                 return (
-                  <div key={f.id} className="grid gap-3 rounded-md bg-surface-card p-3 md:grid-cols-[minmax(0,2fr)_minmax(0,0.7fr)_minmax(0,1fr)_auto] md:items-end">
+                  <div key={f.id} className="grid grid-cols-[minmax(0,1fr)] gap-3 rounded-md bg-surface-card p-3 md:grid-cols-[minmax(0,2fr)_minmax(0,0.7fr)_minmax(0,1fr)_auto] md:items-end">
                     <Field label="Item" error={e?.description?.message}>
                       <TextInput placeholder="Product or service" {...register(`items.${n}.description` as const)} />
                     </Field>
@@ -434,9 +435,9 @@ export function InvoiceCreatedPage() {
     <div className="flex flex-col gap-6">
       <PageTitle>Invoice created</PageTitle>
       <Confirmation eyebrow={invoiceBadge[i.status].label} title={`${i.invoiceNumber} is ready.`} body="Preview it, email it to your customer or download the PDF." />
-      <div className="grid gap-5 lg:grid-cols-[minmax(0,1.6fr)_minmax(0,1fr)]">
+      <div className="grid grid-cols-[minmax(0,1fr)] gap-5 lg:grid-cols-[minmax(0,1.6fr)_minmax(0,1fr)]">
         <Panel title="Invoice summary">
-          <dl className="grid grid-cols-[minmax(0,9rem)_1fr] gap-x-4 gap-y-3 text-body-lg">
+          <dl className="grid grid-cols-[fit-content(9rem)_minmax(0,1fr)] gap-x-4 gap-y-3 text-body-lg">
             <dt className="text-ink-muted">Customer</dt>
             <dd className="text-ink-strong">{i.clientName}</dd>
             <dt className="text-ink-muted">Lines</dt>
@@ -447,7 +448,7 @@ export function InvoiceCreatedPage() {
             <dd className="text-ink-strong">{i.dueDate ? shortDate(i.dueDate) : "No due date"}</dd>
           </dl>
           <ErrorNote className="mt-4" error={pdf.error} fallback="We couldn't prepare the PDF. Please try again." onRetry={() => void pdf.run(i)} />
-          <div className="mt-6 flex flex-col gap-3 md:flex-row">
+          <div className="mt-6 flex flex-col gap-3 md:flex-row md:flex-wrap">
             <ButtonLink to={`/invoices/${i._id}/email`} className="md:flex-1">
               <IconMail aria-hidden="true" className="size-icon" /> Email invoice
             </ButtonLink>
@@ -495,7 +496,7 @@ export function InvoicePreviewPage() {
     <div className="flex flex-col gap-6">
       <PageTitle>Invoice PDF preview</PageTitle>
       <IntroCard eyebrow="Invoicing / Download or send" title="Review every detail before sharing the invoice." />
-      <div className="grid gap-5 lg:grid-cols-[minmax(0,1.8fr)_minmax(0,1fr)]">
+      <div className="grid grid-cols-[minmax(0,1fr)] gap-5 lg:grid-cols-[minmax(0,1.8fr)_minmax(0,1fr)]">
         <InvoiceDocument
           number={i.invoiceNumber}
           status={i.status}
@@ -626,7 +627,7 @@ export function EmailInvoicePage() {
       <IntroCard eyebrow="Invoicing / Customer communication" title="Send a professional invoice in a few steps.">
         An invoice PDF is attached to the customer email.
       </IntroCard>
-      <div className="grid gap-5 lg:grid-cols-[minmax(0,1.6fr)_minmax(0,1fr)]">
+      <div className="grid grid-cols-[minmax(0,1fr)] gap-5 lg:grid-cols-[minmax(0,1.6fr)_minmax(0,1fr)]">
         <form noValidate onSubmit={onSubmit}>
           <Panel title="Compose email">
             <div className="flex flex-col gap-4 md:gap-5">
@@ -702,9 +703,9 @@ export function InvoiceSentPage() {
     <div className="flex flex-col gap-6">
       <PageTitle>Invoice sent</PageTitle>
       <Confirmation eyebrow={invoiceBadge[i.status].label} title={`${i.invoiceNumber} is on its way.`} body={`We emailed it${to || i.clientEmail ? ` to ${to || i.clientEmail}` : ""} with the PDF attached.`} />
-      <div className="grid gap-5 lg:grid-cols-[minmax(0,1.6fr)_minmax(0,1fr)]">
+      <div className="grid grid-cols-[minmax(0,1fr)] gap-5 lg:grid-cols-[minmax(0,1.6fr)_minmax(0,1fr)]">
         <Panel title="Sent invoice">
-          <dl className="grid grid-cols-[minmax(0,9rem)_1fr] gap-x-4 gap-y-3 text-body-lg">
+          <dl className="grid grid-cols-[fit-content(9rem)_minmax(0,1fr)] gap-x-4 gap-y-3 text-body-lg">
             <dt className="text-ink-muted">Customer</dt>
             <dd className="text-ink-strong">{i.clientName}</dd>
             <dt className="text-ink-muted">Total</dt>

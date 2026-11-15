@@ -15,6 +15,9 @@
   body {
     @apply bg-surface-page font-sans text-body-sm text-ink-strong antialiased;
     min-height: 100dvh;
+    /* A long email, URL or reference never pushes the page sideways: it breaks
+       only when it can't fit on its line (normal text is unaffected). */
+    overflow-wrap: break-word;
   }
 
   /* Hand pointer on everything clickable (Tailwind v4's reset uses the default arrow on buttons). */
@@ -41,6 +44,27 @@
   :focus-visible {
     outline: none;
     box-shadow: var(--shadow-focus);
+  }
+
+  /* Phones and tablets: every link, button and checkbox/radio label gets a tap
+     area of at least 44×44px (WCAG 2.5.5) via an invisible ::after, without
+     changing how anything looks or is laid out. Base-layer `position:
+     relative` loses to the absolute/fixed/sticky utilities, so positioned
+     controls keep their position (they're containing blocks already). The
+     layout check (scripts/check-layout.mjs) counts this area. */
+  @media (max-width: 1023.98px) {
+    :where(a[href], button, [role="button"], summary, label:has(input[type="checkbox"], input[type="radio"])) {
+      position: relative;
+    }
+    :where(a[href], button, [role="button"], summary, label:has(input[type="checkbox"], input[type="radio"]))::after {
+      content: "";
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      width: max(100%, 44px);
+      height: max(100%, 44px);
+      transform: translate(-50%, -50%);
+    }
   }
 
   /* Workspace preferences (13.03): set on <html> from the person's settings. */

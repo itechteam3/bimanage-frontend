@@ -93,7 +93,7 @@ export function SuppliersPage() {
       />
       <BsnTabs />
       <Intro>Buyer payments are held securely in escrow until delivery is confirmed.</Intro>
-      <div className="grid gap-5 lg:grid-cols-[minmax(0,2.3fr)_minmax(0,1fr)]">
+      <div className="grid grid-cols-[minmax(0,1fr)] gap-5 lg:grid-cols-[minmax(0,2.3fr)_minmax(0,1fr)]">
         <Panel title="Verified wholesale partners" subtitle="Filter by category, location and trust score.">
           <form role="search" onSubmit={submit} className="grid grid-cols-[minmax(0,1fr)] gap-4 md:grid-cols-[minmax(0,1fr)_minmax(0,1fr)]">
             <Field label="Search">
@@ -221,7 +221,7 @@ export function SupplierProfilePage() {
           This supplier isn't taking new orders right now. Your existing orders aren't affected.
         </p>
       )}
-      <div className="grid gap-5 lg:grid-cols-[minmax(0,2.3fr)_minmax(0,1fr)]">
+      <div className="grid grid-cols-[minmax(0,1fr)] gap-5 lg:grid-cols-[minmax(0,2.3fr)_minmax(0,1fr)]">
         <Panel title="Supplier trust and product catalogue" subtitle="Review credentials before bulk ordering.">
           <RecordRows
             label="Supplier credentials"
@@ -491,7 +491,7 @@ export function ProductsPage() {
       />
       <BsnTabs />
       <Intro>Minimum order quantities vary by supplier and product.</Intro>
-      <div className="grid gap-5 lg:grid-cols-[minmax(0,2.3fr)_minmax(0,1fr)]">
+      <div className="grid grid-cols-[minmax(0,1fr)] gap-5 lg:grid-cols-[minmax(0,2.3fr)_minmax(0,1fr)]">
         <Panel title="Browse wholesale inventory" subtitle="Compare products from verified suppliers.">
           <form role="search" onSubmit={submit} className="grid grid-cols-[minmax(0,1fr)] gap-4 md:grid-cols-[minmax(0,1fr)_minmax(0,1fr)]">
             <Field label="Search" className="md:col-span-2">
@@ -672,7 +672,7 @@ function Checkout({ p }: { p: SupplyProduct }) {
         }
       />
       <Intro>Escrow is held until the buyer confirms goods received.</Intro>
-      <div className="grid gap-5 lg:grid-cols-[minmax(0,1.7fr)_minmax(0,1fr)]">
+      <div className="grid grid-cols-[minmax(0,1fr)] gap-5 lg:grid-cols-[minmax(0,1.7fr)_minmax(0,1fr)]">
         <form noValidate onSubmit={handleSubmit((v) => setReview(v))} className="flex min-w-0 flex-col gap-5">
           <Panel title="Order and delivery details" subtitle={sup ? `Supplier: ${sup.businessName} • Verified.` : undefined}>
             <div className="grid grid-cols-[minmax(0,1fr)] gap-4 md:grid-cols-[minmax(0,1fr)_minmax(0,1fr)] md:gap-x-10 md:gap-y-6">

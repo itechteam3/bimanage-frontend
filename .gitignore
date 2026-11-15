@@ -24,4 +24,4 @@ docs/figma/missing.json
 Thumbs.db
 
 # screenshots from npm run check:layout
-layout-check/
+layout-check*/

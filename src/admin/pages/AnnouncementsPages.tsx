@@ -137,7 +137,7 @@ export function AnnouncementEditorPage() {
         <Link to="/admin/announcements" className="text-body-sm font-semibold text-ink-brand">← Announcements</Link>
       </p>
       {done && <p className="rounded-lg bg-success-bg px-4 py-3 text-body-lg text-success" role="status">{done}</p>}
-      <div className="grid gap-5 lg:grid-cols-[minmax(0,1.2fr)_minmax(0,1fr)]">
+      <div className="grid grid-cols-[minmax(0,1fr)] gap-5 lg:grid-cols-[minmax(0,1.2fr)_minmax(0,1fr)]">
         <Section title={editable ? "Compose" : "Message"}>
           <fieldset disabled={!editable} className="flex flex-col gap-4">
             <Field label="Title" required error={field === "title" ? adminError(error) : undefined}>
@@ -146,7 +146,7 @@ export function AnnouncementEditorPage() {
             <Field label="Message" required hint="Plain text. Leave a blank line between paragraphs." error={field === "body" ? adminError(error) : undefined}>
               <TextArea rows={8} value={d.body} onChange={(e) => set("body", e.target.value)} maxLength={4000} />
             </Field>
-            <div className="grid gap-3 md:grid-cols-2">
+            <div className="grid grid-cols-[minmax(0,1fr)] gap-3 md:grid-cols-2">
               <Field label="Button label (optional)">
                 <TextInput value={d.linkLabel} onChange={(e) => set("linkLabel", e.target.value)} maxLength={40} placeholder="See what's new" />
               </Field>

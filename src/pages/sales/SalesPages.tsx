@@ -36,7 +36,7 @@ export function SalesOverviewPage() {
         <KpiCard tone="invoices" label="Open invoices" value={count(s?.openInvoices)} caption="Awaiting payment" />
         <KpiCard tone="stock" label="Low stock" value={count(s?.lowStock)} caption="Restock reminders" />
       </div>
-      <div className="grid gap-5 lg:grid-cols-[minmax(0,1.9fr)_minmax(0,1fr)]">
+      <div className="grid grid-cols-[minmax(0,1fr)] gap-5 lg:grid-cols-[minmax(0,1.9fr)_minmax(0,1fr)]">
         <Panel title="Recent sales activity">
           {recent.isLoading ? (
             <Loading />
@@ -70,7 +70,7 @@ export function SalesOverviewPage() {
           </dl>
         </Panel>
       </div>
-      <div className="grid gap-3 rounded-2xl bg-surface-pale p-4 md:grid-cols-2">
+      <div className="grid grid-cols-[minmax(0,1fr)] gap-3 rounded-2xl bg-surface-pale p-4 md:grid-cols-2">
         <ButtonLink to="/orders/new" fullWidth>Create an order →</ButtonLink>
         {invoicesOn ? <ButtonLink to="/invoices/new" fullWidth>Create invoice →</ButtonLink> : <ButtonLink to="/reports" fullWidth>Reports →</ButtonLink>}
       </div>

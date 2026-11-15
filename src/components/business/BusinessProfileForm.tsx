@@ -115,7 +115,7 @@ export function BusinessProfileForm({
     <form noValidate onSubmit={onSubmit} className="flex min-w-0 flex-col gap-5">
       {guard.dialog}
       <Panel title={title} subtitle={subtitle ?? "Required details are marked with an asterisk."}>
-        <div className="grid gap-4 md:grid-cols-2 md:gap-x-10 md:gap-y-6">
+        <div className="grid grid-cols-[minmax(0,1fr)] gap-4 md:grid-cols-2 md:gap-x-10 md:gap-y-6">
           <Field label="Legal business name" required error={formState.errors.businessName?.message}>
             <TextInput autoComplete="organization" placeholder="Elijah Apparel Ltd" {...register("businessName")} />
           </Field>

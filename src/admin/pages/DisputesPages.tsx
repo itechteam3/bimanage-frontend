@@ -93,7 +93,7 @@ function MoneyFacts({ m }: { m: Money }) {
 
 function PartiesFacts({ p }: { p: Parties }) {
   return (
-    <div className="grid gap-5 md:grid-cols-2">
+    <div className="grid grid-cols-[minmax(0,1fr)] gap-5 md:grid-cols-2">
       <div>
         <h3 className="text-caption font-semibold uppercase text-ink-muted">Buyer</h3>
         {p.buyer ? (
@@ -171,7 +171,7 @@ export function DisputeDetailPage() {
         </Link>
       </p>
       {done && <p className="rounded-lg bg-success-bg px-4 py-3 text-body-lg text-success" role="status">{done}</p>}
-      <div className="grid gap-5 lg:grid-cols-[minmax(0,1.4fr)_minmax(0,1fr)]">
+      <div className="grid grid-cols-[minmax(0,1fr)] gap-5 lg:grid-cols-[minmax(0,1.4fr)_minmax(0,1fr)]">
         <div className="flex min-w-0 flex-col gap-5">
           <Section title="The case" actions={<Pill value={dis.status} />}>
             <Facts
@@ -337,7 +337,7 @@ export function SupplyOrderDetailPage() {
           Disputed: <Link to={`/admin${d.dispute.link}`} className="font-semibold underline">{d.dispute.reference || "open the dispute"}</Link> (<Pill value={d.dispute.status} />)
         </p>
       )}
-      <div className="grid gap-5 lg:grid-cols-[minmax(0,1.4fr)_minmax(0,1fr)]">
+      <div className="grid grid-cols-[minmax(0,1fr)] gap-5 lg:grid-cols-[minmax(0,1.4fr)_minmax(0,1fr)]">
         <div className="flex min-w-0 flex-col gap-5">
           <Section title="Order" actions={<Pill value={o.status} />}>
             <Facts

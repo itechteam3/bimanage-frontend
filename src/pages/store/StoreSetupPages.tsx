@@ -80,10 +80,10 @@ export function CreateStorePage() {
       <PageTitle>Create your online store</PageTitle>
       <p className="-mt-4 text-body-sm text-ink-muted">Set up a storefront customers can buy from without an account.</p>
       <IntroCard eyebrow="Store operations / New store" title="Your store starts as a draft. Only you can see it until you publish." />
-      <div className="grid gap-5 lg:grid-cols-[minmax(0,1.7fr)_minmax(0,1fr)]">
+      <div className="grid grid-cols-[minmax(0,1fr)] gap-5 lg:grid-cols-[minmax(0,1.7fr)_minmax(0,1fr)]">
         <form noValidate onSubmit={onSubmit} className="flex flex-col gap-5">
           <Panel title="Store details" subtitle="Fields marked * are required.">
-            <div className="grid gap-4 md:grid-cols-2 md:gap-x-10 md:gap-y-6">
+            <div className="grid grid-cols-[minmax(0,1fr)] gap-4 md:grid-cols-2 md:gap-x-10 md:gap-y-6">
               <Field label="Store name" required error={formState.errors.storeName?.message}>
                 <TextInput placeholder="Elijah Apparel" autoComplete="organization" {...register("storeName")} />
               </Field>
@@ -187,13 +187,13 @@ function StoreOverview({ store }: { store: Store }) {
             <KpiCard tone="orders" label="Template" value={c.template.name} caption={c.plan.name} />
             <KpiCard tone="revenue" label="Status" value={live ? "Live" : "Draft"} caption={live ? "Published" : "Not published"} />
           </div>
-          <div className="grid gap-5 lg:grid-cols-[minmax(0,2fr)_minmax(0,1fr)]">
+          <div className="grid grid-cols-[minmax(0,1fr)] gap-5 lg:grid-cols-[minmax(0,2fr)_minmax(0,1fr)]">
             <Panel title="Store readiness" subtitle="Required steps must be done before you publish.">
               <ul className="flex flex-col gap-2">
                 {c.steps.map((s) => {
                   const to = STEP_LINK[s.key];
                   return (
-                    <li key={s.key} className="grid grid-cols-[auto_1fr] items-start gap-3 rounded-md bg-surface-pale px-4 py-3 md:grid-cols-[auto_1.3fr_1fr_1.4fr_auto] md:items-center">
+                    <li key={s.key} className="grid grid-cols-[auto_minmax(0,1fr)] items-start gap-3 rounded-md bg-surface-pale px-4 py-3 md:grid-cols-[auto_1.3fr_minmax(0,1fr)_1.4fr_auto] md:items-center">
                       {s.done ? <IconCheck aria-hidden="true" className="mt-0.5 size-5 text-success md:mt-0" /> : <IconCircleDashed aria-hidden="true" className="mt-0.5 size-5 text-ink-muted md:mt-0" />}
                       <p className="font-semibold text-ink-strong">
                         {s.label}
@@ -324,7 +324,7 @@ function StoreSettings({ store }: { store: Store }) {
       <StoreTabs />
       <form noValidate onSubmit={onSubmit} className="flex flex-col gap-5">
         <Panel title="Business identity" subtitle="Shown on your storefront and order emails.">
-          <div className="grid gap-4 md:grid-cols-2 md:gap-x-10 md:gap-y-6">
+          <div className="grid grid-cols-[minmax(0,1fr)] gap-4 md:grid-cols-2 md:gap-x-10 md:gap-y-6">
             <Field label="Store name" required error={formState.errors.storeName?.message}>
               <TextInput {...register("storeName")} />
             </Field>
@@ -352,7 +352,7 @@ function StoreSettings({ store }: { store: Store }) {
           </div>
         </Panel>
         <Panel title="Delivery" subtitle="One flat fee per order. Leave the second field empty if delivery is never free.">
-          <div className="grid gap-4 md:grid-cols-2 md:gap-x-10">
+          <div className="grid grid-cols-[minmax(0,1fr)] gap-4 md:grid-cols-2 md:gap-x-10">
             <Field label="Delivery fee (NGN)" error={formState.errors.deliveryFee?.message} hint="0 for free delivery.">
               <TextInput inputMode="decimal" {...register("deliveryFee")} />
             </Field>
@@ -419,7 +419,7 @@ function Templates({ store }: { store: Store }) {
         <ErrorNote error={templates.error ?? true} fallback="We couldn't load templates." onRetry={() => void templates.refetch()} />
       ) : (
         <>
-          <ul className="grid gap-4 md:grid-cols-3">
+          <ul className="grid grid-cols-[minmax(0,1fr)] gap-4 md:grid-cols-3">
             {templates.data.templates.map((t) => {
               const copy = TEMPLATE_COPY[t.key];
               const current = templates.data.current === t.key;
@@ -491,7 +491,7 @@ export function DomainPage() {
 type StepState = "done" | "waiting" | "todo";
 function Step({ n, title, state, children }: { n: number; title: string; state: StepState; children: ReactNode }) {
   return (
-    <li className="grid grid-cols-[auto_1fr] gap-3 rounded-xl bg-surface-pale p-4">
+    <li className="grid grid-cols-[auto_minmax(0,1fr)] gap-3 rounded-xl bg-surface-pale p-4">
       <span aria-hidden="true" className={cn("flex size-8 items-center justify-center rounded-full text-action font-semibold", state === "done" ? "bg-success text-ink-on-brand" : "bg-surface-card text-ink-brand")}>
         {state === "done" ? <IconCheck className="size-4" /> : n}
       </span>
@@ -574,7 +574,7 @@ function DomainSettings({ store }: { store: Store }) {
       <p className="-mt-4 text-body-sm text-ink-muted">Manage your public address and custom domain.</p>
       <StoreTabs />
       <IntroCard eyebrow={opsEyebrow(store)} title="Custom domains require Standard or Premium." />
-      <div className="grid gap-5 lg:grid-cols-[minmax(0,1.7fr)_minmax(0,1fr)]">
+      <div className="grid grid-cols-[minmax(0,1fr)] gap-5 lg:grid-cols-[minmax(0,1.7fr)_minmax(0,1fr)]">
         <div className="flex flex-col gap-5">
           <Panel title="Your addresses" subtitle="The BiManage address always works, on every plan.">
             <div className="flex flex-col gap-4">
@@ -606,7 +606,7 @@ function DomainSettings({ store }: { store: Store }) {
                   <p>
                     Sign in where you bought <strong className="text-ink-strong">{d.customDomain.split(".").slice(-2).join(".")}</strong> (for example GoDaddy, Namecheap, Whogohost or Cloudflare), open its DNS settings and add a new record with exactly these values. Delete any other record for the same host first.
                   </p>
-                  <div className="grid gap-2 md:grid-cols-2">
+                  <div className="grid grid-cols-[minmax(0,1fr)] gap-2 md:grid-cols-2">
                     <CopyValue label="Type" value={dns.type} />
                     <CopyValue label="Host / name" value={dns.host} />
                     <CopyValue label="Value / target / points to" value={dns.value} />

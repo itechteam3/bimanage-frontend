@@ -123,7 +123,7 @@ export function UserDetailPage() {
           </p>
         </section>
       )}
-      <div className="grid gap-5 lg:grid-cols-2">
+      <div className="grid grid-cols-[minmax(0,1fr)] gap-5 lg:grid-cols-2">
         <Section title="Account">
           <Facts
             rows={[
@@ -156,7 +156,7 @@ export function UserDetailPage() {
           <Facts rows={[["Supplier", d.wholesalerProfile.businessName], ["Verification", <Pill key="v" value={d.wholesalerProfile.verificationStatus} />], ["Payout account", d.wholesalerProfile.accountNumber ? `${d.wholesalerProfile.bankName || "Bank"} ${d.wholesalerProfile.accountNumber}` : "Not set"]]} />
         </Section>
       )}
-      <div className="grid gap-5 lg:grid-cols-2">
+      <div className="grid grid-cols-[minmax(0,1fr)] gap-5 lg:grid-cols-2">
         <Section title={`Team (${d.team.length})`}>
           {d.team.length ? (
             <ul className="flex flex-col gap-2">

@@ -74,7 +74,7 @@ function Analytics({ store }: { store: Store }) {
       <p className="-mt-4 text-body-sm text-ink-muted">Follow order activity, product views and revenue.</p>
       <StoreTabs />
       <IntroCard eyebrow={opsEyebrow(store)} title={`${rangeLabel} · Download the orders as a spreadsheet.`} />
-      <div role="tablist" aria-label="Date range" className="flex w-max items-center gap-1 rounded-md bg-surface-pale p-1">
+      <div role="tablist" aria-label="Date range" className="flex w-fit max-w-full flex-wrap items-center gap-1 rounded-md bg-surface-pale p-1">
         {RANGES.map(([key, label]) => (
           <button key={key} type="button" role="tab" aria-selected={range === key} onClick={() => setRange(key)} className={cn("min-h-11 rounded-sm px-3 text-action font-semibold", range === key ? "bg-surface-card text-ink-brand shadow-card" : "text-ink-muted")}>
             {label}
@@ -108,13 +108,13 @@ function Analytics({ store }: { store: Store }) {
             <KpiCard tone="stock" label="Product views" value={count(a.productViews)} caption={`${count(a.storeViews)} store visits (all time)`} />
             <KpiCard tone="invoices" label="Top product" value={a.topProduct?.name ?? "—"} caption={a.topProduct ? `${count(a.topProduct.sold)} sold` : "No sales yet"} />
           </div>
-          <div className="grid gap-5 lg:grid-cols-[minmax(0,2fr)_minmax(0,1fr)]">
+          <div className="grid grid-cols-[minmax(0,1fr)] gap-5 lg:grid-cols-[minmax(0,2fr)_minmax(0,1fr)]">
             <Panel title="Revenue trend" subtitle="Paid orders, by the day they were paid (Lagos time).">
               {a.orders === 0 ? <p className="text-body-sm text-ink-muted">No paid orders in this period yet.</p> : <BarChart data={bars(a)} format={naira} title={`Store revenue, ${rangeLabel.toLowerCase()}`} />}
               {a.topProducts.length > 0 && (
                 <ul className="mt-6 flex flex-col divide-y divide-line-subtle">
                   {a.topProducts.map((p) => (
-                    <li key={p.productId} className="grid grid-cols-[1fr_auto_auto] items-center gap-4 py-3 text-body-sm">
+                    <li key={p.productId} className="grid grid-cols-[minmax(0,1fr)_auto_auto] items-center gap-4 py-3 text-body-sm">
                       <Link to={`/store/products/${p.productId}`} className="truncate font-semibold text-ink-strong hover:underline">
                         {p.name}
                       </Link>

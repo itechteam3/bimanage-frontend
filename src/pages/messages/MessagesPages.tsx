@@ -491,7 +491,7 @@ function ConversationActions({ id, c }: { id: string; c: Thread["conversation"] 
         }
       >
         {restricted && (
-          <dl className="grid grid-cols-[auto_1fr] gap-x-4 gap-y-1 text-body-sm">
+          <dl className="grid grid-cols-[auto_minmax(0,1fr)] gap-x-4 gap-y-1 text-body-sm">
             <dt className="text-ink-muted">Conversation</dt>
             <dd className="text-ink-strong">{c.title}</dd>
             <dt className="text-ink-muted">Active order</dt>

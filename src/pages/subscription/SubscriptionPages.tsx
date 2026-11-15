@@ -195,7 +195,7 @@ function Overview() {
         All the essentials for tracking access, daily usage and next steps.
       </IntroCard>
       <PlanNotices s={s} />
-      <div className="grid gap-5 lg:grid-cols-[minmax(0,1.7fr)_minmax(0,1fr)]">
+      <div className="grid grid-cols-[minmax(0,1fr)] gap-5 lg:grid-cols-[minmax(0,1.7fr)_minmax(0,1fr)]">
         <Panel title="Your subscription overview" subtitle={unlimited ? "Unlimited use of everything in your plan." : "Core tools with a transparent daily allowance."}>
           <div className="flex flex-col gap-5">
             <PriceBox label="Current plan" value={planLine(s)} />
@@ -261,10 +261,10 @@ function Overview() {
           )}
         </Panel>
       </div>
-      <div className="grid gap-5 lg:grid-cols-2">
+      <div className="grid grid-cols-[minmax(0,1fr)] gap-5 lg:grid-cols-2">
         <Panel title="Benefits" subtitle="What your access includes right now.">
           {benefits.length ? (
-            <ul className="grid gap-2 md:grid-cols-2">
+            <ul className="grid grid-cols-[minmax(0,1fr)] gap-2 md:grid-cols-2">
               {benefits.map((b) => (
                 <li key={b} className="flex items-center gap-2 text-body-sm text-ink-strong">
                   <IconCheck aria-hidden="true" className="size-4 shrink-0 text-success" /> {b}
@@ -362,12 +362,12 @@ function Plans() {
         </div>
         {provisional && <p className="text-caption text-ink-muted">{PROVISIONAL}</p>}
       </div>
-      <ul className="grid gap-4 lg:grid-cols-3">
+      <ul className="grid grid-cols-[minmax(0,1fr)] gap-4 lg:grid-cols-3">
         {plans.data.map((p) => (
           <PlanCard key={p.id} p={p} cycle={cycle} s={s} />
         ))}
       </ul>
-      <div className="grid gap-4 md:grid-cols-3">
+      <div className="grid grid-cols-[minmax(0,1fr)] gap-4 md:grid-cols-3">
         <Panel tone="pale" title="Credits & FELI">
           <p className="text-body-sm text-ink-secondary">Freemium gives 100 daily credits and 20 FELI messages. Standard and Premium don't use credits.</p>
         </Panel>
@@ -507,7 +507,7 @@ function ChangePlan() {
         You'll see the final price and the date before anything changes.
       </IntroCard>
       <Stepper steps={["Current plan", "Compare", "Review price", "Confirm change"]} current={2} />
-      <div className="grid gap-5 lg:grid-cols-[minmax(0,1.7fr)_minmax(0,1fr)]">
+      <div className="grid grid-cols-[minmax(0,1fr)] gap-5 lg:grid-cols-[minmax(0,1.7fr)_minmax(0,1fr)]">
         <Panel title="Review the differences" subtitle={summary(q)}>
           <div className="flex flex-col gap-5">
             <PriceBox label="Requested plan" value={plan === "freemium" ? "Freemium" : `${planName(plan)} · ${cycleName(cycle)}`} />
@@ -744,7 +744,7 @@ export function CreditsPage() {
       <IntroCard eyebrow={u.unlimited ? "Your plan / Usage" : "Freemium / Daily usage"} title={u.unlimited ? "Your plan doesn't use credits." : out ? "You've used today's free credits." : `${count(u.credits.remaining)} credits left today.`}>
         {u.unlimited ? "Use everything in your plan as often as you need." : "Your credits refresh at midnight (Lagos time). You can review other plans any time."}
       </IntroCard>
-      <div className="grid gap-5 lg:grid-cols-[minmax(0,1.7fr)_minmax(0,1fr)]">
+      <div className="grid grid-cols-[minmax(0,1fr)] gap-5 lg:grid-cols-[minmax(0,1.7fr)_minmax(0,1fr)]">
         <Panel title="Your daily allowance" subtitle="Freemium actions use credits from a daily allowance.">
           <div className="flex flex-col gap-5">
             <PriceBox label="Daily credit limit" value={`${count(u.credits.daily)} credits`} />
@@ -796,7 +796,7 @@ export function TrialPage() {
         {ended ? "Your products, orders and settings are all still here." : `On ${shortDate(s.trialEndDate)} you move to Freemium unless you choose a plan.`}
       </IntroCard>
       <Stepper steps={["Trial started", "Full access", ended ? "Trial ended" : "Ending soon", "Choose a plan"]} current={ended ? 3 : 2} />
-      <div className="grid gap-5 lg:grid-cols-[minmax(0,1.7fr)_minmax(0,1fr)]">
+      <div className="grid grid-cols-[minmax(0,1fr)] gap-5 lg:grid-cols-[minmax(0,1.7fr)_minmax(0,1fr)]">
         <Panel title={ended ? "What changed" : "What changes"} subtitle="Freemium keeps your data and core tools.">
           <div className="flex flex-col gap-5">
             <DetailRows
@@ -870,7 +870,7 @@ function Billing() {
       <IntroCard eyebrow="Account / Subscription" title="Everything about your billing.">
         Review plan status, payments and receipts.
       </IntroCard>
-      <div className="grid gap-5 lg:grid-cols-[minmax(0,1.7fr)_minmax(0,1fr)]">
+      <div className="grid grid-cols-[minmax(0,1fr)] gap-5 lg:grid-cols-[minmax(0,1.7fr)_minmax(0,1fr)]">
         <Panel title="Billing overview" subtitle="Payments and receipts for plans and startup packages.">
           <div className="flex flex-col gap-5">
             {s && <PriceBox label="Current plan" value={planLine(s)} />}
@@ -910,7 +910,7 @@ function Billing() {
               {history.data.payments.map((r) => {
                 const st = BILL_STATUS[r.status];
                 return (
-                  <li key={r.id} className="grid grid-cols-[1fr_auto] items-center gap-x-4 gap-y-1 py-3 md:grid-cols-[1.6fr_1fr_auto_auto]">
+                  <li key={r.id} className="grid grid-cols-[minmax(0,1fr)_auto] items-center gap-x-4 gap-y-1 py-3 md:grid-cols-[1.6fr_minmax(0,1fr)_auto_auto]">
                     <span className="font-semibold text-ink-strong">
                       {r.description} {r.mode === "test" && <Status tone="warning">Test</Status>}
                     </span>

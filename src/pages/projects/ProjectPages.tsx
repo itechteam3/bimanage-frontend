@@ -121,7 +121,7 @@ function ProjectDialog({ project, onClose, onSaved }: { project?: Project; onClo
             ))}
           </SelectInput>
         </Field>
-        <div className="grid gap-4 md:grid-cols-2">
+        <div className="grid grid-cols-[minmax(0,1fr)] gap-4 md:grid-cols-2">
           <Field label="Due date">
             <TextInput type="date" {...register("dueDate")} />
           </Field>
@@ -176,7 +176,7 @@ export function ProjectsOverviewPage() {
         <KpiCard tone="revenue" label="Completed tasks" value={count(s?.completedTasks)} caption={s ? `of ${count(s.totalTasks)} tasks` : "—"} />
         <KpiCard tone="stock" label="Upcoming deadlines" value={count(s?.upcomingDeadlines)} caption={s ? (s.overdueTasks ? `${count(s.overdueTasks)} overdue` : `Next ${s.upcomingDays} days`) : "—"} />
       </div>
-      <div className="grid gap-5 lg:grid-cols-[minmax(0,1.7fr)_minmax(0,1fr)]">
+      <div className="grid grid-cols-[minmax(0,1fr)] gap-5 lg:grid-cols-[minmax(0,1.7fr)_minmax(0,1fr)]">
         <Panel title="Projects in progress">
           {projects.isLoading ? (
             <Loading />
@@ -281,7 +281,7 @@ function TaskCard({ projectId, task }: { projectId: string; task: Task }) {
             value={task.status}
             disabled={update.isPending}
             onChange={(e) => update.mutate({ taskId: task._id, status: e.target.value as TaskStatus })}
-            className="h-8 w-full rounded-sm border border-line-default bg-surface-card px-2 text-caption text-ink-strong"
+            className="h-11 w-full rounded-sm border border-line-default bg-surface-card px-2 text-caption text-ink-strong lg:h-8"
           >
             {STATUS_COLUMNS.map(([s, l]) => (
               <option key={s} value={s}>{l}</option>
@@ -295,7 +295,7 @@ function TaskCard({ projectId, task }: { projectId: string; task: Task }) {
 
 function Kanban({ project }: { project: Project }) {
   return (
-    <div className="grid gap-3 md:grid-cols-3">
+    <div className="grid grid-cols-[minmax(0,1fr)] gap-3 md:grid-cols-3">
       {STATUS_COLUMNS.map(([status, label]) => {
         const tasks = project.tasks.filter((t) => t.status === status);
         return (
@@ -398,7 +398,7 @@ function TaskForm({ project, task }: { project: Project; task?: Task }) {
             ))}
           </SelectInput>
         </Field>
-        <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-1 desktop:grid-cols-2">
+        <div className="grid grid-cols-[minmax(0,1fr)] gap-4 md:grid-cols-2 lg:grid-cols-1 desktop:grid-cols-2">
           <Field label="Due date">
             <TextInput type="date" disabled={staffOnly} {...register("dueDate")} />
           </Field>
@@ -444,7 +444,7 @@ function TaskForm({ project, task }: { project: Project; task?: Task }) {
                     }
                   }}
                   placeholder="Add checklist item"
-                  className="h-control-sm w-full rounded-sm border border-line-default bg-surface-card px-3 text-body-sm"
+                  className="h-11 w-full rounded-sm border border-line-default bg-surface-card px-3 text-body-sm lg:h-control-sm"
                 />
               </label>
               <Button size="md" variant="secondary" disabled={!newItem.trim() || subtasks.add.isPending} onClick={() => subtasks.add.mutate(newItem.trim(), { onSuccess: () => setNewItem("") })}>
@@ -575,9 +575,9 @@ export function TaskAddedPage() {
         <h2 className="mt-2 text-section-title text-ink-strong">“{task.title}” is on the {project.data.name} board.</h2>
         <p className="mt-2 text-body-sm text-ink-muted">{task.assignedTo ? `${task.assignedTo.name} has been notified.` : "Assign it to someone so it gets done."}</p>
       </section>
-      <div className="grid gap-5 lg:grid-cols-[minmax(0,1.6fr)_minmax(0,1fr)]">
+      <div className="grid grid-cols-[minmax(0,1fr)] gap-5 lg:grid-cols-[minmax(0,1.6fr)_minmax(0,1fr)]">
         <Panel title="Task summary">
-          <dl className="grid grid-cols-[minmax(0,8rem)_1fr] gap-x-4 gap-y-3 text-body-lg">
+          <dl className="grid grid-cols-[fit-content(8rem)_minmax(0,1fr)] gap-x-4 gap-y-3 text-body-lg">
             <dt className="text-ink-muted">Assignee</dt>
             <dd className="text-ink-strong">{task.assignedTo?.name ?? "No one yet"}</dd>
             <dt className="text-ink-muted">Priority</dt>
@@ -646,7 +646,7 @@ export function ProjectsCalendarPage() {
     <div className="flex flex-col gap-6">
       <PageTitle>Projects calendar</PageTitle>
       <IntroCard eyebrow="Projects / Team deadlines" title="A clear look at upcoming tasks and milestones." />
-      <div className="grid gap-5 lg:grid-cols-[minmax(0,2fr)_minmax(0,1fr)]">
+      <div className="grid grid-cols-[minmax(0,1fr)] gap-5 lg:grid-cols-[minmax(0,2fr)_minmax(0,1fr)]">
         <Panel>
           <div className="mb-3 flex items-center justify-between gap-2">
             <h2 className="text-title-sm text-ink-brand" aria-live="polite">{label}</h2>
@@ -689,7 +689,12 @@ export function ProjectsCalendarPage() {
                           </Link>
                         </li>
                       ))}
-                      {items.length > 3 && <li className="px-1 text-micro text-ink-muted">+{items.length - 3} more</li>}
+                      {items.length > 3 && (
+                        <li className="whitespace-nowrap px-1 text-micro text-ink-muted">
+                          +{items.length - 3}
+                          <span className="hidden md:inline"> more</span>
+                        </li>
+                      )}
                     </ul>
                   </div>
                 );

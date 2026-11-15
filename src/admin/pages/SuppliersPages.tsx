@@ -118,7 +118,7 @@ export function SupplierDetailPage() {
           {w.infoRequest.items.length > 0 && <p className="mt-1 text-body-sm">Needed: {w.infoRequest.items.join(", ")}</p>}
         </section>
       )}
-      <div className="grid gap-5 lg:grid-cols-2">
+      <div className="grid grid-cols-[minmax(0,1fr)] gap-5 lg:grid-cols-2">
         <Section title="Application">
           <Facts
             rows={[
@@ -151,7 +151,7 @@ export function SupplierDetailPage() {
           <p className="mt-3 text-body-sm text-ink-muted">Check the name and number against the CAC register before approving.</p>
         </Section>
       </div>
-      <div className="grid gap-5 lg:grid-cols-2">
+      <div className="grid grid-cols-[minmax(0,1fr)] gap-5 lg:grid-cols-2">
         <Section title="Business">
           <Facts
             rows={[

@@ -1,6 +1,6 @@
 // Vitest runs on its own bundled Vite, so its config lives apart from
 // vite.config.ts (whose plugins target Vite 6).
-import { defineConfig } from "vitest/config";
+import { configDefaults, defineConfig } from "vitest/config";
 import { fileURLToPath, URL } from "node:url";
 
 export default defineConfig({
@@ -8,6 +8,8 @@ export default defineConfig({
   esbuild: { jsx: "automatic" },
   test: {
     environment: "jsdom",
+    // Never pick up copies of the repo in agent worktrees.
+    exclude: [...configDefaults.exclude, ".claude/**"],
     setupFiles: ["./src/test/setup.ts"],
     css: false,
     restoreMocks: true,

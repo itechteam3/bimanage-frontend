@@ -70,7 +70,7 @@ function ContactStore() {
     <p className="text-body-sm text-ink-secondary">
       Contact {store.storeName}:{" "}
       {store.contactEmail && (
-        <a href={`mailto:${store.contactEmail}`} className="font-semibold text-ink-brand hover:underline">
+        <a href={`mailto:${store.contactEmail}`} className="break-all font-semibold text-ink-brand hover:underline">
           {store.contactEmail}
         </a>
       )}
@@ -132,7 +132,7 @@ export function StorefrontHomePage() {
           e.preventDefault();
           setSearch(typed.trim());
         }}
-        className="grid gap-2 rounded-2xl border border-line-card bg-surface-card p-3 md:grid-cols-[2fr_1fr_1fr_auto]"
+        className="grid grid-cols-[minmax(0,1fr)] gap-2 rounded-2xl border border-line-card bg-surface-card p-3 md:grid-cols-[2fr_minmax(0,1fr)_minmax(0,1fr)_auto]"
       >
         <label className="flex h-control-lg items-center gap-2 rounded-md bg-surface-pale px-3">
           <IconSearch aria-hidden="true" className="size-icon text-ink-muted" />
@@ -181,7 +181,7 @@ export function StorefrontHomePage() {
           <h2 id="featured" className="text-title-md text-ink-strong">
             Featured
           </h2>
-          <ul className="mt-4 grid gap-4 md:grid-cols-3">{featured.map((x) => <ProductCard key={x._id} p={x} slug={slug} />)}</ul>
+          <ul className="mt-4 grid grid-cols-[minmax(0,1fr)] gap-4 md:grid-cols-3">{featured.map((x) => <ProductCard key={x._id} p={x} slug={slug} />)}</ul>
         </section>
       )}
 
@@ -214,7 +214,7 @@ export function StorefrontHomePage() {
             )}
           </div>
         ) : (
-          <ul className="mt-4 grid gap-4 md:grid-cols-2 lg:grid-cols-3">{list.map((x) => <ProductCard key={x._id} p={x} slug={slug} />)}</ul>
+          <ul className="mt-4 grid grid-cols-[minmax(0,1fr)] gap-4 md:grid-cols-2 lg:grid-cols-3">{list.map((x) => <ProductCard key={x._id} p={x} slug={slug} />)}</ul>
         )}
       </section>
     </div>
@@ -290,7 +290,7 @@ export function StorefrontProductPage() {
       <Hero title={p.name}>
         {categoryLabel(p.category)} · {store.storeName}
       </Hero>
-      <div className="grid gap-5 lg:grid-cols-[minmax(0,1.6fr)_minmax(0,1fr)]">
+      <div className="grid grid-cols-[minmax(0,1fr)] gap-5 lg:grid-cols-[minmax(0,1.6fr)_minmax(0,1fr)]">
         <Panel title="Product gallery and details">
           <ProductImage p={{ ...p, images: p.images.slice(photo, photo + 1).concat(p.images).slice(0, 1) }} className="aspect-[4/3]" />
           {p.images.length > 1 && (
@@ -412,11 +412,11 @@ export function CartPage() {
       <Hero title="Your bag">
         {count(c.itemCount)} {c.itemCount === 1 ? "item" : "items"}
       </Hero>
-      <div className="grid gap-5 lg:grid-cols-[minmax(0,1.6fr)_minmax(0,1fr)]">
+      <div className="grid grid-cols-[minmax(0,1fr)] gap-5 lg:grid-cols-[minmax(0,1.6fr)_minmax(0,1fr)]">
         <Panel title="Items">
           <ul className="flex flex-col divide-y divide-line-subtle">
             {c.items.map((i) => (
-              <li key={i.product._id} className="grid grid-cols-[4rem_1fr] gap-3 py-3 md:grid-cols-[4rem_1fr_auto]">
+              <li key={i.product._id} className="grid grid-cols-[4rem_minmax(0,1fr)] gap-3 py-3 md:grid-cols-[4rem_minmax(0,1fr)_auto]">
                 <ProductImage p={i.product} className="size-16" />
                 <div className="min-w-0">
                   <Link to={`/s/${slug}/products/${i.product._id}`} className="font-semibold text-ink-strong hover:underline">
@@ -545,7 +545,7 @@ export function CheckoutPage() {
       <Hero title={reviewing ? "Check your details" : "Secure guest checkout"}>
         {reviewing ? "Step 2 of 2 · Make sure your email is right: your receipt and tracking link go there." : "Step 1 of 2 · No account required · Your delivery details stay protected"}
       </Hero>
-      <div className="grid gap-5 lg:grid-cols-[minmax(0,1.6fr)_minmax(0,1fr)]">
+      <div className="grid grid-cols-[minmax(0,1fr)] gap-5 lg:grid-cols-[minmax(0,1.6fr)_minmax(0,1fr)]">
         {reviewing ? (
           <Panel title="Review your order">
             <section aria-labelledby="confirm-email" className="rounded-xl bg-surface-tint-blue px-4 py-4">
@@ -584,7 +584,7 @@ export function CheckoutPage() {
         ) : (
           <form id="checkout" noValidate onSubmit={toReview} className="flex flex-col gap-5">
             <Panel title="Delivery and contact details" subtitle="Guest checkout · no account creation needed">
-              <div className="grid gap-4 md:grid-cols-2 md:gap-x-8 md:gap-y-5">
+              <div className="grid grid-cols-[minmax(0,1fr)] gap-4 md:grid-cols-2 md:gap-x-8 md:gap-y-5">
                 <Field label="Full name" required error={field("customerName")}>
                   <TextInput autoComplete="name" {...register("customerName")} />
                 </Field>
@@ -868,16 +868,16 @@ export function TrackOrderPage() {
   return (
     <div className="flex flex-col gap-6">
       <Hero title="Track an order">Follow delivery progress using your order number and email.</Hero>
-      <div className="grid gap-5 lg:grid-cols-[minmax(0,1.6fr)_minmax(0,1fr)]">
+      <div className="grid grid-cols-[minmax(0,1fr)] gap-5 lg:grid-cols-[minmax(0,1.6fr)_minmax(0,1fr)]">
         <Panel title={o ? "Delivery timeline" : "Find your order"}>
           <form noValidate onSubmit={onSubmit} className="flex flex-col gap-4 md:flex-row md:items-start">
-            <Field label="Order number" required error={formState.errors.order?.message} className="flex-1">
+            <Field label="Order number" required error={formState.errors.order?.message} className="min-w-0 flex-1">
               <TextInput placeholder="BM-7K2Q-9MXA" autoCapitalize="characters" {...register("order")} />
             </Field>
-            <Field label="Email used at checkout" required error={formState.errors.email?.message} className="flex-1">
+            <Field label="Email used at checkout" required error={formState.errors.email?.message} className="min-w-0 flex-1">
               <TextInput type="email" autoComplete="email" {...register("email")} />
             </Field>
-            <Button type="submit" size="md" loading={formState.isSubmitting} loadingText="Searching…" className="md:mt-7">
+            <Button type="submit" size="md" loading={formState.isSubmitting} loadingText="Searching…" className="shrink-0 md:mt-7">
               Track
             </Button>
           </form>

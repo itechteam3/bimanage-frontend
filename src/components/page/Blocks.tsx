@@ -91,7 +91,7 @@ export function InfoStrip({ title, children, action, tone = "pale" }: { title: s
 /** Two-column label/value rows ("Package — Starter"). */
 export function DetailRows({ rows }: { rows: Array<[string, ReactNode]> }) {
   return (
-    <dl className="grid grid-cols-[minmax(0,10rem)_1fr] gap-x-4 gap-y-3 text-body-lg">
+    <dl className="grid grid-cols-[fit-content(10rem)_minmax(0,1fr)] gap-x-4 gap-y-3 text-body-lg">
       {rows.map(([k, v]) => (
         <div key={k} className="contents">
           <dt className="text-ink-muted">{k}</dt>

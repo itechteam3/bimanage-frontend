@@ -189,10 +189,10 @@ export function ProductFormPage() {
       </PageTitle>
       <p className="-mt-4 text-body-sm text-ink-muted">Keep pricing, quantity and stock alerts accurate.</p>
       <IntroCard eyebrow="Workspace / Inventory" title="Stock can be published to your online store after saving." />
-      <div className="grid gap-5 lg:grid-cols-[minmax(0,1.7fr)_minmax(0,1fr)]">
+      <div className="grid grid-cols-[minmax(0,1fr)] gap-5 lg:grid-cols-[minmax(0,1.7fr)_minmax(0,1fr)]">
         <form noValidate onSubmit={onSubmit} className="flex flex-col gap-5">
           <Panel title="Product and stock information" subtitle="Required fields keep the inventory consistent.">
-            <div className="grid gap-4 md:grid-cols-2 md:gap-x-10 md:gap-y-6">
+            <div className="grid grid-cols-[minmax(0,1fr)] gap-4 md:grid-cols-2 md:gap-x-10 md:gap-y-6">
               <Field label="Product name" required error={formState.errors.name?.message}>
                 <TextInput placeholder="Classic linen shirt" {...register("name")} />
               </Field>
@@ -303,10 +303,10 @@ export function AddFirstProduct() {
       <PageTitle>Add your first inventory product</PageTitle>
       <p className="-mt-4 text-body-sm text-ink-muted">Start tracking products and stock from one place.</p>
       <IntroCard eyebrow="Inventory" title="Every sale reduces stock automatically, so you always know what you have." />
-      <div className="grid gap-5 lg:grid-cols-[minmax(0,1.7fr)_minmax(0,1fr)]">
+      <div className="grid grid-cols-[minmax(0,1fr)] gap-5 lg:grid-cols-[minmax(0,1.7fr)_minmax(0,1fr)]">
         <form noValidate onSubmit={onSubmit} className="flex flex-col gap-5">
           <Panel title="Product details" subtitle="You can add photos, barcodes and alerts later.">
-            <div className="grid gap-4 md:grid-cols-2 md:gap-x-10 md:gap-y-6">
+            <div className="grid grid-cols-[minmax(0,1fr)] gap-4 md:grid-cols-2 md:gap-x-10 md:gap-y-6">
               <Field label="Product name" required error={formState.errors.name?.message}>
                 <TextInput placeholder="Classic linen shirt" autoFocus {...register("name")} />
               </Field>
@@ -412,10 +412,10 @@ export function AdjustStockPage() {
       {guard.dialog}
       <p className="-mt-4 text-body-sm text-ink-muted">Record corrections and received inventory.</p>
       <IntroCard eyebrow="Workspace / Inventory" title="Every manual adjustment is recorded in the product audit trail." />
-      <div className="grid gap-5 lg:grid-cols-[minmax(0,1.7fr)_minmax(0,1fr)]">
+      <div className="grid grid-cols-[minmax(0,1fr)] gap-5 lg:grid-cols-[minmax(0,1.7fr)_minmax(0,1fr)]">
         <form noValidate onSubmit={onSubmit} className="flex flex-col gap-5">
           <Panel title="Quantity adjustment details" subtitle={`Product: ${p.name}${p.sku ? ` / ${p.sku}` : ""}.`}>
-            <div className="grid gap-4 md:grid-cols-2 md:gap-x-10 md:gap-y-6">
+            <div className="grid grid-cols-[minmax(0,1fr)] gap-4 md:grid-cols-2 md:gap-x-10 md:gap-y-6">
               <Field label="Current stock">
                 <TextInput value={`${count(current)} units`} readOnly disabled />
               </Field>
@@ -603,7 +603,7 @@ export function BarcodeLookupPage() {
       <PageTitle>Scan or enter barcode</PageTitle>
       <p className="-mt-4 text-body-sm text-ink-muted">Find a product using its barcode, SKU or name.</p>
       <IntroCard eyebrow="Workspace / Inventory" title="Existing products load instantly without duplicate entry." />
-      <div className="grid gap-5 lg:grid-cols-[minmax(0,1.7fr)_minmax(0,1fr)]">
+      <div className="grid grid-cols-[minmax(0,1fr)] gap-5 lg:grid-cols-[minmax(0,1.7fr)_minmax(0,1fr)]">
         <div className="flex flex-col gap-5">
           <Panel title="Barcode and product lookup" subtitle="Scan with a barcode reader, use the camera, or type a code.">
             <form
