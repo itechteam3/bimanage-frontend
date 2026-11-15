@@ -148,7 +148,9 @@ function StoreOverview({ store }: { store: Store }) {
   const [error, setError] = useState<unknown>(null);
   const [confirmDraft, setConfirmDraft] = useState(false);
   const c = checklist.data;
-  const live = c?.status === "published";
+  // The checklist is the source of truth; until it loads, use the store's own
+  // flag so a live store never flashes "Ready to launch?".
+  const live = c ? c.status === "published" : store.status === "published" || store.isPublished === true;
 
   const run = async (on: boolean) => {
     setError(null);
