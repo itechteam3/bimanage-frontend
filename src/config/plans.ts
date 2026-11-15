@@ -14,6 +14,7 @@ export type Feature =
   | "settings"
   | "inventory"
   | "orders"
+  | "customers"
   | "analytics"
   | "tasks"
   | "projects"
@@ -40,6 +41,7 @@ export const PLAN_FEATURES: Record<PlanId, Partial<Record<Feature, Access>>> = {
     settings: true,
     inventory: true,
     orders: true,
+    customers: true, // every plan (backend #82)
     analytics: true,
     notifications: true,
     profile: true,
@@ -51,6 +53,7 @@ export const PLAN_FEATURES: Record<PlanId, Partial<Record<Feature, Access>>> = {
     settings: true,
     inventory: true,
     orders: true,
+    customers: true, // every plan (backend #82)
     analytics: true,
     tasks: true,
     projects: true,
@@ -69,6 +72,7 @@ export const PLAN_FEATURES: Record<PlanId, Partial<Record<Feature, Access>>> = {
     settings: true,
     inventory: true,
     orders: true,
+    customers: true, // every plan (backend #82)
     analytics: true,
     tasks: true,
     projects: true,

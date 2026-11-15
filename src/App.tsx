@@ -22,7 +22,8 @@ import { InviteAcceptPage } from "@/pages/auth/InviteAcceptPage";
 import { WorkspaceLayout } from "@/components/layout/WorkspaceLayout";
 import { useRouteMeta } from "@/lib/seo/meta";
 import { DashboardPage } from "@/pages/app/DashboardPage";
-import { ComingSoonPage } from "@/pages/app/ComingSoonPage";
+import { MorePage } from "@/pages/app/MorePage";
+import { CUSTOMERS_FEATURE } from "@/config/customers";
 import { PathPage } from "@/pages/onboarding/PathPage";
 import { CheckoutPage, PackagesPage, PaymentStatusPage } from "@/pages/onboarding/PackagePages";
 import { BusinessIdentityPage, ChecklistPage, TrialStartedPage } from "@/pages/onboarding/SetupPages";
@@ -74,6 +75,12 @@ const InvoiceCreatedPage = sales("InvoiceCreatedPage");
 const InvoicePreviewPage = sales("InvoicePreviewPage");
 const EmailInvoicePage = sales("EmailInvoicePage");
 const InvoiceSentPage = sales("InvoiceSentPage");
+// Customers (Figma 09.01–09.03) load as one chunk.
+const cust = (name: keyof typeof import("@/pages/customers/index")) => lazy(() => import("@/pages/customers/index").then((m) => ({ default: m[name] })));
+const CustomersPage = cust("CustomersPage");
+const CustomerProfilePage = cust("CustomerProfilePage");
+const CustomerFormPage = cust("CustomerFormPage");
+const CustomerAddedPage = cust("CustomerAddedPage");
 // Projects and team (Phase 6) load as one chunk.
 const work = (name: keyof typeof import("@/pages/projects/index")) => lazy(() => import("@/pages/projects/index").then((m) => ({ default: m[name] })));
 const ProjectsOverviewPage = work("ProjectsOverviewPage");
@@ -232,10 +239,6 @@ function RootLayout() {
 
 const guest = (el: React.ReactNode) => <GuestOnly>{el}</GuestOnly>;
 
-// Sections built in later phases: real routes now, so links never 404.
-const comingSoon = (
-  [["/more", "More"]] as const
-).map(([path, section]) => ({ path, element: <ComingSoonPage />, handle: { section } }));
 import { RouteErrorPage } from "@/components/feedback/RouteErrorPage";
 
 const authed = (el: React.ReactNode) => <RequireAuth>{el}</RequireAuth>;
@@ -311,6 +314,17 @@ export const routes = [
               { path: "/orders/:id/created", element: <OrderCreatedPage />, handle: { section: "Orders", back: back("/orders/:id", SCREENS.orders) } },
               { path: "/orders/:id/cancel", element: <CancelOrderPage />, handle: { section: "Orders", back: back("/orders/:id", SCREENS.orders) } },
               { path: "/orders/:id/cancelled", element: <OrderCancelledPage />, handle: { section: "Orders", back: back("/orders/:id", SCREENS.orders) } },
+            ],
+          },
+          // Customers (Figma 09.01–09.03): come with orders (plan), own permissions
+          {
+            element: gated(CUSTOMERS_FEATURE, "Customers"),
+            children: [
+              { path: "/customers", element: <CustomersPage />, handle: { section: "Customers" } },
+              { path: "/customers/new", element: <CustomerFormPage />, handle: { section: "Customers", back: back("/customers", SCREENS.customers) } },
+              { path: "/customers/:id", element: <CustomerProfilePage />, handle: { section: "Customers", back: back("/customers", SCREENS.customers) } },
+              { path: "/customers/:id/edit", element: <CustomerFormPage key="edit" />, handle: { section: "Customers", back: back("/customers/:id", SCREENS.customers) } },
+              { path: "/customers/:id/added", element: <CustomerAddedPage />, handle: { section: "Customers", back: back("/customers/:id", SCREENS.customers) } },
             ],
           },
           {
@@ -510,8 +524,8 @@ export const routes = [
               { path: "/bisupplynet/*", element: <Navigate to="/bisupplynet" replace /> },
             ],
           },
-          // Later phases
-          ...comingSoon,
+          // Mobile "More" tab: every section not in the tab bar
+          { path: "/more", element: <MorePage />, handle: { section: "More" } },
         ],
       },
       // Public storefront (Figma 08.11–08.20): no sign-in, guest checkout.

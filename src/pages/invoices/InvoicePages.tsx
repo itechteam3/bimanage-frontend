@@ -29,6 +29,7 @@ import { count, naira, shortDate } from "@/lib/format";
 import { cn } from "@/lib/cn";
 import { useUrlState } from "@/lib/nav/useUrlState";
 import { useLeaveGuard } from "@/lib/nav/useLeaveGuard";
+import type { CustomerPrefill } from "@/lib/customers/api";
 
 const Loading = () => (
   <div className="flex justify-center py-16 text-ink-brand" role="status">
@@ -242,6 +243,8 @@ function InvoiceDocument({
 
 export function InvoiceEditorPage() {
   const { id } = useParams();
+  // From a customer profile (09.xx): the customer comes prefilled.
+  const prefill = (useLocation().state as { customer?: CustomerPrefill } | null)?.customer;
   const editing = Boolean(id);
   const navigate = useNavigate();
   const existing = useInvoice(id);
@@ -249,7 +252,7 @@ export function InvoiceEditorPage() {
   const [formError, setFormError] = useState<unknown>(null);
   const { register, control, handleSubmit, watch, reset, setError, formState } = useForm<InvoiceValues>({
     resolver: zodResolver(invoiceSchema),
-    defaultValues: { clientName: "", clientEmail: "", clientPhone: "", clientAddress: "", dueDate: "", tax: 0, notes: "", items: [{ description: "", quantity: 1, unitPrice: 0 }] } as unknown as InvoiceValues,
+    defaultValues: { clientName: prefill?.name ?? "", clientEmail: prefill?.email ?? "", clientPhone: prefill?.phone ?? "", clientAddress: prefill?.address ?? "", dueDate: "", tax: 0, notes: "", items: [{ description: "", quantity: 1, unitPrice: 0 }] } as unknown as InvoiceValues,
   });
   const { fields, append, remove } = useFieldArray({ control, name: "items" });
   const guard = useLeaveGuard(formState.isDirty && !formState.isSubmitSuccessful);

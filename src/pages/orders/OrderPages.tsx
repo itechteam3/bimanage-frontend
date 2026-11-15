@@ -1,5 +1,5 @@
 import { useMemo, useState } from "react";
-import { Link, useNavigate, useParams } from "react-router-dom";
+import { Link, useLocation, useNavigate, useParams } from "react-router-dom";
 import { LoadMore } from "@/components/page/LoadMore";
 import { useFieldArray, useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -32,6 +32,7 @@ import { useCan } from "@/lib/auth/useCan";
 import { count, naira, shortDate } from "@/lib/format";
 import { cn } from "@/lib/cn";
 import { useLeaveGuard } from "@/lib/nav/useLeaveGuard";
+import type { CustomerPrefill } from "@/lib/customers/api";
 
 const Loading = () => (
   <div className="flex justify-center py-16 text-ink-brand" role="status">
@@ -217,15 +218,17 @@ type OrderValues = z.infer<typeof orderSchema>;
 
 export function CreateOrderPage() {
   const navigate = useNavigate();
+  // From a customer profile (09.xx): the customer comes prefilled.
+  const prefill = (useLocation().state as { customer?: CustomerPrefill } | null)?.customer;
   const products = useProducts();
   const create = useCreateOrder();
   const [formError, setFormError] = useState<unknown>(null);
   const { register, control, handleSubmit, watch, setError, formState } = useForm<OrderValues>({
     resolver: zodResolver(orderSchema),
     defaultValues: {
-      customerName: "",
-      customerEmail: "",
-      customerPhone: "",
+      customerName: prefill?.name ?? "",
+      customerEmail: prefill?.email ?? "",
+      customerPhone: prefill?.phone ?? "",
       paymentMethod: "cash",
       paymentStatus: "paid",
       fulfilmentStatus: "fulfilled",

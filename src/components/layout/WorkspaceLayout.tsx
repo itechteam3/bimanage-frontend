@@ -3,7 +3,7 @@ import { Navigate, Outlet, useLocation, useMatches, useNavigate } from "react-ro
 import { AppShell } from "./AppShell";
 import { useAuth } from "@/lib/auth/AuthProvider";
 import { useBusinessProfile, useOnboardingStatus, useUnreadCounts } from "@/lib/workspace/api";
-import type { NavItem, Permission } from "@/config/navigation";
+import { useNavState } from "@/lib/nav/useNavState";
 import { Spinner } from "@/components/ui";
 import { PhotoDialog } from "@/components/profile/PhotoDialog";
 import { useSubscription } from "@/lib/workspace/subscription";
@@ -25,6 +25,7 @@ export function WorkspaceLayout() {
   // plan-gated page doesn't wait for onboarding first (saved ~1.7s live).
   useSubscription();
   const [photoOpen, setPhotoOpen] = useState(false);
+  const navState = useNavState();
 
   const section =
     [...matches].reverse().map((m) => (m.handle as { section?: string } | undefined)?.section).find(Boolean) ?? "Dashboard";
@@ -41,14 +42,6 @@ export function WorkspaceLayout() {
     }
     if (onboarding.data && !onboarding.data.userPath) return <Navigate to="/onboarding" replace />;
   }
-
-  const navState = (item: NavItem) => {
-    if (item.ownerOnly && !isOwner) return "hidden" as const;
-    // A list (BiSupplyNet: buy or sell) shows when any one of them is allowed.
-    const perms = item.permission ? ([] as Permission[]).concat(item.permission) : [];
-    if (perms.length && workspace && perms.every((p) => workspace.permissions[p] === false)) return "hidden" as const;
-    return "visible" as const;
-  };
 
   return (
     <AppShell

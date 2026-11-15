@@ -21,7 +21,8 @@ export type Topic =
   | "onboarding"
   | "analytics"
   | "support"
-  | "reviews";
+  | "reviews"
+  | "customers";
 
 export interface ChangeEvent {
   topic: Topic;
@@ -35,12 +36,12 @@ type Key = readonly unknown[];
 
 /** Query-key prefixes to refresh for each topic. */
 export const TOPIC_KEYS: Record<Topic, Key[]> = {
-  orders: [["orders"], ["onboarding", "steps"]],
-  storeOrders: [["store", "orders"], ["store", "order"]],
+  orders: [["orders"], ["onboarding", "steps"], ["customers"]],
+  storeOrders: [["store", "orders"], ["store", "order"], ["customers"]],
   store: [["store"]],
   inventory: [["inventory"], ["store", "products"]],
   dashboard: [["dashboard"], ["onboarding", "steps"]],
-  invoices: [["invoices"]],
+  invoices: [["invoices"], ["customers"]],
   projects: [["projects"]],
   team: [["team"]],
   wallet: [["wallet"]],
@@ -52,6 +53,8 @@ export const TOPIC_KEYS: Record<Topic, Key[]> = {
   analytics: [["analytics"], ["store", "analytics"]],
   support: [["support"]],
   reviews: [["reviews"]],
+  // Customer stats follow orders and invoices; edits come as "customers" or customer:updated.
+  customers: [["customers"]],
 };
 
 /** Reference data that never changes because of a business event. */
