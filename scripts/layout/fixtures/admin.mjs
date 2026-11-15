@@ -30,6 +30,15 @@ const DISPUTE = {
 };
 const ANN = { _id: "n1", title: "Scheduled maintenance tonight from 1am to 2am", body: "BiManage will be unavailable for about an hour while we upgrade our servers.\n\nYour store stays online and no payments are affected.", audience: { kind: "all", plans: [] }, channels: { inApp: true, email: true }, status: "pending_approval", scheduledAt: iso(10), createdBy: { email: "ada@bitechteam.test" }, submittedBy: { email: "ada@bitechteam.test", at: iso(-1) }, needsApproval: true, editable: false, createdAt: iso(-2) };
 export const ADMIN_ROUTES = {
+  "GET /api/admin/store-orders": { orders: [{ trackingNo: "BM-7K2Q-9MXA", status: "delivered", total: 57000, paymentMode: "live", customerName: "Ada Nwosu", problemOpen: true, refundFailed: false, createdAt: iso(-72) }, { trackingNo: "BM-7K2Q-0002", status: "cancelled", total: 24500, paymentMode: "test", customerName: "Tunde Bello", problemOpen: false, refundFailed: true, createdAt: iso(-90) }] },
+  "GET /api/admin/store-orders/BM-7K2Q-9MXA": {
+    order: { trackingNo: "BM-7K2Q-9MXA", status: "delivered", isPaid: true, paidAt: iso(-70), paymentMode: "live", total: 57000, commissionAmount: 1710, vendorPayout: 55290, customerName: "Ada Nwosu", customerEmail: "ada@example.com", deliveredAt: iso(-40), deliveryConfirmedAt: null, statusHistory: [], createdAt: iso(-72) },
+    store: { storeName: "Elijah Apparel", storeSlug: "elijahapparel" },
+    payout: { status: "held", holdDays: 7, holdEndsAt: iso(120), customerConfirmed: false, disputeOpen: true, releasedAt: null, releaseReason: null },
+    dispute: { status: "open", reason: "damaged", message: "The linen shirt arrived with a long tear along the left seam, and the tote bag strap was missing entirely.", openedAt: iso(-30), resolvedAt: null, outcome: null, note: null },
+    refund: { status: "failed", amount: 57000, refundedAt: null },
+    ledger: [{ type: "held", amount: 55290, mode: "live", status: "completed", failureReason: null, note: null, at: iso(-70) }, { type: "refund", amount: 57000, mode: "live", status: "failed", failureReason: "Transaction cannot be refunded right now", note: null, at: iso(-20) }],
+  },
   "POST /api/notifications/unsubscribe": { valid: true, subscribed: false },
   "GET /api/admin/me": { _id: "a1", name: "BiTechTeam", email: "bitechteamlimited@gmail.com", role: "superadmin", roleLabel: "Superadmin", isActive: true, twoFactorEnabled: true, lastLogin: iso(-1), passwordChangedAt: iso(-200), avatar: null, can: ALL },
   "GET /api/admin/overview": OVERVIEW,
