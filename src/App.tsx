@@ -38,6 +38,7 @@ import { useAuth } from "@/lib/auth/AuthProvider";
 // Public landing page (signed-out "/") and newsletter links: their own chunks.
 const LandingPage = lazy(() => import("@/pages/landing/LandingPage"));
 const NewsletterPage = lazy(() => import("@/pages/landing/NewsletterPage"));
+const ContactPage = lazy(() => import("@/pages/landing/ContactPage"));
 
 /** "/": the landing page for visitors; signed-in people go straight to their start page (the dashboard by default). */
 function HomeRoute() {
@@ -272,6 +273,8 @@ export const routes = [
       },
       // The landing page for everyone (signed-in people can still view it; noindex — "/" is canonical).
       { path: "/home", element: <LandingPage /> },
+      // Public contact page: for everyone, signed in or out.
+      { path: "/contact", element: <ContactPage />, handle: { meta: { title: "Contact us", description: "Questions about BiManage, a demo for your team or help with your account? Send us a message and we'll reply by email." } } },
       { path: "/newsletter/confirm", element: <NewsletterPage action="confirm" /> },
       { path: "/newsletter/unsubscribe", element: <NewsletterPage action="unsubscribe" /> },
       // Authentication (Figma 01.xx)

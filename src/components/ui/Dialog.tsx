@@ -78,7 +78,7 @@ export function Dialog({
           </div>
         )}
         {children}
-        {actions && <div className="mt-2 flex flex-col-reverse gap-3 md:flex-row [&>*]:flex-1">{actions}</div>}
+        {actions && <div className="mt-2 flex flex-col-reverse gap-3 md:flex-row md:[&>*]:flex-1">{actions}</div>}
       </div>
     </dialog>
   );

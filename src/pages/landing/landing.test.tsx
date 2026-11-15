@@ -118,19 +118,18 @@ describe("landing page (/)", () => {
     for (const img of shots) expect(img.getAttribute("alt")).toMatch(/bimanage/i);
   });
 
-  it("contact form sends the request with an empty honeypot and confirms", async () => {
-    fb.handlers["POST /public/contact"] = () => [202, { message: "Thanks — we'll reply within one working day." }];
+  it("every Contact us link goes to /contact (navbar, mobile menu, floating button, footer)", async () => {
     const user = userEvent.setup();
     renderApp("/");
     await screen.findByRole("heading", { level: 1 });
-    await user.click(screen.getAllByRole("button", { name: "Contact us" })[0]!);
-    const dialog = await screen.findByRole("dialog", { name: "Contact us" });
-    await user.type(within(dialog).getByLabelText(/your name/i), "Ada");
-    await user.type(within(dialog).getByLabelText(/^email/i), "ada@example.com");
-    await user.type(within(dialog).getByLabelText(/^message/i), "I'd like a demo for my shop.");
-    await user.click(within(dialog).getByRole("button", { name: "Send message" }));
-    expect(await screen.findByText(/we'll reply within one working day/i)).toBeInTheDocument();
-    expect(last("POST /public/contact")?.body).toMatchObject({ name: "Ada", email: "ada@example.com", topic: "demo", website: "" });
+    expect(screen.queryByRole("button", { name: "Contact us" })).toBeNull();
+    expect(within(screen.getByRole("navigation", { name: "Main" })).getByRole("link", { name: "Contact us" })).toHaveAttribute("href", "/contact");
+    expect(within(screen.getByRole("navigation", { name: "Footer" })).getByRole("link", { name: "Contact us" })).toHaveAttribute("href", "/contact");
+    await user.click(screen.getByRole("button", { name: "Open menu" }));
+    expect(within(screen.getByRole("navigation", { name: "Menu" })).getByRole("link", { name: "Contact us" })).toHaveAttribute("href", "/contact");
+    const links = screen.getAllByRole("link", { name: "Contact us" });
+    expect(links).toHaveLength(4);
+    for (const a of links) expect(a).toHaveAttribute("href", "/contact");
   });
 
   it("newsletter signup posts the email and shows the confirmation message", async () => {

@@ -5,5 +5,8 @@ export const LEGAL = {
   privacyUrl: "", // e.g. https://bimanage.com/privacy
 };
 
-/** From the API docs contact (src/config/swagger.js); confirm it's monitored. */
-export const SUPPORT_EMAIL = "support@bimanage.com";
+/**
+ * VITE_SUPPORT_EMAIL when set; otherwise the API docs contact
+ * (src/config/swagger.js) — confirm it's monitored.
+ */
+export const SUPPORT_EMAIL = String(import.meta.env.VITE_SUPPORT_EMAIL || "").trim() || "support@bimanage.com";

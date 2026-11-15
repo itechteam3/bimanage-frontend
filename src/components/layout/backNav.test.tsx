@@ -152,7 +152,7 @@ describe("back rules", () => {
         if (route.children) walk(route.children);
       });
     walk(routes as unknown[]);
-    const starts = new Set(["/", "/login", "/register", "/dashboard", "/onboarding", "/onboarding/trial", "/inventory", "/sales", "/orders", "/projects", "/settings/team", "/store", "/wallet", "/s/:slug", "/oauth/callback", "/invite/accept", "/reset-password/done", "/analytics", "/bisupplynet/suppliers", "/bisupplynet/sell/earnings", "/bisupplynet/apply", "*", "/ui-kit/*"]);
+    const starts = new Set(["/", "/login", "/register", "/dashboard", "/onboarding", "/onboarding/trial", "/inventory", "/sales", "/orders", "/projects", "/settings/team", "/store", "/wallet", "/s/:slug", "/oauth/callback", "/invite/accept", "/reset-password/done", "/analytics", "/bisupplynet/suppliers", "/bisupplynet/sell/earnings", "/bisupplynet/apply", "/newsletter/confirm", "/newsletter/unsubscribe", "*", "/ui-kit/*"]);
     const missing = all.filter((r) => r.path && !r.path.endsWith("/*") && !starts.has(r.path) && r.path.split("/").length > 2 && !r.handle?.back).map((r) => r.path);
     expect(missing).toEqual([]);
   });

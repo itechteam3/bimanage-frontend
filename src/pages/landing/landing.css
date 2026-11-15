@@ -68,3 +68,43 @@ html.reduce-motion .lp-fade { animation: none; }
       linear-gradient(180deg, transparent 55%, var(--color-brand-navy) 92%);
   }
 }
+
+/* Mobile menu (PublicLayout NavBar): the hamburger's three bars morph into an
+   X, the panel slides/fades in (ease-out) with the links in a light stagger,
+   and slides back out before it unmounts (MENU_MS in PublicLayout.tsx). */
+.lp-burger-bar {
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  width: 22px;
+  height: 2px;
+  margin: -1px 0 0 -11px;
+  border-radius: 2px;
+  background: currentColor;
+  transition: transform 260ms cubic-bezier(0.2, 0.7, 0.2, 1), opacity 200ms ease;
+}
+.lp-burger-bar:nth-child(1) { transform: translateY(-7px); }
+.lp-burger-bar:nth-child(3) { transform: translateY(7px); }
+.lp-burger.lp-open .lp-burger-bar:nth-child(1) { transform: rotate(45deg); }
+.lp-burger.lp-open .lp-burger-bar:nth-child(2) { opacity: 0; transform: scaleX(0.2); }
+.lp-burger.lp-open .lp-burger-bar:nth-child(3) { transform: rotate(-45deg); }
+
+@keyframes lp-menu-in { from { opacity: 0; transform: translateY(-12px); } to { opacity: 1; transform: none; } }
+@keyframes lp-menu-out { from { opacity: 1; transform: none; } to { opacity: 0; transform: translateY(-12px); } }
+@keyframes lp-menu-item { from { opacity: 0; transform: translateY(-6px); } to { opacity: 1; transform: none; } }
+@keyframes lp-backdrop-in { from { opacity: 0; } to { opacity: 1; } }
+@keyframes lp-backdrop-out { from { opacity: 1; } to { opacity: 0; } }
+.lp-menu { animation: lp-menu-out 260ms cubic-bezier(0.4, 0, 1, 1) forwards; }
+.lp-menu.lp-open { animation: lp-menu-in 260ms cubic-bezier(0.2, 0.7, 0.2, 1) both; }
+.lp-menu.lp-open .lp-menu-item { animation: lp-menu-item 240ms cubic-bezier(0.2, 0.7, 0.2, 1) both; animation-delay: calc(60ms + var(--lp-i, 0) * 35ms); }
+.lp-menu-backdrop { animation: lp-backdrop-out 260ms ease forwards; }
+.lp-menu-backdrop.lp-open { animation: lp-backdrop-in 260ms ease both; }
+
+@media (prefers-reduced-motion: reduce) {
+  .lp-burger-bar { transition: none; }
+  .lp-menu, .lp-menu.lp-open, .lp-menu.lp-open .lp-menu-item, .lp-menu-backdrop, .lp-menu-backdrop.lp-open { animation: none; }
+}
+html.reduce-motion .lp-burger-bar { transition: none; }
+html.reduce-motion .lp-menu,
+html.reduce-motion .lp-menu.lp-open .lp-menu-item,
+html.reduce-motion .lp-menu-backdrop { animation: none; }
