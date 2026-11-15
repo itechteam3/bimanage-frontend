@@ -1,0 +1,178 @@
+import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
+import { screen, waitFor, within } from "@testing-library/react";
+import userEvent from "@testing-library/user-event";
+import { readFileSync } from "node:fs";
+import { tokenStore } from "@/lib/auth/tokenStore";
+import { serverStatus } from "@/lib/api/serverStatus";
+import { installFakeBackend, renderApp, type FakeBackend } from "@/test/fakeBackend";
+import { installFakeSockets } from "@/test/fakeSocket";
+
+const PLANS = {
+  currency: "NGN",
+  plans: [
+    { id: "freemium", name: "Freemium", description: "Get started for free", price: { monthly: 0, yearly: 0 }, credits: 100, features: { inventory: true, orders: true, store: "view_only" }, pricesConfirmed: true },
+    { id: "standard", name: "Standard", description: "Core business tools", price: { monthly: 17500, yearly: 175000 }, credits: "unlimited", features: { inventory: true, orders: true, invoices: true, store: true }, pricesConfirmed: false },
+  ],
+  startupPackages: [{ id: "starter", name: "Starter", amount: 199999, currency: "NGN", summary: "Core features", days: 30 }],
+};
+const STATS = (show: boolean) => ({ businesses: { count: 1234, show }, storesLive: { count: 87, show }, ordersProcessed: { count: 9876, show: false }, reviews: { count: 0, average: 0, show: false } });
+
+let fb: FakeBackend;
+beforeEach(() => {
+  serverStatus.set("up");
+  installFakeSockets();
+  tokenStore.clear();
+  fb = installFakeBackend();
+  fb.handlers["GET /public/plans"] = () => [200, PLANS];
+  fb.handlers["GET /public/stats"] = () => [200, STATS(false)];
+  fb.handlers["GET /reviews"] = () => [200, { reviews: [], total: 0, page: 1, totalPages: 0, stats: { averageRating: 0, totalReviews: 0, ratingBreakdown: {} } }];
+  fb.handlers["GET /support/faqs"] = () => [200, [{ _id: "f1", question: "How do payouts work?", answer: "Earnings become available when an order completes.", category: "wallet" }]];
+  // jsdom has no IntersectionObserver: the page must still show everything.
+  vi.stubGlobal("IntersectionObserver", undefined);
+});
+afterEach(() => {
+  tokenStore.clear();
+  vi.unstubAllGlobals();
+});
+const last = (key: string) => [...fb.calls].reverse().find((c) => c.key === key);
+
+describe("landing page (/)", () => {
+  it("signed-out visitors see the landing page with sign-in and sign-up links", async () => {
+    renderApp("/");
+    expect(await screen.findByRole("heading", { level: 1, name: /smart business starts with bimanage/i })).toBeInTheDocument();
+    const nav = screen.getByRole("banner");
+    expect(within(nav).getAllByRole("link", { name: "Sign in" })[0]).toHaveAttribute("href", "/login");
+    expect(within(nav).getAllByRole("link", { name: "Get started" })[0]).toHaveAttribute("href", "/register");
+    for (const a of screen.getAllByRole("link", { name: /get started free/i })) expect(a).toHaveAttribute("href", "/register");
+    expect(document.body.textContent).not.toMatch(/(^|[^B])iManage/); // never the Figma typo "iManage"
+  });
+
+  it("signed-in people go straight to the dashboard", async () => {
+    tokenStore.set("tok");
+    const router = renderApp("/");
+    await waitFor(() => expect(router.state.location.pathname).toBe("/dashboard"));
+  });
+
+  it("never links to the internal admin area", async () => {
+    renderApp("/");
+    await screen.findByRole("heading", { level: 1 });
+    for (const a of document.querySelectorAll("a[href]")) expect(a.getAttribute("href")).not.toMatch(/^\/admin/);
+    expect(document.body.textContent).not.toMatch(/admin area|platform admin|two-step sign-in for admins/i);
+  });
+
+  it("pricing comes from the API, with a monthly/yearly toggle and startup packages", async () => {
+    const user = userEvent.setup();
+    renderApp("/");
+    const pricing = await screen.findByRole("heading", { name: /start free, upgrade when you're ready/i });
+    const section = pricing.closest("section")!;
+    expect(await within(section).findByText("₦17,500")).toBeInTheDocument();
+    expect(within(section).getByText(/introductory and may change/i)).toBeInTheDocument();
+    await user.click(within(section).getByRole("radio", { name: "yearly" }));
+    expect(within(section).getByText("₦175,000")).toBeInTheDocument();
+    expect(within(section).getByText("₦199,999")).toBeInTheDocument();
+    expect(within(section).getByText(/live online store \(view only\)/i)).toBeInTheDocument();
+    expect(last("GET /public/plans")).toBeTruthy();
+  });
+
+  it("shows real numbers only when the server says they're worth showing", async () => {
+    renderApp("/");
+    await screen.findByRole("heading", { level: 1 });
+    await waitFor(() => expect(last("GET /public/stats")).toBeTruthy());
+    expect(screen.queryByRole("region", { name: /bimanage in numbers/i })).toBeNull();
+  });
+
+  it("counts up real numbers when shown", async () => {
+    fb.handlers["GET /public/stats"] = () => [200, STATS(true)];
+    renderApp("/");
+    const region = await screen.findByRole("region", { name: /bimanage in numbers/i });
+    expect(within(region).getByText("1,234")).toBeInTheDocument();
+    expect(within(region).getByText("87")).toBeInTheDocument();
+    expect(within(region).queryByText(/orders processed/i)).toBeNull();
+  });
+
+  it("leaves out the reviews section when there are no approved reviews", async () => {
+    renderApp("/");
+    await screen.findByRole("heading", { level: 1 });
+    expect(screen.queryByRole("heading", { name: /what businesses say/i })).toBeNull();
+  });
+
+  it("shows approved reviews from the public API when there are some", async () => {
+    fb.handlers["GET /reviews"] = () => [200, { reviews: [{ _id: "r1", headline: "Saves me hours", rating: 5, review: "Orders and stock in one place.", reviewer: { name: "Tola" }, businessName: "Tola Foods" }], total: 1, page: 1, totalPages: 1, stats: { averageRating: 5, totalReviews: 1, ratingBreakdown: {} } }];
+    renderApp("/");
+    expect(await screen.findByText("Saves me hours")).toBeInTheDocument();
+    expect(screen.getByRole("link", { name: /read all reviews/i })).toHaveAttribute("href", "/reviews");
+  });
+
+  it("FAQ uses the public help-centre articles", async () => {
+    renderApp("/");
+    expect(await screen.findByText("How do payouts work?")).toBeInTheDocument();
+    expect(screen.getByText("Is there a free plan?")).toBeInTheDocument();
+  });
+
+  it("product screenshots are labelled as sample data, with alt text", async () => {
+    renderApp("/");
+    await screen.findByRole("heading", { level: 1 });
+    expect(screen.getAllByText("Sample data").length).toBeGreaterThan(1);
+    const shots = screen.getAllByRole("img").filter((i) => (i.getAttribute("src") ?? "").includes("screens/") || /screens/.test(i.getAttribute("src") ?? ""));
+    expect(shots.length).toBeGreaterThan(1);
+    for (const img of shots) expect(img.getAttribute("alt")).toMatch(/sample data/i);
+  });
+
+  it("contact form sends the request with an empty honeypot and confirms", async () => {
+    fb.handlers["POST /public/contact"] = () => [202, { message: "Thanks — we'll reply within one working day." }];
+    const user = userEvent.setup();
+    renderApp("/");
+    await screen.findByRole("heading", { level: 1 });
+    await user.click(screen.getAllByRole("button", { name: "Contact us" })[0]!);
+    const dialog = await screen.findByRole("dialog", { name: "Contact us" });
+    await user.type(within(dialog).getByLabelText(/your name/i), "Ada");
+    await user.type(within(dialog).getByLabelText(/^email/i), "ada@example.com");
+    await user.type(within(dialog).getByLabelText(/^message/i), "I'd like a demo for my shop.");
+    await user.click(within(dialog).getByRole("button", { name: "Send message" }));
+    expect(await screen.findByText(/we'll reply within one working day/i)).toBeInTheDocument();
+    expect(last("POST /public/contact")?.body).toMatchObject({ name: "Ada", email: "ada@example.com", topic: "demo", website: "" });
+  });
+
+  it("newsletter signup posts the email and shows the confirmation message", async () => {
+    fb.handlers["POST /public/newsletter"] = () => [202, { message: "Check your inbox to confirm your subscription." }];
+    const user = userEvent.setup();
+    renderApp("/");
+    await screen.findByRole("heading", { level: 1 });
+    await user.type(screen.getByLabelText("Email address"), "ada@example.com");
+    await user.click(screen.getByRole("button", { name: "Subscribe" }));
+    expect(await screen.findByText(/check your inbox/i)).toBeInTheDocument();
+    expect(last("POST /public/newsletter")?.body).toEqual({ email: "ada@example.com", website: "" });
+  });
+});
+
+describe("newsletter links", () => {
+  it("confirm posts the signed link and shows the result", async () => {
+    fb.handlers["POST /public/newsletter/confirm"] = () => [200, { message: "You're subscribed.", valid: true, status: "confirmed" }];
+    renderApp("/newsletter/confirm?e=abc&t=sig");
+    expect(await screen.findByText("You're subscribed.")).toBeInTheDocument();
+    expect(last("POST /public/newsletter/confirm")?.body).toEqual({ e: "abc", t: "sig" });
+  });
+
+  it("a bad link shows the server's message", async () => {
+    fb.handlers["POST /public/newsletter/unsubscribe"] = () => [400, { message: "This link isn't valid.", valid: false }];
+    renderApp("/newsletter/unsubscribe?e=abc&t=bad");
+    expect(await screen.findByRole("alert")).toHaveTextContent(/isn't valid/i);
+  });
+});
+
+describe("SEO for /", () => {
+  it("the sitemap lists / first and never /admin", async () => {
+    const { sitemapXml, robotsTxt } = await import("../../../api/_lib/seo.js");
+    const xml = sitemapXml("https://bimanage-frontend.vercel.app", null);
+    expect(xml).toContain("<loc>https://bimanage-frontend.vercel.app/</loc><priority>1.0</priority>");
+    expect(xml).not.toContain("/admin");
+    expect(robotsTxt("https://x").split("\n").filter((l) => /^Allow/.test(l))).toEqual(["Allow: /"]);
+  });
+
+  it("index.html has the logo in structured data and the share tags", () => {
+    const html = readFileSync("index.html", "utf8");
+    expect(html).toContain('"logo": "%VITE_PUBLIC_SITE_URL%/icon-512.png"');
+    expect(html).toContain('property="og:image" content="%VITE_PUBLIC_SITE_URL%/og-image.png"');
+    expect(html).toContain('rel="icon" href="/favicon.ico"');
+  });
+});

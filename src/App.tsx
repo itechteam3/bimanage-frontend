@@ -33,6 +33,19 @@ import { ProfilePage } from "@/pages/settings/ProfilePage";
 import { AccountClosedPage, AccountClosingPage, SessionExpiredPage } from "@/pages/account/AccountPages";
 import { UnsubscribePage } from "@/pages/account/UnsubscribePage";
 import { StartRedirect } from "@/lib/account/preferences";
+import { useAuth } from "@/lib/auth/AuthProvider";
+
+// Public landing page (signed-out "/") and newsletter links: their own chunks.
+const LandingPage = lazy(() => import("@/pages/landing/LandingPage"));
+const NewsletterPage = lazy(() => import("@/pages/landing/NewsletterPage"));
+
+/** "/": the landing page for visitors; signed-in people go straight to their start page (the dashboard by default). */
+function HomeRoute() {
+  const { status } = useAuth();
+  if (status === "authenticated") return authed(<StartRedirect />);
+  if (status === "loading") return <Loading />;
+  return <LandingPage />;
+}
 import { adminRoutes } from "@/admin/routes";
 
 const UiKitPage = lazy(() => import("@/pages/dev/UiKitPage"));
@@ -252,7 +265,13 @@ export const routes = [
     errorElement: <RouteErrorPage />,
     children: [
       // After sign-in: the person's chosen start page (13.03)
-      { path: "/", element: authed(<StartRedirect />) },
+      {
+        path: "/",
+        element: <HomeRoute />,
+        handle: { meta: { description: "Run your whole business in one place: sales, inventory, invoices, your own online store, customers, payouts, wholesale buying on BiSupplyNet and FELI, your AI assistant. Start free." } },
+      },
+      { path: "/newsletter/confirm", element: <NewsletterPage action="confirm" /> },
+      { path: "/newsletter/unsubscribe", element: <NewsletterPage action="unsubscribe" /> },
       // Authentication (Figma 01.xx)
       { path: "/login", element: guest(<SignInPage />), handle: { meta: { title: "Sign in", description: "Sign in to BiManage to manage your sales, inventory, invoices, online store and suppliers." } } },
       { path: "/register", element: guest(<RegisterPage />), handle: { meta: { title: "Create your free account", description: "Start free on BiManage: track sales and stock, send invoices, open your own online store and find trusted suppliers on BiSupplyNet." } } },

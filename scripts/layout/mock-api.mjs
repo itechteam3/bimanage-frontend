@@ -209,6 +209,31 @@ const { P13_ROUTES } = await import("./fixtures/account.mjs");
 Object.assign(routes, P13_ROUTES, ADMIN_ROUTES);
 routes["GET /api/business-profile"] = { ...routes["GET /api/business-profile"], owner: { name: "Samuel Adebayo" }, store: { name: "Dior Factory", slug: "diorfactory", url: "diorfactory.bimanage.com", customDomain: null, published: true }, completeness: { completed: 6, total: 8, percent: 75, missing: ["logo", "businessDescription"] } };
 routes["GET /api/subscriptions/current"] = { ...routes["GET /api/subscriptions/current"], features: { ...(routes["GET /api/subscriptions/current"].features||{}), analytics: true, orders: true, invoices: true } };
+// Customers (09.01–09.03).
+{
+  const cust = (i, name, email, phone, n, spent) => ({ _id: "c" + i, name, email, phone, address: { line: "14 Adebayo St", city: "Yaba", state: "Lagos" }, tags: i === 1 ? ["VIP"] : [], notes: "", source: "order",
+    stats: { ordersCount: n, invoicesCount: 1, totalSpent: spent, averageOrder: Math.round(spent / n), lastOrderAt: "2026-11-12T09:00:00Z", firstSeenAt: "2026-08-01T09:00:00Z", lastSeenAt: "2026-11-12T09:00:00Z" }, createdAt: "2026-08-01T09:00:00Z", updatedAt: "2026-11-12T09:00:00Z" });
+  const list = [cust(1, "Ada Nwosu", "ada@example.com", "+234 803 222 0180", 6, 342000), cust(2, "Tunde Bello", "tunde@example.com", "+234 803 222 0181", 3, 121500), cust(3, "Chioma Eze", "chioma@example.com", null, 1, 45000)];
+  routes["GET /api/customers"] = { customers: list, total: list.length, page: 1, totalPages: 1, tags: ["VIP"] };
+  routes["GET /api/customers/stats"] = { total: 3, newThisMonth: 1, repeat: 2, totalSpent: 508500 };
+  routes["GET /api/customers/c1"] = { customer: list[0], orders: [{ _id: "o1", channel: "online", reference: "BM-7K2Q-0001", total: 57000, status: "completed", createdAt: "2026-11-12T09:00:00Z" }], invoices: [{ _id: "i1", invoiceNumber: "INV-2026-4GRMM6", total: 11000, status: "draft", createdAt: "2026-11-10T09:00:00Z" }], conversation: { _id: "c1" } };
+}
+
+// Public landing endpoints (signed-out "/").
+routes["GET /api/public/plans"] = { currency: "NGN", plans: routes["GET /api/subscriptions/plans"], startupPackages: [{ id: "starter", name: "Starter", amount: 199999, currency: "NGN", summary: "Core business features for 30 days", days: 30 }] };
+routes["GET /api/public/stats"] = { businesses: { count: 12, show: false }, storesLive: { count: 3, show: false }, ordersProcessed: { count: 40, show: false }, reviews: { count: 1, average: 5, show: false } };
+routes["GET /api/support/faqs"] ||= [];
+
+// Optional overlay (e.g. the marketing sample business): FIXTURE_OVERLAY=path/to/module.mjs
+let overlayRename = null;
+if (process.env.FIXTURE_OVERLAY) {
+  const { pathToFileURL } = await import("node:url");
+  const { resolve } = await import("node:path");
+  const m = await import(pathToFileURL(resolve(process.env.FIXTURE_OVERLAY)).href);
+  m.apply(routes);
+  overlayRename = m.rename ?? null;
+}
+
 // ── Long data: the worst realistic values a screen must still handle ──
 let long = process.env.LAYOUT_LONG === "1";
 const LONG_NAME = " Adewale-Okonkwo Enterprises International Limited";
@@ -251,7 +276,8 @@ http.createServer((req, res) => {
   if (path === "/__mode/long") long = true;
   if (path === "/__mode/normal") long = false;
   if (path.startsWith("/__mode/")) { res.writeHead(200, cors); return res.end(JSON.stringify({ long, populated })); }
-  let body = key === "GET /api/dashboard" ? dashboard() : feliRoute(key) ?? routes[key];
+  let body = key === "GET /api/dashboard" ? (routes.__dashboard ?? dashboard()) : feliRoute(key) ?? routes[key];
+  if (body && overlayRename && key !== "GET /api/dashboard") body = overlayRename(body);
   // Writes succeed with an empty object so forms and dialogs can be opened and submitted.
   if (!body && req.method !== "GET") body = { message: "ok" };
   if (body && long) body = stretch(body);
