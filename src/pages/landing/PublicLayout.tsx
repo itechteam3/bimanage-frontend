@@ -232,8 +232,8 @@ export function Footer() {
             © {new Date().getFullYear()} BiManage, a product of{" "}
             <a href={COMPANY.website} target="_blank" rel="noopener noreferrer" className="font-medium text-ink-on-brand underline underline-offset-2 hover:text-ink-on-brand-accent">
               {COMPANY.legalName}
-            </a>{" "}
-            (bitechteam.org). All rights reserved.
+            </a>
+            . All rights reserved.
           </p>
           <nav aria-label="Legal" className="flex flex-wrap gap-x-6">
             <Link to="/terms" className="inline-flex min-h-11 items-center text-body-sm text-ink-on-brand-muted hover:text-ink-on-brand">Terms of Service</Link>

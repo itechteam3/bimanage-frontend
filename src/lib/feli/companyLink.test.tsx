@@ -43,6 +43,8 @@ describe("approved BiTechTeam facts on the public site", async () => {
     expect(footer).toHaveTextContent("Co-founder and CTO: Elijah Ayanlere.");
     const link = screen.getByRole("link", { name: "BiTechTeam Limited" });
     expect(link).toHaveAttribute("href", "https://bitechteam.org");
+    expect(footer).toHaveTextContent(/BiManage, a product of BiTechTeam Limited. All rights reserved./);
+    expect(footer).not.toHaveTextContent("(bitechteam.org)");
     expect(footer.textContent).not.toMatch(/[–—]/);
   });
 
