@@ -6,6 +6,7 @@ import { serverStatus } from "@/lib/api/serverStatus";
 import { installFakeBackend, renderApp, type FakeBackend } from "@/test/fakeBackend";
 import { parseCsv, rowsFromCsv } from "./StoreProductPages";
 import { browser } from "@/lib/store/api";
+import { SITE_URL } from "@/lib/seo/meta";
 
 // Online store (Figma 08.01–08.20) against a fake API.
 
@@ -298,6 +299,8 @@ describe("storefront (guest, no sign-in)", () => {
     await user.click(screen.getByRole("button", { name: /review order/i }));
     expect(await screen.findByTestId("review-email")).toHaveTextContent("ada@example.com");
     expect(last("POST /store-orders/elijahapparel/checkout")).toBeUndefined();
+    // Stores can be on their own domain: the terms link points at the main site.
+    expect(screen.getByRole("link", { name: "Terms of Service" }).getAttribute("href")).toBe(`${SITE_URL}/terms`);
     await user.click(screen.getByRole("button", { name: /confirm and pay with paystack/i }));
     await waitFor(() => expect(assigned).toBe("https://checkout.paystack.com/abc"));
     const call = last("POST /store-orders/elijahapparel/checkout")!;

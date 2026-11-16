@@ -8,6 +8,7 @@ import { AuthProvider } from "@/lib/auth/AuthProvider";
 import { tokenStore } from "@/lib/auth/tokenStore";
 import { pendingInvite } from "@/lib/auth/pending";
 import { serverStatus } from "@/lib/api/serverStatus";
+import { LEGAL_LAST_UPDATED } from "@/config/legal";
 
 // Fake backend: route table of "METHOD /path" → (body, headers) => [status, json]
 type Handler = (body: Record<string, unknown>, headers: Record<string, string>) => [number, unknown, Record<string, string>?];
@@ -124,6 +125,29 @@ describe("create account (01.02) and verify (01.03 / 01.07 / 01.13)", () => {
     expect(await screen.findByText(/passwords do not match/i)).toBeInTheDocument();
   });
 
+  it("won't submit until the Terms and Privacy box is ticked; the links open in a new tab", async () => {
+    handlers["POST /auth/register"] = () => [201, { message: "ok", email: "sam@x.com" }];
+    renderAt("/register");
+    await type(/full name/i, "Samuel Adebayo");
+    await type(/work email/i, "sam@x.com");
+    await type(/^password/i, "Secret123");
+    await type(/confirm password/i, "Secret123");
+    const box = screen.getByRole("checkbox", { name: /i agree to the terms of service and privacy policy/i });
+    expect(box).not.toBeChecked();
+    for (const [name, href] of [["Terms of Service", "/terms"], ["Privacy Policy", "/privacy"]] as const) {
+      const a = screen.getByRole("link", { name });
+      expect(a).toHaveAttribute("href", href);
+      expect(a).toHaveAttribute("target", "_blank");
+    }
+    await userEvent.click(screen.getByRole("button", { name: "Create account" }));
+    expect(await screen.findByText(/tick the box to agree/i)).toBeInTheDocument();
+    expect(calls.some((c) => c.key === "POST /auth/register")).toBe(false);
+    await userEvent.click(box);
+    await userEvent.click(screen.getByRole("button", { name: "Create account" }));
+    await waitFor(() => expect(calls.some((c) => c.key === "POST /auth/register")).toBe(true));
+    expect(calls.find((c) => c.key === "POST /auth/register")!.body).toMatchObject({ termsAccepted: true, termsVersion: LEGAL_LAST_UPDATED });
+  });
+
   it("registers then verifies the code and signs in", async () => {
     handlers["POST /auth/register"] = () => [201, { message: "ok", email: "sam@x.com" }];
     handlers["POST /verify/email"] = (b) => (b.otp === "286419" ? [200, { ...ME, token: "tok-v" }] : [400, { message: "Invalid OTP" }]);
@@ -132,9 +156,10 @@ describe("create account (01.02) and verify (01.03 / 01.07 / 01.13)", () => {
     await type(/work email/i, "sam@x.com");
     await type(/^password/i, "Secret123");
     await type(/confirm password/i, "Secret123");
+    await userEvent.click(screen.getByRole("checkbox", { name: /i agree to the terms of service and privacy policy/i }));
     await userEvent.click(screen.getByRole("button", { name: "Create account" }));
     expect(await screen.findByRole("heading", { name: "Verify your email" })).toBeInTheDocument();
-    expect(calls.find((c) => c.key === "POST /auth/register")!.body).toEqual({ name: "Samuel Adebayo", email: "sam@x.com", password: "Secret123" });
+    expect(calls.find((c) => c.key === "POST /auth/register")!.body).toEqual({ name: "Samuel Adebayo", email: "sam@x.com", password: "Secret123", termsAccepted: true, termsVersion: LEGAL_LAST_UPDATED });
 
     await type(/verification code/i, "111111");
     await userEvent.click(screen.getByRole("button", { name: "Verify email" }));

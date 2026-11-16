@@ -5,7 +5,6 @@ import {
   IconBuildingStore,
   IconChartBar,
   IconCheck,
-  IconChevronDown,
   IconCreditCard,
   IconDevices,
   IconKey,
@@ -26,9 +25,10 @@ import { cn } from "@/lib/cn";
 import { naira } from "@/lib/format";
 import { FEATURE_LABELS } from "@/lib/subscription/api";
 import { usePublicReviews } from "@/lib/reviews/api";
-import { useFaqs } from "@/lib/support/api";
 import { usePublicPlans, usePublicStats } from "@/lib/landing/api";
 import { AuthCtas, Container, PublicLayout, reducedMotion } from "./PublicLayout";
+import { FaqAccordion } from "./FaqAccordion";
+import { FEATURED_FAQS } from "./faq";
 import { Avatar } from "@/components/ui/Avatar";
 import { IPHONE, IPHONE_APP_HEIGHT, IPhoneFrame, type PhoneChrome } from "./IPhoneFrame";
 
@@ -182,14 +182,7 @@ const TRUST = [
   { icon: IconUsersGroup, title: "Roles and permissions", body: "Give each team member only the access they need — from owner and admin to manager and staff." },
   { icon: IconLock, title: "Your data stays yours", body: "Each business sees only its own data. Every request is checked against your business on the server." },
   { icon: IconKey, title: "Stronger passwords", body: "Common and breached passwords are blocked, and you can't reuse your recent passwords." },
-  { icon: IconDevices, title: "Session control", body: "See where your account is signed in and sign out other devices from your security settings." },
-];
-
-const BASE_FAQS = [
-  { q: "Is there a free plan?", a: "Yes. Freemium is free and uses daily credits, so you can try BiManage before you pay. Paid plans unlock more modules — see Plans and pricing above." },
-  { q: "Can I take payments online?", a: "Yes. Your online store has a checkout powered by Paystack. Earnings go to your BiManage wallet and are paid out to your bank account." },
-  { q: "Does it work on my phone?", a: "Yes. BiManage works in the browser on phones, tablets and laptops — there's nothing to install." },
-  { q: "Can my team use it?", a: "Yes. Invite team members and choose their role and permissions; each person only sees what they're allowed to." },
+  { icon: IconDevices, title: "Session control", body: "Sign out of all other devices from your security settings, and get an email whenever your password changes." },
 ];
 
 // ── Sections ──────────────────────────────────────────────────────────────
@@ -485,24 +478,21 @@ function Reviews() {
   );
 }
 
+// A short preview: the featured questions from the shared FAQ (faq.ts). The
+// full list, topic links, search and the FAQPage structured data are on /faq.
 function Faq() {
-  const { data } = useFaqs("", "");
-  const items = [...(data ?? []).slice(0, 6).map((f) => ({ q: f.question, a: f.answer })), ...BASE_FAQS].slice(0, 8);
+  const { data: plans } = usePublicPlans();
+  const [openId, setOpenId] = useState<string | null>(null);
   return (
     <section id="faq" className="scroll-mt-20 bg-surface-card py-16 lg:py-24">
       <Container className="max-w-[50rem]">
         <SectionTitle eyebrow="FAQ" title="Questions, answered" />
-        <div className="mt-10 flex flex-col gap-3">
-          {items.map((f) => (
-            <details key={f.q} className="group rounded-xl border border-line-card bg-surface-page px-5" data-reveal>
-              <summary className="flex min-h-14 cursor-pointer list-none items-center justify-between gap-4 py-3 text-card-heading text-ink-strong">
-                {f.q}
-                <IconChevronDown className="size-5 shrink-0 text-ink-muted transition-transform group-open:rotate-180" aria-hidden="true" />
-              </summary>
-              <p className="whitespace-pre-line pb-4 text-body text-ink-muted">{f.a}</p>
-            </details>
-          ))}
+        <div className="mt-10" data-reveal>
+          <FaqAccordion items={FEATURED_FAQS} plans={plans} openId={openId} onToggle={(id) => setOpenId((cur) => (cur === id ? null : id))} />
         </div>
+        <p className="mt-8 text-center">
+          <ButtonLink to="/faq" variant="outlined">See all FAQs</ButtonLink>
+        </p>
       </Container>
     </section>
   );

@@ -15,6 +15,9 @@ export interface User {
   userPath?: "startup" | "existing_business" | null;
   onboardingComplete?: boolean;
   createdAt?: string;
+  /** When they agreed to the Terms and Privacy Policy (null for Google sign-ups until onboarding asks). */
+  termsAcceptedAt?: string | null;
+  termsVersion?: string | null;
 }
 
 export type Role = "owner" | "admin" | "manager" | "staff";
@@ -44,8 +47,12 @@ export const authApi = {
   login: (email: string, password: string) =>
     api<LoginResult>("/auth/login", { method: "POST", body: { email, password }, auth: false, quiet401: true }),
 
-  register: (input: { name: string; email: string; password: string }) =>
+  register: (input: { name: string; email: string; password: string; termsAccepted: true; termsVersion: string }) =>
     api<{ message: string; email: string }>("/auth/register", { method: "POST", body: input, auth: false }),
+
+  /** Google sign-ups agree on the first onboarding step. */
+  acceptTerms: (termsVersion: string) =>
+    api<{ termsAcceptedAt: string; termsVersion: string }>("/auth/accept-terms", { method: "POST", body: { termsAccepted: true, termsVersion } }),
 
   verifyEmail: (email: string, otp: string) =>
     api<LoginResult & { message: string }>("/verify/email", { method: "POST", body: { email, otp }, auth: false }),

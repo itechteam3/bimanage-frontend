@@ -6,6 +6,7 @@ import { tokenStore } from "@/lib/auth/tokenStore";
 import { serverStatus } from "@/lib/api/serverStatus";
 import { installFakeBackend, renderApp, type FakeBackend } from "@/test/fakeBackend";
 import { installFakeSockets } from "@/test/fakeSocket";
+import { FEATURED_FAQS } from "./faq";
 
 const PLANS = {
   currency: "NGN",
@@ -120,10 +121,17 @@ describe("landing page (/)", () => {
     expect(screen.getByRole("link", { name: /read all reviews/i })).toHaveAttribute("href", "/reviews");
   });
 
-  it("FAQ uses the public help-centre articles", async () => {
+  it("FAQ preview shows only the featured questions, with See all FAQs going to /faq (no FAQPage markup here)", async () => {
     renderApp("/");
-    expect(await screen.findByText("How do payouts work?")).toBeInTheDocument();
-    expect(screen.getByText("Is there a free plan?")).toBeInTheDocument();
+    const section = (await screen.findByRole("heading", { name: "Questions, answered" })).closest("section")!;
+    const questions = within(section).getAllByRole("button", { expanded: false }).map((b) => b.textContent);
+    expect(questions).toEqual(FEATURED_FAQS.map((f) => f.q));
+    expect(questions.length).toBeGreaterThanOrEqual(5);
+    expect(questions.length).toBeLessThanOrEqual(7);
+    expect(within(section).queryByText("How do payouts work?")).toBeNull(); // help-centre answers live on /faq
+    expect(within(section).getByRole("link", { name: "See all FAQs" })).toHaveAttribute("href", "/faq");
+    expect(within(screen.getByRole("navigation", { name: "Main" })).getByRole("link", { name: "FAQ" })).toHaveAttribute("href", "/faq");
+    expect(document.querySelector('script[type="application/ld+json"]#faq-jsonld')).toBeNull();
   });
 
   it('product screenshots have alt text and no "Sample data" badge', async () => {
