@@ -79,7 +79,7 @@ export function StoreOrderMoneyPage() {
           ← Store orders
         </Link>
       </p>
-      {o.paymentMode !== "live" && o.isPaid && <p className="rounded-lg bg-warning-bg px-4 py-3 text-body-lg text-warning">Test payment: no real money moved.</p>}
+      {o.paymentMode !== "live" && o.isPaid && <p className="rounded-lg bg-warning-bg px-4 py-3 text-body-lg text-warning">Test payment — don't ship. No real money moved.</p>}
       {done && (
         <p className="rounded-lg bg-success-bg px-4 py-3 text-body-lg text-success" role="status">
           {done}

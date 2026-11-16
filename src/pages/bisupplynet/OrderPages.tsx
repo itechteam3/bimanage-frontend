@@ -1,3 +1,4 @@
+import { TestPaymentBadge, isTestPayment } from "@/components/feedback/TestPaymentBadge";
 import { useEffect, useRef, useState, type FormEvent, type ReactNode } from "react";
 import { Link, useLocation, useNavigate, useParams, useSearchParams } from "react-router-dom";
 import { useForm } from "react-hook-form";
@@ -121,7 +122,7 @@ function PaymentReturn({ id, reference }: { id: string; reference: string }) {
             />
           </div>
           <p className="mt-4 text-body-sm font-semibold text-ink-brand">Only confirm delivery after inspecting the ordered goods.</p>
-          {d.order.paymentMode === "test" && <p className="mt-2 text-body-sm text-ink-muted">This was a test payment. No real money moved.</p>}
+          {isTestPayment(d.order) && <p className="mt-2 text-body-sm text-ink-muted">This was a test payment. No real money moved.</p>}
         </section>
         <Button className="md:self-center md:px-16" onClick={track}>
           Track bulk order
@@ -225,7 +226,7 @@ function OrderTracking({ d }: { d: OrderDetail }) {
           <Panel title="Order milestone timeline" subtitle="Delivery must be checked before funds release.">
             <div className="mb-4 flex flex-wrap items-center gap-2">
               <Status tone={st.tone}>{st.label}</Status>
-              {o.paymentMode === "test" && <Status tone="neutral">Test payment (no money moved)</Status>}
+              {isTestPayment(o) && <TestPaymentBadge />}
             </div>
             <RecordRows label="Order milestones" rows={[...done, ...next.map((cells, i) => ({ key: `next-${i}`, cells }))]} />
           </Panel>
