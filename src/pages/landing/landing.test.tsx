@@ -143,6 +143,24 @@ describe("landing page (/)", () => {
     for (const img of shots) expect(img.getAttribute("alt")).toMatch(/bimanage/i);
   });
 
+  it("phone screenshots sit in the drawn iPhone frame, below a decorative status bar", async () => {
+    renderApp("/");
+    await screen.findByRole("heading", { level: 1 });
+    const phone = screen.getByAltText("The BiManage dashboard on a phone.");
+    // Captured at the iPhone 18 Pro Max width, below the 62 pt status bar; the hero loads eagerly.
+    expect(phone).toHaveAttribute("width", "440");
+    expect(phone).toHaveAttribute("height", "894");
+    expect(phone).toHaveAttribute("loading", "eager");
+    const frame = phone.closest("figure.lp-phone") as HTMLElement;
+    expect(frame).not.toBeNull();
+    const status = frame.querySelector(".lp-phone-status") as HTMLElement;
+    expect(status).toHaveAttribute("aria-hidden", "true");
+    expect(status).toHaveTextContent("9:41");
+    expect(frame.querySelector(".lp-phone-island")).not.toBeNull();
+    // Feature showcase phones are lazy.
+    expect(screen.getByAltText(/in BiManage on a phone\.$/)).toHaveAttribute("loading", "lazy");
+  });
+
   it("every Contact us link goes to /contact (navbar, mobile menu, floating button, footer)", async () => {
     const user = userEvent.setup();
     renderApp("/");

@@ -31,6 +31,7 @@ import { AuthCtas, Container, PublicLayout, reducedMotion } from "./PublicLayout
 import { FaqAccordion } from "./FaqAccordion";
 import { FEATURED_FAQS } from "./faq";
 import { Avatar } from "@/components/ui/Avatar";
+import { IPHONE, IPHONE_APP_HEIGHT, IPhoneFrame, type PhoneChrome } from "./IPhoneFrame";
 
 import heroImg from "@/assets/landing/hero.webp";
 import heroSmImg from "@/assets/landing/hero-sm.webp";
@@ -39,12 +40,15 @@ import stepCustomize from "@/assets/landing/step-customize.webp";
 import stepGrow from "@/assets/landing/step-grow.webp";
 
 // Product screenshots: the REAL app with the invented "Adunni Fashion House"
-// sample data (scripts/marketing). 2x WebP with a 1x PNG fallback.
+// sample data (scripts/marketing). Desktop: 2x WebP; phone: 3x WebP at the
+// iPhone 18 Pro Max viewport (below its status bar); 1x PNG fallbacks.
 const shots = import.meta.glob<string>("../../assets/landing/screens/*.{webp,png}", { eager: true, import: "default", query: "?url" });
 const shot = (name: string, kind: "desktop" | "phone") => ({
   webp: shots[`../../assets/landing/screens/${name}-${kind}.webp`] ?? "",
   png: shots[`../../assets/landing/screens/${name}-${kind}.png`] ?? "",
 });
+// Per phone screen: status bar colour and glyph tone, measured at capture time.
+const phoneChrome = (Object.values(import.meta.glob<Record<string, PhoneChrome>>("../../assets/landing/screens/phone-chrome.json", { eager: true, import: "default" }))[0] ?? {});
 const collage = Object.entries(import.meta.glob<string>("../../assets/landing/collage-*.webp", { eager: true, import: "default", query: "?url" }))
   .sort(([a], [b]) => a.localeCompare(b, undefined, { numeric: true }))
   .map(([, url]) => url);
@@ -114,7 +118,7 @@ function CountUp({ to, suffix = "" }: { to: number; suffix?: string }) {
 
 function Shot({ name, kind, alt, eager }: { name: string; kind: "desktop" | "phone"; alt: string; eager?: boolean }) {
   const s = shot(name, kind);
-  const [w, h] = kind === "desktop" ? [1280, 800] : [390, 844];
+  const [w, h] = kind === "desktop" ? [1280, 800] : [IPHONE.width, IPHONE_APP_HEIGHT];
   return (
     <picture>
       <source type="image/webp" srcSet={s.webp} />
@@ -139,13 +143,11 @@ function BrowserFrame({ name, alt, path, eager, className }: { name: string; alt
   );
 }
 
-function PhoneFrame({ name, alt, className }: { name: string; alt: string; className?: string }) {
+function PhoneFrame({ name, alt, eager, className }: { name: string; alt: string; eager?: boolean; className?: string }) {
   return (
-    <figure className={cn("relative mx-auto w-full max-w-[17rem] overflow-hidden rounded-[2.25rem] border-[6px] border-ink-strong bg-ink-strong shadow-floating", className)}>
-      <div className="relative overflow-hidden rounded-[1.75rem]">
-        <Shot name={name} kind="phone" alt={alt} />
-      </div>
-    </figure>
+    <IPhoneFrame chrome={phoneChrome[name]} className={cn("max-w-[18rem]", className)}>
+      <Shot name={name} kind="phone" alt={alt} eager={eager} />
+    </IPhoneFrame>
   );
 }
 
@@ -221,7 +223,7 @@ function Hero() {
         <div className="lp-preview mx-auto mt-12 max-w-[62rem] md:mt-16">
           <div className="lp-float">
             <BrowserFrame name="dashboard" path="/dashboard" alt="The BiManage business dashboard: revenue, orders, open invoices, low stock and recent orders." eager className="hidden md:block" />
-            <PhoneFrame name="dashboard" alt="The BiManage dashboard on a phone." className="md:hidden" />
+            <PhoneFrame name="dashboard" alt="The BiManage dashboard on a phone." eager className="md:hidden" />
           </div>
         </div>
       </Container>

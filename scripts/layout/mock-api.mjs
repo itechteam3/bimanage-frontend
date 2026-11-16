@@ -176,7 +176,21 @@ routes["GET /api/support/service-requests"] = { requests: [], total: 0, page: 1,
 routes["GET /api/support/faqs"] = [
   { _id: "f1", question: "How do payouts work and when does my money become available?", answer: "Store earnings become available when an order completes.", category: "wallet", readMinutes: 4, helpfulCount: 3, updatedAt: P12NOW },
   { _id: "f2", question: "Connect your online store to a custom domain", answer: "Go to Online Store, Domain.", category: "store", readMinutes: 3, helpfulCount: 1, updatedAt: P12NOW },
+  { _id: "f3", slug: "publish-your-store", question: "How to publish your store", summary: "Finish the readiness steps and make your store live for customers.", answer: "1. Go to **Online Store**.", category: "store", readMinutes: 1, helpfulCount: 0, updatedAt: P12NOW },
 ];
+// A written article (markdown-lite: steps with sub-points, bold, links, notes).
+routes["GET /api/support/faqs/f1"] = {
+  _id: "f1",
+  slug: "how-wallet-works",
+  question: "How do payouts work and when does my money become available?",
+  summary: "Where your store earnings go, and when you can withdraw them to your bank account.",
+  answer:
+    "1. Go to **Wallet**. The **Wallet overview** shows **Total earnings**, **Available**, **On hold** and **Payouts**.\n2. Complete each step:\n   - **Business identity**: store name, category, description, and an email or phone.\n   - **Inventory products**: at least one published product.\n3. When the order is completed, the money becomes **Available** to withdraw.\n\n**Note:** BiManage's commission is taken when a sale is paid, not when you withdraw. A very long word to test wrapping: supercalifragilisticexpialidocious-withdrawal-schedule-reference.\n\n- **Your money is still on hold.** Store earnings become available when the order is completed.\n- **No verified bank account.** Add one under **Bank account**.\n\nRelated: [Withdraw to your bank](/support/help/withdraw-to-bank), [Set your withdrawal schedule](/support/help/withdrawal-schedule)",
+  category: "wallet",
+  readMinutes: 1,
+  helpfulCount: 3,
+  updatedAt: P12NOW,
+};
 routes["GET /api/reviews"] = { reviews: [{ _id: "r1", headline: "Saves me hours every week", rating: 5, review: "Inventory and orders in one place. The store setup was easy.", category: "product_experience", featuresUsed: ["inventory", "orders", "store"], businessName: "Elijah Apparel Ltd", reviewer: { name: "Elijah", avatar: null }, isVerified: true, edited: false, createdAt: P12NOW, updatedAt: P12NOW }], total: 1, page: 1, totalPages: 1, stats: { averageRating: 4.5, totalReviews: 2, ratingBreakdown: { 5: 1, 4: 1, 3: 0, 2: 0, 1: 0 } } };
 routes["GET /api/subscriptions/current"] = { ...(routes["GET /api/subscriptions/current"] || {}), features: { ...((routes["GET /api/subscriptions/current"] || {}).features || {}), messages: true } };
 // FELI11
