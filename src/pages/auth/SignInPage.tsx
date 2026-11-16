@@ -8,7 +8,7 @@ import { GoogleButton } from "@/components/auth/GoogleButton";
 import { Button, ButtonLink, Field, PasswordInput, TextInput } from "@/components/ui";
 import { authApi } from "@/lib/auth/api";
 import { useAuth } from "@/lib/auth/AuthProvider";
-import { pendingInvite, safeNext } from "@/lib/auth/pending";
+import { afterAuthPath, pendingInvite, safeNext } from "@/lib/auth/pending";
 import { ApiError } from "@/lib/api/client";
 import { cooldownMessage, errorMessage } from "@/lib/api/errorMessage";
 
@@ -62,7 +62,8 @@ export function SignInPage() {
         return;
       }
       await signIn(res.token);
-      navigate(pendingInvite.get() ? "/invite/accept" : safeNext(params.get("next"), "/start"), { replace: true });
+      // An explicit ?next= (bounced from a signed-in page) wins over a destination picked earlier on the landing page.
+      navigate(params.get("next") && !pendingInvite.get() ? safeNext(params.get("next"), "/start") : afterAuthPath("/start"), { replace: true });
     } catch (err) {
       if (!(err instanceof ApiError)) return setFormError(errorMessage(err));
       if (err.status === 401) {

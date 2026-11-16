@@ -1,7 +1,10 @@
 import { useEffect, useRef, useState } from "react";
 import { Link } from "react-router-dom";
 import {
+  IconArrowRight,
   IconBarcode,
+  IconBuildingWarehouse,
+  IconCrown,
   IconBuildingBank,
   IconBuildingStore,
   IconCalendarCheck,
@@ -27,6 +30,8 @@ import {
   IconWallet,
 } from "@tabler/icons-react";
 import { ButtonLink } from "@/components/ui/Button";
+import { useAuth } from "@/lib/auth/AuthProvider";
+import { pendingNext } from "@/lib/auth/pending";
 import { ErrorNote } from "@/components/feedback/ErrorNote";
 import { cn } from "@/lib/cn";
 import { naira } from "@/lib/format";
@@ -189,6 +194,37 @@ const TRUST = [
   { icon: IconKey, title: "Stronger passwords", body: "Common and breached passwords are blocked, and you can't reuse your recent passwords." },
   { icon: IconDevices, title: "Session control", body: "Sign out of all other devices from your security settings, and get an email whenever your password changes." },
 ];
+
+// "Sell on BiSupplyNet" (#sell). TRUE claims only; where each is checked:
+//   Premium only: backend src/config/features.js (bisupplynetSell is Premium;
+//     the free trial and Premium packages get the Premium tier, getAccess)
+//   Apply form (business details, CAC number, verification document, live
+//     trust score): ApplyPage in src/pages/bisupplynet/SellerPages.tsx
+//   Review (approve, reject, ask for more info): backend adminSuppliersController
+//   Escrow: backend src/utils/supplyEscrow.js (hold in wallet, release on
+//     confirmation or SUPPLY_AUTO_RELEASE_DAYS=7 after delivered, admin dispute
+//     resolution, unshipped paid orders refunded after 7 days, commission only
+//     on what the wholesaler keeps) and the FAQ "How does escrow protect wholesale payments?"
+const SELL_PATH = "/bisupplynet/sell/apply";
+const SELL_BENEFITS = [
+  { icon: IconShieldCheck, title: "A verified marketplace", body: "Every seller is reviewed before listing, and buyers compare verified sellers by category, reputation and location." },
+  { icon: IconReceipt, title: "Orders inside BiManage", body: "Receive wholesale orders and manage listings, buyer connections and disputes in the same app you run your business with." },
+  { icon: IconLock, title: "Escrow-protected payments", body: "Buyers pay before you ship, and the money is held for you until the delivery is confirmed." },
+  { icon: IconWallet, title: "Payouts to your wallet", body: "Earnings land in your BiManage wallet, and you withdraw them to your bank account like any other wallet money." },
+] as const;
+const SELL_STEPS = [
+  { title: "Create your business account", body: "Sign up, verify your email and finish onboarding." },
+  { title: "Be on Premium", body: "Choose the Premium plan or a Premium package, or use your free trial." },
+  { title: "Apply as a wholesaler", body: "Under BiSupplyNet, Sell, add your business details, CAC number and a verification document, and watch your trust score as you go." },
+  { title: "We review your application", body: "BiTechTeam approves it, rejects it or asks you for more information. You can follow its status in the app." },
+  { title: "List products and get orders", body: "Once approved, list your wholesale products, receive orders and track your earnings." },
+] as const;
+const SELL_ESCROW = [
+  "The buyer pays through Paystack before you ship, and BiManage holds the money. It shows as on hold in your wallet.",
+  "It is released to you when the buyer confirms delivery, or automatically 7 days after you mark the order delivered if no dispute is open.",
+  "If there is a dispute, BiTechTeam reviews it and releases, refunds or splits the payment.",
+  "Paid orders must ship within 7 days, or the buyer is refunded. BiManage's commission is taken only on the amount you keep.",
+] as const;
 
 // ── Sections ──────────────────────────────────────────────────────────────
 
@@ -472,6 +508,84 @@ function WhyBiManage() {
   );
 }
 
+/** "Become a supplier": straight to the application when signed in; otherwise sign up first and land on it after onboarding (pendingNext). */
+function BecomeSupplierButton() {
+  const signedIn = useAuth().status === "authenticated";
+  return (
+    <ButtonLink to={signedIn ? SELL_PATH : "/register"} size="lg" onClick={signedIn ? undefined : () => pendingNext.set(SELL_PATH)}>
+      Become a supplier <IconArrowRight aria-hidden="true" className="size-5" />
+    </ButtonLink>
+  );
+}
+
+function SellOnBiSupplyNet() {
+  return (
+    <section id="sell" aria-labelledby="lp-sell-h" className="scroll-mt-20 bg-surface-card py-16 lg:py-24">
+      <Container>
+        <div className="mx-auto max-w-[44rem] text-center" data-reveal>
+          <p className="text-caption font-semibold uppercase tracking-wide text-ink-brand">Sell on BiSupplyNet</p>
+          <h2 id="lp-sell-h" className="mt-2 text-title-lg text-ink-strong md:text-page-title">Sell wholesale to other businesses</h2>
+          <p className="mt-3 text-body-lg text-ink-muted">For wholesalers, manufacturers and distributors who sell in bulk. Get verified, list your products and take orders from businesses buying on BiSupplyNet.</p>
+        </div>
+        <ul className="mt-10 grid grid-cols-[minmax(0,1fr)] gap-5 md:grid-cols-2 lg:grid-cols-4">
+          {SELL_BENEFITS.map((b, i) => {
+            const Icon = b.icon;
+            return (
+              <li key={b.title} data-reveal style={{ ["--lp-delay" as string]: `${i * 100}ms` }} className="rounded-2xl border border-line-card bg-surface-page p-6">
+                <span className="flex size-11 items-center justify-center rounded-md bg-surface-tint-blue text-ink-brand" aria-hidden="true"><Icon className="size-6" /></span>
+                <h3 className="mt-4 text-card-heading text-ink-strong">{b.title}</h3>
+                <p className="mt-2 text-body-sm text-ink-muted">{b.body}</p>
+              </li>
+            );
+          })}
+        </ul>
+        <div className="mt-12 grid grid-cols-[minmax(0,1fr)] gap-8 lg:grid-cols-[minmax(0,1.1fr)_minmax(0,1fr)] lg:gap-12">
+          <div className="min-w-0" data-reveal>
+            <h3 className="flex items-center gap-2 text-title-sm text-ink-strong">
+              <IconBuildingWarehouse aria-hidden="true" className="size-6 shrink-0 text-ink-brand" /> How to become a supplier
+            </h3>
+            <ol className="mt-6 flex flex-col gap-5" aria-label="Steps to become a supplier">
+              {SELL_STEPS.map((s, i) => (
+                <li key={s.title} className="flex gap-4">
+                  <span className="flex size-9 shrink-0 items-center justify-center rounded-full bg-surface-tint-blue text-body font-semibold text-ink-brand" aria-hidden="true">{i + 1}</span>
+                  <div className="min-w-0">
+                    <p className="text-body font-semibold text-ink-strong"><span className="sr-only">Step {i + 1}: </span>{s.title}</p>
+                    <p className="mt-1 text-body-sm text-ink-muted">{s.body}</p>
+                  </div>
+                </li>
+              ))}
+            </ol>
+          </div>
+          <div className="flex min-w-0 flex-col gap-5" data-reveal style={{ ["--lp-delay" as string]: "120ms" }}>
+            <div className="rounded-2xl bg-brand-navy p-6 text-ink-on-brand">
+              <h3 className="flex items-center gap-2 text-title-sm">
+                <IconShieldCheck aria-hidden="true" className="size-6 shrink-0 text-ink-on-brand-accent" /> How escrow protects you
+              </h3>
+              <ul className="mt-4 flex flex-col gap-3">
+                {SELL_ESCROW.map((t) => (
+                  <li key={t} className="flex gap-2.5 text-body-sm text-ink-on-brand-muted">
+                    <IconCheck aria-hidden="true" className="mt-0.5 size-4 shrink-0 text-ink-on-brand-accent" stroke={2.5} />
+                    <span>{t}</span>
+                  </li>
+                ))}
+              </ul>
+            </div>
+            <div className="flex gap-3 rounded-2xl border border-line-card bg-surface-tint-warm p-5" data-testid="lp-sell-premium">
+              <IconCrown aria-hidden="true" className="size-6 shrink-0 text-kpi-invoices-fg" />
+              <p className="min-w-0 text-body-sm text-ink-strong">
+                <span className="font-semibold">Selling needs Premium.</span> Use the Premium plan, a Premium package or your 14-day free trial. Buying on BiSupplyNet starts on Standard.
+              </p>
+            </div>
+            <div>
+              <BecomeSupplierButton />
+            </div>
+          </div>
+        </div>
+      </Container>
+    </section>
+  );
+}
+
 function Pricing() {
   const { data, isLoading, error, refetch } = usePublicPlans();
   const [cycle, setCycle] = useState<"monthly" | "yearly">("monthly");
@@ -664,6 +778,7 @@ export default function LandingPage() {
       <Features />
       <HowItWorks />
       <WhyBiManage />
+      <SellOnBiSupplyNet />
       <Pricing />
       <Trust />
       <Reviews />

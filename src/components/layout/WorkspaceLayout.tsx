@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { Navigate, Outlet, useLocation, useMatches, useNavigate } from "react-router-dom";
 import { AppShell } from "./AppShell";
 import { useAuth } from "@/lib/auth/AuthProvider";
@@ -9,6 +9,7 @@ import { PhotoDialog } from "@/components/profile/PhotoDialog";
 import { useSubscription } from "@/lib/workspace/subscription";
 import { DisplayPreferences } from "@/lib/account/preferences";
 import { ReportIssue } from "@/components/feedback/ReportIssue";
+import { pendingNext } from "@/lib/auth/pending";
 
 // Signed-in pages render inside this. Routes declare their breadcrumb with
 // `handle: { section: "Dashboard" }`. Owners who haven't chosen an onboarding
@@ -32,6 +33,12 @@ export function WorkspaceLayout() {
     [...matches].reverse().map((m) => (m.handle as { section?: string } | undefined)?.section).find(Boolean) ?? "Dashboard";
 
   const onOnboarding = location.pathname.startsWith("/onboarding");
+  // A destination picked before signing up (pendingNext) is done with once the
+  // person actually reaches it past the onboarding gate.
+  const onboarded = !isOwner || !!onboarding.data?.userPath;
+  useEffect(() => {
+    if (onboarded && location.pathname === pendingNext.get()) pendingNext.clear();
+  }, [onboarded, location.pathname]);
   if (isOwner && !onOnboarding) {
     if (onboarding.isLoading) {
       return (
