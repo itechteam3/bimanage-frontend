@@ -3,7 +3,8 @@ import { screen, waitFor } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { tokenStore } from "@/lib/auth/tokenStore";
 import { serverStatus } from "@/lib/api/serverStatus";
-import { EMPTY_DASHBOARD, installFakeBackend, renderApp, type FakeBackend } from "@/test/fakeBackend";
+import { EMPTY_DASHBOARD, ME, installFakeBackend, renderApp, type FakeBackend } from "@/test/fakeBackend";
+import { LEGAL_LAST_UPDATED } from "@/config/legal";
 
 const PACKAGES = [
   { id: "starter", name: "Starter", amount: 199999, currency: "NGN", tagline: "For businesses finding their feet", summary: "Core business features", days: 30 },
@@ -57,6 +58,27 @@ describe("paths", () => {
     expect(await screen.findByRole("heading", { name: /trial started/i })).toBeInTheDocument();
   });
 
+  it("a Google sign-up agrees to the Terms and Privacy Policy here before choosing a path", async () => {
+    fb.handlers["GET /auth/me"] = () => [200, { ...ME, termsAcceptedAt: null, termsVersion: null }];
+    fb.handlers["POST /auth/accept-terms"] = (b) => [200, { termsAcceptedAt: "2026-11-16T10:00:00.000Z", termsVersion: b.termsVersion }];
+    fb.handlers["POST /onboarding/start-trial"] = () => [200, { daysRemaining: 14 }];
+    const router = renderApp("/onboarding");
+    const box = await screen.findByRole("checkbox", { name: /i agree to the terms of service and privacy policy/i });
+    await userEvent.click(screen.getByRole("button", { name: /start existing-business setup/i }));
+    expect(await screen.findByText(/tick the box to agree/i)).toBeInTheDocument();
+    expect(fb.calls.some((c) => c.key === "POST /onboarding/select-path")).toBe(false);
+    await userEvent.click(box);
+    await userEvent.click(screen.getByRole("button", { name: /start existing-business setup/i }));
+    await waitFor(() => expect(router.state.location.pathname).toBe("/onboarding/trial"));
+    expect(fb.calls.find((c) => c.key === "POST /auth/accept-terms")!.body).toEqual({ termsAccepted: true, termsVersion: LEGAL_LAST_UPDATED });
+  });
+
+  it("people who agreed at sign-up don't see the terms box", async () => {
+    renderApp("/onboarding");
+    await screen.findByRole("button", { name: /start existing-business setup/i });
+    expect(screen.queryByRole("checkbox", { name: /i agree/i })).toBeNull();
+  });
+
   it("startup: packages (07.12) → review (07.13) → hands off to Paystack", async () => {
     fb.handlers["POST /onboarding/startup-package/checkout"] = (b) => [201, { authorizationUrl: "https://checkout.paystack.com/xyz", reference: "BMSP-1", status: "pending", package: PACKAGES.find((p) => p.id === b.package), amount: 299999, activated: false }];
     const assign = vi.fn();
@@ -66,6 +88,7 @@ describe("paths", () => {
     await waitFor(() => expect(router.state.location.pathname).toBe("/onboarding/packages"));
     expect(await screen.findByText("₦299,999")).toBeInTheDocument();
     await userEvent.click(screen.getByRole("link", { name: /review standard package/i }));
+    expect(await screen.findByRole("link", { name: "Terms of Service" })).toHaveAttribute("href", "/terms");
     await userEvent.click(await screen.findByRole("button", { name: /pay ₦299,999 with paystack/i }));
     await waitFor(() => expect(assign).toHaveBeenCalledWith("https://checkout.paystack.com/xyz"));
     expect(fb.calls.find((c) => c.key === "POST /onboarding/startup-package/checkout")!.body).toEqual({ package: "standard" });

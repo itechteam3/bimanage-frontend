@@ -1,8 +1,8 @@
-// External links BiTechTeam still needs to provide. While empty, the UI shows
-// plain text instead of a dead link.
+// The Terms of Service and Privacy Policy pages (src/pages/landing/TermsPage,
+// PrivacyPage; draft banner and version in src/config/legal.ts).
 export const LEGAL = {
-  termsUrl: "", // e.g. https://bimanage.com/terms
-  privacyUrl: "", // e.g. https://bimanage.com/privacy
+  termsUrl: "/terms",
+  privacyUrl: "/privacy",
 };
 
 /**

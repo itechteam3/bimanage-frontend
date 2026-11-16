@@ -18,7 +18,7 @@ export interface FakeBackend {
   calls: Array<{ key: string; body: Record<string, unknown>; headers: Record<string, string> }>;
 }
 
-export const ME = { _id: "u1", name: "Samuel Adebayo", email: "sam@x.com", isVerified: true };
+export const ME = { _id: "u1", name: "Samuel Adebayo", email: "sam@x.com", isVerified: true, termsAcceptedAt: "2026-11-16T09:00:00.000Z", termsVersion: "2026-11-16" };
 export const OWNER_WS = { role: "owner", permissions: {}, businessId: "u1" };
 export const EMPTY_DASHBOARD = {
   stats: { totalProducts: 0, totalStock: 0, totalInventoryValue: 0, totalSales: 0, revenue: 0, totalOrders: 0, openInvoices: 0, lowStock: 0, totalTasks: 0, pendingTasks: 0 },
@@ -63,8 +63,9 @@ export function installFakeBackend(): FakeBackend {
 
 export function renderApp(path: string, state?: unknown) {
   resetHistory();
-  const [pathname, search] = path.split("?");
-  const router = createMemoryRouter(routes, { initialEntries: [{ pathname: pathname!, search: search ? `?${search}` : "", state }] });
+  const [beforeHash, hash] = path.split("#");
+  const [pathname, search] = beforeHash!.split("?");
+  const router = createMemoryRouter(routes, { initialEntries: [{ pathname: pathname!, search: search ? `?${search}` : "", hash: hash ? `#${hash}` : "", state }] });
   const client = new QueryClient({ defaultOptions: { queries: { retry: false } } });
   testQueryClient = client;
   render(

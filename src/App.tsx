@@ -38,6 +38,9 @@ import { StartRedirect } from "@/lib/account/preferences";
 const LandingPage = lazy(() => import("@/pages/landing/LandingPage"));
 const NewsletterPage = lazy(() => import("@/pages/landing/NewsletterPage"));
 const ContactPage = lazy(() => import("@/pages/landing/ContactPage"));
+const FaqPage = lazy(() => import("@/pages/landing/FaqPage"));
+const TermsPage = lazy(() => import("@/pages/landing/TermsPage"));
+const PrivacyPage = lazy(() => import("@/pages/landing/PrivacyPage"));
 
 /** "/": always the landing page (signed-in people see "Go to dashboard" in its navbar). */
 function HomeRoute() {
@@ -273,6 +276,10 @@ export const routes = [
       { path: "/home", element: <Navigate to="/" replace /> },
       // Public contact page: for everyone, signed in or out.
       { path: "/contact", element: <ContactPage />, handle: { meta: { title: "Contact us", description: "Questions about BiManage, a demo for your team or help with your account? Send us a message and we'll reply by email." } } },
+      // Public FAQ and legal pages (shared PublicLayout), signed in or out.
+      { path: "/faq", element: <FaqPage />, handle: { meta: { title: "Frequently asked questions", description: "Answers about BiManage plans and billing, your online store, wallet payouts, BiSupplyNet escrow, FELI, security and your account." } } },
+      { path: "/terms", element: <TermsPage />, handle: { meta: { title: "Terms of Service", description: "The terms for using BiManage: accounts, plans and renewals, payments through Paystack, store commission, wallet payouts, BiSupplyNet escrow and FELI." } } },
+      { path: "/privacy", element: <PrivacyPage />, handle: { meta: { title: "Privacy Policy", description: "How BiManage collects, uses, shares and protects personal data, how long it is kept, and your rights under the Nigeria Data Protection Act 2023." } } },
       { path: "/newsletter/confirm", element: <NewsletterPage action="confirm" /> },
       { path: "/newsletter/unsubscribe", element: <NewsletterPage action="unsubscribe" /> },
       // Authentication (Figma 01.xx)

@@ -4,6 +4,7 @@ import { IconCheck, IconArrowRight, IconAlertTriangle } from "@tabler/icons-reac
 import { Button, ButtonLink, Spinner, buttonClasses } from "@/components/ui";
 import { DetailRows, InfoStrip, IntroCard, PageTitle, Panel, PriceBox, Stepper, TipList } from "@/components/page/Blocks";
 import { AuthNote } from "@/components/layout/AuthLayout";
+import { PayTermsNote } from "@/components/legal/PayTermsNote";
 import { isPaymentsUnavailable, PAYMENTS_COMING_SOON, startCheckout, useStartupPackages, verifyPayment, keys, type PaymentState, type StartupPackage } from "@/lib/workspace/api";
 import { naira } from "@/lib/format";
 import { friendlyText, errorMessage } from "@/lib/api/errorMessage";
@@ -182,6 +183,7 @@ export function CheckoutPage() {
                   Pay {naira(pkg.amount)} with Paystack
                 </Button>
                 <p className="text-body-sm text-ink-muted">You'll be taken to Paystack's secure checkout (card, bank transfer or USSD), then brought back here.</p>
+                <PayTermsNote />
               </>
             )}
           </div>

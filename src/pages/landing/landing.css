@@ -108,3 +108,37 @@ html.reduce-motion .lp-burger-bar { transition: none; }
 html.reduce-motion .lp-menu,
 html.reduce-motion .lp-menu.lp-open .lp-menu-item,
 html.reduce-motion .lp-menu-backdrop { animation: none; }
+
+/* FAQ accordion (FaqAccordion.tsx): height + fade, one answer at a time. */
+.lp-acc {
+  display: grid;
+  grid-template-rows: 0fr;
+  opacity: 0;
+  visibility: hidden;
+  transition: grid-template-rows 280ms cubic-bezier(0.2, 0.7, 0.2, 1), opacity 180ms ease, visibility 0s linear 280ms;
+}
+.lp-acc.lp-acc-open {
+  grid-template-rows: 1fr;
+  opacity: 1;
+  visibility: visible;
+  transition: grid-template-rows 280ms cubic-bezier(0.2, 0.7, 0.2, 1), opacity 240ms ease 40ms, visibility 0s;
+}
+.lp-acc-icon { transition: transform 220ms ease; }
+@media (prefers-reduced-motion: reduce) {
+  .lp-acc, .lp-acc.lp-acc-open, .lp-acc-icon { transition: none; }
+}
+html.reduce-motion .lp-acc,
+html.reduce-motion .lp-acc.lp-acc-open,
+html.reduce-motion .lp-acc-icon { transition: none; }
+
+/* Topic bar on phones: scrolls inside itself, never the page. */
+.lp-topics { scrollbar-width: none; }
+.lp-topics::-webkit-scrollbar { display: none; }
+
+/* Printing public pages (Terms, Privacy, FAQ): content only, answers open. */
+@media print {
+  .lp-root header, .lp-root footer, .lp-no-print { display: none !important; }
+  .lp-root { background: #fff; }
+  .lp-acc { grid-template-rows: 1fr; opacity: 1; visibility: visible; }
+  .lp-legal a[href^="http"]::after { content: " (" attr(href) ")"; font-size: 0.85em; }
+}

@@ -8,6 +8,7 @@ import { useQueryClient } from "@tanstack/react-query";
 import { IconCheck, IconCircle, IconMinus, IconPlus, IconSearch, IconShoppingBag, IconTrash } from "@tabler/icons-react";
 import { Button, ButtonLink, EmailSuggestion, Field, SelectInput, Spinner, Status, TextArea, TextInput } from "@/components/ui";
 import { suggestEmail } from "@/lib/emailTypos";
+import { PayTermsNote } from "@/components/legal/PayTermsNote";
 import { useOrderLive } from "@/lib/realtime/useOrderLive";
 import { hasInAppHistory } from "@/lib/nav/history";
 import { DetailRows, Panel } from "@/components/page/Blocks";
@@ -643,9 +644,12 @@ export function CheckoutPage() {
               <ContactStore />
             </div>
           ) : reviewing ? (
-            <Button fullWidth className="mt-4" onClick={() => void pay()} loading={paying || redirecting} loadingText={redirecting ? "Opening Paystack…" : "Reserving your items…"}>
-              Confirm and pay with Paystack →
-            </Button>
+            <>
+              <Button fullWidth className="mt-4" onClick={() => void pay()} loading={paying || redirecting} loadingText={redirecting ? "Opening Paystack…" : "Reserving your items…"}>
+                Confirm and pay with Paystack →
+              </Button>
+              <PayTermsNote absolute className="mt-2" />
+            </>
           ) : (
             <Button type="submit" form="checkout" fullWidth className="mt-4">
               Review order →

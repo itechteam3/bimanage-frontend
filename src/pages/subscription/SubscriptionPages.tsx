@@ -4,6 +4,7 @@ import { IconAlertTriangle, IconArrowRight, IconBolt, IconCheck, IconClock, Icon
 import { Button, ButtonLink, Dialog, EmptyState, Spinner, Status } from "@/components/ui";
 import { DetailRows, InfoStrip, IntroCard, PageTitle, Panel, PriceBox, Stepper, TipList } from "@/components/page/Blocks";
 import { ErrorNote } from "@/components/feedback/ErrorNote";
+import { PayTermsNote } from "@/components/legal/PayTermsNote";
 import { saveBlob } from "@/lib/api/client";
 import { useAuth } from "@/lib/auth/AuthProvider";
 import { useSubscription, type CurrentSubscription } from "@/lib/workspace/subscription";
@@ -540,6 +541,7 @@ function ChangePlan() {
                   Checkout unavailable
                 </Button>
               ))}
+            {payNow && q.paymentsAvailable && <PayTermsNote />}
             {q.type === "downgrade" && (
               <Button fullWidth loading={change.isPending} onClick={confirmLater}>
                 Switch on {shortDate(q.effectiveAt)}
