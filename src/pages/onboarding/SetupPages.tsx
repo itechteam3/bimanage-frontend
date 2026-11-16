@@ -7,6 +7,7 @@ import { BusinessProfileForm } from "@/components/business/BusinessProfileForm";
 import { useBusinessProfile, useOnboardingStatus, useSetupSteps } from "@/lib/workspace/api";
 import { errorMessage } from "@/lib/api/errorMessage";
 import { cn } from "@/lib/cn";
+import { pendingNext } from "@/lib/auth/pending";
 
 const Loading = () => (
   <div className="flex justify-center py-16 text-ink-brand" role="status">
@@ -69,7 +70,8 @@ export function TrialStartedPage() {
   );
 }
 
-// 02.03 Complete business identity (Figma 1897:2548)
+// 02.03 Complete business identity (Figma 1897:2548). The last onboarding step:
+// a destination picked before signing up (e.g. "Become a supplier") opens next.
 export function BusinessIdentityPage() {
   const navigate = useNavigate();
   const profile = useBusinessProfile();
@@ -90,7 +92,7 @@ export function BusinessIdentityPage() {
       <p className="-mt-4 text-body-sm text-ink-muted">Set up your identity for orders, invoices and your online store.</p>
       <IntroCard eyebrow="Workspace / Onboarding" title="The same information is reused across BiManage modules." />
       <div className="grid grid-cols-[minmax(0,1fr)] gap-5 lg:grid-cols-[minmax(0,1.7fr)_minmax(0,1fr)]">
-        <BusinessProfileForm profile={profile.data} title="Business identity setup" submitLabel="Save and continue" onSaved={() => navigate("/onboarding/checklist")}>
+        <BusinessProfileForm profile={profile.data} title="Business identity setup" submitLabel="Save and continue" onSaved={() => navigate(pendingNext.get() ?? "/onboarding/checklist")}>
           <div className="mt-6 rounded-xl bg-surface-pale p-4">
             <p className="text-caption font-semibold uppercase text-ink-brand">Setup progress</p>
             <p className="mt-2 text-body-lg text-ink-strong">Complete your business identity before publishing or billing.</p>

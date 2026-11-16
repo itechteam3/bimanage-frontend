@@ -1,7 +1,7 @@
 import type { ReactNode } from "react";
 import { Navigate, useLocation } from "react-router-dom";
 import { useAuth } from "./AuthProvider";
-import { pendingInvite } from "./pending";
+import { afterAuthPath } from "./pending";
 import { Spinner } from "@/components/ui";
 
 const FullPageSpinner = () => (
@@ -33,7 +33,7 @@ export function GuestOnly({ children }: { children: ReactNode }) {
   const { status } = useAuth();
   if (status === "loading") return <FullPageSpinner />;
   if (status === "authenticated") {
-    return <Navigate to={pendingInvite.get() ? "/invite/accept" : "/start"} replace />;
+    return <Navigate to={afterAuthPath("/start")} replace />;
   }
   return <>{children}</>;
 }

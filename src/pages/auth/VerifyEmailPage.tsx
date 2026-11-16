@@ -5,7 +5,7 @@ import { CodeInput } from "@/components/auth/CodeInput";
 import { Button, ButtonLink, Field } from "@/components/ui";
 import { authApi, isExpiredCodeError } from "@/lib/auth/api";
 import { useAuth } from "@/lib/auth/AuthProvider";
-import { pendingInvite } from "@/lib/auth/pending";
+import { afterAuthPath } from "@/lib/auth/pending";
 import { ApiError } from "@/lib/api/client";
 import { cooldownMessage, errorMessage } from "@/lib/api/errorMessage";
 
@@ -57,7 +57,7 @@ export function VerifyEmailPage() {
     try {
       const res = await authApi.verifyEmail(email, code);
       await signIn(res.token);
-      navigate(pendingInvite.get() ? "/invite/accept" : "/dashboard", { replace: true });
+      navigate(afterAuthPath("/dashboard"), { replace: true });
     } catch (err) {
       if (err instanceof ApiError && isExpiredCodeError(err.message)) {
         setState("expired");

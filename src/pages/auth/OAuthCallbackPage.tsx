@@ -2,7 +2,7 @@ import { useEffect, useRef } from "react";
 import { useNavigate } from "react-router-dom";
 import { Spinner } from "@/components/ui";
 import { useAuth } from "@/lib/auth/AuthProvider";
-import { pendingInvite } from "@/lib/auth/pending";
+import { afterAuthPath } from "@/lib/auth/pending";
 import { ApiError } from "@/lib/api/client";
 import { authApi } from "@/lib/auth/api";
 
@@ -29,7 +29,7 @@ export function OAuthCallbackPage() {
     }
     (code ? authApi.exchangeGoogleCode(code).then((r) => r.token) : Promise.resolve(legacyToken!))
       .then((token) => signIn(token))
-      .then(() => navigate(pendingInvite.get() ? "/invite/accept" : "/start", { replace: true }))
+      .then(() => navigate(afterAuthPath("/start"), { replace: true }))
       .catch((err) => navigate(err instanceof ApiError && err.data.accountClosing ? "/account-closing" : "/login?error=google", { replace: true }));
   }, [navigate, signIn]);
 
