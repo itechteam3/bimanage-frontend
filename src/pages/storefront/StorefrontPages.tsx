@@ -133,7 +133,7 @@ export function StorefrontHomePage() {
           e.preventDefault();
           setSearch(typed.trim());
         }}
-        className="grid grid-cols-[minmax(0,1fr)] gap-2 rounded-2xl border border-line-card bg-surface-card p-3 md:grid-cols-[2fr_minmax(0,1fr)_minmax(0,1fr)_auto]"
+        className="grid grid-cols-[minmax(0,1fr)] gap-2 rounded-2xl border border-line-card bg-surface-card p-3 md:grid-cols-[minmax(0,2fr)_minmax(0,1fr)_minmax(0,1fr)_auto]"
       >
         <label className="flex h-control-lg items-center gap-2 rounded-md bg-surface-pale px-3">
           <IconSearch aria-hidden="true" className="size-icon text-ink-muted" />
@@ -147,7 +147,7 @@ export function StorefrontHomePage() {
               if (!e.target.value) setSearch("");
             }}
             placeholder="Search products"
-            className="h-full flex-1 bg-transparent text-input text-ink-strong outline-none placeholder:text-ink-muted"
+            className="h-full min-w-0 flex-1 bg-transparent text-input text-ink-strong outline-none placeholder:text-ink-muted"
           />
         </label>
         <label className="contents">
