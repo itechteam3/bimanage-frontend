@@ -6,7 +6,7 @@ import { Button, Dialog, Field, TextArea } from "@/components/ui";
 import { adminApi } from "../lib/api";
 import { useAdminMe } from "../lib/hooks";
 import type { Paged } from "../lib/types";
-import { AdminName, AdminPage, ErrorBox, Facts, FilterSelect, Loading, Metrics, Pager, Pill, Records, SearchBox, Section, Toolbar, dateOnly, dateTime, useDebounced, words, type Column } from "../components/AdminKit";
+import { AdminPage, ErrorBox, Facts, FilterSelect, Loading, Metrics, Pager, Pill, Records, SearchBox, Section, Toolbar, dateOnly, dateTime, useDebounced, words, type Column } from "../components/AdminKit";
 
 // Platform review moderation (/admin/reviews). New and edited reviews wait as
 // "pending"; only approved ones are public. Every action needs a reason from
@@ -110,11 +110,12 @@ export function ReviewsPage() {
   const counts = list.data?.counts;
   const setStatus = (v: ReviewStatus | "") => setParams((p) => (v ? (p.set("status", v), p) : (p.delete("status"), p)), { replace: true });
   const columns: Column<AdminReview>[] = [
-    { key: "review", label: "Review", cell: (r) => <span className="block max-w-md [overflow-wrap:anywhere]">{r.headline || r.review.slice(0, 80) || "(no headline)"}</span> },
+    { key: "review", label: "Review", className: "lg:min-w-56", cell: (r) => <span className="block max-w-md [overflow-wrap:anywhere]">{r.headline || r.review.slice(0, 80) || "(no headline)"}</span> },
     { key: "rating", label: "Rating", cell: (r) => <Stars n={r.rating} /> },
-    { key: "reviewer", label: "Reviewer", cell: (r) => (
+    { key: "reviewer", label: "Reviewer", className: "lg:min-w-48 lg:max-w-64", cell: (r) => (
       <span className="block min-w-0 [overflow-wrap:anywhere]">
-        <AdminName name={r.reviewer.name || null} email={r.reviewer.email || null} small />
+        <span className="block font-medium text-ink-strong">{r.reviewer.name || "—"}</span>
+        {r.reviewer.email && <span className="block text-body-sm text-ink-muted">{r.reviewer.email}</span>}
         {r.businessName && <span className="block text-body-sm text-ink-muted">{r.businessName}</span>}
       </span>
     ) },
