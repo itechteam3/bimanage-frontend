@@ -749,7 +749,7 @@ function SyncInventory({ store }: { store: Store }) {
       >
         Sync from inventory
       </PageTitle>
-      <p className="-mt-4 text-body-sm text-ink-muted">Bring products over from Inventory. Price and stock stay in step with it.</p>
+      <p className="-mt-4 text-body-sm text-ink-muted">Bring products over from Inventory. Only stock stays in step with it; the store price is set separately.</p>
       <IntroCard eyebrow={opsEyebrow(store)} title="Synced products use your inventory stock, so you never sell what you don't have." />
       <div className="grid grid-cols-[minmax(0,1fr)] gap-5 lg:grid-cols-[minmax(0,2.3fr)_minmax(0,1fr)]">
         <Panel>
@@ -798,6 +798,7 @@ function SyncInventory({ store }: { store: Store }) {
             ["Selected", count(selected.size)],
             ["Already in store", count(linked.size)],
             ["Stock", "Always from Inventory"],
+            ["Price", "Set on the store product (starts at the inventory price)"],
             ["Photos", "Inventory photo is copied; add more in the store"],
           ]}
         />
