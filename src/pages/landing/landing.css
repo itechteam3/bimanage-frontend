@@ -16,6 +16,31 @@
   transform: none;
 }
 
+/* Full-screen hero: the whole screen below the sticky navbar. svh so phone
+   browser bars never cut it off (vh first for older browsers). */
+.lp-hero-full {
+  min-height: calc(100vh - var(--spacing-mobile-header));
+  min-height: calc(100svh - var(--spacing-mobile-header));
+}
+@media (min-width: 1024px) {
+  .lp-hero-full {
+    min-height: calc(100vh - var(--spacing-header));
+    min-height: calc(100svh - var(--spacing-header));
+  }
+}
+
+/* Scroll hint at the bottom of the hero: a gentle bob. */
+@keyframes lp-bob {
+  0%, 100% { transform: translate(-50%, 0); opacity: 0.75; }
+  50% { transform: translate(-50%, 8px); opacity: 1; }
+}
+.lp-scroll-hint { animation: lp-bob 2.2s ease-in-out 1.2s infinite; }
+
+/* How it works: the dashed line between step icons (side by side). */
+.lp-step-line {
+  border-top: 2px dashed color-mix(in srgb, var(--color-brand-navy) 22%, transparent);
+}
+
 /* Hero entrance. */
 @keyframes lp-rise {
   from { opacity: 0; transform: translateY(18px); }
@@ -43,13 +68,14 @@
 
 @media (prefers-reduced-motion: reduce) {
   .lp-js [data-reveal] { opacity: 1; transform: none; transition: none; }
-  .lp-rise, .lp-preview, .lp-float, .lp-fade { animation: none; }
+  .lp-rise, .lp-preview, .lp-float, .lp-fade, .lp-scroll-hint { animation: none; }
   .lp-lift:hover { transform: none; }
 }
 html.reduce-motion .lp-js [data-reveal] { opacity: 1; transform: none; transition: none; }
 html.reduce-motion .lp-rise,
 html.reduce-motion .lp-preview,
 html.reduce-motion .lp-float,
+html.reduce-motion .lp-scroll-hint,
 html.reduce-motion .lp-fade { animation: none; }
 
 /* Smooth scrolling to #sections (not for reduced motion). */

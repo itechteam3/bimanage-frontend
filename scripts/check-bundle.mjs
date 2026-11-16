@@ -39,7 +39,10 @@ try {
 
 let apiFound = false;
 for (const file of files) {
-  const text = readFileSync(file, "utf8");
+  // Known third-party text that isn't a real call: Sentry's Spotlight dev
+  // integration names its default local sidecar address, but it only runs when
+  // explicitly enabled (we never enable it).
+  const text = readFileSync(file, "utf8").split('sidecarUrl||"http://localhost:8969/stream"').join("sidecarUrl");
   if (api && text.includes(api)) apiFound = true;
   for (const [re, what] of FORBIDDEN) {
     const m = text.match(re);

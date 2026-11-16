@@ -749,14 +749,14 @@ function SyncInventory({ store }: { store: Store }) {
       >
         Sync from inventory
       </PageTitle>
-      <p className="-mt-4 text-body-sm text-ink-muted">Bring products over from Inventory. Price and stock stay in step with it.</p>
+      <p className="-mt-4 text-body-sm text-ink-muted">Bring products over from Inventory. Only stock stays in step with it; the store price is set separately.</p>
       <IntroCard eyebrow={opsEyebrow(store)} title="Synced products use your inventory stock, so you never sell what you don't have." />
       <div className="grid grid-cols-[minmax(0,1fr)] gap-5 lg:grid-cols-[minmax(0,2.3fr)_minmax(0,1fr)]">
         <Panel>
           <label className="flex h-control-lg items-center gap-2 rounded-md bg-surface-pale px-3">
             <IconSearch aria-hidden="true" className="size-icon text-ink-muted" />
             <span className="sr-only">Search inventory</span>
-            <input value={q} onChange={(e) => setQ(e.target.value)} placeholder="Search inventory…" className="h-full flex-1 bg-transparent text-input text-ink-strong outline-none placeholder:text-ink-muted" />
+            <input value={q} onChange={(e) => setQ(e.target.value)} placeholder="Search inventory…" className="h-full min-w-0 flex-1 bg-transparent text-input text-ink-strong outline-none placeholder:text-ink-muted" />
           </label>
           {inventory.isLoading ? (
             <Loading />
@@ -798,6 +798,7 @@ function SyncInventory({ store }: { store: Store }) {
             ["Selected", count(selected.size)],
             ["Already in store", count(linked.size)],
             ["Stock", "Always from Inventory"],
+            ["Price", "Set on the store product (starts at the inventory price)"],
             ["Photos", "Inventory photo is copied; add more in the store"],
           ]}
         />

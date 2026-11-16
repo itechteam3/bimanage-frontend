@@ -4,6 +4,7 @@ import { IconAlertTriangle, IconCheck, IconMail, IconPhone, IconSearch } from "@
 import { Button, ButtonLink, Dialog, Status } from "@/components/ui";
 import { DetailRows, HelpPanel, IntroCard, PageTitle, Panel } from "@/components/page/Blocks";
 import { ErrorNote } from "@/components/feedback/ErrorNote";
+import { TestPaymentBadge, TestPaymentNotice, isTestPayment } from "@/components/feedback/TestPaymentBadge";
 import { UpdatedNote, newRowClass } from "@/components/feedback/UpdatedNote";
 import { useNewItems } from "@/lib/realtime/useLiveList";
 import { count, naira, shortDate } from "@/lib/format";
@@ -16,6 +17,7 @@ import {
   useMerchantStoreOrders,
   useSetStoreOrderStatus,
   type MerchantStoreOrder,
+  type StorePayout,
   type Store,
   type StoreOrderFilter,
   type StoreOrderStatus,
@@ -65,7 +67,7 @@ function StoreOrders({ store }: { store: Store }) {
       <PageTitle>Store orders</PageTitle>
       <p className="-mt-4 text-body-sm text-ink-muted">Orders customers placed in your online store.</p>
       <StoreTabs />
-      <IntroCard eyebrow={opsEyebrow(store)} title="Paid orders move from New to Completed. Completing an order releases your earnings to your wallet." />
+      <IntroCard eyebrow={opsEyebrow(store)} title="Paid orders move from New to Completed. Your earnings are released when the customer confirms delivery, or 7 days after you mark the order delivered." />
       <div className="grid grid-cols-[minmax(0,1fr)] gap-5 lg:grid-cols-[minmax(0,2.3fr)_minmax(0,1fr)]">
         <Panel>
           <form
@@ -87,7 +89,7 @@ function StoreOrders({ store }: { store: Store }) {
                   if (!e.target.value) setQuery("");
                 }}
                 placeholder="Search order number, customer name or email"
-                className="h-full flex-1 bg-transparent text-input text-ink-strong outline-none placeholder:text-ink-muted"
+                className="h-full min-w-0 flex-1 bg-transparent text-input text-ink-strong outline-none placeholder:text-ink-muted"
               />
             </label>
           </form>
@@ -125,8 +127,9 @@ function StoreOrders({ store }: { store: Store }) {
                       <span className="truncate text-body-sm text-ink-muted md:order-2">
                         {o.customerName} · {count(units)} {units === 1 ? "item" : "items"} · {shortDate(o.createdAt)}
                       </span>
-                      <span className="justify-self-end md:order-4">
+                      <span className="flex flex-wrap justify-end gap-1 justify-self-end md:order-4">
                         <Status tone={b.tone}>{b.label}</Status>
+                        {isTestPayment(o) && <TestPaymentBadge />}
                       </span>
                     </li>
                   );
@@ -152,8 +155,8 @@ function StoreOrders({ store }: { store: Store }) {
           items={[
             ["New", "Paid; start preparing it"],
             ["Shipped → Delivered", "Customer gets an email at each step"],
-            ["Completed", "Earnings move to your available balance (automatically 7 days after delivery)"],
-            ["Cancel", "Stock goes back; refund paid orders in Paystack"],
+            ["Earnings", "On hold until the customer confirms delivery, or 7 days after delivery with no reported problem"],
+            ["Cancel", "Stock goes back; paid orders are refunded to the customer automatically"],
           ]}
         />
       </div>
@@ -163,12 +166,47 @@ function StoreOrders({ store }: { store: Store }) {
 
 // ── Detail ────────────────────────────────────────────────────────────────
 
+const longDate = (iso: string) => new Date(iso).toLocaleDateString("en-GB", { day: "numeric", month: "short", year: "numeric", timeZone: "Africa/Lagos" });
+
+/** Where this order's earnings stand (on hold, available, reversed). Security fix P0-1. */
+export function EarningsPanel({ payout, amount }: { payout: StorePayout; amount?: number }) {
+  const sum = amount !== undefined ? naira(amount) : "Your earnings";
+  let title: string;
+  let body: string;
+  if (payout.status === "held" && payout.disputeOpen) {
+    title = `${sum} on hold`;
+    body = "The customer reported a problem. Your earnings stay on hold while BiManage support looks into it.";
+  } else if (payout.status === "held") {
+    title = `${sum} on hold`;
+    body = payout.holdEndsAt
+      ? `Earnings on hold until ${longDate(payout.holdEndsAt)} or the customer confirms delivery, whichever comes first.`
+      : `Earnings on hold until the customer confirms delivery, or ${payout.holdDays} days after you mark the order delivered.`;
+  } else if (payout.status === "released") {
+    title = `${sum} available`;
+    body =
+      payout.releaseReason === "customer_confirmed"
+        ? "The customer confirmed delivery. The money is in your available balance."
+        : payout.releaseReason === "dispute_resolved"
+          ? "BiManage support resolved the reported problem. The money is in your available balance."
+          : "The hold ended with no reported problem. The money is in your available balance.";
+  } else {
+    title = "Earnings reversed";
+    body = "This order was cancelled or refunded, so its earnings were taken back.";
+  }
+  return (
+    <Panel title="Earnings">
+      <p className="font-semibold text-ink-strong">{title}</p>
+      <p className="mt-1 text-body-sm text-ink-secondary">{body}</p>
+    </Panel>
+  );
+}
+
 type Next = "processing" | "shipped" | "delivered" | "completed";
 const NEXT_LABEL: Record<Next, { label: string; body: string }> = {
   processing: { label: "Mark processing", body: "You're preparing the order. The customer gets an email." },
   shipped: { label: "Mark shipped", body: "The order is on its way. The customer gets an email." },
-  delivered: { label: "Mark delivered", body: "The customer has it. It completes on its own after 7 days." },
-  completed: { label: "Mark completed", body: "Releases your earnings for this order to your available balance." },
+  delivered: { label: "Mark delivered", body: "The customer has it. Your earnings are released when they confirm, or 7 days after delivery." },
+  completed: { label: "Mark completed", body: "Closes the order. Your earnings still wait for the customer's confirmation or the end of the hold." },
 };
 const HISTORY_LABEL: Partial<Record<StoreOrderStatus, string>> = { pending: "Order placed", payment_confirmed: "Payment confirmed" };
 
@@ -200,7 +238,7 @@ function StoreOrderDetail({ store, id }: { store: Store; id: string }) {
     try {
       const res = await setStatus.mutateAsync(status);
       setConfirmCancel(false);
-      if (res.refundNeeded) setRefund(`Refund ${naira(o.total)} to ${o.customerName} from your Paystack dashboard (Transactions → this payment → Refund).`);
+      if (res.refund === "failed") setRefund(res.message ?? "The refund didn't go through yet. BiManage support has been alerted and will retry it.");
       setNotice(status === "cancelled" ? "Order cancelled. Its stock is back in your store." : `Order marked ${badge(status === "completed" ? "completed" : status).label.toLowerCase()}.`);
     } catch (err) {
       setConfirmCancel(false);
@@ -214,7 +252,7 @@ function StoreOrderDetail({ store, id }: { store: Store; id: string }) {
       <PageTitle
         actions={
           <span className="flex flex-wrap gap-2">
-            {o.paymentMode === "test" && <Status tone="neutral">Test payment (no money moved)</Status>}
+            {isTestPayment(o) && <TestPaymentBadge />}
             <Status tone={b.tone}>{b.label}</Status>
           </span>
         }
@@ -224,18 +262,25 @@ function StoreOrderDetail({ store, id }: { store: Store; id: string }) {
       <p className="-mt-4 text-body-sm text-ink-muted">
         Placed {shortDate(o.createdAt)} · {count(units)} {units === 1 ? "item" : "items"} · {o.isPaid ? `paid ${shortDate(o.paidAt)}` : "not paid"}
       </p>
+      {isTestPayment(o) && <TestPaymentNotice />}
       <IntroCard eyebrow={opsEyebrow(store)} title={o.isPaid ? "Prepare, ship and complete this order." : "This order hasn't been paid. Don't send anything yet."} />
       {refund && (
         <section role="alert" className="flex gap-3 rounded-xl bg-danger-bg px-5 py-4">
           <IconAlertTriangle aria-hidden="true" className="mt-0.5 size-5 shrink-0 text-danger" />
           <div>
-            <p className="font-semibold text-ink-strong">Refund needed</p>
+            <p className="font-semibold text-ink-strong">Refund not sent yet</p>
             <p className="text-body-sm text-ink-secondary">{refund}</p>
           </div>
         </section>
       )}
-      {o.status === "cancelled" && o.isPaid && o.earningsReversed && !refund && (
-        <p className="rounded-xl bg-surface-tint-warm px-5 py-3 text-body-sm text-ink-strong">This paid order was cancelled. If you haven't yet, refund the customer from your Paystack dashboard.</p>
+      {(o.status === "cancelled" || o.status === "refunded") && o.isPaid && !refund && (
+        <p className="rounded-xl bg-surface-tint-warm px-5 py-3 text-body-sm text-ink-strong">
+          {o.payout?.refundStatus === "failed"
+            ? "This paid order was cancelled. The refund to the customer didn't go through yet: BiManage support is retrying it."
+            : o.payout?.refundStatus
+              ? `This paid order was ${o.status}. ${naira(o.total)} is being refunded to the customer through Paystack.`
+              : "This paid order was cancelled. If you haven't yet, refund the customer from your Paystack dashboard."}
+        </p>
       )}
       <div className="grid grid-cols-[minmax(0,1fr)] gap-5 lg:grid-cols-[minmax(0,1.7fr)_minmax(0,1fr)]">
         <div className="flex flex-col gap-5">
@@ -297,7 +342,7 @@ function StoreOrderDetail({ store, id }: { store: Store; id: string }) {
             {!canAct ? (
               <p className="text-body-sm text-ink-muted">Your role can view store orders but not change them.</p>
             ) : next.length === 0 && !canCancel ? (
-              <p className="text-body-sm text-ink-muted">{o.status === "completed" ? "This order is complete. Your earnings are in your available balance." : "Nothing more to do on this order."}</p>
+              <p className="text-body-sm text-ink-muted">{o.status === "completed" ? (o.payout?.status === "held" ? "This order is complete. Your earnings are released when the customer confirms delivery or the hold ends." : "This order is complete. Your earnings are in your available balance.") : "Nothing more to do on this order."}</p>
             ) : (
               <div className="flex flex-col gap-3">
                 {next.map((s, n) => (
@@ -316,6 +361,7 @@ function StoreOrderDetail({ store, id }: { store: Store; id: string }) {
               </div>
             )}
           </Panel>
+          {o.isPaid && o.payout && o.payout.status !== "none" && <EarningsPanel payout={o.payout} amount={o.vendorPayout} />}
           <Panel tone="pale" title="Customer">
             <DetailRows
               rows={[
@@ -345,7 +391,7 @@ function StoreOrderDetail({ store, id }: { store: Store; id: string }) {
         title={`Cancel order ${o.trackingNo}?`}
         description={
           o.isPaid
-            ? `The ${count(units)} ${units === 1 ? "item goes" : "items go"} back into stock and your earnings for this order are reversed. ${o.customerName} paid ${naira(o.total)}: you'll need to refund them from your Paystack dashboard.`
+            ? `The ${count(units)} ${units === 1 ? "item goes" : "items go"} back into stock and your earnings for this order are reversed. ${o.customerName} paid ${naira(o.total)}: we refund them in full through Paystack.`
             : `The ${count(units)} ${units === 1 ? "item goes" : "items go"} back into stock. The customer hasn't paid, so there's nothing to refund.`
         }
         actions={

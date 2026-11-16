@@ -1,5 +1,6 @@
 import type { ReactNode } from "react";
-import { IconDiamond, IconSparkles, IconArrowUpRight } from "@tabler/icons-react";
+import { IconDiamond, IconArrowUpRight } from "@tabler/icons-react";
+import { FeliAvatar } from "@/components/feli/FeliAvatar";
 import { Logo } from "@/components/brand/Logo";
 import { Status } from "@/components/ui";
 import { cn } from "@/lib/cn";
@@ -75,9 +76,7 @@ function ShowcasePanel() {
         </div>
         <div className="w-showcase-feli max-w-full rounded-icon desktop:-ml-3 bg-surface-tint-feli p-5 shadow-floating">
           <div className="flex items-center gap-4">
-            <span className="flex size-feature-icon items-center justify-center rounded-xl bg-surface-tint-lavender text-brand-violet">
-              <IconSparkles className="size-icon" />
-            </span>
+            <FeliAvatar size="lg" decorative />
             <div>
               <p className="text-body font-semibold">FELI AI&nbsp;&nbsp;/&nbsp;&nbsp;Inventory insight</p>
               <p className="text-caption text-ink-muted">7 products are running low. Review stock →</p>

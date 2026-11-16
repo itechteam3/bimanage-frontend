@@ -47,6 +47,9 @@ export const authApi = {
   login: (email: string, password: string) =>
     api<LoginResult>("/auth/login", { method: "POST", body: { email, password }, auth: false, quiet401: true }),
 
+  /** Google sign-in: trade the one-time code from /oauth/callback?code= for the session token (60 s, once). */
+  exchangeGoogleCode: (code: string) => api<LoginResult>("/auth/google/exchange", { method: "POST", body: { code }, auth: false }),
+
   register: (input: { name: string; email: string; password: string; termsAccepted: true; termsVersion: string }) =>
     api<{ message: string; email: string }>("/auth/register", { method: "POST", body: input, auth: false }),
 

@@ -143,14 +143,56 @@ describe("landing page (/)", () => {
     for (const img of shots) expect(img.getAttribute("alt")).toMatch(/bimanage/i);
   });
 
+  it("the hero fills the screen and has a scroll hint to the dashboard section", async () => {
+    renderApp("/");
+    const h1 = await screen.findByRole("heading", { level: 1 });
+    const hero = h1.closest("section") as HTMLElement;
+    expect(hero).toHaveClass("lp-hero-full");
+    const hint = within(hero).getByRole("link", { name: "Scroll to the dashboard" });
+    expect(hint).toHaveAttribute("href", "#lp-dashboard");
+    expect(document.getElementById("lp-dashboard")).toHaveAccessibleName("Everything your business needs, in one dashboard");
+  });
+
+  it("How it works: three numbered steps with icons, no images", async () => {
+    renderApp("/");
+    await screen.findByRole("heading", { level: 1 });
+    const section = document.getElementById("how-it-works") as HTMLElement;
+    const steps = within(section).getAllByRole("listitem");
+    expect(steps.map((li) => within(li).getByRole("heading", { level: 3 }).textContent)).toEqual(["Sign up", "Set up your business", "Sell, manage and grow"]);
+    steps.forEach((li, i) => {
+      expect(li).toHaveTextContent(`Step ${i + 1}`);
+      expect(li.querySelector("svg")).not.toBeNull();
+      expect(li.querySelector("img")).toBeNull();
+    });
+    expect(steps[0]).toHaveTextContent("Create your account and verify your email. It takes minutes.");
+  });
+
+  it("no em or en dashes anywhere in the landing page text", async () => {
+    renderApp("/");
+    await screen.findByRole("heading", { level: 1 });
+    await screen.findByRole("heading", { name: "Everything your business needs, in one dashboard" });
+    expect(document.body.textContent).not.toMatch(/[\u2013\u2014]/);
+  });
+
+  it("the hero stands alone; the dashboard screenshots are in their own section right after it", async () => {
+    renderApp("/");
+    const h1 = await screen.findByRole("heading", { level: 1 });
+    const hero = h1.closest("section") as HTMLElement;
+    expect(hero.querySelectorAll("figure")).toHaveLength(0);
+    const preview = screen.getByRole("region", { name: "Everything your business needs, in one dashboard" });
+    expect(hero.nextElementSibling).toBe(preview);
+    expect(within(preview).getByAltText(/The BiManage business dashboard/)).toBeInTheDocument();
+    expect(within(preview).getByAltText("The BiManage dashboard on a phone.")).toBeInTheDocument();
+  });
+
   it("phone screenshots sit in the drawn iPhone frame, below a decorative status bar", async () => {
     renderApp("/");
     await screen.findByRole("heading", { level: 1 });
     const phone = screen.getByAltText("The BiManage dashboard on a phone.");
-    // Captured at the iPhone 18 Pro Max width, below the 62 pt status bar; the hero loads eagerly.
+    // Captured at the iPhone 18 Pro Max width, below the 62 pt status bar; below the hero, so lazy.
     expect(phone).toHaveAttribute("width", "440");
     expect(phone).toHaveAttribute("height", "894");
-    expect(phone).toHaveAttribute("loading", "eager");
+    expect(phone).toHaveAttribute("loading", "lazy");
     const frame = phone.closest("figure.lp-phone") as HTMLElement;
     expect(frame).not.toBeNull();
     const status = frame.querySelector(".lp-phone-status") as HTMLElement;

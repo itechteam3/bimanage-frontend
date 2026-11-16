@@ -128,6 +128,18 @@ describe("Talk to FELI (public guest chat)", () => {
     expect(within(log).getAllByRole("listitem").map((li) => li.textContent)).toEqual(["sell online", "track stock"]);
   });
 
+  it("our public pages in a reply become links (help articles, /register); other addresses stay text", async () => {
+    fb.handlers["POST /public/feli"] = () => [200, { reply: "See /help/publish-your-store or browse /help?category=store.\n- Sign up at /register\n- Company site: bitechteam.org/contact.html", suggestions: [], remaining: 6, limit: 10 }];
+    const user = await openChat();
+    await user.click(within(panel()).getByRole("button", { name: "What is BiManage?" }));
+    const log = within(panel()).getByRole("log");
+    expect(await within(log).findByRole("link", { name: "/help/publish-your-store" })).toHaveAttribute("href", "/help/publish-your-store");
+    expect(within(log).getByRole("link", { name: "/help?category=store" })).toHaveAttribute("href", "/help?category=store");
+    expect(within(log).getByRole("link", { name: "/register" })).toHaveAttribute("href", "/register");
+    expect(within(log).queryByRole("link", { name: "/contact" })).toBeNull();
+    expect(log.textContent).toContain("bitechteam.org/contact.html");
+  });
+
   it("daily limit: shows the server's message, disables the box and links to sign up and contact", async () => {
     fb.handlers["POST /public/feli"] = () => [429, { message: "You've used today's 10 free messages. Create a free account to keep going.", reason: "daily_limit", links: LINKS, remaining: 0, limit: 10 }];
     const user = await openChat();

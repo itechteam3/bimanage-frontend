@@ -35,6 +35,8 @@ export interface Wallet {
   fees: { withdrawalRate: number; paystackTransferFee: boolean; minWithdrawal: number };
   paymentsMode: "test" | "live" | null;
   payoutsCount?: number;
+  /** Payouts wait after a bank account change (backend P1-2); null when not paused. */
+  payoutsPausedUntil?: string | null;
 }
 
 export interface WithdrawalQuote {
@@ -71,13 +73,39 @@ export interface WalletTx {
   mode: "test" | "live" | null;
   failureReason: string | null;
   order: { _id: string; trackingNo: string; customerName?: string } | string | null;
+  /** A BiSupplyNet supply order this business sold as a wholesaler. */
+  supplyOrder?: { _id: string; trackingNo: string } | string | null;
+  /** Where the money came from (backend, 2026-11-16); null for payouts and fees. */
+  source?: TxSource | null;
+  /** The backend's label ("Store sale", "BiSupplyNet sale", "Payout"…). */
+  label?: string;
   createdAt: string;
   completedAt: string | null;
   related?: WalletTx[];
   bank?: WalletBank | null;
 }
 
+export type TxSource = "store" | "bisupplynet";
+
 export const TX_TYPE: Record<TxType, string> = { credit: "Store sale", debit: "Debit", commission: "BiManage fee", withdrawal: "Payout", refund: "Refund" };
+
+/** Where a transaction's money came from: the backend's `source`, else worked out the same way. */
+export function txSource(t: Pick<WalletTx, "source" | "order" | "supplyOrder" | "description">): TxSource | null {
+  if (t.source !== undefined) return t.source;
+  if (t.supplyOrder || /^BiSupplyNet\b/i.test(t.description ?? "")) return "bisupplynet";
+  if (t.order || /\bstore order\b/i.test(t.description ?? "")) return "store";
+  return null;
+}
+
+/** The label for a transaction: a BiSupplyNet supply order is a "BiSupplyNet sale", never a "Store sale". */
+export function txLabel(t: Pick<WalletTx, "type" | "source" | "order" | "supplyOrder" | "description">): string {
+  if (t.type !== "credit") return TX_TYPE[t.type];
+  return txSource(t) === "bisupplynet" ? "BiSupplyNet sale" : TX_TYPE.credit;
+}
+
+/** The order number a transaction belongs to (store or BiSupplyNet), if known. */
+export const txOrderNo = (t: Pick<WalletTx, "order" | "supplyOrder">) =>
+  t.order && typeof t.order === "object" ? t.order.trackingNo : t.supplyOrder && typeof t.supplyOrder === "object" ? t.supplyOrder.trackingNo : null;
 
 /** Plain-language status for a row (06.07: Pending / Available / Paid / Failed). */
 export function txStatus(t: Pick<WalletTx, "type" | "status">): { label: string; tone: "success" | "warning" | "danger" | "neutral" | "live" } {
@@ -122,7 +150,12 @@ function useWalletMutation<V, R>(fn: (v: V) => Promise<R>) {
   return useMutation({ mutationFn: fn, onSuccess: () => qc.invalidateQueries({ queryKey: ["wallet"] }) });
 }
 
-export const useSetupBank = () => useWalletMutation((v: { accountNumber: string; bankCode: string; bankName?: string }) => api<{ accountName: string; wallet: Wallet }>("/wallet/setup-bank", { method: "POST", body: v }));
+/** Saving the payout account needs the password, or an emailed code for Google-only accounts (P1-2). */
+export const useSetupBank = () =>
+  useWalletMutation((v: { accountNumber: string; bankCode: string; bankName?: string; currentPassword?: string; code?: string }) =>
+    api<{ accountName: string; wallet: Wallet; message?: string }>("/wallet/setup-bank", { method: "POST", body: v })
+  );
+export const requestBankChangeCode = () => api<{ message: string }>("/wallet/bank-change-code", { method: "POST" });
 
 export const useSaveSchedule = () =>
   useWalletMutation((v: { interval: Wallet["schedule"]["interval"]; days?: number; notificationEmail?: string; payoutReminder?: boolean }) => api<{ wallet: Wallet }>("/wallet/withdrawal-schedule", { method: "PUT", body: v }));

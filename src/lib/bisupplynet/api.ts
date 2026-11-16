@@ -156,6 +156,7 @@ export interface ReceivedOrder {
   totalAmount: number;
   status: OrderStatus;
   isPaid: boolean;
+  paymentMode?: "test" | "live" | null;
   createdAt: string;
   client?: { _id: string; name: string; avatar?: string | null } | null;
   product?: { _id: string; name: string; images?: string[] } | null;

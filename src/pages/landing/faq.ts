@@ -24,8 +24,8 @@ export interface FaqItem {
   featured?: boolean;
   /** In-site links shown under the answer. */
   links?: FaqLink[];
-  /** Related help-centre topic (the help centre needs sign-in). */
-  help?: boolean;
+  /** The public help centre guide for this question (/help/<slug>, open to everyone). */
+  help?: string;
 }
 export interface FaqGroup {
   /** Stable slug for /faq#<slug> and /faq?topic=<slug>. */
@@ -65,7 +65,7 @@ export const FAQ_GROUPS: FaqGroup[] = [
           "Yes. You can invite team members by email and give each one a role (admin, manager or staff) with its own permissions. Each person only sees and does what their role allows, and the server checks this on every request.",
           "Some actions are kept for the owner, such as managing billing and closing the account.",
         ],
-        help: true,
+        help: "/help/team-roles",
       },
     ],
   },
@@ -131,7 +131,7 @@ export const FAQ_GROUPS: FaqGroup[] = [
           "Yes. On a paid plan (or during a trial or package that includes the store) you can publish your own online store with your products, delivery fees and a checkout. Shoppers pay through Paystack's secure checkout and do not need an account: they check out with their email address and can track the order with its order number.",
           "Each paid order shows up in your store orders, and your share of the money goes to your BiManage wallet.",
         ],
-        help: true,
+        help: "/help/create-your-store",
       },
       {
         id: "commission",
@@ -162,7 +162,7 @@ export const FAQ_GROUPS: FaqGroup[] = [
           "When a shopper pays, your share shows as pending in your wallet. It becomes available once the order is completed: you can mark it completed after delivery, and delivered orders complete on their own 7 days after you mark them delivered.",
           "You can withdraw available money to your verified Nigerian bank account on the schedule you choose (weekly, every two weeks, monthly or every 7 to 90 days). The minimum withdrawal is NGN 1,000.",
         ],
-        help: true,
+        help: "/help/withdraw-to-bank",
       },
       {
         id: "payout-fees",
@@ -216,7 +216,7 @@ export const FAQ_GROUPS: FaqGroup[] = [
           "FELI is BiManage's AI assistant. It answers questions about using BiManage and about your business, using only the data your role lets you see. It can also suggest actions, such as drafting an invoice, creating a task or opening a support ticket, but nothing happens until you review and approve it.",
           "Freemium businesses get 20 FELI messages a day; paid plans have no daily limit. Like any AI, FELI can make mistakes, so check important answers and figures before you rely on them.",
         ],
-        help: true,
+        help: "/help/what-feli-can-do",
       },
     ],
   },
@@ -260,9 +260,9 @@ export const FAQ_GROUPS: FaqGroup[] = [
         id: "contact-support",
         q: "How do I get help?",
         a: [
-          "Send us a message from the contact page and we'll reply by email, usually within one working day. If you already have an account, you can also open a support ticket inside BiManage or ask FELI.",
+          "Send us a message from the contact page and we'll reply by email, usually within one working day. If you already have an account, you can also open a support ticket inside BiManage or ask FELI. Step-by-step guides for every part of BiManage are in the help centre.",
         ],
-        links: [{ label: "Contact us", to: "/contact" }],
+        links: [{ label: "Contact us", to: "/contact" }, { label: "Help centre", to: "/help" }],
       },
     ],
   },
