@@ -11,7 +11,6 @@ import {
   IconKey,
   IconLayoutKanban,
   IconLock,
-  IconMessageCircle,
   IconReceipt,
   IconShieldCheck,
   IconSparkles,
@@ -546,9 +545,6 @@ export default function LandingPage() {
       <Reviews />
       <Faq />
       <FinalCta />
-      <Link to="/contact" aria-label="Contact us" className="fixed bottom-5 right-5 z-20 flex size-14 items-center justify-center rounded-full bg-brand-navy text-ink-on-brand shadow-floating transition-transform hover:scale-105">
-        <IconMessageCircle className="size-7" aria-hidden="true" />
-      </Link>
     </PublicLayout>
   );
 }
