@@ -2,6 +2,8 @@ import { defineConfig, type Plugin } from "vite";
 import react from "@vitejs/plugin-react";
 import tailwindcss from "@tailwindcss/vite";
 import { fileURLToPath, URL } from "node:url";
+// @ts-expect-error: plain JS module shared with vercel.json's check (scripts/check-csp.mjs).
+import { cspFor, PERMISSIONS_POLICY } from "./csp.config.mjs";
 
 // Served at the domain root (Vercel). VITE_BASE_PATH overrides it if the app
 // is ever hosted under a sub-path.
@@ -32,5 +34,14 @@ export default defineConfig(({ command }) => {
     define: { __APP_VERSION__: JSON.stringify(version) },
     resolve: { alias: { "@": fileURLToPath(new URL("./src", import.meta.url)) } },
     server: { port: 5173, strictPort: true },
+    // `vite preview` (used by the layout check) serves the same
+    // Content-Security-Policy as production, for the API this build talks to,
+    // so every screen is checked under it.
+    preview: {
+      headers: {
+        "Content-Security-Policy": cspFor({ apiUrl: process.env.VITE_API_BASE_URL || "http://localhost:5000/api", socketUrl: process.env.VITE_SOCKET_URL || undefined }),
+        "Permissions-Policy": PERMISSIONS_POLICY,
+      },
+    },
   };
 });

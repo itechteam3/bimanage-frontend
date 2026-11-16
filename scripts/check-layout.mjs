@@ -58,7 +58,8 @@ async function waitFor(url, ms = 30000) {
 if (!args.origin) {
   if (!existsSync("dist/index.html")) { console.error("No dist/: run `npm run build:layout` first."); process.exit(2); }
   children.push(spawn(process.execPath, ["scripts/layout/mock-api.mjs", String(API_PORT)], { stdio: "ignore", env: { ...process.env, LAYOUT_LONG: "1" } }));
-  children.push(spawn(process.execPath, ["node_modules/vite/bin/vite.js", "preview", "--port", String(WEB_PORT), "--strictPort", "--host", "127.0.0.1"], { stdio: "ignore" }));
+  // Served with the production Content-Security-Policy for the fixture API (vite.config.ts).
+  children.push(spawn(process.execPath, ["node_modules/vite/bin/vite.js", "preview", "--port", String(WEB_PORT), "--strictPort", "--host", "127.0.0.1"], { stdio: "ignore", env: { ...process.env, VITE_API_BASE_URL: `http://127.0.0.1:${API_PORT}/api`, VITE_SOCKET_URL: `http://127.0.0.1:${API_PORT}` } }));
   await waitFor(`http://127.0.0.1:${API_PORT}/__mode/long`);
   await waitFor(ORIGIN);
 }
@@ -81,6 +82,8 @@ async function browser(width, port) {
     return r.timeout ? undefined : r.result?.result?.value;
   };
   await send("Page.enable");
+  // Content-Security-Policy violations are layout-check failures too.
+  await send("Page.addScriptToEvaluateOnNewDocument", { source: "window.__csp = []; addEventListener('securitypolicyviolation', (e) => window.__csp.push(e.effectiveDirective + ' blocked ' + (e.blockedURI || 'inline') + (e.sourceFile ? ' (' + e.sourceFile.split('/').pop() + ')' : '')), true);" });
   await send("Emulation.setDeviceMetricsOverride", { width, height: width <= PHONE ? 800 : 900, deviceScaleFactor: 1, mobile: width <= PHONE });
   if (width <= PHONE) await send("Emulation.setTouchEmulationEnabled", { enabled: true, maxTouchPoints: 5 });
   const shot = async (file) => {
@@ -236,11 +239,18 @@ async function runWidth(width, port) {
   for (const r of routes.filter((x) => !x.guest)) await check(r);
   b.close();
 
+  async function cspProblems() {
+    const list = JSON.parse((await b.evaluate("JSON.stringify([...new Set(window.__csp || [])]); ")) ?? "[]");
+    await b.evaluate("window.__csp = []; true");
+    return list.map((detail) => ({ type: "csp", el: "", detail }));
+  }
+
   async function check(r) {
     const landed = await go(r.url);
     let problems = (await b.evaluate(AUDIT(width <= PHONE))) ?? [{ type: "audit-failed", el: "", detail: "page didn't respond" }];
     // Real layout bugs persist; look again once before reporting (skips a frame caught mid-render).
     if (problems.length) { await sleep(800); problems = (await b.evaluate(AUDIT(width <= PHONE))) ?? problems; }
+    problems = problems.concat(await cspProblems());
     const slug = (r.url.replace(/[?].*$/, "").replace(/[^a-z0-9]+/gi, "-").replace(/^-|-$/g, "") || "root") + "-" + width;
     if (problems.length || SHOTS_ALL) await b.shot(slug + ".png");
     results.push({ path: r.path, url: r.url, width, landed, problems });
@@ -257,7 +267,7 @@ async function runWidth(width, port) {
         })()`);
         if (opened) {
           await sleep(250);
-          const dp = ((await b.evaluate(AUDIT(width <= PHONE))) ?? []).filter((p) => p.type !== "sideways-scroll" || true);
+          const dp = ((await b.evaluate(AUDIT(width <= PHONE))) ?? []).concat(await cspProblems());
           const name = `${r.path} › dialog "${label}"`;
           if (dp.length || SHOTS_ALL) await b.shot(`${slug}-dialog-${label.replace(/[^a-z0-9]+/gi, "-").slice(0, 30)}.png`);
           results.push({ path: name, url: r.url, width, landed: r.url, problems: dp });

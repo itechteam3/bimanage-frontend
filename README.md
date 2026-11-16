@@ -49,7 +49,7 @@ To run against a local backend, start it on port 5000. In development the backen
 - **`main` → production** at https://bimanage-frontend.vercel.app.
 - **Pull requests → preview deployments**, one URL per PR/commit (`bimanage-frontend-<hash>-<team>.vercel.app`).
 - Build settings come from `vercel.json`: Vite, output `dist/`, and a rewrite to `index.html` so
-  deep links such as `/invite/accept?token=…` and `/oauth/callback?token=…` work.
+  deep links such as `/invite/accept?token=…` and `/oauth/callback?code=…` work.
 - Set `VITE_API_BASE_URL` and `VITE_SOCKET_URL` in Vercel → Project → Settings → Environment Variables,
   for both Production and Preview.
 
@@ -58,6 +58,26 @@ on `main`. It doesn't deploy.
 
 For the browser to reach the API, the backend's `CORS_ORIGINS` must include the production URL
 and the preview pattern, and `CLIENT_URL` must be the production URL. See the backend README.
+
+### Security headers
+
+`vercel.json` sends a **Content-Security-Policy** (scripts only from this site; images from this
+site, Cloudinary and Google profile pictures; connections only to the API and its Socket.io server;
+no framing, no plugins), a **Permissions-Policy** (camera for barcode scanning only) and **HSTS**.
+The policy is defined once in `csp.config.mjs`:
+
+- `npm run build` fails (`scripts/check-csp.mjs`) if vercel.json's headers don't match it for the
+  `VITE_API_BASE_URL` / `VITE_SOCKET_URL` being built. After changing the API host or allowing a new
+  service, run `node scripts/check-csp.mjs --print` with the new values and paste the lines into
+  vercel.json.
+- `vite preview` serves the same policy, and the layout check reports any CSP violation on any
+  screen as a failure.
+
+**Admin subdomain (planned, no change yet):** the admin area (`/admin`) shares this origin today.
+The plan is to serve it from its own subdomain (e.g. `admin.<domain>`) so it gets its own, stricter
+policy (no storefront images, connect only to the admin API), its session storage is separate from
+the business app's, and a script problem on a business or store page can never reach an admin
+session. The backend's `CORS_ORIGINS` and `ADMIN_URL` would point at the new host.
 
 ## Design tokens
 
