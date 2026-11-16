@@ -29,6 +29,28 @@ const DISPUTE = {
   conversationId: null,
 };
 const ANN = { _id: "n1", title: "Scheduled maintenance tonight from 1am to 2am", body: "BiManage will be unavailable for about an hour while we upgrade our servers.\n\nYour store stays online and no payments are affected.", audience: { kind: "all", plans: [] }, channels: { inApp: true, email: true }, status: "pending_approval", scheduledAt: iso(10), createdBy: { email: "ada@bitechteam.test" }, submittedBy: { email: "ada@bitechteam.test", at: iso(-1) }, needsApproval: true, editable: false, createdAt: iso(-2) };
+const PROBLEMS = [{ value: "spam", label: "Spam" }, { value: "abusive", label: "Abusive or hateful" }, { value: "personal_data", label: "Personal data" }, { value: "off_topic", label: "Off-topic" }, { value: "suspected_fake", label: "Suspected fake" }, { value: "other", label: "Other" }];
+const REVIEW_REASONS = { approve: [{ value: "meets_guidelines", label: "Meets the guidelines" }, { value: "other", label: "Other" }], reject: PROBLEMS, unpublish: PROBLEMS, delete: PROBLEMS, restore: [{ value: "deleted_by_mistake", label: "Deleted by mistake" }, { value: "other", label: "Other" }] };
+const REVIEW = {
+  _id: "rv1",
+  headline: "Inventory, invoices and the online store finally talk to each other for our wholesale business",
+  review: "We moved from three spreadsheets and a notebook. Stock counts are right, invoices go out the same day and the store updates itself. Support answered within the hour when our Paystack payout was late.",
+  rating: 2,
+  category: "product_experience",
+  featuresUsed: ["inventory", "invoices", "store", "wallet", "bisupplynet"],
+  businessName: "Wale & Sons Wholesale Agro-Allied Distribution Limited",
+  isVerified: true,
+  status: "pending",
+  reviewer: { _id: "u9", name: USER.name, email: USER.email },
+  createdAt: iso(-30),
+  updatedAt: iso(-2),
+  edited: true,
+  moderatedAt: iso(-20),
+  deletedAt: null,
+  restoreUntil: null,
+  lastAction: null,
+  history: [{ action: "unpublish", from: "approved", to: "pending", reason: "personal_data", reasonLabel: "Personal data", note: "Shows the owner's personal phone number in the second paragraph; asked to edit", by: { name: "Sola Adebanjo-Williams", email: "sola.adebanjo.williams@bitechteam.org" }, at: iso(-20) }, { action: "approve", from: "pending", to: "approved", reason: "meets_guidelines", reasonLabel: "Meets the guidelines", note: null, by: { name: "BiTechTeam", email: "bitechteamlimited@gmail.com" }, at: iso(-28) }],
+};
 export const ADMIN_ROUTES = {
   "POST /api/notifications/unsubscribe": { valid: true, subscribed: false },
   "GET /api/admin/me": { _id: "a1", name: "BiTechTeam", email: "bitechteamlimited@gmail.com", role: "superadmin", roleLabel: "Superadmin", isActive: true, twoFactorEnabled: true, lastLogin: iso(-1), passwordChangedAt: iso(-200), avatar: null, can: ALL },
@@ -51,6 +73,15 @@ export const ADMIN_ROUTES = {
   "GET /api/admin/announcements/n1/preview": { recipients: 1101, inApp: { title: ANN.title, message: ANN.body, link: null }, email: { subject: `${ANN.title} | BiManage`, html: "<div style='font-family:sans-serif;padding:24px'><h2 style='color:#014f86'>Scheduled maintenance tonight</h2><p>Hi Ada,</p><p>BiManage will be unavailable for about an hour.</p></div>" }, needsApproval: true },
   "GET /api/admin/admins": [{ _id: "a1", name: "BiTechTeam", email: "bitechteamlimited@gmail.com", role: "superadmin", roleLabel: "Superadmin", isActive: true, twoFactorEnabled: true, lastLogin: iso(-1), createdAt: iso(-24) }, { _id: "a2", name: "Sola Adebanjo-Williams", email: "sola.adebanjo.williams@bitechteam.org", role: "support", roleLabel: "Support agent", isActive: true, twoFactorEnabled: false, lastLogin: null, createdAt: iso(-2) }],
   "GET /api/admin/audit": { entries: [{ id: "e1", at: iso(-1), recordedAt: iso(-1), action: "user.suspend", by: "ada@bitechteam.test", role: "admin", via: "admin", targetType: "user", targetId: "u9", summary: "Account suspended. They've been signed out and emailed; the store and listings are hidden.", reason: "Selling counterfeit goods" }, { id: "e2", at: "2026-11-13T23:00:00Z", recordedAt: iso(-3), action: "admin.delete", by: "BiTechTeam (recorded at the owner's request)", role: null, via: "manual", targetType: "admin", targetId: "admin@bitechteam.org", summary: "Deleted the old superadmin account admin@bitechteam.org directly in MongoDB.", reason: "Manual action by the BiTechTeam owner" }], total: 2, page: 1, totalPages: 1 },
+  "GET /api/admin/reviews": {
+    reviews: [REVIEW, { ...REVIEW, _id: "rv2", status: "approved", rating: 5, headline: "Great", review: "Love it.", edited: false, lastAction: null }, { ...REVIEW, _id: "rv3", status: "deleted", rating: 1, deletedAt: iso(-48), restoreUntil: iso(28 * 24) }],
+    total: 3,
+    page: 1,
+    totalPages: 2,
+    counts: { pending: 12, approved: 1480, rejected: 37, deleted: 4 },
+    reasons: REVIEW_REASONS,
+  },
+  "GET /api/admin/reviews/rv1": { review: REVIEW, reasons: REVIEW_REASONS },
   "GET /api/admin/notifications/unread-count": { unread: 128 },
   "GET /api/admin/notifications": {
     notifications: [

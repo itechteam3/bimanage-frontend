@@ -36,8 +36,6 @@ export interface ReviewList {
 }
 
 export interface MyReview extends PublicReview {
-  isPublished?: boolean;
-  hiddenReason?: string | null;
 }
 
 export interface MyReviewResponse {

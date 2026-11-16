@@ -41,6 +41,9 @@ const AdminAccountPage = page(account, "AdminAccountPage");
 const AdminForgotPasswordPage = page(account, "AdminForgotPasswordPage");
 const AdminResetPasswordPage = page(account, "AdminResetPasswordPage");
 const AdminMorePage = page(shell, "AdminMorePage");
+const reviews = () => import("./pages/ReviewsPages");
+const ReviewsPage = page(reviews, "ReviewsPage");
+const ReviewDetailPage = page(reviews, "ReviewDetailPage");
 const notifications = () => import("./pages/NotificationsPages");
 const NotificationsPage = page(notifications, "NotificationsPage");
 const NotificationSettingsPage = page(notifications, "NotificationSettingsPage");
@@ -82,6 +85,8 @@ export const adminRoutes: RouteObject[] = [
       { path: "announcements/new", element: gate("announcements.send", <AnnouncementEditorPage />), handle: { section: "Announcements" } },
       { path: "announcements/:id", element: gate("announcements.send", <AnnouncementEditorPage key="edit" />), handle: { section: "Announcements" } },
       { path: "analytics", element: gate("stats.read", <AnalyticsPage />), handle: { section: "Analytics" } },
+      { path: "reviews", element: gate("reviews.moderate", <ReviewsPage />), handle: { section: "Reviews" } },
+      { path: "reviews/:id", element: gate("reviews.moderate", <ReviewDetailPage />), handle: { section: "Reviews" } },
       { path: "store-domains", element: gate("domains.manage", <StoreDomainsPage />), handle: { section: "Store domains" } },
       { path: "roles", element: gate("admins.manage", <RolesPage />), handle: { section: "Admin Roles" } },
       { path: "audit", element: gate("audit.read", <AuditPage />), handle: { section: "Audit trail" } },
