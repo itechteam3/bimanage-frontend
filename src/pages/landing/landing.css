@@ -29,6 +29,19 @@
   }
 }
 
+/* Phones: the scroll arrow sits over the hero's bottom padding (inset
+   max(1rem, safe area) + its 2.75rem height), so reserve that plus a gap.
+   On short phones the content then makes the hero taller than the screen
+   instead of running under the arrow; they also get less top padding. */
+@media (max-width: 767px) {
+  .lp-hero-pad {
+    padding-bottom: calc(max(var(--spacing) * 4, env(safe-area-inset-bottom)) + var(--spacing) * 16);
+  }
+}
+@media (max-width: 767px) and (max-height: 700px) {
+  .lp-hero-pad { padding-top: calc(var(--spacing) * 6); }
+}
+
 /* Scroll hint at the bottom of the hero: a gentle bob. */
 @keyframes lp-bob {
   0%, 100% { transform: translate(-50%, 0); opacity: 0.75; }
