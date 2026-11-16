@@ -15,10 +15,12 @@
 //   npm run build:layout      # builds against the fixture API (port 5099)
 //   npm run check:layout      # starts the fixture API + preview, checks everything
 //   node scripts/check-layout.mjs --only=/settings/team/invite --widths=360,1440
+//   LAYOUT_API_PORT=5199 npm run build:layout && node scripts/check-layout.mjs --apiPort=5199 --webPort=4279 --cdpPort=9500   # beside another check
+//   node scripts/check-layout.mjs --data=normal --shots=all --full --widths=1440   # ordinary data, whole pages, for Figma comparison
 //
 // Screenshots of every failure go to layout-check/ (gitignored), with
 // report.json. Exit code 1 when anything fails.
-import { spawn } from "node:child_process";
+import { spawn, spawnSync } from "node:child_process";
 import { existsSync, mkdirSync, mkdtempSync, rmSync, writeFileSync } from "node:fs";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
@@ -29,12 +31,13 @@ const WIDTHS = (args.widths ?? "360,390,768,1024,1280,1440").split(",").map(Numb
 const OUT = args.out ?? "layout-check";
 const API_PORT = Number(args.apiPort ?? 5099);
 const WEB_PORT = Number(args.webPort ?? 4179);
+const CDP_PORT = Number(args.cdpPort ?? 9400); // headless browsers use CDP_PORT, CDP_PORT+1, … (one per width)
 const ORIGIN = args.origin ?? `http://127.0.0.1:${WEB_PORT}`;
 const ONLY = args.only ? args.only.split(",") : null;
 const DIALOGS = args.dialogs !== "off";
-const SHOTS_ALL = args.shots === "all"; // --shots=all saves every page (and opened dialog), not just failures
-// Widths at which dialog openers are pressed (default phone 360 + desktop 1440).
-const DIALOG_WIDTHS = (args.dialogWidths ?? "360,1440").split(",").map(Number);
+const SHOTS_ALL = args.shots === "all"; // --shots=all saves every page, not just failures
+const FULL = "full" in args; // --full: screenshots cover the whole page height, not just the first screen
+const LONG = args.data !== "normal"; // --data=normal uses ordinary fixture strings (for visual comparison with Figma)
 const PHONE = 430;
 
 const BROWSER = [process.env.CHROME_PATH, "C:/Program Files (x86)/Microsoft/Edge/Application/msedge.exe", "C:/Program Files/Google/Chrome/Application/chrome.exe",
@@ -45,7 +48,8 @@ const sleep = (ms) => new Promise((r) => setTimeout(r, ms));
 rmSync(OUT, { recursive: true, force: true });
 mkdirSync(OUT, { recursive: true });
 const children = [];
-const cleanup = () => { for (const c of children) try { c.kill(); } catch {} };
+// On Windows kill() only stops the direct child (e.g. not vite preview's own children): kill the whole tree.
+const cleanup = () => { for (const c of children) try { if (process.platform === "win32" && c.pid) spawnSync("taskkill", ["/pid", String(c.pid), "/T", "/F"], { stdio: "ignore" }); else c.kill(); } catch {} };
 process.on("exit", cleanup);
 process.on("SIGINT", () => process.exit(130));
 
@@ -55,12 +59,20 @@ async function waitFor(url, ms = 30000) {
 }
 
 // ── Servers: the fixture API (long data) and the built app ──
+// Another check (e.g. a parallel session) already on our ports would answer for us — and our
+// /__mode switch would change ITS data. Refuse instead.
+async function busy(port) { try { await fetch(`http://127.0.0.1:${port}/`, { signal: AbortSignal.timeout(1000) }); return true; } catch { return false; } }
+const ports = [...(args.origin ? [] : [API_PORT, WEB_PORT]), ...WIDTHS.map((_, i) => CDP_PORT + i)];
+const taken = [];
+for (const p of ports) if (await busy(p)) taken.push(p);
+if (taken.length) { console.error(`Port(s) ${taken.join(", ")} already in use (another layout check?). Wait, or use --apiPort/--webPort/--cdpPort (rebuild with LAYOUT_API_PORT=<apiPort> npm run build:layout).`); process.exit(2); }
+
 if (!args.origin) {
   if (!existsSync("dist/index.html")) { console.error("No dist/: run `npm run build:layout` first."); process.exit(2); }
-  children.push(spawn(process.execPath, ["scripts/layout/mock-api.mjs", String(API_PORT)], { stdio: "ignore", env: { ...process.env, LAYOUT_LONG: "1" } }));
+  children.push(spawn(process.execPath, ["scripts/layout/mock-api.mjs", String(API_PORT)], { stdio: "ignore", env: { ...process.env, LAYOUT_LONG: LONG ? "1" : "0" } }));
   // Served with the production Content-Security-Policy for the fixture API (vite.config.ts).
   children.push(spawn(process.execPath, ["node_modules/vite/bin/vite.js", "preview", "--port", String(WEB_PORT), "--strictPort", "--host", "127.0.0.1"], { stdio: "ignore", env: { ...process.env, VITE_API_BASE_URL: `http://127.0.0.1:${API_PORT}/api`, VITE_SOCKET_URL: `http://127.0.0.1:${API_PORT}` } }));
-  await waitFor(`http://127.0.0.1:${API_PORT}/__mode/long`);
+  await waitFor(`http://127.0.0.1:${API_PORT}/__mode/${LONG ? "long" : "normal"}`);
   await waitFor(ORIGIN);
 }
 
@@ -87,10 +99,28 @@ async function browser(width, port) {
   await send("Emulation.setDeviceMetricsOverride", { width, height: width <= PHONE ? 800 : 900, deviceScaleFactor: 1, mobile: width <= PHONE });
   if (width <= PHONE) await send("Emulation.setTouchEmulationEnabled", { enabled: true, maxTouchPoints: 5 });
   const shot = async (file) => {
+    // --full: grow the viewport to the page's (or its scrolling panel's) full height first.
+    const tall = FULL ? Number(await evaluate(`Math.max(document.scrollingElement.scrollHeight, ...[...document.querySelectorAll("*")].filter((e) => /auto|scroll/.test(getComputedStyle(e).overflowY) && e.clientWidth > innerWidth / 2).map((e) => e.scrollHeight + e.getBoundingClientRect().top))`)) || 0 : 0;
+    const height = Math.min(6000, Math.ceil(tall));
+    const base = width <= PHONE ? 800 : 900;
+    if (height > base) { await send("Emulation.setDeviceMetricsOverride", { width, height, deviceScaleFactor: 1, mobile: width <= PHONE }); await sleep(400); }
     const r = await send("Page.captureScreenshot", { format: "png", captureBeyondViewport: false });
+    if (height > base) await send("Emulation.setDeviceMetricsOverride", { width, height: base, deviceScaleFactor: 1, mobile: width <= PHONE });
     if (r.result?.data) writeFileSync(join(OUT, file), Buffer.from(r.result.data, "base64"));
   };
-  return { send, evaluate, shot, close: () => { ws.close(); proc.kill(); } };
+  // Browser.close shuts the whole browser; kill() alone leaves Edge running on Windows (it relaunches under a new parent).
+  const close = async () => {
+    try { ws.close(); } catch {}
+    try {
+      const { webSocketDebuggerUrl } = await (await fetch(`http://127.0.0.1:${port}/json/version`)).json();
+      const bws = new WebSocket(webSocketDebuggerUrl);
+      await Promise.race([new Promise((r) => (bws.onopen = r)), sleep(2000)]);
+      bws.send(JSON.stringify({ id: 1, method: "Browser.close" }));
+      await sleep(1000);
+    } catch {}
+    proc.kill();
+  };
+  return { send, evaluate, shot, close };
 }
 
 // In-page audit. Returns a list of { type, detail } problems.
@@ -237,7 +267,7 @@ async function runWidth(width, port) {
   for (const r of routes.filter((x) => x.guest)) await check(r);
   await b.evaluate(`localStorage.setItem("bimanage.session", "layout-check-token"); localStorage.setItem("bimanage.admin.session", "layout-check-admin"); true`);
   for (const r of routes.filter((x) => !x.guest)) await check(r);
-  b.close();
+  await b.close();
 
   async function cspProblems() {
     const list = JSON.parse((await b.evaluate("JSON.stringify([...new Set(window.__csp || [])]); ")) ?? "[]");
@@ -255,7 +285,7 @@ async function runWidth(width, port) {
     if (problems.length || SHOTS_ALL) await b.shot(slug + ".png");
     results.push({ path: r.path, url: r.url, width, landed, problems });
     // Dialogs: press likely openers (phone and desktop widths only, to keep it quick).
-    if (DIALOGS && DIALOG_WIDTHS.includes(width)) {
+    if (DIALOGS && (width === 360 || width === 1440)) {
       const labels = (await b.evaluate(`JSON.stringify([...document.querySelectorAll('main button, [role="main"] button, button')].filter((e) => { const r = e.getBoundingClientRect(); return r.width > 0 && !e.disabled && ${DIALOG_OPENERS}.test((e.textContent || e.getAttribute('aria-label') || '').trim()); }).map((e) => (e.textContent || e.getAttribute('aria-label') || '').trim()).filter((v, i, a) => a.indexOf(v) === i).slice(0, 4))`)) ?? "[]";
       for (const label of JSON.parse(labels)) {
         const opened = await b.evaluate(`(async () => {
@@ -269,7 +299,7 @@ async function runWidth(width, port) {
           await sleep(250);
           const dp = ((await b.evaluate(AUDIT(width <= PHONE))) ?? []).concat(await cspProblems());
           const name = `${r.path} › dialog "${label}"`;
-          if (dp.length || SHOTS_ALL) await b.shot(`${slug}-dialog-${label.replace(/[^a-z0-9]+/gi, "-").slice(0, 30)}.png`);
+          if (dp.length) await b.shot(`${slug}-dialog-${label.replace(/[^a-z0-9]+/gi, "-").slice(0, 30)}.png`);
           results.push({ path: name, url: r.url, width, landed: r.url, problems: dp });
         }
         // Back to a clean page for the next opener.
@@ -280,7 +310,7 @@ async function runWidth(width, port) {
 }
 
 const started = Date.now();
-await Promise.all(WIDTHS.map((w, i) => runWidth(w, 9400 + i)));
+await Promise.all(WIDTHS.map((w, i) => runWidth(w, CDP_PORT + i)));
 
 // ── Report ──
 const failing = results.filter((r) => r.problems.length);

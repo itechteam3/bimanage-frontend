@@ -4,6 +4,7 @@ import { IconChevronDown, IconThumbDown, IconThumbUp } from "@tabler/icons-react
 import { cn } from "@/lib/cn";
 import type { PublicPlans } from "@/lib/landing/api";
 import { PRICE_FALLBACK, pricesProvisional, resolveFaqText, type FaqItem } from "./faq";
+import { linkCompanySite } from "@/lib/feli/companyLink";
 
 // The public FAQ accordion (landing preview and /faq): one answer open at a
 // time (the parent owns `openId`), animated open/close (landing.css .lp-acc,
@@ -73,7 +74,7 @@ export function FaqAnswer({ item, plans }: { item: FaqItem; plans: PublicPlans |
     <>
       {item.a.map((p, i) => (
         <p key={i} className="text-body-lg text-ink-muted">
-          {resolveFaqText(p, plans) ?? PRICE_FALLBACK}
+          {linkCompanySite(resolveFaqText(p, plans) ?? PRICE_FALLBACK, i)}
         </p>
       ))}
       {usesPrices && pricesProvisional(plans) && <p className="text-body-sm text-ink-muted">Some prices are introductory and may change; you'll always see the price before you pay.</p>}

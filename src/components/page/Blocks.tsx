@@ -112,12 +112,13 @@ export function PriceBox({ label, value }: { label: string; value: ReactNode }) 
   );
 }
 
-export type KpiTone = "revenue" | "orders" | "invoices" | "stock";
+export type KpiTone = "revenue" | "orders" | "invoices" | "stock" | "info";
 const kpiTone: Record<KpiTone, { bg: string; fg: string; line: string }> = {
   revenue: { bg: "bg-kpi-revenue-bg", fg: "text-kpi-revenue-fg", line: "text-kpi-revenue-line" },
   orders: { bg: "bg-kpi-orders-bg", fg: "text-kpi-orders-fg", line: "text-kpi-orders-line" },
   invoices: { bg: "bg-kpi-invoices-bg", fg: "text-kpi-invoices-fg", line: "text-kpi-invoices-line" },
   stock: { bg: "bg-kpi-stock-bg", fg: "text-kpi-stock-fg", line: "text-kpi-stock-line" },
+  info: { bg: "bg-kpi-info-bg", fg: "text-kpi-info-fg", line: "text-kpi-info-line" },
 };
 
 /**

@@ -8,6 +8,7 @@ import { useAuth } from "@/lib/auth/AuthProvider";
 import { cn } from "@/lib/cn";
 import { FeliAvatar } from "@/components/feli/FeliAvatar";
 import { cleanFeliText } from "@/lib/feli/clean";
+import { linkCompanySite } from "@/lib/feli/companyLink";
 import {
   FELI_GUEST_MAX,
   feliGuestHistory,
@@ -161,12 +162,12 @@ function withLinks(text: string, key: number): ReactNode[] {
         {part}
       </Link>
     ) : (
-      part
+      linkCompanySite(part, `${key}-${i}`)
     )
   );
 }
 
-/** **bold** as React text (never HTML); our public pages as links. */
+/** **bold** as React text (never HTML); our public pages and bitechteam.org as links. */
 function inline(text: string): ReactNode[] {
   return text.split(/(\*\*[^*\n]+\*\*)/g).flatMap<ReactNode>((part, i) => (/^\*\*[^*\n]+\*\*$/.test(part) ? [<strong key={i} className="font-semibold">{part.slice(2, -2)}</strong>] : withLinks(part, i)));
 }

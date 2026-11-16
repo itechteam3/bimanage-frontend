@@ -172,9 +172,9 @@ export function ProjectsOverviewPage() {
       </IntroCard>
       <div className="grid grid-cols-2 gap-3 lg:grid-cols-4 lg:gap-4">
         <KpiCard tone="orders" label="Active projects" value={count(s?.active)} caption={s ? `${count(s.total)} in total` : "—"} />
-        <KpiCard tone="invoices" label="Tasks in progress" value={count(s?.inProgressTasks)} caption={s ? `${count(s.todoTasks)} to do` : "—"} />
+        <KpiCard tone="info" label="Tasks in progress" value={count(s?.inProgressTasks)} caption={s ? `${count(s.todoTasks)} to do` : "—"} />
         <KpiCard tone="revenue" label="Completed tasks" value={count(s?.completedTasks)} caption={s ? `of ${count(s.totalTasks)} tasks` : "—"} />
-        <KpiCard tone="stock" label="Upcoming deadlines" value={count(s?.upcomingDeadlines)} caption={s ? (s.overdueTasks ? `${count(s.overdueTasks)} overdue` : `Next ${s.upcomingDays} days`) : "—"} />
+        <KpiCard tone="invoices" label="Upcoming deadlines" value={count(s?.upcomingDeadlines)} caption={s ? (s.overdueTasks ? `${count(s.overdueTasks)} overdue` : `Next ${s.upcomingDays} days`) : "—"} />
       </div>
       <div className="grid grid-cols-[minmax(0,1fr)] gap-5 lg:grid-cols-[minmax(0,1.7fr)_minmax(0,1fr)]">
         <Panel title="Projects in progress">

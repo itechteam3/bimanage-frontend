@@ -98,10 +98,10 @@ export function NotificationsPage() {
       </IntroCard>
       <div className="grid grid-cols-2 gap-3 lg:grid-cols-4 lg:gap-4">
         {/* "–" until the numbers arrive, so a slow server never shows a misleading 0. */}
-        <KpiCard tone="orders" label="All alerts" value={s ? count(s.all) : "–"} caption="Everything kept here" />
-        <KpiCard tone="invoices" label="Unread" value={s ? count(s.unread) : "–"} caption="Needs review" />
+        <KpiCard tone="info" label="All alerts" value={s ? count(s.all) : "–"} caption="Everything kept here" />
+        <KpiCard tone="orders" label="Unread" value={s ? count(s.unread) : "–"} caption="Needs review" />
         <KpiCard tone="revenue" label="Orders" value={s ? count(s.orders) : "–"} caption="New and updated orders" />
-        <KpiCard tone="stock" label="Low stock" value={s ? count(s.lowStock) : "–"} caption="Inventory reminders" />
+        <KpiCard tone="invoices" label="Low stock" value={s ? count(s.lowStock) : "–"} caption="Inventory reminders" />
       </div>
       <Panel title="Recent notifications" subtitle="Newest first. Select one to open it.">
         <div className="flex flex-col gap-4">

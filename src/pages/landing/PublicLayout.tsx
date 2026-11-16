@@ -1,3 +1,4 @@
+import { COMPANY } from "@/config/legal";
 import { useEffect, useLayoutEffect, useRef, useState, type ReactNode } from "react";
 import { Link, useLocation } from "react-router-dom";
 import { IconSend } from "@tabler/icons-react";
@@ -220,9 +221,20 @@ export function Footer() {
           <ErrorNote error={signup.error} fallback="We couldn't sign you up. Please try again." className="mt-3" />
         </div>
       </Container>
+      <Container className="pb-6">
+        <p className="max-w-[48rem] text-body-sm text-ink-on-brand-muted">
+          BiTechTeam helps people start and manage businesses; BiManage is its business management platform for business owners. Founded in {COMPANY.founded} and registered as {COMPANY.legalName} in {COMPANY.registered}. {COMPANY.founder.role}: {COMPANY.founder.name}. {COMPANY.cofounder.role}: {COMPANY.cofounder.name}.
+        </p>
+      </Container>
       <div className="border-t border-line-on-brand">
         <Container className="flex flex-col gap-2 py-5 md:flex-row md:items-center md:justify-between">
-          <p className="text-body-sm text-ink-on-brand-muted">© {new Date().getFullYear()} BiManage by BiTechTeam. All rights reserved.</p>
+          <p className="text-body-sm text-ink-on-brand-muted">
+            © {new Date().getFullYear()} BiManage, a product of{" "}
+            <a href={COMPANY.website} target="_blank" rel="noopener noreferrer" className="font-medium text-ink-on-brand underline underline-offset-2 hover:text-ink-on-brand-accent">
+              {COMPANY.legalName}
+            </a>{" "}
+            (bitechteam.org). All rights reserved.
+          </p>
           <nav aria-label="Legal" className="flex flex-wrap gap-x-6">
             <Link to="/terms" className="inline-flex min-h-11 items-center text-body-sm text-ink-on-brand-muted hover:text-ink-on-brand">Terms of Service</Link>
             <Link to="/privacy" className="inline-flex min-h-11 items-center text-body-sm text-ink-on-brand-muted hover:text-ink-on-brand">Privacy Policy</Link>

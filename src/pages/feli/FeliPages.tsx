@@ -8,6 +8,7 @@ import { ApiError } from "@/lib/api/client";
 import { errorMessage, friendlyText } from "@/lib/api/errorMessage";
 import { cn } from "@/lib/cn";
 import { FeliAvatar } from "@/components/feli/FeliAvatar";
+import { linkCompanySite } from "@/lib/feli/companyLink";
 import {
   actionLabel,
   isLimitError,
@@ -347,9 +348,9 @@ function Bubble({
   );
 }
 
-/** **bold** and "- " bullets from FELI's replies, as React text (never HTML). */
+/** **bold** and "- " bullets from FELI's replies, as React text (never HTML); bitechteam.org as a link. */
 function inline(text: string): ReactNode[] {
-  return text.split(/(\*\*[^*\n]+\*\*)/g).map((part, i) => (/^\*\*[^*\n]+\*\*$/.test(part) ? <strong key={i} className="font-semibold">{part.slice(2, -2)}</strong> : part));
+  return text.split(/(\*\*[^*\n]+\*\*)/g).flatMap<ReactNode>((part, i) => (/^\*\*[^*\n]+\*\*$/.test(part) ? [<strong key={i} className="font-semibold">{part.slice(2, -2)}</strong>] : linkCompanySite(part, i)));
 }
 
 export function RichText({ text }: { text: string }) {
