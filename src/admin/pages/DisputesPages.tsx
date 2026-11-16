@@ -297,11 +297,11 @@ export function SupplyOrdersPage() {
   const refund = params.get("refund") || "";
   const page = Number(params.get("page") || 1);
   const list = useSupplyOrders({ refund, page, limit: 20 });
-  type Row = { _id: string; trackingNo: string; productName: string; totalAmount: number; status: string; refundStatus?: string; paymentMode?: string; client?: { name: string }; wholesaler?: { businessName: string } };
+  type Row = { _id: string; trackingNo: string; productName: string; totalAmount: number; status: string; refundStatus?: string; paymentMode?: string; isPaid?: boolean; client?: { name: string }; wholesaler?: { businessName: string } };
   const columns: Column<Row>[] = [
     { key: "order", label: "Order", cell: (o) => o.trackingNo },
     { key: "parties", label: "Buyer / supplier", cell: (o) => `${o.client?.name || "—"} / ${o.wholesaler?.businessName || "—"}` },
-    { key: "amount", label: "Amount", cell: (o) => <span className="inline-flex items-center gap-2">{naira(o.totalAmount)}{o.paymentMode === "test" && <TestTag />}</span> },
+    { key: "amount", label: "Amount", cell: (o) => <span className="inline-flex items-center gap-2">{naira(o.totalAmount)}{o.isPaid && o.paymentMode !== "live" && <TestTag />}</span> },
     { key: "status", label: "Status", cell: (o) => <Pill value={o.refundStatus === "failed" ? "failed" : o.status} label={o.refundStatus === "failed" ? "Refund failed" : undefined} /> },
   ];
   return (

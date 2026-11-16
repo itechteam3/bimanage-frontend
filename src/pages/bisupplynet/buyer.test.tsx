@@ -364,3 +364,17 @@ describe("10.11 dispute review", () => {
     expect(screen.queryByLabelText("Your reply")).toBeNull();
   });
 });
+
+describe("test-mode guard (security fix P0-3)", () => {
+  it("an order paid in test mode says don't ship; a live one doesn't", async () => {
+    fb.handlers["GET /bisupplynet/orders/o1"] = () => [200, DETAIL_ORDER({}, { paymentMode: "test" })];
+    renderApp("/bisupplynet/orders/o1");
+    expect(await screen.findByText("Test payment — don't ship")).toBeInTheDocument();
+  });
+
+  it("a live payment has no test badge", async () => {
+    renderApp("/bisupplynet/orders/o1");
+    expect(await screen.findByText("Order milestone timeline")).toBeInTheDocument();
+    expect(screen.queryByText("Test payment — don't ship")).toBeNull();
+  });
+});
