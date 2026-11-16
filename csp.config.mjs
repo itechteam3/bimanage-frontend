@@ -21,11 +21,15 @@ export const wsOriginOf = (url) => originOf(url).replace(/^http/, "ws");
 
 export const PRODUCTION_API = "https://bimanage-backend.onrender.com/api";
 
+/** Where Sentry receives error reports (US and EU regions). */
+export const SENTRY_INGEST = ["https://*.ingest.sentry.io", "https://*.ingest.us.sentry.io", "https://*.ingest.de.sentry.io"];
+
 /** The policy for an app talking to this API (and Socket.io server). */
 export function cspFor({ apiUrl = PRODUCTION_API, socketUrl, extraConnect = [] } = {}) {
   const api = originOf(apiUrl);
   const socket = originOf(socketUrl || String(apiUrl).replace(/\/api\/?$/, ""));
-  const connect = [...new Set(["'self'", api, socket, wsOriginOf(socket), ...extraConnect].filter(Boolean))];
+  // Sentry's ingest hosts (error reports; used only when VITE_SENTRY_DSN is set).
+  const connect = [...new Set(["'self'", api, socket, wsOriginOf(socket), ...SENTRY_INGEST, ...extraConnect].filter(Boolean))];
   const directives = [
     ["default-src", ["'self'"]],
     ["script-src", ["'self'"]],
