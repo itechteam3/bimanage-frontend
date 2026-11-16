@@ -20,7 +20,9 @@ const variants: Record<ButtonVariant, string> = {
 };
 
 const sizes: Record<ButtonSize, string> = {
-  lg: "h-control-lg px-5 text-button-lg", // 52px
+  // 52px. Inside the app shell (data-app-main) on desktop, Figma's in-app buttons are
+  // the 44px size (02–12 desktop frames: 45px, 13px semibold); phones keep 52px (Mobile v2 button).
+  lg: "h-control-lg px-5 text-button-lg lg:in-data-app-main:h-control-md lg:in-data-app-main:px-4 lg:in-data-app-main:text-action",
   md: "h-control-md px-4 text-action", // 44px
 };
 

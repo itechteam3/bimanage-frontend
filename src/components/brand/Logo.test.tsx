@@ -12,6 +12,7 @@ const fixedH = (c: string[]) => c.some((x) => /^h-(?!auto$)/.test(x));
 describe("Logo", () => {
   it.each([
     [{ size: "panel" as const }, "w-40", "h-auto"],
+    [{ size: "rail" as const }, "w-44.5", "h-auto"],
     [{ size: "sidebar" as const }, "h-8.5", "w-auto"],
     [{ compact: true }, "h-13", "w-auto"],
     [{}, "h-8.5", "w-auto"],
