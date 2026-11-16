@@ -8,6 +8,7 @@ import { useJsonLd } from "@/lib/seo/jsonLd";
 import { Container, PublicLayout, reducedMotion } from "./PublicLayout";
 import { FaqAccordion } from "./FaqAccordion";
 import { ALL_FAQS, FAQ_GROUPS, faqJsonLd, fold, resolveFaqText, type FaqGroup, type FaqItem } from "./faq";
+import { FeliAvatar } from "@/components/feli/FeliAvatar";
 
 // /faq: every public question, grouped by topic. Deep links per topic:
 // /faq#billing and /faq?topic=billing both select and scroll to it (FELI and
@@ -153,7 +154,7 @@ export default function FaqPage() {
                 <h2 className="text-title-sm text-ink-strong">No results</h2>
                 <p className="mt-2 text-body-lg text-ink-muted">Try other words, or ask us directly.</p>
                 <p className="mt-4 flex flex-wrap gap-x-6 gap-y-1">
-                  <Link to="/feli" className="inline-flex min-h-11 items-center text-body-lg font-semibold text-ink-brand hover:underline">Ask FELI (sign in)</Link>
+                  <Link to="/feli" className="inline-flex min-h-11 items-center gap-2 text-body-lg font-semibold text-ink-brand hover:underline"><FeliAvatar size="xs" decorative />Ask FELI (sign in)</Link>
                   <Link to="/contact" className="inline-flex min-h-11 items-center text-body-lg font-semibold text-ink-brand hover:underline">Contact us</Link>
                 </p>
               </div>

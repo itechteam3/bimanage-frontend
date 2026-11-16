@@ -30,6 +30,7 @@ import { AuthCtas, Container, PublicLayout, reducedMotion } from "./PublicLayout
 import { FaqAccordion } from "./FaqAccordion";
 import { FEATURED_FAQS } from "./faq";
 import { Avatar } from "@/components/ui/Avatar";
+import { FeliAvatar } from "@/components/feli/FeliAvatar";
 import { IPHONE, IPHONE_APP_HEIGHT, IPhoneFrame, type PhoneChrome } from "./IPhoneFrame";
 
 import heroImg from "@/assets/landing/hero.webp";
@@ -276,9 +277,13 @@ function Features() {
                   onClick={() => setActive(i)}
                   className={cn("flex min-h-11 items-start gap-3 rounded-lg border p-3 text-left transition-colors", on ? "border-brand-navy bg-surface-card shadow-card" : "border-transparent hover:bg-surface-card")}
                 >
-                  <span className={cn("flex size-10 shrink-0 items-center justify-center rounded-md", on ? "bg-brand-navy text-ink-on-brand" : "bg-surface-tint-blue text-ink-brand")}>
-                    <Icon className="size-5" aria-hidden="true" />
-                  </span>
+                  {x.key === "feli" ? (
+                    <FeliAvatar size="md" decorative />
+                  ) : (
+                    <span className={cn("flex size-10 shrink-0 items-center justify-center rounded-md", on ? "bg-brand-navy text-ink-on-brand" : "bg-surface-tint-blue text-ink-brand")}>
+                      <Icon className="size-5" aria-hidden="true" />
+                    </span>
+                  )}
                   <span className="min-w-0">
                     <span className="block text-card-heading text-ink-strong">{x.title}</span>
                     {on && <span className="mt-1 block text-body-sm text-ink-muted">{x.body}</span>}

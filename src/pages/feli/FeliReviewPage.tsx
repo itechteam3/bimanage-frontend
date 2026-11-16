@@ -3,10 +3,11 @@ import { Link, useNavigate, useSearchParams } from "react-router-dom";
 import { useFieldArray, useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
-import { IconCircleCheck, IconPlus, IconSparkles, IconTrash } from "@tabler/icons-react";
+import { IconCircleCheck, IconPlus, IconTrash } from "@tabler/icons-react";
 import { Button, ButtonLink, EmptyState, Field, SelectInput, Spinner, TextArea, TextInput } from "@/components/ui";
 import { HelpPanel, IntroCard, PageTitle, Panel } from "@/components/page/Blocks";
 import { ErrorNote } from "@/components/feedback/ErrorNote";
+import { FeliAvatar } from "@/components/feli/FeliAvatar";
 import { ApiError } from "@/lib/api/client";
 import { applyFieldErrors } from "@/lib/api/errorMessage";
 import { safeLink } from "@/lib/notifications/api";
@@ -156,7 +157,7 @@ function ReviewOne({ id }: { id: string }) {
   else if (handled)
     body = (
       <EmptyState
-        icon={<IconSparkles className="size-7" />}
+        icon={<FeliAvatar size="md" decorative />}
         title="This suggestion has already been handled"
         body="It may have been approved, cancelled or replaced by a newer one. Ask FELI again if you still need it."
         action={<ButtonLink to="/feli" size="md">Back to FELI</ButtonLink>}
@@ -173,7 +174,7 @@ function ReviewOne({ id }: { id: string }) {
   else if (!proposal)
     body = (
       <EmptyState
-        icon={<IconSparkles className="size-7" />}
+        icon={<FeliAvatar size="md" decorative />}
         title="Nothing waiting for review"
         body="When FELI suggests an action, you'll review it here before anything changes."
         action={<ButtonLink to="/feli" size="md">Back to FELI</ButtonLink>}
