@@ -1,3 +1,4 @@
+import { TestPaymentBadge, isTestPayment } from "@/components/feedback/TestPaymentBadge";
 import { useState, type FormEvent } from "react";
 import { Link, useNavigate, useParams } from "react-router-dom";
 import { useForm, useWatch } from "react-hook-form";
@@ -782,9 +783,10 @@ export function MyOrdersPage() {
                   </Link>,
                   `${o.productName}${o.wholesaler?.businessName ? ` • ${o.wholesaler.businessName}` : ""}`,
                   `${naira(o.totalAmount)} • ${shortDate(o.createdAt)}`,
-                  <Status key="s" tone={st.tone}>
-                    {st.label}
-                  </Status>,
+                  <span key="s" className="flex flex-wrap gap-1">
+                    <Status tone={st.tone}>{st.label}</Status>
+                    {isTestPayment(o) && <TestPaymentBadge />}
+                  </span>,
                 ],
               };
             })}

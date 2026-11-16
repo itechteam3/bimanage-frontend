@@ -70,6 +70,8 @@ describe("07.10 change plan → 07.02 Paystack → 07.03/07.04/07.05", () => {
     const user = userEvent.setup();
     renderApp("/subscription/change?plan=standard&cycle=monthly");
     const pay = await screen.findByRole("button", { name: /pay ₦12,345 with paystack/i });
+    expect(screen.getByText(/by paying you agree to the bimanage/i)).toBeInTheDocument();
+    expect(screen.getByRole("link", { name: "Terms of Service" })).toHaveAttribute("href", "/terms");
     expect(screen.getByText("Standard adds")).toBeInTheDocument();
     expect(screen.getByText(/invoices, projects and tasks, live online store/i)).toBeInTheDocument();
     await user.click(pay);

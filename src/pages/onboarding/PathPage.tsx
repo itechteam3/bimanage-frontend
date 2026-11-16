@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { useNavigate } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import { IconArrowRight, IconCheck } from "@tabler/icons-react";
 import { Button } from "@/components/ui";
 import { IntroCard, InfoStrip, PageTitle } from "@/components/page/Blocks";
@@ -7,6 +7,9 @@ import { AuthNote } from "@/components/layout/AuthLayout";
 import { useOnboardingStatus, useSelectPath, useStartTrial } from "@/lib/workspace/api";
 import { ApiError } from "@/lib/api/client";
 import { errorMessage } from "@/lib/api/errorMessage";
+import { useAuth } from "@/lib/auth/AuthProvider";
+import { authApi } from "@/lib/auth/api";
+import { LEGAL_LAST_UPDATED } from "@/config/legal";
 
 // 02.06B "Compare onboarding paths" (Figma 2234:676): starting a business
 // (paid 30-day startup package) or existing business (14-day free trial).
@@ -57,11 +60,30 @@ export function PathPage() {
   const startTrial = useStartTrial();
   const [busy, setBusy] = useState<"startup" | "existing" | null>(null);
   const [error, setError] = useState<string | null>(null);
+  // Google sign-ups have no sign-up form, so they agree to the terms here
+  // (POST /auth/accept-terms) before choosing a path.
+  const { user, refresh } = useAuth();
+  const needsTerms = Boolean(user) && !user?.termsAcceptedAt;
+  const [agreed, setAgreed] = useState(false);
+  const [termsError, setTermsError] = useState<string | null>(null);
+
+  /** Records the agreement first if it's still needed; false = stop. */
+  const termsOk = async () => {
+    if (!needsTerms) return true;
+    if (!agreed) {
+      setTermsError("Tick the box to agree to the Terms of Service and Privacy Policy.");
+      return false;
+    }
+    await authApi.acceptTerms(LEGAL_LAST_UPDATED);
+    void refresh();
+    return true;
+  };
 
   const chooseStartup = async () => {
     setBusy("startup");
     setError(null);
     try {
+      if (!(await termsOk())) return;
       await selectPath.mutateAsync("startup");
       navigate("/onboarding/packages");
     } catch (err) {
@@ -75,6 +97,7 @@ export function PathPage() {
     setBusy("existing");
     setError(null);
     try {
+      if (!(await termsOk())) return;
       await selectPath.mutateAsync("existing_business");
       if (!status.data?.isTrialUsed) await startTrial.mutateAsync();
       navigate("/onboarding/trial");
@@ -94,6 +117,33 @@ export function PathPage() {
         We'll guide you through the setup process, whichever path you choose.
       </IntroCard>
       {error && <AuthNote tone="danger">{error}</AuthNote>}
+      {needsTerms && (
+        <div className="flex flex-col gap-1 rounded-xl border border-line-card bg-surface-card p-4">
+          <label className="flex cursor-pointer items-start gap-3 text-body-lg text-ink-strong">
+            <input
+              type="checkbox"
+              className="mt-0.5 size-5 shrink-0 accent-brand-navy"
+              checked={agreed}
+              onChange={(e) => {
+                setAgreed(e.target.checked);
+                if (e.target.checked) setTermsError(null);
+              }}
+              aria-invalid={termsError ? true : undefined}
+              aria-describedby={termsError ? "path-terms-error" : undefined}
+            />
+            <span>
+              I agree to the{" "}
+              <Link to="/terms" target="_blank" rel="noreferrer" className="font-semibold text-ink-brand underline">Terms of Service</Link>{" "}
+              and{" "}
+              <Link to="/privacy" target="_blank" rel="noreferrer" className="font-semibold text-ink-brand underline">Privacy Policy</Link>
+              <span className="sr-only"> (open in a new tab)</span>
+            </span>
+          </label>
+          {termsError && (
+            <p id="path-terms-error" role="alert" className="text-body-sm text-danger">{termsError}</p>
+          )}
+        </div>
+      )}
       <div className="grid grid-cols-[minmax(0,1fr)] gap-5 md:grid-cols-2">
         <PathCard
           eyebrow="Startup path"

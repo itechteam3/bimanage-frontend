@@ -139,7 +139,7 @@ export function AnnouncementEditorPage() {
       {done && <p className="rounded-lg bg-success-bg px-4 py-3 text-body-lg text-success" role="status">{done}</p>}
       <div className="grid grid-cols-[minmax(0,1fr)] gap-5 lg:grid-cols-[minmax(0,1.2fr)_minmax(0,1fr)]">
         <Section title={editable ? "Compose" : "Message"}>
-          <fieldset disabled={!editable} className="flex flex-col gap-4">
+          <fieldset disabled={!editable} className="flex min-w-0 flex-col gap-4">
             <Field label="Title" required error={field === "title" ? adminError(error) : undefined}>
               <TextInput value={d.title} onChange={(e) => set("title", e.target.value)} maxLength={120} />
             </Field>
@@ -154,7 +154,7 @@ export function AnnouncementEditorPage() {
                 <TextInput value={d.linkUrl} onChange={(e) => set("linkUrl", e.target.value)} placeholder="/invoices" />
               </Field>
             </div>
-            <fieldset className="flex flex-col gap-2">
+            <fieldset className="flex min-w-0 flex-col gap-2">
               <legend className="text-body-sm font-semibold text-ink-secondary">Who gets it</legend>
               {(
                 [
@@ -178,7 +178,7 @@ export function AnnouncementEditorPage() {
               )}
               {field === "audience" && <p className="text-body-sm text-danger">{adminError(error)}</p>}
             </fieldset>
-            <fieldset className="flex flex-wrap gap-4">
+            <fieldset className="flex min-w-0 flex-wrap gap-4">
               <legend className="mb-2 text-body-sm font-semibold text-ink-secondary">Channel</legend>
               <label className="flex items-center gap-2 text-body-lg">
                 <input type="checkbox" className="size-5" checked={d.inApp} onChange={(e) => set("inApp", e.target.checked)} /> In-app notice

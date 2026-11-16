@@ -184,10 +184,10 @@ function StoreOverview({ store }: { store: Store }) {
       ) : (
         <>
           <div className="grid grid-cols-2 gap-3 lg:grid-cols-4 lg:gap-4">
-            <KpiCard tone="invoices" label="Completion" value={`${c.percent}%`} caption={`${c.completed} of ${c.total} steps`} />
-            <KpiCard tone="stock" label="Products" value={String(c.products.total)} caption={`${c.products.published} published`} />
+            <KpiCard tone="info" label="Completion" value={`${c.percent}%`} caption={`${c.completed} of ${c.total} steps`} />
+            <KpiCard tone="revenue" label="Products" value={String(c.products.total)} caption={`${c.products.published} published`} />
             <KpiCard tone="orders" label="Template" value={c.template.name} caption={c.plan.name} />
-            <KpiCard tone="revenue" label="Status" value={live ? "Live" : "Draft"} caption={live ? "Published" : "Not published"} />
+            <KpiCard tone="invoices" label="Status" value={live ? "Live" : "Draft"} caption={live ? "Published" : "Not published"} />
           </div>
           <div className="grid grid-cols-[minmax(0,1fr)] gap-5 lg:grid-cols-[minmax(0,2fr)_minmax(0,1fr)]">
             <Panel title="Store readiness" subtitle="Required steps must be done before you publish.">
@@ -583,10 +583,10 @@ function DomainSettings({ store }: { store: Store }) {
               <CopyValue label="BiManage address" value={d.bimanageAddress.replace(/^https?:\/\//, "")} />
               {planAllows ? (
                 <form noValidate onSubmit={onSave} className="flex flex-col gap-3 md:flex-row md:items-end">
-                  <Field label="Custom domain" error={formState.errors.domain?.message} hint="Use a sub-domain you own, such as shop.yourbusiness.com." className="flex-1">
+                  <Field label="Custom domain" error={formState.errors.domain?.message} hint="Use a sub-domain you own, such as shop.yourbusiness.com." className="min-w-0 flex-1">
                     <TextInput placeholder="shop.yourbusiness.com" autoCapitalize="none" spellCheck={false} {...register("domain")} />
                   </Field>
-                  <Button type="submit" variant="secondary" size="md" loading={save.isPending} loadingText="Saving…" className="md:mb-0.5">
+                  <Button type="submit" variant="secondary" size="md" loading={save.isPending} loadingText="Saving…" className="shrink-0 md:mb-0.5">
                     {d.customDomain ? "Change domain" : "Save domain"}
                   </Button>
                 </form>

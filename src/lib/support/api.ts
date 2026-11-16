@@ -6,8 +6,9 @@ import type { StatusTone } from "@/components/ui";
 // and the public help centre (FAQs). Every query key starts with "support".
 
 import type { Attachment } from "@/lib/attachments";
+import type { IssueContext } from "./issues";
 
-export type TicketCategory = "billing" | "wallet" | "orders" | "store" | "inventory" | "bisupplynet" | "account" | "technical" | "other";
+export type TicketCategory = "billing" | "wallet" | "orders" | "store" | "inventory" | "bisupplynet" | "account" | "technical" | "technical_issue" | "other";
 export type TicketPriority = "low" | "medium" | "high";
 export type TicketStatus = "open" | "in_progress" | "awaiting_reply" | "resolved" | "closed";
 export type TicketFilter = "active" | "resolved" | "closed";
@@ -42,6 +43,8 @@ export interface Ticket extends TicketSummary {
   replies?: TicketReply[];
   resolvedAt?: string | null;
   closedAt?: string | null;
+  /** "Report an issue" tickets: the page, app and device it came from. */
+  meta?: { issueContext?: IssueContext | null } | null;
 }
 
 export interface NewTicket {
@@ -93,7 +96,12 @@ export interface NewServiceRequest {
 
 export interface Faq {
   _id: string;
+  /** Stable id for written articles (links use it); admin articles have none. */
+  slug?: string | null;
   question: string;
+  /** One line under the title (optional). */
+  summary?: string;
+  /** Markdown-lite: steps, bullets, **bold**, [links](/path). */
   answer: string;
   category: string;
   readMinutes?: number;
@@ -149,6 +157,27 @@ export const REQUEST_STATUS: Record<ServiceRequestStatus, { label: string; tone:
 const lookup = <K extends string>(list: Array<[K, string]>, key: string | null | undefined) =>
   list.find(([k]) => k === key)?.[1] ?? (key ? key.charAt(0).toUpperCase() + key.slice(1).replace(/_/g, " ") : "");
 export const categoryLabel = (c?: string | null) => lookup(TICKET_CATEGORIES, c);
+
+// Help centre topics (backend FAQ.CATEGORIES; labels match the backend's
+// utils/helpArticles.js CATEGORY_LABELS and the "Popular help topics" cards).
+export const HELP_CATEGORIES: Array<[string, string]> = [
+  ["getting_started", "Getting started"],
+  ["billing", "Subscription & billing"],
+  ["orders", "Order management"],
+  ["store", "Store setup"],
+  ["bisupplynet", "BiSupplyNet & escrow"],
+  ["wallet", "Wallet & payouts"],
+  ["inventory", "Inventory"],
+  ["invoices", "Invoices"],
+  ["customers", "Customers"],
+  ["projects", "Projects & team"],
+  ["reports", "Reports"],
+  ["messages", "Messages & notifications"],
+  ["feli", "FELI"],
+  ["account", "Account & security"],
+  ["technical", "Technical problems"],
+];
+export const helpCategoryLabel = (c?: string | null) => lookup(HELP_CATEGORIES, c);
 export const priorityLabel = (p?: string | null) => lookup(PRIORITIES, p);
 export const serviceLabel = (s?: string | null) => lookup(SERVICE_TYPES, s);
 export const startLabel = (s?: string | null) => lookup(PREFERRED_STARTS, s);

@@ -1,3 +1,4 @@
+import { COMPANY } from "@/config/legal";
 import { useEffect, useLayoutEffect, useRef, useState, type ReactNode } from "react";
 import { Link, useLocation } from "react-router-dom";
 import { IconSend } from "@tabler/icons-react";
@@ -7,10 +8,11 @@ import { ErrorNote } from "@/components/feedback/ErrorNote";
 import { cn } from "@/lib/cn";
 import { useAuth } from "@/lib/auth/AuthProvider";
 import { useNewsletterSignup } from "@/lib/landing/api";
+import { FeliGuestChat } from "./FeliGuestChat";
 import "./landing.css";
 
 // The public site's shared frame: navbar and footer used by the landing page
-// ("/", "/home") and the other public pages (/contact).
+// ("/", "/home") and the other public pages (/contact, /faq, /terms, /privacy, /help).
 
 export const reducedMotion = () =>
   typeof window !== "undefined" && (window.matchMedia?.("(prefers-reduced-motion: reduce)").matches || document.documentElement.classList.contains("reduce-motion"));
@@ -23,8 +25,11 @@ const NAV = [
   ["Features", "#features"],
   ["Pricing", "#pricing"],
   ["How it works", "#how-it-works"],
-  ["FAQ", "#faq"],
+  ["FAQ", "/faq"],
 ] as const;
+
+/** A section of the landing page ("#…") or a page of its own ("/faq"). */
+const navHref = (href: string, base: string) => (href.startsWith("/") ? href : `${base}${href}`);
 
 /** Where the landing page's #sections live: in-page on "/", otherwise "/" (the landing page for everyone). */
 function useSectionBase() {
@@ -108,8 +113,13 @@ export function NavBar() {
           </Link>
           <nav aria-label="Main" className="hidden items-center gap-8 lg:flex">
             {NAV.map(([label, href]) => (
-              <a key={href} href={`${base}${href}`} className="text-nav text-ink-on-brand-muted transition-colors hover:text-ink-on-brand">{label}</a>
+              href.startsWith("/") ? (
+                <Link key={href} to={href} className="text-nav text-ink-on-brand-muted transition-colors hover:text-ink-on-brand">{label}</Link>
+              ) : (
+                <a key={href} href={navHref(href, base)} className="text-nav text-ink-on-brand-muted transition-colors hover:text-ink-on-brand">{label}</a>
+              )
             ))}
+            <Link to="/help" className="text-nav text-ink-on-brand-muted transition-colors hover:text-ink-on-brand">Help</Link>
             <Link to="/contact" className="text-nav text-ink-on-brand-muted transition-colors hover:text-ink-on-brand">Contact us</Link>
           </nav>
           <div className="hidden items-center gap-3 lg:flex">
@@ -145,10 +155,15 @@ export function NavBar() {
           >
             <Container className="flex flex-col items-start gap-1 py-5">
               {NAV.map(([label, href], i) => (
-                <a key={href} href={`${base}${href}`} onClick={close} {...item(i)}>{label}</a>
+                href.startsWith("/") ? (
+                  <Link key={href} to={href} onClick={close} {...item(i)}>{label}</Link>
+                ) : (
+                  <a key={href} href={navHref(href, base)} onClick={close} {...item(i)}>{label}</a>
+                )
               ))}
-              <Link to="/contact" onClick={close} {...item(NAV.length)}>Contact us</Link>
-              <div className="lp-menu-item mt-4 flex w-full max-w-[20rem] flex-col gap-3" style={{ ["--lp-i" as string]: NAV.length + 1 }}>
+              <Link to="/help" onClick={close} {...item(NAV.length)}>Help</Link>
+              <Link to="/contact" onClick={close} {...item(NAV.length + 1)}>Contact us</Link>
+              <div className="lp-menu-item mt-4 flex w-full max-w-[20rem] flex-col gap-3" style={{ ["--lp-i" as string]: NAV.length + 2 }}>
                 {signedIn ? (
                   <ButtonLink to="/start" variant="tonal" fullWidth onClick={close}>Go to dashboard</ButtonLink>
                 ) : (
@@ -170,7 +185,6 @@ export function Footer() {
   const signup = useNewsletterSignup();
   const [email, setEmail] = useState("");
   const [website, setWebsite] = useState("");
-  const base = useSectionBase();
   const linkClass = "inline-flex min-h-11 items-center text-body text-ink-on-brand-muted hover:text-ink-on-brand";
   return (
     <footer className="bg-brand-navy text-ink-on-brand">
@@ -182,7 +196,8 @@ export function Footer() {
             {(useAuth().status === "authenticated" ? ([["Go to dashboard", "/start"], ["Reviews", "/reviews"]] as const) : ([["Sign in", "/login"], ["Create an account", "/register"], ["Reviews", "/reviews"]] as const)).map(([l, to]) => (
               <Link key={to} to={to} className={linkClass}>{l}</Link>
             ))}
-            <a href={`${base}#faq`} className={linkClass}>FAQ</a>
+            <Link to="/faq" className={linkClass}>FAQ</Link>
+            <Link to="/help" className={linkClass}>Help centre</Link>
             <Link to="/contact" className={linkClass}>Contact us</Link>
           </nav>
         </div>
@@ -206,9 +221,24 @@ export function Footer() {
           <ErrorNote error={signup.error} fallback="We couldn't sign you up. Please try again." className="mt-3" />
         </div>
       </Container>
+      <Container className="pb-6">
+        <p className="max-w-[48rem] text-body-sm text-ink-on-brand-muted">
+          BiTechTeam helps people start and manage businesses; BiManage is its business management platform for business owners. Founded in {COMPANY.founded} and registered as {COMPANY.legalName} in {COMPANY.registered}. {COMPANY.founder.role}: {COMPANY.founder.name}. {COMPANY.cofounder.role}: {COMPANY.cofounder.name}.
+        </p>
+      </Container>
       <div className="border-t border-line-on-brand">
-        <Container className="py-5">
-          <p className="text-body-sm text-ink-on-brand-muted">© {new Date().getFullYear()} BiManage by BiTechTeam. All rights reserved.</p>
+        <Container className="flex flex-col gap-2 py-5 md:flex-row md:items-center md:justify-between">
+          <p className="text-body-sm text-ink-on-brand-muted">
+            © {new Date().getFullYear()} BiManage, a product of{" "}
+            <a href={COMPANY.website} target="_blank" rel="noopener noreferrer" className="font-medium text-ink-on-brand underline underline-offset-2 hover:text-ink-on-brand-accent">
+              {COMPANY.legalName}
+            </a>
+            . All rights reserved.
+          </p>
+          <nav aria-label="Legal" className="flex flex-wrap gap-x-6">
+            <Link to="/terms" className="inline-flex min-h-11 items-center text-body-sm text-ink-on-brand-muted hover:text-ink-on-brand">Terms of Service</Link>
+            <Link to="/privacy" className="inline-flex min-h-11 items-center text-body-sm text-ink-on-brand-muted hover:text-ink-on-brand">Privacy Policy</Link>
+          </nav>
         </Container>
       </div>
     </footer>
@@ -223,6 +253,7 @@ export function PublicLayout({ children, className, rootRef }: { children: React
       <NavBar />
       <main id="main">{children}</main>
       <Footer />
+      <FeliGuestChat />
     </div>
   );
 }

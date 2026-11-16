@@ -16,12 +16,16 @@ import { shortDate } from "@/lib/format";
 import { cn } from "@/lib/cn";
 import type { Attachment } from "@/lib/attachments";
 import { AttachmentPicker } from "@/components/attachments/AttachmentPicker";
+import { ArticleBody } from "./ArticleBody";
+import { issueContextRows } from "@/lib/support/issues";
 import {
+  HELP_CATEGORIES,
   PREFERRED_STARTS,
   PRIORITIES,
   SERVICE_TYPES,
   TICKET_CATEGORIES,
   categoryLabel,
+  helpCategoryLabel,
   priorityLabel,
   requestStatus,
   serviceLabel,
@@ -38,6 +42,7 @@ import {
   useTicket,
   useTickets,
   useVoteFaq,
+  type Faq,
   type PreferredStart,
   type ServiceRequest,
   type ServiceType,
@@ -526,22 +531,37 @@ function TicketDetail({ t, created }: { t: Ticket; created: boolean }) {
           <ReplyBox t={t} done={done} />
           <ErrorNote error={close.error} fallback="We couldn't close this ticket. Please try again." />
         </div>
-        <Panel tone="pale" title="Ticket details">
-          <DetailRows
-            rows={[
-              ["Status", <Status tone={st.tone}>{st.label}</Status>],
-              ["Category", categoryLabel(t.category)],
-              ["Priority", priorityLabel(t.priority)],
-              ...(t.relatedReference ? ([["Reference", t.relatedReference]] as Array<[string, ReactNode]>) : []),
-              ["Opened", shortDate(t.createdAt)],
-              ["Updated", shortDate(t.updatedAt)],
-              ...(t.contactEmail ? ([["Contact email", <span className="break-all">{t.contactEmail}</span>]] as Array<[string, ReactNode]>) : []),
-            ]}
-          />
-          <ButtonLink to="/support/tickets" variant="outlined" size="md" className="mt-5">
-            All my tickets
-          </ButtonLink>
-        </Panel>
+        <div className="flex min-w-0 flex-col gap-5">
+          <Panel tone="pale" title="Ticket details">
+            <DetailRows
+              rows={[
+                ["Status", <Status tone={st.tone}>{st.label}</Status>],
+                ["Category", categoryLabel(t.category)],
+                ["Priority", priorityLabel(t.priority)],
+                ...(t.relatedReference ? ([["Reference", t.relatedReference]] as Array<[string, ReactNode]>) : []),
+                ["Opened", shortDate(t.createdAt)],
+                ["Updated", shortDate(t.updatedAt)],
+                ...(t.contactEmail ? ([["Contact email", <span className="break-all">{t.contactEmail}</span>]] as Array<[string, ReactNode]>) : []),
+              ]}
+            />
+            <ButtonLink to="/support/tickets" variant="outlined" size="md" className="mt-5">
+              All my tickets
+            </ButtonLink>
+          </Panel>
+          {issueContextRows(t.meta?.issueContext).length > 0 && (
+            <Panel tone="pale" title="Technical details" subtitle="Sent with your report so support can see where it happened.">
+              {/* Stacked (label above value): page addresses and browser strings are long and unbroken, so a two-column row squeezes them into a sliver in the narrow side column. */}
+              <dl className="flex flex-col gap-3 text-body-lg">
+                {issueContextRows(t.meta?.issueContext).map(([k, v]) => (
+                  <div key={k} className="min-w-0">
+                    <dt className="text-body-sm text-ink-muted">{k}</dt>
+                    <dd className="break-words text-ink-strong">{v}</dd>
+                  </div>
+                ))}
+              </dl>
+            </Panel>
+          )}
+        </div>
       </div>
       <Dialog
         open={confirmClose}
@@ -623,7 +643,26 @@ function ReplyBox({ t, done }: { t: Ticket; done: boolean }) {
 
 // ── 12.07 Help centre ────────────────────────────────────────────────────
 
-const HELP_CATEGORIES: Array<[string, string]> = [["", "All topics"], ...TICKET_CATEGORIES.filter(([k]) => k !== "other")];
+const HELP_TOPICS: Array<[string, string]> = [["", "All topics"], ...HELP_CATEGORIES];
+const articleHref = (f: Faq) => `/support/help/${encodeURIComponent(f.slug || f._id)}`;
+
+function ArticleRow({ f, showCategory }: { f: Faq; showCategory: boolean }) {
+  return (
+    <li>
+      <Link to={articleHref(f)} className="flex items-center justify-between gap-4 py-3 hover:bg-surface-pale md:px-2">
+        <span className="min-w-0">
+          <span className="block font-semibold text-ink-strong">{f.question}</span>
+          {f.summary ? <span className="block text-body-sm text-ink-secondary">{f.summary}</span> : null}
+          <span className="block text-body-sm text-ink-muted">
+            {showCategory ? `${helpCategoryLabel(f.category)} · ` : ""}
+            {f.readMinutes ?? 1} min read
+          </span>
+        </span>
+        <IconArrowRight aria-hidden="true" className="size-4 shrink-0 text-ink-brand" />
+      </Link>
+    </li>
+  );
+}
 
 export function HelpCentrePage() {
   const [q, setQ] = useUrlState<string>("q", "");
@@ -660,7 +699,7 @@ export function HelpCentrePage() {
       </form>
       <div role="radiogroup" aria-label="Help topic" className="-mx-5 overflow-x-auto px-5 lg:mx-0 lg:px-0">
         <div className="flex w-max gap-2">
-          {HELP_CATEGORIES.map(([k, label]) => (
+          {HELP_TOPICS.map(([k, label]) => (
             <button
               key={k || "all"}
               type="button"
@@ -689,24 +728,31 @@ export function HelpCentrePage() {
             </ButtonLink>
           }
         />
-      ) : (
+      ) : filtered ? (
         <Panel>
           <ul className="flex flex-col divide-y divide-line-subtle">
             {faqs.data.map((f) => (
-              <li key={f._id}>
-                <Link to={`/support/help/${f._id}`} className="flex items-center justify-between gap-4 py-3 hover:bg-surface-pale md:px-2">
-                  <span className="min-w-0">
-                    <span className="block font-semibold text-ink-strong">{f.question}</span>
-                    <span className="block text-body-sm text-ink-muted">
-                      {categoryLabel(f.category)} · {f.readMinutes ?? 1} min read
-                    </span>
-                  </span>
-                  <IconArrowRight aria-hidden="true" className="size-4 shrink-0 text-ink-brand" />
-                </Link>
-              </li>
+              <ArticleRow key={f._id} f={f} showCategory={!category} />
             ))}
           </ul>
         </Panel>
+      ) : (
+        // All topics: grouped under each topic, in the order of the topic list
+        // (any category the list doesn't know yet goes last).
+        <div className="flex flex-col gap-5">
+          {[...new Set([...HELP_CATEGORIES.map(([k]) => k), ...faqs.data.map((f) => f.category)])].map((k) => {
+            const list = faqs.data.filter((f) => f.category === k);
+            return list.length ? (
+              <Panel key={k} title={helpCategoryLabel(k)}>
+                <ul className="flex flex-col divide-y divide-line-subtle">
+                  {list.map((f) => (
+                    <ArticleRow key={f._id} f={f} showCategory={false} />
+                  ))}
+                </ul>
+              </Panel>
+            ) : null;
+          })}
+        </div>
       )}
     </div>
   );
@@ -717,14 +763,13 @@ export function HelpCentrePage() {
 export function HelpArticlePage() {
   const { id = "" } = useParams();
   const faq = useFaq(id);
-  const vote = useVoteFaq(id);
+  // The link may use the slug; votes go by the article's id.
+  const vote = useVoteFaq(faq.data?._id ?? id);
   if (faq.isLoading) return <Loading label="Loading the article…" />;
   if (faq.error || !faq.data) return <ErrorNote error={faq.error} fallback="We couldn't load this article. Please try again." onRetry={() => void faq.refetch()} />;
   const f = faq.data;
-  const paragraphs = f.answer
-    .split(/\n\s*\n/)
-    .map((p) => p.trim())
-    .filter(Boolean);
+  // Ticket categories are fewer than help topics: preset only when it exists.
+  const ticketCategory = TICKET_CATEGORIES.some(([k]) => k === f.category) ? f.category : "";
   const thanks = vote.data ? (vote.data.alreadyVoted ? "Thanks, we already have your feedback." : "Thanks for your feedback.") : null;
 
   return (
@@ -734,16 +779,14 @@ export function HelpArticlePage() {
       </Link>
       <PageTitle>{f.question}</PageTitle>
       <p className="-mt-4 text-body-sm text-ink-muted">
-        {categoryLabel(f.category)} · {f.readMinutes ?? 1} min read{f.updatedAt ? ` · Updated ${shortDate(f.updatedAt)}` : ""}
+        <Link to={`/support/help?category=${encodeURIComponent(f.category)}`} className="text-ink-brand underline-offset-2 hover:underline">
+          {helpCategoryLabel(f.category)}
+        </Link>{" "}
+        · {f.readMinutes ?? 1} min read{f.updatedAt ? ` · Updated ${shortDate(f.updatedAt)}` : ""}
       </p>
+      {f.summary ? <p className="-mt-2 text-body-lg text-ink-secondary">{f.summary}</p> : null}
       <Panel>
-        <div className="flex flex-col gap-4 text-body-lg text-ink-secondary">
-          {paragraphs.map((p, i) => (
-            <p key={i} className="whitespace-pre-line">
-              {p}
-            </p>
-          ))}
-        </div>
+        <ArticleBody body={f.answer} />
       </Panel>
       <Panel tone="pale" title="Was this helpful?">
         {thanks ? (
@@ -762,7 +805,7 @@ export function HelpArticlePage() {
         )}
         <ErrorNote error={vote.error} fallback="We couldn't save your feedback." className="mt-3" />
       </Panel>
-      <Link to={`/support/tickets/new?category=${encodeURIComponent(f.category)}`} className="flex items-center gap-2 self-start font-semibold text-ink-brand underline-offset-2 hover:underline">
+      <Link to={ticketCategory ? `/support/tickets/new?category=${encodeURIComponent(ticketCategory)}` : "/support/tickets/new"} className="flex items-center gap-2 self-start font-semibold text-ink-brand underline-offset-2 hover:underline">
         <IconLifebuoy aria-hidden="true" className="size-5" /> Still need help? Create a support ticket
       </Link>
     </div>

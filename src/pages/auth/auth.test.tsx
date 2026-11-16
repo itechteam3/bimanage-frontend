@@ -8,6 +8,7 @@ import { AuthProvider } from "@/lib/auth/AuthProvider";
 import { tokenStore } from "@/lib/auth/tokenStore";
 import { pendingInvite } from "@/lib/auth/pending";
 import { serverStatus } from "@/lib/api/serverStatus";
+import { LEGAL_LAST_UPDATED } from "@/config/legal";
 
 // Fake backend: route table of "METHOD /path" → (body, headers) => [status, json]
 type Handler = (body: Record<string, unknown>, headers: Record<string, string>) => [number, unknown, Record<string, string>?];
@@ -75,14 +76,14 @@ describe("sign in (01.01 / 01.08)", () => {
     expect(calls.find((c) => c.key === "GET /auth/me")!.headers.Authorization).toBe("Bearer tok-1");
   });
 
-  it("wrong details show 01.08 with attempts left", async () => {
-    handlers["POST /auth/login"] = () => [401, { message: "Invalid email or password", attemptsRemaining: 2 }];
+  it("wrong details show 01.08 (no attempts-left hint: the same for every email)", async () => {
+    handlers["POST /auth/login"] = () => [401, { message: "Invalid email or password" }];
     renderAt("/login");
     await type(/email address/i, "sam@x.com");
     await type(/^password/i, "nope1234");
     await userEvent.click(screen.getByRole("button", { name: "Sign in" }));
     expect(await screen.findByRole("heading", { name: /check your sign-in details/i })).toBeInTheDocument();
-    expect(screen.getByText(/2 attempts left/i)).toBeInTheDocument();
+    expect(screen.queryByText(/attempts? left/i)).toBeNull();
     expect(screen.getByRole("button", { name: "Try again" })).toBeInTheDocument();
   });
 
@@ -124,6 +125,29 @@ describe("create account (01.02) and verify (01.03 / 01.07 / 01.13)", () => {
     expect(await screen.findByText(/passwords do not match/i)).toBeInTheDocument();
   });
 
+  it("won't submit until the Terms and Privacy box is ticked; the links open in a new tab", async () => {
+    handlers["POST /auth/register"] = () => [201, { message: "ok", email: "sam@x.com" }];
+    renderAt("/register");
+    await type(/full name/i, "Samuel Adebayo");
+    await type(/work email/i, "sam@x.com");
+    await type(/^password/i, "Secret123");
+    await type(/confirm password/i, "Secret123");
+    const box = screen.getByRole("checkbox", { name: /i agree to the terms of service and privacy policy/i });
+    expect(box).not.toBeChecked();
+    for (const [name, href] of [["Terms of Service", "/terms"], ["Privacy Policy", "/privacy"]] as const) {
+      const a = screen.getByRole("link", { name });
+      expect(a).toHaveAttribute("href", href);
+      expect(a).toHaveAttribute("target", "_blank");
+    }
+    await userEvent.click(screen.getByRole("button", { name: "Create account" }));
+    expect(await screen.findByText(/tick the box to agree/i)).toBeInTheDocument();
+    expect(calls.some((c) => c.key === "POST /auth/register")).toBe(false);
+    await userEvent.click(box);
+    await userEvent.click(screen.getByRole("button", { name: "Create account" }));
+    await waitFor(() => expect(calls.some((c) => c.key === "POST /auth/register")).toBe(true));
+    expect(calls.find((c) => c.key === "POST /auth/register")!.body).toMatchObject({ termsAccepted: true, termsVersion: LEGAL_LAST_UPDATED });
+  });
+
   it("registers then verifies the code and signs in", async () => {
     handlers["POST /auth/register"] = () => [201, { message: "ok", email: "sam@x.com" }];
     handlers["POST /verify/email"] = (b) => (b.otp === "286419" ? [200, { ...ME, token: "tok-v" }] : [400, { message: "Invalid OTP" }]);
@@ -132,9 +156,10 @@ describe("create account (01.02) and verify (01.03 / 01.07 / 01.13)", () => {
     await type(/work email/i, "sam@x.com");
     await type(/^password/i, "Secret123");
     await type(/confirm password/i, "Secret123");
+    await userEvent.click(screen.getByRole("checkbox", { name: /i agree to the terms of service and privacy policy/i }));
     await userEvent.click(screen.getByRole("button", { name: "Create account" }));
     expect(await screen.findByRole("heading", { name: "Verify your email" })).toBeInTheDocument();
-    expect(calls.find((c) => c.key === "POST /auth/register")!.body).toEqual({ name: "Samuel Adebayo", email: "sam@x.com", password: "Secret123" });
+    expect(calls.find((c) => c.key === "POST /auth/register")!.body).toEqual({ name: "Samuel Adebayo", email: "sam@x.com", password: "Secret123", termsAccepted: true, termsVersion: LEGAL_LAST_UPDATED });
 
     await type(/verification code/i, "111111");
     await userEvent.click(screen.getByRole("button", { name: "Verify email" }));
@@ -220,13 +245,35 @@ describe("password reset (01.04 → 01.09 → 01.05 → 01.06)", () => {
 });
 
 describe("Google callback, invites and guards", () => {
-  it("/oauth/callback stores the token, clears it from the URL and opens the workspace", async () => {
-    window.history.replaceState(null, "", "/oauth/callback?token=g-tok");
+  it("/oauth/callback trades the one-time code for the token (POST), clears the URL and opens the workspace", async () => {
+    handlers["POST /auth/google/exchange"] = (b) => (b.code === "one-time-code" ? [200, { ...ME, token: "g-tok" }] : [400, { message: "expired" }]);
+    window.history.replaceState(null, "", "/oauth/callback?code=one-time-code");
     const replace = vi.spyOn(window.history, "replaceState");
-    const router = renderAt("/oauth/callback?token=g-tok");
+    const router = renderAt("/oauth/callback?code=one-time-code");
     await waitFor(() => expect(router.state.location.pathname).toBe("/dashboard"));
     expect(tokenStore.get()).toBe("g-tok");
     expect(replace).toHaveBeenCalledWith(null, "", "/oauth/callback");
+    expect(calls.find((c) => c.key === "POST /auth/google/exchange")?.body).toEqual({ code: "one-time-code" });
+  });
+
+  it("/oauth/callback: an expired code goes back to sign in", async () => {
+    handlers["POST /auth/google/exchange"] = () => [400, { message: "This sign-in link has expired.", code: "oauth_code_invalid" }];
+    window.history.replaceState(null, "", "/oauth/callback?code=old");
+    const router = renderAt("/oauth/callback?code=old");
+    await waitFor(() => expect(router.state.location.pathname).toBe("/login"));
+    expect(tokenStore.get()).toBeNull();
+  });
+
+  it("an older API's ?token= still works during the switch", async () => {
+    window.history.replaceState(null, "", "/oauth/callback?token=g-tok");
+    const router = renderAt("/oauth/callback?token=g-tok");
+    await waitFor(() => expect(router.state.location.pathname).toBe("/dashboard"));
+    expect(tokenStore.get()).toBe("g-tok");
+  });
+
+  it("a Google account whose email Google hasn't verified is explained on sign in", async () => {
+    renderAt("/login?error=google_unverified");
+    expect(await screen.findByText(/Google hasn't verified the email on that Google account/)).toBeInTheDocument();
   });
 
   it("an invite opened while signed out waits for sign-in, then is accepted", async () => {

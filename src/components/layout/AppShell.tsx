@@ -259,7 +259,8 @@ export function AppShell({ section, user, navState, onLogout, onChangePhoto, unr
       <MobileHeader user={user} navState={navState} onLogout={onLogout} />
       <div className="flex min-w-0 flex-1 flex-col">
         <DesktopHeader section={section} user={user} unread={unread} onLogout={onLogout} onChangePhoto={onChangePhoto} />
-        <main id="main" data-app-main className="relative flex-1 px-5 pb-28 pt-5 lg:px-12 lg:pb-12 lg:pt-6">
+        {/* Bottom padding clears the tab bar and the floating "Report an issue" button. */}
+        <main id="main" data-app-main className="relative flex-1 px-5 pb-44 pt-5 lg:px-12 lg:pb-24 lg:pt-6">
           <div aria-hidden="true" className="pointer-events-none absolute inset-x-0 top-0 h-52 bg-gradient-atmosphere" />
           <div className="relative mx-auto w-full max-w-6xl">
             <BackBar />

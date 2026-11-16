@@ -110,17 +110,17 @@ export function OrdersPage() {
         Search your history, filter by status or create a new order.
       </IntroCard>
       <div className="grid grid-cols-2 gap-3 lg:grid-cols-4 lg:gap-4">
-        <KpiCard tone="orders" label="All orders" value={count(s?.all)} caption={s ? `${count(s.cancelled)} cancelled` : "—"} />
+        <KpiCard tone="info" label="All orders" value={count(s?.all)} caption={s ? `${count(s.cancelled)} cancelled` : "—"} />
         <KpiCard tone="revenue" label="Awaiting payment" value={count(s?.awaitingPayment)} caption="Track collections" />
-        <KpiCard tone="invoices" label="Unfulfilled" value={count(s?.unfulfilled)} caption="Eligible for cancellation" />
-        <KpiCard tone="stock" label="Completed" value={count(s?.completed)} caption={s ? `${naira(s.revenue)} revenue` : "—"} />
+        <KpiCard tone="orders" label="Unfulfilled" value={count(s?.unfulfilled)} caption="Eligible for cancellation" />
+        <KpiCard tone="invoices" label="Completed" value={count(s?.completed)} caption={s ? `${naira(s.revenue)} revenue` : "—"} />
       </div>
       <div className="grid grid-cols-[minmax(0,1fr)] gap-5 lg:grid-cols-[minmax(0,2.3fr)_minmax(0,1fr)]">
         <Panel>
-          <div className="flex flex-col gap-3 md:flex-row">
+          <div className="flex flex-col gap-3 md:flex-row md:flex-wrap">
             <form
               role="search"
-              className="flex-1"
+              className="min-w-0 grow basis-64"
               onSubmit={(e) => {
                 e.preventDefault();
                 setQuery(q.trim());
@@ -136,11 +136,11 @@ export function OrdersPage() {
                     if (!e.target.value) setQuery("");
                   }}
                   placeholder="Search order, customer, product…"
-                  className="h-full flex-1 bg-transparent text-input text-ink-strong outline-none placeholder:text-ink-muted"
+                  className="h-full min-w-0 flex-1 bg-transparent text-input text-ink-strong outline-none placeholder:text-ink-muted"
                 />
               </label>
             </form>
-            <div role="tablist" aria-label="Filter by status" className="flex flex-wrap items-center gap-1 rounded-md bg-surface-pale p-1">
+            <div role="tablist" aria-label="Filter by status" className="flex min-w-0 flex-wrap items-center gap-1 rounded-md bg-surface-pale p-1">
               {FILTERS.map(([key, label]) => (
                 <button
                   key={key}

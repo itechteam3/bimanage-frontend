@@ -17,6 +17,9 @@ applyCachedDisplay();
 // Start waking a sleeping Render backend as early as possible.
 void wakeServer();
 
+// Error tracking, only when VITE_SENTRY_DSN is set (loaded after start-up).
+void import("@/lib/monitoring/sentry").then((m) => m.initMonitoring());
+
 createRoot(document.getElementById("root")!).render(
   <StrictMode>
     <App />

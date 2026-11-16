@@ -1,3 +1,4 @@
+import { TestPaymentBadge, isTestPayment } from "@/components/feedback/TestPaymentBadge";
 import { useEffect, useMemo, useRef, useState, type ReactNode } from "react";
 import { Link, Navigate, useLocation, useNavigate, useParams } from "react-router-dom";
 import { useForm, useWatch } from "react-hook-form";
@@ -775,9 +776,10 @@ export function SellerOrdersPage() {
                   </Link>,
                   `${count(o.quantity)} × ${o.productName}${o.client?.name ? ` • ${o.client.name}` : ""}`,
                   `${naira(o.totalAmount)} • ${shortDate(o.createdAt)}`,
-                  <Status key="s" tone={st.tone}>
-                    {st.label}
-                  </Status>,
+                  <span key="s" className="flex flex-wrap gap-1">
+                    <Status tone={st.tone}>{st.label}</Status>
+                    {isTestPayment(o) && <TestPaymentBadge />}
+                  </span>,
                 ],
               };
             })}
@@ -886,9 +888,9 @@ export function EarningsPage() {
       )}
       <div className="grid grid-cols-[minmax(0,1fr)] gap-4 md:grid-cols-[minmax(0,1fr)_minmax(0,1fr)] lg:grid-cols-[repeat(4,minmax(0,1fr))]">
         <KpiCard tone="revenue" label="Trust score" value={`${Math.round(e.trustScore)}%`} caption={trustLevel(e.trustScore)} />
-        <KpiCard tone="orders" label="Order value" value={nairaCompact(book.orderValue30d)} caption="Last 30 days" badge={badge} />
-        <KpiCard tone="invoices" label="Escrow held" value={nairaCompact(book.held)} caption="Awaiting buyer" badge={badge} />
-        <KpiCard tone="stock" label="Paid out" value={nairaCompact(book.released.allTime)} caption="Net earnings" badge={badge} />
+        <KpiCard tone="info" label="Order value" value={nairaCompact(book.orderValue30d)} caption="Last 30 days" badge={badge} />
+        <KpiCard tone="orders" label="Escrow held" value={nairaCompact(book.held)} caption="Awaiting buyer" badge={badge} />
+        <KpiCard tone="invoices" label="Paid out" value={nairaCompact(book.released.allTime)} caption="Net earnings" badge={badge} />
       </div>
       <div className="grid grid-cols-[minmax(0,1fr)] gap-5 lg:grid-cols-[minmax(0,1.7fr)_minmax(0,1fr)]">
         <Panel title="Recent supplier payout activity" subtitle="Latest paid orders and where the money is.">

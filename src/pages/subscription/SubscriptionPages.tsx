@@ -1,9 +1,11 @@
+import { paymentFailureText } from "@/components/feedback/TestPaymentBadge";
 import { useEffect, useRef, useState, type ReactNode } from "react";
 import { NavLink, useNavigate, useSearchParams } from "react-router-dom";
 import { IconAlertTriangle, IconArrowRight, IconBolt, IconCheck, IconClock, IconDownload, IconLock } from "@tabler/icons-react";
 import { Button, ButtonLink, Dialog, EmptyState, Spinner, Status } from "@/components/ui";
 import { DetailRows, InfoStrip, IntroCard, PageTitle, Panel, PriceBox, Stepper, TipList } from "@/components/page/Blocks";
 import { ErrorNote } from "@/components/feedback/ErrorNote";
+import { PayTermsNote } from "@/components/legal/PayTermsNote";
 import { saveBlob } from "@/lib/api/client";
 import { useAuth } from "@/lib/auth/AuthProvider";
 import { useSubscription, type CurrentSubscription } from "@/lib/workspace/subscription";
@@ -540,6 +542,7 @@ function ChangePlan() {
                   Checkout unavailable
                 </Button>
               ))}
+            {payNow && q.paymentsAvailable && <PayTermsNote />}
             {q.type === "downgrade" && (
               <Button fullWidth loading={change.isPending} onClick={confirmLater}>
                 Switch on {shortDate(q.effectiveAt)}
@@ -686,7 +689,7 @@ export function SubscriptionPaymentPage() {
           Your payment wasn't confirmed, so your plan hasn't changed.
         </IntroCard>
         <Stepper steps={["Choose plan", "Review", "Not confirmed", "Resolve"]} current={2} />
-        <Panel title="Payment needs attention" subtitle={state?.failureReason ?? "Paystack didn't confirm the payment."}>
+        <Panel title="Payment needs attention" subtitle={paymentFailureText(state?.failureReason) ?? "Paystack didn't confirm the payment."}>
           <div className="flex flex-col gap-5">
             <div className="flex items-center gap-3 rounded-xl bg-danger-bg px-4 py-4 text-danger">
               <IconAlertTriangle aria-hidden="true" className="size-6 shrink-0" />
@@ -918,7 +921,7 @@ function Billing() {
                     <span className="text-body-sm text-ink-muted md:order-2">
                       {shortDate(r.paidAt ?? r.createdAt)}
                       {r.periodEnd ? ` · until ${shortDate(r.periodEnd)}` : ""}
-                      {r.failureReason ? ` · ${r.failureReason}` : ""}
+                      {r.failureReason ? ` · ${r.failureReason === "test_payment" ? "test payment, not accepted" : r.failureReason}` : ""}
                     </span>
                     <span className="flex items-center justify-end gap-2 md:order-4">
                       <Status tone={st.tone}>{st.label}</Status>

@@ -8,7 +8,7 @@ import { GoogleButton } from "@/components/auth/GoogleButton";
 import { Button, ButtonLink, Field, PasswordInput, TextInput } from "@/components/ui";
 import { authApi } from "@/lib/auth/api";
 import { useAuth } from "@/lib/auth/AuthProvider";
-import { pendingInvite, safeNext } from "@/lib/auth/pending";
+import { afterAuthPath, pendingInvite, safeNext } from "@/lib/auth/pending";
 import { ApiError } from "@/lib/api/client";
 import { cooldownMessage, errorMessage } from "@/lib/api/errorMessage";
 
@@ -31,7 +31,7 @@ export function SignInPage() {
   const navigate = useNavigate();
   const [params] = useSearchParams();
   const { signIn, signOutReason, enterClosing } = useAuth();
-  const [invalid, setInvalid] = useState<{ attemptsRemaining?: number } | null>(null);
+  const [invalid, setInvalid] = useState(false);
   const [formError, setFormError] = useState<string | null>(null);
 
   const { register, handleSubmit, formState } = useForm<Values>({
@@ -46,6 +46,8 @@ export function SignInPage() {
       ? reasonNotice.suspended
       : urlError === "google"
         ? "Google sign-in didn't complete. Please try again."
+        : urlError === "google_unverified"
+          ? "Google hasn't verified the email on that Google account, so it can't be used to sign in. Verify it with Google, or sign in with your email and password."
         : signOutReason
           ? reasonNotice[signOutReason]
           : null);
@@ -60,11 +62,12 @@ export function SignInPage() {
         return;
       }
       await signIn(res.token);
-      navigate(pendingInvite.get() ? "/invite/accept" : safeNext(params.get("next"), "/start"), { replace: true });
+      // An explicit ?next= (bounced from a signed-in page) wins over a destination picked earlier on the landing page.
+      navigate(params.get("next") && !pendingInvite.get() ? safeNext(params.get("next"), "/start") : afterAuthPath("/start"), { replace: true });
     } catch (err) {
       if (!(err instanceof ApiError)) return setFormError(errorMessage(err));
       if (err.status === 401) {
-        setInvalid({ attemptsRemaining: err.data.attemptsRemaining as number | undefined });
+        setInvalid(true);
       } else if (err.status === 403 && err.data.isVerified === false) {
         navigate(`/verify?email=${encodeURIComponent(email.trim())}`, { state: { fromLogin: true } });
       } else if (err.status === 403 && err.data.suspended) {
@@ -91,11 +94,6 @@ export function SignInPage() {
     >
       <form noValidate onSubmit={onSubmit} className="flex flex-col gap-4 lg:gap-5">
         {notice && <AuthNote tone="danger">{notice}</AuthNote>}
-        {invalid?.attemptsRemaining !== undefined && invalid.attemptsRemaining > 0 && (
-          <AuthNote tone="danger">
-            {invalid.attemptsRemaining} attempt{invalid.attemptsRemaining === 1 ? "" : "s"} left before a short cooldown.
-          </AuthNote>
-        )}
 
         <div className="flex flex-col gap-3.5 rounded-lg border border-line-default bg-surface-card p-5 lg:gap-5 lg:border-0 lg:bg-transparent lg:p-0">
           <Field label="Email address" required error={formState.errors.email?.message}>

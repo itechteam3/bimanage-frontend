@@ -17,6 +17,10 @@ export function RouteErrorPage() {
   useEffect(() => {
     if (stale && reloadForNewVersion()) setReloading(true);
   }, [stale]);
+  // A real crash (not a stale build after a deploy) goes to error tracking.
+  useEffect(() => {
+    if (!stale) void import("@/lib/monitoring/sentry").then((m) => m.reportError(error, "route"));
+  }, [stale, error]);
 
   return (
     <main className="flex min-h-dvh items-center justify-center bg-surface-page px-4">

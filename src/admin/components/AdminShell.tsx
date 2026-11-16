@@ -11,6 +11,7 @@ import {
   IconChartBar,
   IconSettings,
   IconWorld,
+  IconBuildingStore,
   IconHistory,
   IconLogout,
   IconMenu2,
@@ -20,6 +21,7 @@ import {
   IconUserCircle,
   IconCamera,
   IconChevronDown,
+  IconStar,
   type Icon,
 } from "@tabler/icons-react";
 import { cn } from "@/lib/cn";
@@ -28,6 +30,8 @@ import { Avatar, IconButton, Spinner } from "@/components/ui";
 import { adminApi } from "../lib/api";
 import { adminSession } from "../lib/session";
 import { useAdminMe } from "../lib/hooks";
+import { AdminLiveUpdates } from "../lib/notifications";
+import { NotificationBell } from "./NotificationBell";
 import type { Capability } from "../lib/types";
 
 // Admin layout (Figma 16.01–16.08): the "Unified administration" sidebar
@@ -48,7 +52,9 @@ export const ADMIN_NAV: AdminNavItem[] = [
   { to: "/admin/users", label: "Users", icon: IconUsers, can: "users.read" },
   { to: "/admin/suppliers", label: "Supplier KYC", icon: IconShieldCheck, can: "suppliers.review" },
   { to: "/admin/bisupplynet/disputes", label: "Disputes", icon: IconScale, can: "disputes.read" },
+  { to: "/admin/store-orders", label: "Store orders", icon: IconBuildingStore, can: "orders.read" },
   { to: "/admin/support/tickets", label: "Support", icon: IconLifebuoy, can: "support.manage" },
+  { to: "/admin/reviews", label: "Reviews", icon: IconStar, can: "reviews.moderate" },
   { to: "/admin/announcements", label: "Announcements", icon: IconBell, can: "announcements.send" },
   { to: "/admin/analytics", label: "Analytics", icon: IconChartBar, can: "stats.read" },
   { to: "/admin/store-domains", label: "Store domains", icon: IconWorld, can: "domains.manage" },
@@ -198,6 +204,7 @@ function TopBar({ section }: { section: string }) {
           <span aria-hidden="true" className="size-2 rounded-full bg-success" />
           Administrative access{me ? ` · ${me.roleLabel}` : ""}
         </span>
+        <NotificationBell />
         <AvatarMenu />
       </div>
     </header>
@@ -215,7 +222,10 @@ function MobileHeader() {
           <Logo tone="on-brand" compact />
           <span className="text-card-heading font-semibold text-ink-on-brand">Admin</span>
         </Link>
-        <IconButton tone="on-brand" size="sm" label="Open menu" aria-expanded={open} icon={<IconMenu2 aria-hidden="true" className="size-6" />} onClick={() => setOpen(true)} />
+        <div className="flex items-center gap-1">
+          <NotificationBell tone="on-brand" />
+          <IconButton tone="on-brand" size="sm" label="Open menu" aria-expanded={open} icon={<IconMenu2 aria-hidden="true" className="size-6" />} onClick={() => setOpen(true)} />
+        </div>
       </header>
       {open && (
         <div className="fixed inset-0 z-40 lg:hidden">
@@ -267,7 +277,7 @@ export function AdminMorePage() {
     <div className="flex flex-col gap-4">
       <h1 className="text-title-md text-ink-strong">More</h1>
       <ul className="flex flex-col gap-2">
-        {[...items, { to: "/admin/account", label: "My account", icon: IconUserCircle }].map(({ to, label, icon: Icon }) => (
+        {[...items, { to: "/admin/notifications", label: "Notifications", icon: IconBell }, { to: "/admin/account", label: "My account", icon: IconUserCircle }].map(({ to, label, icon: Icon }) => (
           <li key={to}>
             <Link to={to} className="flex items-center gap-3 rounded-lg border border-line-card bg-surface-card px-4 py-3 text-body-lg font-medium text-ink-strong shadow-card">
               <Icon aria-hidden="true" className="size-icon text-ink-brand" /> {label}
@@ -295,23 +305,25 @@ export function AdminLayout() {
   if (me.isPending) return <FullPageSpinner />;
   if (me.isError || !me.data) return <Navigate to="/admin/login" replace state={{ from: location.pathname + location.search }} />;
   return (
-    <div className="min-h-dvh bg-surface-page lg:flex">
-      <a href="#admin-main" className="sr-only focus:not-sr-only focus:fixed focus:left-4 focus:top-4 focus:z-50 focus:rounded-md focus:bg-surface-card focus:px-4 focus:py-2">
-        Skip to content
-      </a>
-      <Sidebar />
-      <MobileHeader />
-      <div className="flex min-w-0 flex-1 flex-col">
-        <TopBar section={section} />
-        <main id="admin-main" className="relative flex-1 px-4 pb-28 pt-5 md:px-5 lg:px-12 lg:pb-12 lg:pt-6">
-          <div aria-hidden="true" className="pointer-events-none absolute inset-x-0 top-0 h-52 bg-gradient-atmosphere" />
-          <div className="relative mx-auto w-full max-w-6xl">
-            <Outlet />
-          </div>
-        </main>
+    <AdminLiveUpdates>
+      <div className="min-h-dvh bg-surface-page lg:flex">
+        <a href="#admin-main" className="sr-only focus:not-sr-only focus:fixed focus:left-4 focus:top-4 focus:z-50 focus:rounded-md focus:bg-surface-card focus:px-4 focus:py-2">
+          Skip to content
+        </a>
+        <Sidebar />
+        <MobileHeader />
+        <div className="flex min-w-0 flex-1 flex-col">
+          <TopBar section={section} />
+          <main id="admin-main" className="relative flex-1 px-4 pb-28 pt-5 md:px-5 lg:px-12 lg:pb-12 lg:pt-6">
+            <div aria-hidden="true" className="pointer-events-none absolute inset-x-0 top-0 h-52 bg-gradient-atmosphere" />
+            <div className="relative mx-auto w-full max-w-6xl">
+              <Outlet />
+            </div>
+          </main>
+        </div>
+        <MobileTabs />
       </div>
-      <MobileTabs />
-    </div>
+    </AdminLiveUpdates>
   );
 }
 

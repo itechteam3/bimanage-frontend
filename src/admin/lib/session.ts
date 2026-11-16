@@ -7,6 +7,9 @@ const KEY = "bimanage.admin.session";
 let memory: string | null = null;
 type Listener = (reason: "signed-out" | "ended") => void;
 const listeners = new Set<Listener>();
+// Anything that depends on the token itself (the live admin socket).
+const changeListeners = new Set<() => void>();
+const changed = () => changeListeners.forEach((l) => l());
 
 export const adminSession = {
   key: KEY,
@@ -24,6 +27,7 @@ export const adminSession = {
     } catch {
       /* memory only */
     }
+    changed();
   },
   clear(reason: "signed-out" | "ended" = "signed-out") {
     memory = null;
@@ -33,11 +37,24 @@ export const adminSession = {
       /* nothing stored */
     }
     listeners.forEach((l) => l(reason));
+    changed();
   },
   onClear(l: Listener): () => void {
     listeners.add(l);
     return () => {
       listeners.delete(l);
+    };
+  },
+  /** Called whenever the token is set or cleared (here or in another tab). */
+  subscribe(l: () => void): () => void {
+    changeListeners.add(l);
+    const onStorage = (e: StorageEvent) => {
+      if (e.key === KEY) l();
+    };
+    window.addEventListener("storage", onStorage);
+    return () => {
+      changeListeners.delete(l);
+      window.removeEventListener("storage", onStorage);
     };
   },
 };

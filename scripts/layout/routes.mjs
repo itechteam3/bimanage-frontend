@@ -17,6 +17,7 @@ const IDS = [
   [/^\/messages\//, { id: "c1" }],
   [/^\/support\/tickets\//, { id: "t1" }],
   [/^\/support\/help\//, { id: "f1" }],
+  [/^\/help\//, { slug: "how-wallet-works" }],
   [/^\/support\/service-requests\//, { id: "s1" }],
   [/^\/wallet\/transactions\//, { id: "wfail" }],
   [/^\/bisupplynet\/suppliers\//, { id: "w1" }],
@@ -26,15 +27,17 @@ const IDS = [
   [/^\/bisupplynet\/sell\/listings\//, { id: "p1" }],
   [/^\/admin\/users\//, { id: "u9" }],
   [/^\/admin\/suppliers\//, { id: "w1" }],
+  [/^\/admin\/reviews\//, { id: "rv1" }],
   [/^\/admin\/bisupplynet\/disputes\//, { id: "d1" }],
   [/^\/admin\/bisupplynet\/orders\//, { id: "o1" }],
+  [/^\/admin\/store-orders\//, { orderNumber: "BM-7K2Q-9MXA" }],
   [/^\/admin\/support\/tickets\//, { id: "t1" }],
   [/^\/admin\/support\/service-requests\//, { id: "s1" }],
   [/^\/admin\/announcements\//, { id: "n1" }],
 ];
 
 // Signed-out screens (guest-only pages redirect when signed in).
-const GUEST = new Set(["/", "/home", "/newsletter/confirm", "/newsletter/unsubscribe", "/contact", "/login", "/register", "/verify", "/forgot-password", "/forgot-password/code", "/reset-password", "/reset-password/done",
+const GUEST = new Set(["/", "/home", "/newsletter/confirm", "/newsletter/unsubscribe", "/contact", "/faq", "/terms", "/privacy", "/help", "/help/:slug", "/login", "/register", "/verify", "/forgot-password", "/forgot-password/code", "/reset-password", "/reset-password/done",
   "/oauth/callback", "/session-expired", "/account-closing", "/account-closed", "/invite/accept", "/unsubscribe", "/reviews",
   "/admin/login", "/admin/login/verify", "/admin/login/setup", "/admin/invite", "/admin/forgot-password", "/admin/reset-password"]);
 // Not product screens.

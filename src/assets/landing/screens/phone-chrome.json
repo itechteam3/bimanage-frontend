@@ -1,0 +1,67 @@
+{
+  "bisupplynet": {
+    "bar": "#00456c",
+    "glyphs": "light",
+    "home": "dark"
+  },
+  "checkout": {
+    "bar": "#ffffff",
+    "glyphs": "dark",
+    "home": "dark"
+  },
+  "customers": {
+    "bar": "#00456c",
+    "glyphs": "light",
+    "home": "dark"
+  },
+  "dashboard": {
+    "bar": "#00456c",
+    "glyphs": "light",
+    "home": "dark"
+  },
+  "feli": {
+    "bar": "#00456c",
+    "glyphs": "light",
+    "home": "dark"
+  },
+  "inventory": {
+    "bar": "#00456c",
+    "glyphs": "light",
+    "home": "dark"
+  },
+  "invoice": {
+    "bar": "#00456c",
+    "glyphs": "light",
+    "home": "dark"
+  },
+  "orders": {
+    "bar": "#00456c",
+    "glyphs": "light",
+    "home": "dark"
+  },
+  "projects": {
+    "bar": "#00456c",
+    "glyphs": "light",
+    "home": "dark"
+  },
+  "reports": {
+    "bar": "#00456c",
+    "glyphs": "light",
+    "home": "dark"
+  },
+  "store": {
+    "bar": "#ffffff",
+    "glyphs": "dark",
+    "home": "dark"
+  },
+  "store-orders": {
+    "bar": "#00456c",
+    "glyphs": "light",
+    "home": "dark"
+  },
+  "wallet": {
+    "bar": "#00456c",
+    "glyphs": "light",
+    "home": "dark"
+  }
+}

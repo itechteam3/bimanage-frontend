@@ -1,12 +1,14 @@
 import { useEffect, useRef, useState, type FormEvent, type KeyboardEvent, type ReactNode } from "react";
 import { Link } from "react-router-dom";
-import { IconChevronDown, IconHeadset, IconSend, IconSparkles, IconTrash } from "@tabler/icons-react";
+import { IconChevronDown, IconHeadset, IconSend, IconTrash } from "@tabler/icons-react";
 import { Button, ButtonLink, Dialog, Spinner, Status } from "@/components/ui";
 import { IntroCard, PageTitle } from "@/components/page/Blocks";
 import { ErrorNote } from "@/components/feedback/ErrorNote";
 import { ApiError } from "@/lib/api/client";
 import { errorMessage, friendlyText } from "@/lib/api/errorMessage";
 import { cn } from "@/lib/cn";
+import { FeliAvatar } from "@/components/feli/FeliAvatar";
+import { linkCompanySite } from "@/lib/feli/companyLink";
 import {
   actionLabel,
   isLimitError,
@@ -143,9 +145,12 @@ function ChatPanel({
   return (
     <section aria-label="Chat with FELI" className="flex min-w-0 flex-col gap-4 rounded-2xl border border-line-card bg-surface-card p-4 shadow-card lg:p-6">
       <header className="flex flex-wrap items-start justify-between gap-3">
-        <div className="min-w-0">
-          <h2 className="text-title-sm text-ink-strong">Today with FELI</h2>
-          <p className="text-caption text-ink-muted">{usageLine(usage)}</p>
+        <div className="flex min-w-0 items-center gap-3">
+          <FeliAvatar size="md" decorative />
+          <div className="min-w-0">
+            <h2 className="text-title-sm text-ink-strong">Today with FELI</h2>
+            <p className="text-caption text-ink-muted">{usageLine(usage)}</p>
+          </div>
         </div>
         {messages.length > 0 && (
           <Button variant="secondary" size="md" onClick={() => setConfirmClear(true)} icon={<IconTrash aria-hidden="true" className="size-4" />}>
@@ -178,9 +183,12 @@ function ChatPanel({
           {pending && (
             <>
               <Bubble m={{ role: "user", content: pending }} />
-              <p role="status" className="flex items-center gap-2 self-start rounded-2xl bg-surface-pale px-4 py-2 text-body-sm text-ink-muted">
-                <Spinner className="size-4" /> FELI is thinking…
-              </p>
+              <div className="flex items-center gap-2 self-start">
+                <FeliAvatar size="sm" decorative />
+                <p role="status" className="flex items-center gap-2 rounded-2xl bg-surface-pale px-4 py-2 text-body-sm text-ink-muted">
+                  <Spinner className="size-4" /> FELI is thinking…
+                </p>
+              </div>
             </>
           )}
           {!pending && proposals.length > 0 && (
@@ -303,8 +311,8 @@ function Bubble({
   onResend?: () => void;
 }) {
   const mine = m.role === "user";
-  return (
-    <div className={cn("flex min-w-0 max-w-[90%] flex-col gap-2", mine ? "items-end self-end" : "self-start")}>
+  const body = (
+    <div className={cn("flex min-w-0 flex-col gap-2", mine ? "max-w-[90%] items-end self-end" : "flex-1")}>
       <div className={cn("min-w-0 rounded-2xl px-4 py-3", mine ? "bg-surface-pale" : "bg-surface-tint-aqua")}>
         <p className={cn("text-caption font-semibold uppercase", mine ? "text-ink-muted" : "text-success")}>{mine ? "You" : "FELI · Business assistant"}</p>
         {mine ? <p className="mt-1 whitespace-pre-wrap break-words text-body-sm text-ink-strong [overflow-wrap:anywhere]">{m.content}</p> : <RichText text={m.content} />}
@@ -330,11 +338,19 @@ function Bubble({
       )}
     </div>
   );
+  if (mine) return body;
+  // FELI's replies carry her avatar; the visible "FELI" label makes it decorative.
+  return (
+    <div className="flex min-w-0 max-w-[90%] items-start gap-2 self-start">
+      <FeliAvatar size="sm" decorative className="mt-1" />
+      {body}
+    </div>
+  );
 }
 
-/** **bold** and "- " bullets from FELI's replies, as React text (never HTML). */
+/** **bold** and "- " bullets from FELI's replies, as React text (never HTML); bitechteam.org as a link. */
 function inline(text: string): ReactNode[] {
-  return text.split(/(\*\*[^*\n]+\*\*)/g).map((part, i) => (/^\*\*[^*\n]+\*\*$/.test(part) ? <strong key={i} className="font-semibold">{part.slice(2, -2)}</strong> : part));
+  return text.split(/(\*\*[^*\n]+\*\*)/g).flatMap<ReactNode>((part, i) => (/^\*\*[^*\n]+\*\*$/.test(part) ? [<strong key={i} className="font-semibold">{part.slice(2, -2)}</strong>] : linkCompanySite(part, i)));
 }
 
 export function RichText({ text }: { text: string }) {
@@ -381,7 +397,7 @@ function ProposalCard({ proposal, position }: { proposal: FeliProposal; position
   return (
     <section aria-label="Suggested action" className="min-w-0 self-stretch rounded-2xl border border-line-strong bg-surface-card p-4">
       <p className="flex items-center gap-2 text-caption font-semibold uppercase text-ink-brand">
-        <IconSparkles aria-hidden="true" className="size-4" /> FELI suggests an action{position ? ` · ${position}` : ""}
+        <FeliAvatar size="xs" decorative /> FELI suggests an action{position ? ` · ${position}` : ""}
       </p>
       <h3 className="mt-1 break-words text-body-lg font-semibold text-ink-strong">{proposal.label}</h3>
       {rows.length > 0 && (

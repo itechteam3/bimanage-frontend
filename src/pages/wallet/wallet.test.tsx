@@ -80,8 +80,50 @@ describe("wallet", () => {
     await user.type(screen.getByLabelText(/account number/i), "0123459921");
     expect(await screen.findByText("Verified: ELIJAH APPAREL LTD")).toBeInTheDocument();
     await user.click(screen.getByRole("button", { name: "Save bank account" }));
-    await waitFor(() => expect(last("POST /wallet/setup-bank")?.body).toEqual({ bankCode: "058", accountNumber: "0123459921", bankName: "GTBank" }));
+    expect(await screen.findByText("Enter your BiManage password.")).toBeInTheDocument();
+    expect(last("POST /wallet/setup-bank")).toBeUndefined();
+    await user.type(screen.getByLabelText(/your bimanage password/i), "Secret123");
+    await user.click(screen.getByRole("button", { name: "Save bank account" }));
+    await waitFor(() => expect(last("POST /wallet/setup-bank")?.body).toEqual({ bankCode: "058", accountNumber: "0123459921", bankName: "GTBank", currentPassword: "Secret123" }));
     expect(await screen.findByText("Bank account linked.")).toBeInTheDocument();
+  });
+
+  it("a wrong password is shown on the password field", async () => {
+    fb.handlers["GET /wallet/resolve-account"] = () => [200, { accountName: "ELIJAH APPAREL LTD" }];
+    fb.handlers["POST /wallet/setup-bank"] = () => [400, { message: "That password isn't right.", field: "currentPassword", reauth: "password" }];
+    const user = userEvent.setup();
+    renderApp("/wallet/bank");
+    await user.type(await screen.findByRole("combobox", { name: /bank name/i }), "gt");
+    await user.click(await screen.findByRole("option", { name: "GTBank" }));
+    await user.type(screen.getByLabelText(/account number/i), "0123459921");
+    await screen.findByText("Verified: ELIJAH APPAREL LTD");
+    await user.type(screen.getByLabelText(/your bimanage password/i), "wrong-one");
+    await user.click(screen.getByRole("button", { name: "Save bank account" }));
+    expect(await screen.findByText("That password isn't right.")).toBeInTheDocument();
+  });
+
+  it("Google-only accounts confirm with an emailed code", async () => {
+    fb.handlers["GET /profile"] = () => [200, { _id: "u1", name: "Elijah", email: "e@x.com", hasPassword: false }];
+    fb.handlers["GET /wallet/resolve-account"] = () => [200, { accountName: "ELIJAH APPAREL LTD" }];
+    fb.handlers["POST /wallet/bank-change-code"] = () => [200, { message: "We emailed a 6-digit code to e@x.com. It expires in 10 minutes." }];
+    fb.handlers["POST /wallet/setup-bank"] = () => [200, { accountName: "ELIJAH APPAREL LTD", wallet: WALLET }];
+    const user = userEvent.setup();
+    renderApp("/wallet/bank");
+    await user.type(await screen.findByRole("combobox", { name: /bank name/i }), "gt");
+    await user.click(await screen.findByRole("option", { name: "GTBank" }));
+    await user.type(screen.getByLabelText(/account number/i), "0123459921");
+    await screen.findByText("Verified: ELIJAH APPAREL LTD");
+    await user.click(await screen.findByRole("button", { name: "Email me a code" }));
+    expect(await screen.findByText(/We emailed a 6-digit code/)).toBeInTheDocument();
+    await user.type(screen.getByLabelText(/code from your email/i), "123456");
+    await user.click(screen.getByRole("button", { name: "Save bank account" }));
+    await waitFor(() => expect(last("POST /wallet/setup-bank")?.body).toEqual({ bankCode: "058", accountNumber: "0123459921", bankName: "GTBank", code: "123456" }));
+  });
+
+  it("after a bank change, the wallet says payouts are paused until when", async () => {
+    fb.handlers["GET /wallet"] = () => [200, { ...WALLET, payoutsPausedUntil: "2026-11-18T10:00:00Z" }];
+    renderApp("/wallet");
+    expect(await screen.findByText(/Payouts paused until 18 Nov/)).toBeInTheDocument();
   });
 
   it("06.04 → 06.05 → 06.06: amount, Paystack fee and net shown; nothing sent until Confirm", async () => {
@@ -135,6 +177,46 @@ describe("wallet", () => {
     expect(router.state.location.search).toContain("q=BMW");
     const row = screen.getByRole("link", { name: "BM-WYYZ-KJDF" }).closest("li")!;
     expect(within(row).getByText("Test")).toBeInTheDocument();
+  });
+
+  it("BiSupplyNet supplier earnings are labelled BiSupplyNet sale, store orders Store sale (list, detail, filter)", async () => {
+    const SUPPLY = TX({ _id: "t3", amount: 97000, description: "BiSupplyNet order SN-4H2K: on hold until the buyer confirms delivery", reference: "so1:held", order: null, supplyOrder: { _id: "so1", trackingNo: "SN-4H2K" }, source: "bisupplynet", label: "BiSupplyNet sale" });
+    // An older backend without `source`: the description still tells them apart.
+    const LEGACY = TX({ _id: "t4", description: "BiSupplyNet order SN-OLD1: on hold until the buyer confirms delivery", reference: "x:held", order: null });
+    fb.handlers["GET /wallet/transactions"] = () => [200, { transactions: [TX({ source: "store", label: "Store sale" }), SUPPLY, LEGACY], total: 3, page: 1, totalPages: 1 }];
+    fb.handlers["GET /wallet/transactions/t3"] = () => [200, { ...SUPPLY, related: [], bank: WALLET.bank }];
+    const user = userEvent.setup();
+    const router = renderApp("/wallet/transactions");
+    const store = (await screen.findByRole("link", { name: "BM-AAAA-BBBB" })).closest("li")!;
+    expect(within(store).getByText(/Store sale/)).toBeInTheDocument();
+    const supply = screen.getByRole("link", { name: "SN-4H2K" }).closest("li")!;
+    expect(within(supply).getByText(/BiSupplyNet sale/)).toBeInTheDocument();
+    expect(within(supply).queryByText(/Store sale/)).not.toBeInTheDocument();
+    const legacy = screen.getByRole("link", { name: "x:held" }).closest("li")!;
+    expect(within(legacy).getByText(/BiSupplyNet sale/)).toBeInTheDocument();
+
+    await user.selectOptions(screen.getByRole("combobox", { name: "Type" }), "credit:bisupplynet");
+    await waitFor(() => expect(router.state.location.search).toContain("source=bisupplynet"));
+    const call = [...fb.calls].reverse().find((c) => c.key === "GET /wallet/transactions");
+    expect(call).toBeDefined();
+    await waitFor(() => expect(fb.calls.some((c) => c.key === "GET /wallet/transactions")).toBe(true));
+
+    await router.navigate("/wallet/transactions/t3");
+    expect(await screen.findByRole("heading", { level: 1, name: /BiSupplyNet sale/ })).toBeInTheDocument();
+    expect(screen.getByRole("link", { name: "SN-4H2K" })).toHaveAttribute("href", "/bisupplynet/orders/so1");
+  });
+
+  it("the type filter sends type=credit&source=store for store sales", async () => {
+    const urls: string[] = [];
+    fb.handlers["GET /wallet/transactions"] = (_b, _h, url) => {
+      urls.push(url.search);
+      return [200, { transactions: [TX()], total: 1, page: 1, totalPages: 1 }];
+    };
+    const user = userEvent.setup();
+    renderApp("/wallet/transactions");
+    await screen.findByRole("link", { name: "BM-AAAA-BBBB" });
+    await user.selectOptions(screen.getByRole("combobox", { name: "Type" }), "credit:store");
+    await waitFor(() => expect(urls.some((u) => u.includes("type=credit") && u.includes("source=store"))).toBe(true));
   });
 
   it("06.03: custom interval needs 7–90 days; saving sends the schedule", async () => {

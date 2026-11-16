@@ -266,6 +266,18 @@
       "stock-line": {
         "$value": "#A44257",
         "$description": "KPI • stock sparkline (03.02)."
+      },
+      "info-bg": {
+        "$value": "#E7F3FC",
+        "$description": "KPI • blue card fill, first tile on Sales, Orders, Store launch, Notifications; second on Projects and Supplier earnings (05.01, 05.02, 04.04, 08.02, 10.12, 12.11)."
+      },
+      "info-fg": {
+        "$value": "#00456B",
+        "$description": "KPI • blue card value colour (05.01 '₦1.28m')."
+      },
+      "info-line": {
+        "$value": "#00456B",
+        "$description": "KPI • blue card sparkline."
       }
     }
   },

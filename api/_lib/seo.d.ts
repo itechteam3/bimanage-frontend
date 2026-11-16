@@ -12,7 +12,9 @@ export function shareMeta(input: { site: string; slug: string; productId?: strin
 export function injectMeta(html: string, m: ShareMeta, site: string): string;
 export function minimalHtml(m: ShareMeta, site: string): string;
 export const STATIC_PAGES: string[];
-export function sitemapXml(site: string, data: { stores?: { slug: string; updatedAt?: string }[]; products?: { slug: string; id: string; updatedAt?: string }[] } | null): string;
+export type SitemapData = { stores?: { slug: string; updatedAt?: string }[]; products?: { slug: string; id: string; updatedAt?: string }[]; articles?: { slug: string; updatedAt?: string }[] };
+export function sitemapXml(site: string, data: SitemapData | null): string;
+export function sitemapData(api?: string, get?: (url: string, ms?: number) => Promise<unknown>): Promise<SitemapData | null>;
 export const PRIVATE_PATHS: string[];
 export function robotsTxt(site: string): string;
 export function getJson(url: string, ms?: number): Promise<unknown>;

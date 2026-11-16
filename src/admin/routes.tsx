@@ -25,6 +25,9 @@ const DisputesPage = page(disputes, "DisputesPage");
 const DisputeDetailPage = page(disputes, "DisputeDetailPage");
 const SupplyOrdersPage = page(disputes, "SupplyOrdersPage");
 const SupplyOrderDetailPage = page(disputes, "SupplyOrderDetailPage");
+const storeOrders = () => import("./pages/StoreOrdersPages");
+const StoreOrdersAttentionPage = page(storeOrders, "StoreOrdersAttentionPage");
+const StoreOrderMoneyPage = page(storeOrders, "StoreOrderMoneyPage");
 const support = () => import("./pages/SupportPages");
 const SupportPage = page(support, "SupportPage");
 const TicketDetailPage = page(support, "TicketDetailPage");
@@ -41,6 +44,12 @@ const AdminAccountPage = page(account, "AdminAccountPage");
 const AdminForgotPasswordPage = page(account, "AdminForgotPasswordPage");
 const AdminResetPasswordPage = page(account, "AdminResetPasswordPage");
 const AdminMorePage = page(shell, "AdminMorePage");
+const reviews = () => import("./pages/ReviewsPages");
+const ReviewsPage = page(reviews, "ReviewsPage");
+const ReviewDetailPage = page(reviews, "ReviewDetailPage");
+const notifications = () => import("./pages/NotificationsPages");
+const NotificationsPage = page(notifications, "NotificationsPage");
+const NotificationSettingsPage = page(notifications, "NotificationSettingsPage");
 const RequireCan = lazy(() => shell().then((m) => ({ default: m.RequireCan as ComponentType<{ can: Capability; children: ReactNode }> })));
 
 const Wait = () => (
@@ -71,6 +80,8 @@ export const adminRoutes: RouteObject[] = [
       { path: "bisupplynet/disputes/:id", element: gate("disputes.read", <DisputeDetailPage />), handle: { section: "Disputes" } },
       { path: "bisupplynet/orders", element: gate("orders.read", <SupplyOrdersPage />), handle: { section: "Disputes" } },
       { path: "bisupplynet/orders/:id", element: gate("orders.read", <SupplyOrderDetailPage />), handle: { section: "Disputes" } },
+      { path: "store-orders", element: gate("orders.read", <StoreOrdersAttentionPage />), handle: { section: "Store orders" } },
+      { path: "store-orders/:orderNumber", element: gate("orders.read", <StoreOrderMoneyPage />), handle: { section: "Store orders" } },
       { path: "support/tickets", element: gate("support.manage", <SupportPage />), handle: { section: "Support" } },
       { path: "support/tickets/:id", element: gate("support.manage", <TicketDetailPage />), handle: { section: "Support" } },
       { path: "support/service-requests", element: <Navigate to="/admin/support/tickets?tab=requests" replace /> },
@@ -79,10 +90,14 @@ export const adminRoutes: RouteObject[] = [
       { path: "announcements/new", element: gate("announcements.send", <AnnouncementEditorPage />), handle: { section: "Announcements" } },
       { path: "announcements/:id", element: gate("announcements.send", <AnnouncementEditorPage key="edit" />), handle: { section: "Announcements" } },
       { path: "analytics", element: gate("stats.read", <AnalyticsPage />), handle: { section: "Analytics" } },
+      { path: "reviews", element: gate("reviews.moderate", <ReviewsPage />), handle: { section: "Reviews" } },
+      { path: "reviews/:id", element: gate("reviews.moderate", <ReviewDetailPage />), handle: { section: "Reviews" } },
       { path: "store-domains", element: gate("domains.manage", <StoreDomainsPage />), handle: { section: "Store domains" } },
       { path: "roles", element: gate("admins.manage", <RolesPage />), handle: { section: "Admin Roles" } },
       { path: "audit", element: gate("audit.read", <AuditPage />), handle: { section: "Audit trail" } },
       { path: "account", element: s(<AdminAccountPage />), handle: { section: "My account" } },
+      { path: "notifications", element: s(<NotificationsPage />), handle: { section: "Notifications" } },
+      { path: "notifications/settings", element: s(<NotificationSettingsPage />), handle: { section: "Notifications" } },
       { path: "more", element: s(<AdminMorePage />), handle: { section: "More" } },
       { path: "*", element: <Navigate to="/admin" replace /> },
     ],

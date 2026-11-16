@@ -6,6 +6,7 @@ import { tokenStore } from "@/lib/auth/tokenStore";
 import { serverStatus } from "@/lib/api/serverStatus";
 import { installFakeBackend, renderApp, type FakeBackend } from "@/test/fakeBackend";
 import { installFakeSockets } from "@/test/fakeSocket";
+import { FEATURED_FAQS } from "./faq";
 
 const PLANS = {
   currency: "NGN",
@@ -120,10 +121,17 @@ describe("landing page (/)", () => {
     expect(screen.getByRole("link", { name: /read all reviews/i })).toHaveAttribute("href", "/reviews");
   });
 
-  it("FAQ uses the public help-centre articles", async () => {
+  it("FAQ preview shows only the featured questions, with See all FAQs going to /faq (no FAQPage markup here)", async () => {
     renderApp("/");
-    expect(await screen.findByText("How do payouts work?")).toBeInTheDocument();
-    expect(screen.getByText("Is there a free plan?")).toBeInTheDocument();
+    const section = (await screen.findByRole("heading", { name: "Questions, answered" })).closest("section")!;
+    const questions = within(section).getAllByRole("button", { expanded: false }).map((b) => b.textContent);
+    expect(questions).toEqual(FEATURED_FAQS.map((f) => f.q));
+    expect(questions.length).toBeGreaterThanOrEqual(5);
+    expect(questions.length).toBeLessThanOrEqual(7);
+    expect(within(section).queryByText("How do payouts work?")).toBeNull(); // help-centre answers live on /faq
+    expect(within(section).getByRole("link", { name: "See all FAQs" })).toHaveAttribute("href", "/faq");
+    expect(within(screen.getByRole("navigation", { name: "Main" })).getByRole("link", { name: "FAQ" })).toHaveAttribute("href", "/faq");
+    expect(document.querySelector('script[type="application/ld+json"]#faq-jsonld')).toBeNull();
   });
 
   it('product screenshots have alt text and no "Sample data" badge', async () => {
@@ -135,7 +143,85 @@ describe("landing page (/)", () => {
     for (const img of shots) expect(img.getAttribute("alt")).toMatch(/bimanage/i);
   });
 
-  it("every Contact us link goes to /contact (navbar, mobile menu, floating button, footer)", async () => {
+  it("the hero fills the screen and has a scroll hint to the dashboard section", async () => {
+    renderApp("/");
+    const h1 = await screen.findByRole("heading", { level: 1 });
+    const hero = h1.closest("section") as HTMLElement;
+    expect(hero).toHaveClass("lp-hero-full");
+    const hint = within(hero).getByRole("link", { name: "Scroll to the dashboard" });
+    expect(hint).toHaveAttribute("href", "#lp-dashboard");
+    expect(document.getElementById("lp-dashboard")).toHaveAccessibleName("Everything your business needs, in one dashboard");
+  });
+
+  it("the hero has the FELI badge, a trust row of true facts and decorative sample cards", async () => {
+    renderApp("/");
+    const h1 = await screen.findByRole("heading", { level: 1 });
+    const hero = h1.closest("section") as HTMLElement;
+    expect(within(hero).getByText("Meet FELI, your AI business assistant")).toBeInTheDocument();
+    const trust = within(hero).getByRole("list", { name: "Why it's easy to start" });
+    expect(within(trust).getAllByRole("listitem").map((li) => li.textContent)).toEqual(["14-day free trial", "Payments through Paystack", "Works on phone and laptop"]);
+    // The trial length matches what the backend grants and the FAQ says.
+    expect(readFileSync("src/pages/landing/faq.ts", "utf8")).toContain("14-day free trial");
+    // Sample "live" cards (desktop cluster + phone pair): hidden from screen readers.
+    const cards = [...hero.querySelectorAll(".lp-hcard")];
+    expect(cards.length).toBe(6);
+    for (const c of cards) expect(c.closest('[aria-hidden="true"]')).not.toBeNull();
+    expect(hero.textContent).toContain("₦45,000");
+    expect(within(hero).queryByRole("img", { name: /feli/i })).toBeNull();
+    expect(hero.textContent).not.toMatch(/[–—]/);
+  });
+
+  it("How it works: three numbered steps with icons, no images", async () => {
+    renderApp("/");
+    await screen.findByRole("heading", { level: 1 });
+    const section = document.getElementById("how-it-works") as HTMLElement;
+    const steps = within(section).getAllByRole("listitem");
+    expect(steps.map((li) => within(li).getByRole("heading", { level: 3 }).textContent)).toEqual(["Sign up", "Set up your business", "Sell, manage and grow"]);
+    steps.forEach((li, i) => {
+      expect(li).toHaveTextContent(`Step ${i + 1}`);
+      expect(li.querySelector("svg")).not.toBeNull();
+      expect(li.querySelector("img")).toBeNull();
+    });
+    expect(steps[0]).toHaveTextContent("Create your account and verify your email. It takes minutes.");
+  });
+
+  it("no em or en dashes anywhere in the landing page text", async () => {
+    renderApp("/");
+    await screen.findByRole("heading", { level: 1 });
+    await screen.findByRole("heading", { name: "Everything your business needs, in one dashboard" });
+    expect(document.body.textContent).not.toMatch(/[\u2013\u2014]/);
+  });
+
+  it("the hero stands alone; the dashboard screenshots are in their own section right after it", async () => {
+    renderApp("/");
+    const h1 = await screen.findByRole("heading", { level: 1 });
+    const hero = h1.closest("section") as HTMLElement;
+    expect(hero.querySelectorAll("figure")).toHaveLength(0);
+    const preview = screen.getByRole("region", { name: "Everything your business needs, in one dashboard" });
+    expect(hero.nextElementSibling).toBe(preview);
+    expect(within(preview).getByAltText(/The BiManage business dashboard/)).toBeInTheDocument();
+    expect(within(preview).getByAltText("The BiManage dashboard on a phone.")).toBeInTheDocument();
+  });
+
+  it("phone screenshots sit in the drawn iPhone frame, below a decorative status bar", async () => {
+    renderApp("/");
+    await screen.findByRole("heading", { level: 1 });
+    const phone = screen.getByAltText("The BiManage dashboard on a phone.");
+    // Captured at the iPhone 18 Pro Max width, below the 62 pt status bar; below the hero, so lazy.
+    expect(phone).toHaveAttribute("width", "440");
+    expect(phone).toHaveAttribute("height", "894");
+    expect(phone).toHaveAttribute("loading", "lazy");
+    const frame = phone.closest("figure.lp-phone") as HTMLElement;
+    expect(frame).not.toBeNull();
+    const status = frame.querySelector(".lp-phone-status") as HTMLElement;
+    expect(status).toHaveAttribute("aria-hidden", "true");
+    expect(status).toHaveTextContent("9:41");
+    expect(frame.querySelector(".lp-phone-island")).not.toBeNull();
+    // Feature showcase phones are lazy.
+    expect(screen.getByAltText(/in BiManage on a phone\.$/)).toHaveAttribute("loading", "lazy");
+  });
+
+  it("every Contact us link goes to /contact (navbar, mobile menu, footer)", async () => {
     const user = userEvent.setup();
     renderApp("/");
     await screen.findByRole("heading", { level: 1 });
@@ -145,7 +231,7 @@ describe("landing page (/)", () => {
     await user.click(screen.getByRole("button", { name: "Open menu" }));
     expect(within(screen.getByRole("navigation", { name: "Menu" })).getByRole("link", { name: "Contact us" })).toHaveAttribute("href", "/contact");
     const links = screen.getAllByRole("link", { name: "Contact us" });
-    expect(links).toHaveLength(4);
+    expect(links).toHaveLength(3);
     for (const a of links) expect(a).toHaveAttribute("href", "/contact");
   });
 

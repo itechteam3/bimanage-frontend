@@ -3,11 +3,12 @@ import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
 import { useNavigate } from "react-router-dom";
-import { AuthActions, AuthLayout, AuthNote } from "@/components/layout/AuthLayout";
-import { Button, ButtonLink, EmailSuggestion, Field, PasswordInput, TextInput, buttonClasses } from "@/components/ui";
+import { AuthLayout, AuthNote } from "@/components/layout/AuthLayout";
+import { Button, ButtonLink, EmailSuggestion, Field, PasswordInput, TextInput } from "@/components/ui";
 import { authApi } from "@/lib/auth/api";
 import { characterTypes, MIN_PASSWORD } from "@/lib/auth/password";
 import { LEGAL } from "@/config/links";
+import { LEGAL_LAST_UPDATED } from "@/config/legal";
 import { ApiError } from "@/lib/api/client";
 import { cooldownMessage, errorMessage } from "@/lib/api/errorMessage";
 import { useLeaveGuard } from "@/lib/nav/useLeaveGuard";
@@ -22,26 +23,23 @@ const schema = z
       .min(MIN_PASSWORD, "Use at least 8 characters.")
       .refine((pw) => characterTypes(pw) >= 2, "Mix character types — e.g. letters and numbers."),
     confirm: z.string().min(1, "Repeat your password."),
+    terms: z.boolean().refine((v) => v, "Tick the box to agree to the Terms of Service and Privacy Policy."),
   })
   .refine((v) => v.password === v.confirm, { path: ["confirm"], message: "Passwords do not match. Re-enter your password." });
 type Values = z.infer<typeof schema>;
 
-// Terms / Privacy buttons appear once BiTechTeam provides the URLs (src/config/links.ts).
-const legalLinks = [
-  { label: "Terms", href: LEGAL.termsUrl },
-  { label: "Privacy Notice", href: LEGAL.privacyUrl },
-].filter((l) => l.href);
 
 export function RegisterPage() {
   const navigate = useNavigate();
   const [formError, setFormError] = useState<string | null>(null);
-  const { register, handleSubmit, setError, setValue, watch, formState } = useForm<Values>({ resolver: zodResolver(schema) });
+  const { register, handleSubmit, setError, setValue, watch, formState } = useForm<Values>({ resolver: zodResolver(schema), defaultValues: { terms: false } });
   const guard = useLeaveGuard(formState.isDirty && !formState.isSubmitSuccessful);
 
   const onSubmit = handleSubmit(async ({ name, email, password }) => {
     setFormError(null);
     try {
-      await authApi.register({ name: name.trim(), email: email.trim(), password });
+      // The schema only lets the form submit once the terms box is ticked.
+      await authApi.register({ name: name.trim(), email: email.trim(), password, termsAccepted: true, termsVersion: LEGAL_LAST_UPDATED });
       guard.allow();
       navigate(`/verify?email=${encodeURIComponent(email.trim())}`, { state: { justRegistered: true } });
     } catch (err) {
@@ -82,6 +80,34 @@ export function RegisterPage() {
           </Field>
         </div>
 
+        <div className="flex flex-col gap-1">
+          <label className="flex cursor-pointer items-start gap-3 text-body-lg text-ink-strong">
+            <input
+              type="checkbox"
+              className="mt-0.5 size-5 shrink-0 accent-brand-navy"
+              aria-invalid={formState.errors.terms ? true : undefined}
+              aria-describedby={formState.errors.terms ? "terms-error" : undefined}
+              {...register("terms")}
+            />
+            <span>
+              I agree to the{" "}
+              <a href={LEGAL.termsUrl} target="_blank" rel="noreferrer" className="font-semibold text-ink-brand underline">
+                Terms of Service
+              </a>{" "}
+              and{" "}
+              <a href={LEGAL.privacyUrl} target="_blank" rel="noreferrer" className="font-semibold text-ink-brand underline">
+                Privacy Policy
+              </a>
+              <span className="sr-only"> (open in a new tab)</span>
+            </span>
+          </label>
+          {formState.errors.terms && (
+            <p id="terms-error" role="alert" className="text-body-sm text-danger">
+              {formState.errors.terms.message}
+            </p>
+          )}
+        </div>
+
         <Button type="submit" fullWidth loading={formState.isSubmitting} loadingText="Creating account…">
           Create account
         </Button>
@@ -92,16 +118,6 @@ export function RegisterPage() {
             Sign in
           </ButtonLink>
         </div>
-        <p className="text-body-lg text-ink-brand">By creating an account, you agree to the Terms and Privacy Notice.</p>
-        {legalLinks.length > 0 && (
-          <AuthActions>
-            {legalLinks.map((l) => (
-              <a key={l.label} href={l.href} target="_blank" rel="noreferrer" className={buttonClasses({ variant: "secondary", size: "md" })}>
-                {l.label}
-              </a>
-            ))}
-          </AuthActions>
-        )}
         <AuthNote>
           <span className="lg:hidden">Next: choose Starting a Business or Existing Business.</span>
           <span className="hidden lg:inline">Next: choose Starting a Business or Existing Business onboarding.</span>
