@@ -124,10 +124,10 @@ function Sidebar() {
   return (
     <aside className="sticky top-0 hidden h-dvh w-sidebar shrink-0 flex-col rounded-2xl bg-brand-navy px-3 pb-6 pt-7 text-ink-on-brand shadow-sidebar lg:flex">
       <Link to="/admin" className="px-2">
-        <Logo tone="on-brand" />
+        <Logo tone="on-brand" size="rail" />
       </Link>
       <p className="mt-2 px-2 text-label font-semibold uppercase tracking-wide text-ink-on-brand-soft">Platform admin</p>
-      <nav aria-label="Admin" className="mt-10 flex-1 overflow-y-auto">
+      <nav aria-label="Admin" className="mt-5.5 flex-1 overflow-y-auto">
         <NavList />
       </nav>
       <ProfileBlock />

@@ -15,12 +15,14 @@ import markNavy from "@/assets/brand/bimanage-mark-navy.png";
 //
 // Sizes, from the Figma frames (logo fitted inside each box):
 //   panel   — auth side panels, 160×64 box  → 160 wide (≈ 47 high)
-//   sidebar — app/admin sidebar, 171×34 box → 34 high  (≈ 116 wide)
+//   rail    — desktop app/admin sidebar, 178×71 box (every 02–16 screen frame) → 178 wide (≈ 52 high)
+//   sidebar — mobile drawer and public navbars, 171×34 box → 34 high (≈ 116 wide)
 //   header  — mobile header mark, 52×52 box → 52 high  (≈ 47 wide)
-export type LogoSize = "panel" | "sidebar" | "header";
+export type LogoSize = "panel" | "rail" | "sidebar" | "header";
 
 const SIZE: Record<LogoSize, string> = {
   panel: "w-40 h-auto",
+  rail: "w-44.5 h-auto",
   sidebar: "h-8.5 w-auto",
   header: "h-13 w-auto",
 };

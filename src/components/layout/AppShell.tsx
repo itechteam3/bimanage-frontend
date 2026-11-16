@@ -93,9 +93,11 @@ function Sidebar({ user, navState, onLogout }: Pick<AppShellProps, "user" | "nav
   return (
     <aside className="sticky top-0 hidden h-dvh w-sidebar shrink-0 flex-col rounded-2xl bg-brand-navy px-3 pb-6 pt-7 text-ink-on-brand shadow-sidebar lg:flex">
       <Link to="/dashboard" className="px-2">
-        <Logo tone="on-brand" />
+        <Logo tone="on-brand" size="rail" />
       </Link>
-      <nav aria-label="Main" className="mt-14 flex-1 overflow-y-auto">
+      {/* Figma: logo 178 wide (box 178×71). The first nav row stays at y=118 (Figma 138) so
+          the 15 rows still fit a 900px-tall laptop screen without scrolling the nav more. */}
+      <nav aria-label="Main" className="mt-9.5 flex-1 overflow-y-auto">
         <NavList navState={navState} />
       </nav>
       <SidebarFooter user={user} onLogout={onLogout} />
@@ -257,7 +259,7 @@ export function AppShell({ section, user, navState, onLogout, onChangePhoto, unr
       <MobileHeader user={user} navState={navState} onLogout={onLogout} />
       <div className="flex min-w-0 flex-1 flex-col">
         <DesktopHeader section={section} user={user} unread={unread} onLogout={onLogout} onChangePhoto={onChangePhoto} />
-        <main id="main" className="relative flex-1 px-5 pb-28 pt-5 lg:px-12 lg:pb-12 lg:pt-6">
+        <main id="main" data-app-main className="relative flex-1 px-5 pb-28 pt-5 lg:px-12 lg:pb-12 lg:pt-6">
           <div aria-hidden="true" className="pointer-events-none absolute inset-x-0 top-0 h-52 bg-gradient-atmosphere" />
           <div className="relative mx-auto w-full max-w-6xl">
             <BackBar />
