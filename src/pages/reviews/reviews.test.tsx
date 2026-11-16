@@ -114,7 +114,7 @@ describe("12.16 write a review", () => {
     let mine: Record<string, unknown> = { review: null, eligibility: { ok: true, reasons: [] } };
     fb.handlers["GET /reviews/my-review"] = () => [200, mine];
     fb.handlers["POST /reviews"] = (body) => {
-      mine = { review: { ...REVIEW, ...body, isPublished: true }, eligibility: { ok: true, reasons: [] } };
+      mine = { review: { ...REVIEW, ...body }, eligibility: { ok: true, reasons: [] } };
       return [201, { message: "Saved", review: mine.review }];
     };
     const user = userEvent.setup();
@@ -141,14 +141,14 @@ describe("12.16 write a review", () => {
     expect(screen.getByRole("link", { name: "View public reviews" })).toHaveAttribute("href", "/reviews");
   });
 
-  it("hidden review: explains why, prefills, and can be deleted", async () => {
-    fb.handlers["GET /reviews/my-review"] = () => [200, { review: { ...REVIEW, isPublished: false, hiddenReason: "It included a phone number." }, eligibility: { ok: true, reasons: [] } }];
+  it("my review: prefilled with what they wrote, no moderation status, and can be deleted", async () => {
+    fb.handlers["GET /reviews/my-review"] = () => [200, { review: REVIEW, eligibility: { ok: true, reasons: [] } }];
     fb.handlers["DELETE /reviews"] = () => [200, { message: "Deleted" }];
     fb.handlers["GET /reviews"] = () => [200, EMPTY];
     const user = userEvent.setup();
     const router = renderPages("/reviews/write");
-    expect(await screen.findByText(/it included a phone number\. editing publishes it again\./i)).toBeInTheDocument();
-    expect(screen.getByLabelText(/review headline/i)).toHaveValue("Orders and stock in one place");
+    expect(await screen.findByLabelText(/review headline/i)).toHaveValue("Orders and stock in one place");
+    expect(screen.queryByText(/hidden|rejected|pending|moderat/i)).not.toBeInTheDocument();
     expect(screen.getByRole("radio", { name: "5 stars" })).toBeChecked();
     expect(screen.getByRole("checkbox", { name: "Inventory" })).toBeChecked();
 

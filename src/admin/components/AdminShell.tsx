@@ -20,6 +20,7 @@ import {
   IconUserCircle,
   IconCamera,
   IconChevronDown,
+  IconStar,
   type Icon,
 } from "@tabler/icons-react";
 import { cn } from "@/lib/cn";
@@ -51,6 +52,7 @@ export const ADMIN_NAV: AdminNavItem[] = [
   { to: "/admin/suppliers", label: "Supplier KYC", icon: IconShieldCheck, can: "suppliers.review" },
   { to: "/admin/bisupplynet/disputes", label: "Disputes", icon: IconScale, can: "disputes.read" },
   { to: "/admin/support/tickets", label: "Support", icon: IconLifebuoy, can: "support.manage" },
+  { to: "/admin/reviews", label: "Reviews", icon: IconStar, can: "reviews.moderate" },
   { to: "/admin/announcements", label: "Announcements", icon: IconBell, can: "announcements.send" },
   { to: "/admin/analytics", label: "Analytics", icon: IconChartBar, can: "stats.read" },
   { to: "/admin/store-domains", label: "Store domains", icon: IconWorld, can: "domains.manage" },

@@ -5,7 +5,7 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
 import { IconCircleCheck, IconMessageCircle, IconRosetteDiscountCheck, IconStar, IconStarFilled } from "@tabler/icons-react";
 import { Button, ButtonLink, Dialog, EmptyState, Field, SelectInput, Spinner, Status, TextArea, TextInput } from "@/components/ui";
-import { DetailRows, InfoStrip, IntroCard, PageTitle, Panel, TipList } from "@/components/page/Blocks";
+import { DetailRows, IntroCard, PageTitle, Panel, TipList } from "@/components/page/Blocks";
 import { ErrorNote } from "@/components/feedback/ErrorNote";
 import { applyFieldErrors } from "@/lib/api/errorMessage";
 import { useAuth } from "@/lib/auth/AuthProvider";
@@ -348,11 +348,6 @@ function ReviewEditor({ existing }: { existing: MyReview | null }) {
       <IntroCard eyebrow="Reviews / Your feedback" title="Share how BiManage works for your business.">
         One review per verified account. You can edit it at any time.
       </IntroCard>
-      {existing && existing.isPublished === false && (
-        <InfoStrip tone="warm" title="Your review is hidden from the public page">
-          {existing.hiddenReason ? `${existing.hiddenReason} ` : ""}Editing publishes it again.
-        </InfoStrip>
-      )}
       <div className="grid grid-cols-[minmax(0,1fr)] gap-5 lg:grid-cols-[minmax(0,1.7fr)_minmax(0,1fr)]">
         <form noValidate onSubmit={onSubmit} className="flex flex-col gap-5">
           <Panel title="Your review" subtitle="Fields marked * are required.">
@@ -482,7 +477,7 @@ export function ReviewSubmittedPage() {
     ["Rating", `${r.rating} / 5 stars`],
     ["Reviewer", "Verified business account"],
     ["Review policy", "One review per verified account"],
-    ["After submission", r.isPublished === false ? "Hidden until it meets the review policy" : "Public reviews display your feedback"],
+    ["After submission", "Reviews appear on the public page after a quick check against the review policy"],
   ];
   return (
     <div className="flex flex-col gap-6">

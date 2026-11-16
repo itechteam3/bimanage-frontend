@@ -348,6 +348,8 @@ export const words = (v: string | null | undefined) => String(v || "").replace(/
 const TONES: Record<string, StatusTone> = {
   active: "success",
   verified: "success",
+  approved: "success",
+  deleted: "danger",
   sent: "success",
   resolved: "success",
   closed: "neutral",
