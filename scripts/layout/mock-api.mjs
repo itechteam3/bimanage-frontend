@@ -192,6 +192,8 @@ routes["GET /api/support/faqs/f1"] = {
   helpfulCount: 3,
   updatedAt: P12NOW,
 };
+// The public help centre opens the same article by its slug (/help/how-wallet-works).
+routes["GET /api/support/faqs/how-wallet-works"] = routes["GET /api/support/faqs/f1"];
 routes["GET /api/reviews"] = { reviews: [{ _id: "r1", headline: "Saves me hours every week", rating: 5, review: "Inventory and orders in one place. The store setup was easy.", category: "product_experience", featuresUsed: ["inventory", "orders", "store"], businessName: "Elijah Apparel Ltd", reviewer: { name: "Elijah", avatar: null }, isVerified: true, edited: false, createdAt: P12NOW, updatedAt: P12NOW }], total: 1, page: 1, totalPages: 1, stats: { averageRating: 4.5, totalReviews: 2, ratingBreakdown: { 5: 1, 4: 1, 3: 0, 2: 0, 1: 0 } } };
 routes["GET /api/subscriptions/current"] = { ...(routes["GET /api/subscriptions/current"] || {}), features: { ...((routes["GET /api/subscriptions/current"] || {}).features || {}), messages: true } };
 // FELI11

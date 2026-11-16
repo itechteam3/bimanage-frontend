@@ -495,8 +495,9 @@ function Faq() {
         <div className="mt-10" data-reveal>
           <FaqAccordion items={FEATURED_FAQS} plans={plans} openId={openId} onToggle={(id) => setOpenId((cur) => (cur === id ? null : id))} />
         </div>
-        <p className="mt-8 text-center">
+        <p className="mt-8 flex flex-col items-center gap-2">
           <ButtonLink to="/faq" variant="outlined">See all FAQs</ButtonLink>
+          <Link to="/help" className="inline-flex min-h-11 items-center text-action font-semibold text-ink-brand hover:underline">Browse the help centre</Link>
         </p>
       </Container>
     </section>

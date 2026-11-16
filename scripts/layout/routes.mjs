@@ -17,6 +17,7 @@ const IDS = [
   [/^\/messages\//, { id: "c1" }],
   [/^\/support\/tickets\//, { id: "t1" }],
   [/^\/support\/help\//, { id: "f1" }],
+  [/^\/help\//, { slug: "how-wallet-works" }],
   [/^\/support\/service-requests\//, { id: "s1" }],
   [/^\/wallet\/transactions\//, { id: "wfail" }],
   [/^\/bisupplynet\/suppliers\//, { id: "w1" }],
@@ -36,7 +37,7 @@ const IDS = [
 ];
 
 // Signed-out screens (guest-only pages redirect when signed in).
-const GUEST = new Set(["/", "/home", "/newsletter/confirm", "/newsletter/unsubscribe", "/contact", "/faq", "/terms", "/privacy", "/login", "/register", "/verify", "/forgot-password", "/forgot-password/code", "/reset-password", "/reset-password/done",
+const GUEST = new Set(["/", "/home", "/newsletter/confirm", "/newsletter/unsubscribe", "/contact", "/faq", "/terms", "/privacy", "/help", "/help/:slug", "/login", "/register", "/verify", "/forgot-password", "/forgot-password/code", "/reset-password", "/reset-password/done",
   "/oauth/callback", "/session-expired", "/account-closing", "/account-closed", "/invite/accept", "/unsubscribe", "/reviews",
   "/admin/login", "/admin/login/verify", "/admin/login/setup", "/admin/invite", "/admin/forgot-password", "/admin/reset-password"]);
 // Not product screens.
