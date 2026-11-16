@@ -42,6 +42,7 @@ export function installFakeBackend(): FakeBackend {
       "GET /dashboard": () => [200, EMPTY_DASHBOARD],
       "GET /notifications/unread-count": () => [200, { unreadCount: 0 }],
       "GET /messages/unread-count": () => [200, { unreadCount: 0 }],
+      "GET /admin/notifications/unread-count": () => [200, { unread: 0 }],
     "GET /business-profile": () => [200, { businessName: "Dior Factory LTD." }],
     },
   };

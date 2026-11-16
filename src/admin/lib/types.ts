@@ -3,6 +3,7 @@
 export type AdminRole = "superadmin" | "admin" | "finance" | "support" | "reviewer";
 export type Capability =
   | "stats.read"
+  | "notifications.own"
   | "users.read"
   | "users.manage"
   | "plans.assign"
