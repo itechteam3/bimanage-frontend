@@ -7,7 +7,7 @@ import { ErrorNote } from "@/components/feedback/ErrorNote";
 import { TestPaymentBadge, TestPaymentNotice, isTestPayment } from "@/components/feedback/TestPaymentBadge";
 import { UpdatedNote, newRowClass } from "@/components/feedback/UpdatedNote";
 import { useNewItems } from "@/lib/realtime/useLiveList";
-import { count, naira, shortDate } from "@/lib/format";
+import { count, nairaExact as naira, shortDate } from "@/lib/format";
 import { cn } from "@/lib/cn";
 import { useCan } from "@/lib/auth/useCan";
 import { useUrlState } from "@/lib/nav/useUrlState";

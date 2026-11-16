@@ -12,7 +12,7 @@ import { ApiError, saveBlob } from "@/lib/api/client";
 import { applyFieldErrors } from "@/lib/api/errorMessage";
 import { useAuth } from "@/lib/auth/AuthProvider";
 import { useAccountProfile } from "@/lib/account/api";
-import { count, naira, shortDate } from "@/lib/format";
+import { count, nairaExact as naira, shortDate } from "@/lib/format";
 import { cn } from "@/lib/cn";
 import { useUrlState } from "@/lib/nav/useUrlState";
 import { useLeaveGuard } from "@/lib/nav/useLeaveGuard";
