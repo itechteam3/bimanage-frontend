@@ -89,7 +89,7 @@ export const minimalHtml = (m, site) =>
   injectMeta(`<!doctype html><html lang="en-NG"><head><meta charset="UTF-8" /></head><body><a href="${escapeHtml(m?.url || site)}">Open on BiManage</a></body></html>`, m, site);
 
 // ── sitemap.xml ──
-export const STATIC_PAGES = ["/", "/login", "/register", "/reviews", "/contact", "/faq", "/terms", "/privacy"];
+export const STATIC_PAGES = ["/", "/login", "/register", "/reviews", "/contact", "/faq", "/terms", "/privacy", "/help"];
 const day = (d) => {
   const t = d ? new Date(d) : null;
   return t && !Number.isNaN(t.getTime()) ? t.toISOString().slice(0, 10) : null;
@@ -100,6 +100,8 @@ export function sitemapXml(site, data) {
     `  <url><loc>${escapeHtml(loc)}</loc>${lastmod ? `<lastmod>${lastmod}</lastmod>` : ""}${priority ? `<priority>${priority}</priority>` : ""}</url>`;
   const rows = [
     ...STATIC_PAGES.map((p) => url(`${site}${p}`, null, p === "/" ? "1.0" : p === "/register" ? "0.9" : p === "/faq" ? "0.7" : p === "/contact" ? "0.5" : p === "/terms" || p === "/privacy" ? "0.3" : "0.6")),
+    // Public help articles (/help/<slug>); only written articles have a slug.
+    ...(data?.articles || []).filter((a) => a && typeof a.slug === "string" && /^[a-z0-9-]{1,100}$/.test(a.slug)).map((a) => url(`${site}/help/${a.slug}`, day(a.updatedAt), "0.5")),
     ...(data?.stores || []).filter((s) => s && s.slug).map((s) => url(`${site}/s/${encodeURIComponent(s.slug)}`, day(s.updatedAt), "0.8")),
     ...(data?.products || []).filter((p) => p && p.slug && p.id).map((p) => url(`${site}/s/${encodeURIComponent(p.slug)}/products/${encodeURIComponent(p.id)}`, day(p.updatedAt), "0.7")),
   ];
@@ -127,6 +129,19 @@ export const robotsTxt = (site) =>
     `Sitemap: ${site}/sitemap.xml`,
     "",
   ].join("\n");
+
+/**
+ * What the sitemap lists from the backend: published stores and products,
+ * and the published help articles (GET /support/faqs is public and returns
+ * published articles only). Each source falls back on its own: a slow
+ * backend still gives the static pages.
+ */
+export async function sitemapData(api = apiUrl(), get = getJson) {
+  const [shop, faqs] = await Promise.all([get(`${api}/store/share-sitemap`, 8000), get(`${api}/support/faqs`, 8000)]);
+  const articles = Array.isArray(faqs) ? faqs.filter((f) => f && f.slug).map((f) => ({ slug: f.slug, updatedAt: f.updatedAt })) : null;
+  if (!shop && !articles) return null;
+  return { ...(shop || {}), articles: articles || [] };
+}
 
 /** fetch JSON with a hard timeout (Render can be cold-starting). */
 export async function getJson(url, ms = 4500) {
