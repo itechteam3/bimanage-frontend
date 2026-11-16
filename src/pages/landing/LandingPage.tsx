@@ -262,13 +262,13 @@ function HeroCards() {
   );
 }
 
-/** Phones and tablets: two small cards under the buttons. */
+/** Phones and tablets: two small cards under the buttons (short phones: the order card only, so the Talk to FELI bubble covers nothing). */
 function HeroCardsCompact() {
   const pick = HERO_CARDS.filter((c) => c.key === "order" || c.key === "feli");
   return (
     <div className="mt-6 grid max-w-[26rem] grid-cols-2 gap-3 lg:hidden" aria-hidden="true">
       {pick.map((c, i) => (
-        <div key={c.key} className="lp-rise h-full min-w-0" style={{ ["--lp-delay" as string]: `${420 + i * 160}ms` }}>
+        <div key={c.key} data-hcard={c.key} className={cn("lp-rise h-full min-w-0", c.key === "feli" && "lp-hcard-short-hide")} style={{ ["--lp-delay" as string]: `${420 + i * 160}ms` }}>
           <div className="lp-hcard-float h-full" style={{ ["--lp-fdur" as string]: `${5.5 + i * 0.9}s`, ["--lp-fdelay" as string]: `${1.4 + i * 0.5}s` }}>
             <HeroCardView c={c} compact />
           </div>

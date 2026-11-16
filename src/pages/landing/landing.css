@@ -40,6 +40,9 @@
 }
 @media (max-width: 767px) and (max-height: 700px) {
   .lp-hero-pad { padding-top: calc(var(--spacing) * 6); }
+  /* Only the New order card: the floating Talk to FELI bubble sits where the
+     second card would be. */
+  .lp-hcard-short-hide { display: none; }
 }
 
 /* Scroll hint at the bottom of the hero: a gentle bob. */
