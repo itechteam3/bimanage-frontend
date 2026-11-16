@@ -149,9 +149,26 @@ function useTurnstile(siteKey: string | null | undefined, active: boolean) {
   return { containerRef, getToken, refresh };
 }
 
-/** **bold** as React text (never HTML). */
+// Our own public pages FELI names in a reply ("/help/publish-your-store",
+// "/register"…) become links. Nothing else does.
+// Not inside another address ("bitechteam.org/contact.html").
+const SITE_PATH = /(?<![\w.:/])(\/(?:help(?:\/[a-z0-9-]+)?(?:\?category=[a-z_]+)?|register|contact|faq))(?![\w/-]|\.\w)/g;
+
+function withLinks(text: string, key: number): ReactNode[] {
+  return text.split(SITE_PATH).map((part, i) =>
+    i % 2 ? (
+      <Link key={`${key}-${i}`} to={part} className="font-medium text-ink-brand underline underline-offset-2">
+        {part}
+      </Link>
+    ) : (
+      part
+    )
+  );
+}
+
+/** **bold** as React text (never HTML); our public pages as links. */
 function inline(text: string): ReactNode[] {
-  return text.split(/(\*\*[^*\n]+\*\*)/g).map((part, i) => (/^\*\*[^*\n]+\*\*$/.test(part) ? <strong key={i} className="font-semibold">{part.slice(2, -2)}</strong> : part));
+  return text.split(/(\*\*[^*\n]+\*\*)/g).flatMap<ReactNode>((part, i) => (/^\*\*[^*\n]+\*\*$/.test(part) ? [<strong key={i} className="font-semibold">{part.slice(2, -2)}</strong>] : withLinks(part, i)));
 }
 
 /** Plain text with line breaks and simple "- " / "1. " lists. */

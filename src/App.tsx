@@ -284,7 +284,7 @@ export const routes = [
       { path: "/privacy", element: <PrivacyPage />, handle: { meta: { title: "Privacy Policy", description: "How BiManage collects, uses, shares and protects personal data, how long it is kept, and your rights under the Nigeria Data Protection Act 2023." } } },
       // Public help centre: read-only, for everyone (signed in or out). The article page sets its own title and description.
       { path: "/help", element: <PublicHelpCentrePage />, handle: { meta: { title: "Help centre", description: "Step-by-step BiManage guides: set up your online store, manage orders and inventory, withdraw from your wallet, buy on BiSupplyNet and more." } } },
-      { path: "/help/:slug", element: <PublicHelpArticlePage />, handle: { meta: { title: "Help centre", description: "Step-by-step BiManage guides." } } },
+      { path: "/help/:slug", element: <PublicHelpArticlePage />, handle: { meta: { title: "Help centre", description: "Step-by-step BiManage guides." }, back: back("/help", { label: "Help centre", to: "/help" }) } },
       { path: "/newsletter/confirm", element: <NewsletterPage action="confirm" /> },
       { path: "/newsletter/unsubscribe", element: <NewsletterPage action="unsubscribe" /> },
       // Authentication (Figma 01.xx)

@@ -23,7 +23,8 @@ function useHelpCentreGroup(): FaqGroup | null {
     const known = new Set(ALL_FAQS.map((f) => fold(f.q).trim()));
     const items: FaqItem[] = (data ?? [])
       .filter((f) => f.question && f.answer && !known.has(fold(f.question).trim()))
-      .map((f) => ({ id: `help-${f._id}`, q: f.question, a: String(f.answer).split(/\n{2,}/).filter(Boolean) }));
+      // A short answer here; the full article (steps, links) is on the public help centre.
+      .map((f) => ({ id: `help-${f._id}`, q: f.question, a: f.summary ? [f.summary] : String(f.answer).split(/\n{2,}/).filter(Boolean), help: `/help/${encodeURIComponent(f.slug || f._id)}` }));
     return items.length ? { slug: HELP_SLUG, title: "More answers", items } : null;
   }, [data]);
 }

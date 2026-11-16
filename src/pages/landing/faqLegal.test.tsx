@@ -190,11 +190,15 @@ describe("/faq page", () => {
     expect(screen.queryByRole("group", { name: "Was this helpful?" })).toBeNull();
   });
 
-  it("help-centre pointers go to the help centre (sign-in)", async () => {
+  it("help-centre pointers open the public help centre article (no sign-in)", async () => {
     renderApp("/faq");
     await screen.findByRole("heading", { level: 1, name: "Frequently asked questions" });
     await userEvent.click(question("What is FELI and what can it do?"));
-    expect(screen.getAllByRole("link", { name: /more in the help centre \(sign in\)/i })[0]).toHaveAttribute("href", "/support/help");
+    const guides = screen.getAllByRole("link", { name: /step-by-step guide in the help centre/i }).map((l) => l.getAttribute("href"));
+    expect(guides).toContain("/help/what-feli-can-do");
+    expect(guides.every((h) => h?.startsWith("/help/"))).toBe(true);
+    await userEvent.click(question("How do I get help?"));
+    expect(screen.getAllByRole("link", { name: "Help centre" }).some((l) => l.getAttribute("href") === "/help")).toBe(true);
   });
 });
 
