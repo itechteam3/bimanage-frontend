@@ -31,10 +31,10 @@ export function SalesOverviewPage() {
         Monitor recorded orders, revenue trends, customers and invoice follow-ups.
       </IntroCard>
       <div className="grid grid-cols-2 gap-3 lg:grid-cols-4 lg:gap-4">
-        <KpiCard tone="orders" label="Revenue" value={nairaCompact(s?.revenue)} caption="Completed orders" />
+        <KpiCard tone="info" label="Revenue" value={nairaCompact(s?.revenue)} caption="Completed orders" />
         <KpiCard tone="revenue" label="Total orders" value={count(s?.totalOrders)} caption="All recorded orders" />
-        <KpiCard tone="invoices" label="Open invoices" value={count(s?.openInvoices)} caption="Awaiting payment" />
-        <KpiCard tone="stock" label="Low stock" value={count(s?.lowStock)} caption="Restock reminders" />
+        <KpiCard tone="orders" label="Open invoices" value={count(s?.openInvoices)} caption="Awaiting payment" />
+        <KpiCard tone="invoices" label="Low stock" value={count(s?.lowStock)} caption="Restock reminders" />
       </div>
       <div className="grid grid-cols-[minmax(0,1fr)] gap-5 lg:grid-cols-[minmax(0,1.9fr)_minmax(0,1fr)]">
         <Panel title="Recent sales activity">

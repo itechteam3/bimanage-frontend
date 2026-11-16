@@ -145,10 +145,10 @@ function Overview({ w }: { w: Wallet }) {
       <IntroCard eyebrow={EYEBROW} title="Store earnings become available when an order is completed (or 7 days after delivery)." />
       <UpdatedNote updatedAt={dataUpdatedAt} className="-mb-2" />
       <div className="grid grid-cols-2 gap-3 lg:grid-cols-4 lg:gap-4">
-        <KpiCard tone="stock" label="Total earnings" value={naira(f.totalEarned.value)} caption="Store and BiSupplyNet sales (after BiManage's 3%)" badge={badge(f.totalEarned)} note={testNote(f.totalEarned.test)} />
+        <KpiCard tone="revenue" label="Total earnings" value={naira(f.totalEarned.value)} caption="Store and BiSupplyNet sales (after BiManage's 3%)" badge={badge(f.totalEarned)} note={testNote(f.totalEarned.test)} />
         <KpiCard tone="revenue" label="Available" value={naira(f.available.value)} caption={f.includeTest ? `Available to withdraw: ${naira(f.withdrawable)}` : "Ready to withdraw"} badge={badge(f.available)} note={testNote(f.available.test)} />
         <KpiCard tone="invoices" label="On hold" value={naira(f.onHold.value)} caption="Orders not completed yet" badge={badge(f.onHold)} note={testNote(f.onHold.test)} />
-        <KpiCard tone="orders" label="Payouts" value={count(w.payoutsCount ?? 0)} caption="Completed transfers" />
+        <KpiCard tone="stock" label="Payouts" value={count(w.payoutsCount ?? 0)} caption="Completed transfers" />
       </div>
       <TestMoneyNote w={w} />
       <div className="grid grid-cols-[minmax(0,1fr)] gap-5 lg:grid-cols-[minmax(0,2fr)_minmax(0,1fr)]">
