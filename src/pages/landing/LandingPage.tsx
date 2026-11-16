@@ -3,6 +3,7 @@ import { Link } from "react-router-dom";
 import {
   IconBarcode,
   IconBuildingStore,
+  IconChevronDown,
   IconChartBar,
   IconCheck,
   IconCreditCard,
@@ -13,6 +14,8 @@ import {
   IconReceipt,
   IconShieldCheck,
   IconSparkles,
+  IconTrendingUp,
+  IconUserPlus,
   IconStarFilled,
   IconTruckDelivery,
   IconUsers,
@@ -35,9 +38,6 @@ import { IPHONE, IPHONE_APP_HEIGHT, IPhoneFrame, type PhoneChrome } from "./IPho
 
 import heroImg from "@/assets/landing/hero.webp";
 import heroSmImg from "@/assets/landing/hero-sm.webp";
-import stepSignup from "@/assets/landing/step-signup.webp";
-import stepCustomize from "@/assets/landing/step-customize.webp";
-import stepGrow from "@/assets/landing/step-grow.webp";
 
 // Product screenshots: the REAL app with the invented "Adunni Fashion House"
 // sample data (scripts/marketing). Desktop: 2x WebP; phone: 3x WebP at the
@@ -160,19 +160,19 @@ const FEATURES = [
   { key: "wallet", icon: IconWallet, title: "Wallet and payouts", body: "See earnings, money on hold and payouts to your bank account, with every transaction recorded.", path: "/wallet" },
   { key: "customers", icon: IconUsers, title: "Customers", body: "Customer records built automatically from orders, store sales and invoices, with history, notes and tags.", path: "/customers" },
   { key: "projects", icon: IconLayoutKanban, title: "Projects and team", body: "Plan work on boards, assign tasks with due dates, and invite your team with roles and permissions.", path: "/projects/p1" },
-  { key: "feli", icon: IconSparkles, title: "FELI, your AI assistant", body: "Ask about your business, get answers and suggested actions — nothing changes until you approve it.", path: "/feli" },
+  { key: "feli", icon: IconSparkles, title: "FELI, your AI assistant", body: "Ask about your business, get answers and suggested actions. Nothing changes until you approve it.", path: "/feli" },
   { key: "bisupplynet", icon: IconTruckDelivery, title: "BiSupplyNet wholesale", body: "Find verified wholesalers and buy in bulk, with your payment held in escrow until delivery is confirmed.", path: "/bisupplynet/suppliers" },
   { key: "reports", icon: IconChartBar, title: "Reports", body: "Revenue, stock and invoice collections over any period, with spreadsheet exports.", path: "/reports" },
 ] as const;
 
 const STEPS = [
-  { img: stepSignup, title: "Sign up", body: "Create your account and verify your email — it takes minutes." },
-  { img: stepCustomize, title: "Set up your business", body: "Add your business details and products, and open your online store if you sell online." },
-  { img: stepGrow, title: "Sell, manage and grow", body: "Record sales, take payments, track stock and customers, and see how you're doing." },
+  { icon: IconUserPlus, title: "Sign up", body: "Create your account and verify your email. It takes minutes." },
+  { icon: IconBuildingStore, title: "Set up your business", body: "Add your business details and products, and open your online store if you sell online." },
+  { icon: IconTrendingUp, title: "Sell, manage and grow", body: "Record sales, take payments, track stock and customers, and see how you're doing." },
 ];
 
 const WHY = [
-  { title: "All-in-one platform", body: "Sales, inventory, invoices, your online store, customers, projects and wholesale buying in one place — no more switching between apps and spreadsheets." },
+  { title: "All-in-one platform", body: "Sales, inventory, invoices, your online store, customers, projects and wholesale buying in one place. No more switching between apps and spreadsheets." },
   { title: "Works on your phone", body: "Every screen works on phones, tablets and laptops, so you can check sales, update orders and reply to customers wherever you are." },
   { title: "For solo founders and teams", body: "Start on your own and invite your team when you're ready, with roles and permissions that control what each person can see and do." },
 ];
@@ -180,7 +180,7 @@ const WHY = [
 const TRUST = [
   { icon: IconCreditCard, title: "Payments through Paystack", body: "Online payments are processed by Paystack, and every payment is verified on our server before an order is marked paid." },
   { icon: IconShieldCheck, title: "Escrow on BiSupplyNet", body: "Wholesale payments are held until the buyer confirms delivery, with a dispute process if something goes wrong." },
-  { icon: IconUsersGroup, title: "Roles and permissions", body: "Give each team member only the access they need — from owner and admin to manager and staff." },
+  { icon: IconUsersGroup, title: "Roles and permissions", body: "Give each team member only the access they need, from owner and admin to manager and staff." },
   { icon: IconLock, title: "Your data stays yours", body: "Each business sees only its own data. Every request is checked against your business on the server." },
   { icon: IconKey, title: "Stronger passwords", body: "Common and breached passwords are blocked, and you can't reuse your recent passwords." },
   { icon: IconDevices, title: "Session control", body: "Sign out of all other devices from your security settings, and get an email whenever your password changes." },
@@ -200,31 +200,50 @@ function SectionTitle({ eyebrow, title, subtitle, light }: { eyebrow?: string; t
 
 function Hero() {
   return (
-    // Full-bleed hero: the Figma city photo across the whole width, navy shade
-    // for legible text, then the real dashboard rising in below the buttons.
-    <section className="relative isolate overflow-hidden bg-brand-navy text-ink-on-brand">
+    // Full-bleed hero, on its own: the Figma city photo across the whole
+    // width, a navy shade for legible text, the headline and the two buttons.
+    <section className="lp-hero-full relative isolate flex items-center overflow-hidden bg-brand-navy text-ink-on-brand">
       <picture>
         <source media="(min-width: 768px)" srcSet={heroImg} />
         <img src={heroSmImg} alt="" width={1600} height={809} fetchPriority="high" decoding="async" className="absolute inset-0 -z-20 h-full w-full object-cover" />
       </picture>
       <div className="lp-hero-shade absolute inset-0 -z-10" aria-hidden="true" />
-      <Container className="pb-14 pt-14 md:pb-20 md:pt-20 lg:pt-24">
+      <Container className="w-full py-16 md:py-20 lg:py-24">
         <div className="max-w-[42rem]">
           <h1 className="lp-rise text-title-lg md:text-display lg:text-hero" style={{ ["--lp-delay" as string]: "60ms" }}>
             Smart business starts with BiManage
           </h1>
           <p className="lp-rise mt-4 text-body-lg text-ink-on-brand-muted" style={{ ["--lp-delay" as string]: "160ms" }}>
-            Sales, inventory, invoices, your online store, customers, payouts and wholesale buying — in one dashboard built for Nigerian businesses.
+            Sales, inventory, invoices, your online store, customers, payouts and wholesale buying, in one dashboard built for Nigerian businesses.
           </p>
           <div className="lp-rise mt-6 flex flex-wrap gap-3" style={{ ["--lp-delay" as string]: "260ms" }}>
             <AuthCtas />
           </div>
         </div>
-        <div className="lp-preview mx-auto mt-12 max-w-[62rem] md:mt-16">
-          <div className="lp-float">
-            <BrowserFrame name="dashboard" path="/dashboard" alt="The BiManage business dashboard: revenue, orders, open invoices, low stock and recent orders." eager className="hidden md:block" />
-            <PhoneFrame name="dashboard" alt="The BiManage dashboard on a phone." eager className="md:hidden" />
+      </Container>
+      <a href="#lp-dashboard" aria-label="Scroll to the dashboard" className="lp-scroll-hint absolute bottom-[max(1rem,env(safe-area-inset-bottom))] left-1/2 flex size-11 -translate-x-1/2 items-center justify-center rounded-full text-ink-on-brand-muted hover:text-ink-on-brand md:bottom-6">
+        <IconChevronDown aria-hidden="true" className="size-7" />
+      </a>
+    </section>
+  );
+}
+
+function DashboardPreview() {
+  return (
+    // The real dashboard, in its own white section right after the hero:
+    // desktop frame, with the phone version beside it on wide screens (phones
+    // see the phone version only). Rises in as the section enters the screen.
+    <section id="lp-dashboard" aria-labelledby="lp-dashboard-h" className="scroll-mt-20 bg-surface-card py-16 lg:py-24">
+      <Container>
+        <div className="mx-auto max-w-[44rem] text-center" data-reveal>
+          <h2 id="lp-dashboard-h" className="text-title-lg text-ink-strong md:text-page-title">Everything your business needs, in one dashboard</h2>
+          <p className="mt-3 text-body-lg text-ink-muted">Revenue, orders, open invoices and low stock at a glance, on your laptop or your phone.</p>
+        </div>
+        <div className="mx-auto mt-10 flex max-w-[72rem] items-end justify-center gap-8 md:mt-12" data-reveal style={{ ["--lp-delay" as string]: "120ms" }}>
+          <div className="lp-float min-w-0 flex-1 max-md:hidden">
+            <BrowserFrame name="dashboard" path="/dashboard" alt="The BiManage business dashboard: revenue, orders, open invoices, low stock and recent orders." />
           </div>
+          <PhoneFrame name="dashboard" alt="The BiManage dashboard on a phone." className="w-full shrink-0 md:hidden lg:block lg:w-[15rem]" />
         </div>
       </Container>
     </section>
@@ -309,15 +328,22 @@ function HowItWorks() {
     <section id="how-it-works" className="scroll-mt-20 bg-surface-card py-16 lg:py-24">
       <Container>
         <SectionTitle eyebrow="How it works" title="Up and running in three steps" />
-        <ol className="mt-10 grid grid-cols-[minmax(0,1fr)] gap-5 md:grid-cols-3">
-          {STEPS.map((s, i) => (
-            <li key={s.title} data-reveal style={{ ["--lp-delay" as string]: `${i * 120}ms` }} className="lp-lift flex flex-col items-center rounded-2xl bg-gradient-brand-panel p-6 text-center text-ink-on-brand shadow-card">
-              <span className="text-caption font-semibold uppercase text-ink-on-brand-accent">Step {i + 1}</span>
-              <img src={s.img} alt="" width={80} height={80} loading="lazy" decoding="async" className="mt-3 size-20 rounded-full bg-surface-card object-cover" />
-              <h3 className="mt-4 text-title-sm">{s.title}</h3>
-              <p className="mt-2 text-body text-ink-on-brand-muted">{s.body}</p>
-            </li>
-          ))}
+        <ol className="mt-10 grid grid-cols-[minmax(0,1fr)] gap-10 md:mt-14 md:grid-cols-3 md:gap-6">
+          {STEPS.map((s, i) => {
+            const Icon = s.icon;
+            return (
+              <li key={s.title} data-reveal style={{ ["--lp-delay" as string]: `${i * 140}ms` }} className="relative flex flex-col items-center px-2 text-center">
+                {/* A light connecting line to the next step (side by side only). */}
+                {i < STEPS.length - 1 && <span aria-hidden="true" className="lp-step-line absolute left-[calc(50%+3.5rem)] right-[calc(-50%+3.5rem)] top-10 hidden md:block" />}
+                <span className="relative flex size-20 items-center justify-center rounded-full bg-surface-tint-blue text-ink-brand ring-8 ring-surface-tint-blue/40">
+                  <Icon aria-hidden="true" className="size-9" stroke={1.6} />
+                </span>
+                <span className="mt-5 text-caption font-semibold uppercase tracking-wide text-ink-brand">Step {i + 1}</span>
+                <h3 className="mt-1 text-title-sm text-ink-strong">{s.title}</h3>
+                <p className="mt-2 max-w-[20rem] text-body text-ink-muted">{s.body}</p>
+              </li>
+            );
+          })}
         </ol>
       </Container>
     </section>
@@ -451,7 +477,7 @@ function Trust() {
 function Reviews() {
   const { data } = usePublicReviews({ sort: "recent" });
   const reviews = (data?.reviews ?? []).slice(0, 3);
-  if (!reviews.length) return null; // Only approved, real reviews — otherwise no section.
+  if (!reviews.length) return null; // Only approved, real reviews; otherwise no section.
   return (
     <section className="bg-surface-page py-16 lg:py-24">
       <Container>
@@ -532,6 +558,7 @@ export default function LandingPage() {
   return (
     <PublicLayout rootRef={root}>
       <Hero />
+      <DashboardPreview />
       <RealNumbers />
       <Features />
       <HowItWorks />

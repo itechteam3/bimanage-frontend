@@ -75,7 +75,7 @@ Proportions from Apple's published iPhone 18 Pro Max specs
 
 ## Landing page photos from the Figma design
 
-`src/assets/landing/hero*.webp` (city skyline), `step-*.webp` (3D icons) and
+`src/assets/landing/hero*.webp` (city skyline) and
 `collage-*.webp` were supplied in the BiManage Figma file ("Landing Page",
 node 1:12) by the designer; their original source was not recorded in the
 file. Replace them if a source can't be confirmed.
