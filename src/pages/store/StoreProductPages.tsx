@@ -756,7 +756,7 @@ function SyncInventory({ store }: { store: Store }) {
           <label className="flex h-control-lg items-center gap-2 rounded-md bg-surface-pale px-3">
             <IconSearch aria-hidden="true" className="size-icon text-ink-muted" />
             <span className="sr-only">Search inventory</span>
-            <input value={q} onChange={(e) => setQ(e.target.value)} placeholder="Search inventory…" className="h-full flex-1 bg-transparent text-input text-ink-strong outline-none placeholder:text-ink-muted" />
+            <input value={q} onChange={(e) => setQ(e.target.value)} placeholder="Search inventory…" className="h-full min-w-0 flex-1 bg-transparent text-input text-ink-strong outline-none placeholder:text-ink-muted" />
           </label>
           {inventory.isLoading ? (
             <Loading />

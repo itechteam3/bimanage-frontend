@@ -117,10 +117,10 @@ export function OrdersPage() {
       </div>
       <div className="grid grid-cols-[minmax(0,1fr)] gap-5 lg:grid-cols-[minmax(0,2.3fr)_minmax(0,1fr)]">
         <Panel>
-          <div className="flex flex-col gap-3 md:flex-row">
+          <div className="flex flex-col gap-3 md:flex-row md:flex-wrap">
             <form
               role="search"
-              className="flex-1"
+              className="min-w-0 grow basis-64"
               onSubmit={(e) => {
                 e.preventDefault();
                 setQuery(q.trim());
@@ -136,11 +136,11 @@ export function OrdersPage() {
                     if (!e.target.value) setQuery("");
                   }}
                   placeholder="Search order, customer, product…"
-                  className="h-full flex-1 bg-transparent text-input text-ink-strong outline-none placeholder:text-ink-muted"
+                  className="h-full min-w-0 flex-1 bg-transparent text-input text-ink-strong outline-none placeholder:text-ink-muted"
                 />
               </label>
             </form>
-            <div role="tablist" aria-label="Filter by status" className="flex flex-wrap items-center gap-1 rounded-md bg-surface-pale p-1">
+            <div role="tablist" aria-label="Filter by status" className="flex min-w-0 flex-wrap items-center gap-1 rounded-md bg-surface-pale p-1">
               {FILTERS.map(([key, label]) => (
                 <button
                   key={key}

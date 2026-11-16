@@ -811,7 +811,7 @@ function Transactions({ w }: { w: Wallet }) {
                     if (!e.target.value) setSearch("");
                   }}
                   placeholder="Search reference or order"
-                  className="h-full flex-1 bg-transparent text-input text-ink-strong outline-none placeholder:text-ink-muted"
+                  className="h-full min-w-0 flex-1 bg-transparent text-input text-ink-strong outline-none placeholder:text-ink-muted"
                 />
               </label>
             </form>

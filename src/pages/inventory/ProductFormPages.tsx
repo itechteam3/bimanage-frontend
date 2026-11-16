@@ -614,12 +614,12 @@ export function BarcodeLookupPage() {
                 void find(code);
               }}
             >
-              <div className="flex-1">
+              <div className="min-w-0 flex-1">
                 <Field label="Barcode / EAN, SKU or name" error={error ?? undefined}>
                   <TextInput autoFocus inputMode="search" placeholder="8901234567890" value={code} onChange={(e) => setCode(e.target.value)} />
                 </Field>
               </div>
-              <div className="flex gap-3">
+              <div className="flex shrink-0 gap-3">
                 {hasCamera && (
                   <Button variant="secondary" onClick={() => setCamera(true)} aria-label="Scan with camera">
                     <IconCamera aria-hidden="true" className="size-icon" />

@@ -550,7 +550,15 @@ function TicketDetail({ t, created }: { t: Ticket; created: boolean }) {
           </Panel>
           {issueContextRows(t.meta?.issueContext).length > 0 && (
             <Panel tone="pale" title="Technical details" subtitle="Sent with your report so support can see where it happened.">
-              <DetailRows rows={issueContextRows(t.meta?.issueContext).map(([k, v]) => [k, <span className="break-words">{v}</span>] as [string, ReactNode])} />
+              {/* Stacked (label above value): page addresses and browser strings are long and unbroken, so a two-column row squeezes them into a sliver in the narrow side column. */}
+              <dl className="flex flex-col gap-3 text-body-lg">
+                {issueContextRows(t.meta?.issueContext).map(([k, v]) => (
+                  <div key={k} className="min-w-0">
+                    <dt className="text-body-sm text-ink-muted">{k}</dt>
+                    <dd className="break-words text-ink-strong">{v}</dd>
+                  </div>
+                ))}
+              </dl>
             </Panel>
           )}
         </div>
