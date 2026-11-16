@@ -35,6 +35,8 @@ The component gallery lives at `/ui-kit` (plus `/ui-kit/auth` and `/ui-kit/app`)
 |---|---|---|
 | `VITE_API_BASE_URL` | `https://bimanage-backend.onrender.com/api` | API base, including `/api`. Defaults to `http://localhost:5000/api`. |
 | `VITE_SOCKET_URL` | `https://bimanage-backend.onrender.com` | Server root for Socket.io and the health check. Defaults to the API URL without `/api`. |
+| `VITE_SENTRY_DSN` | (unset) | Optional error tracking (Sentry, free tier). Unset: off and the SDK is never downloaded. Create a Sentry project with platform **React**, copy its DSN, set it in Vercel (Production; Preview optional) and redeploy. Events carry the deployed commit as release; personal data is scrubbed in the browser (`src/lib/monitoring/sentry.ts`). Alert rules: see the backend README → Monitoring. |
+| `VITE_SENTRY_ENVIRONMENT` | (Vite mode) | Optional label, e.g. `production` / `preview`. |
 | `VITE_BASE_PATH` | `/` | Only needed if the app is hosted under a sub-path. |
 | `VITE_SUPPORT_EMAIL` | `support@bimanage.com` | Support address shown on `/contact` and in error notes. Defaults to `support@bimanage.com`. |
 
