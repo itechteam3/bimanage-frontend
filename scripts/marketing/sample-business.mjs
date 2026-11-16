@@ -6,6 +6,7 @@
 // customer's data in this file.
 
 import { readFileSync } from "node:fs";
+import { PEOPLE, slugOf } from "./make-avatars.mjs";
 
 // Product photos for the sample store (Pexels, see docs/image-credits.md):
 // product-only shots, no faces or brand marks. Used ONLY in these screenshots.
@@ -28,6 +29,21 @@ function withPhotos(v) {
   const p = id && PRODUCTS[id];
   if (p && Array.isArray(o.images) && o.images.some((s) => typeof s === "string" && s.startsWith("data:image/svg"))) o.images = [p.img];
   if (p && typeof o.productImage === "string" && o.productImage.startsWith("data:image/svg")) o.productImage = p.img;
+  return o;
+}
+
+// Illustrated profile pictures (CC0 "Lorelei" drawings, see make-avatars.mjs
+// and docs/image-credits.md), one per sample person, the same on every screen.
+const asset = (dir, f) => `data:image/webp;base64,${readFileSync(new URL(`./${dir}/${f}.webp`, import.meta.url)).toString("base64")}`;
+const AVATARS = Object.fromEntries(Object.keys(PEOPLE).map((n) => [n, asset("avatars", slugOf(n))]));
+// Our own monogram for the invented shop (logo/adunni-fashion-house.svg).
+const LOGO = asset("logo", "adunni-fashion-house");
+/** Give every sample person object (user, team member, reviewer…) its avatar. */
+function withAvatars(v) {
+  if (Array.isArray(v)) return v.map(withAvatars);
+  if (!v || typeof v !== "object") return v;
+  const o = Object.fromEntries(Object.entries(v).map(([k, x]) => [k, withAvatars(x)]));
+  if (typeof o.name === "string" && AVATARS[o.name] && ("avatar" in o || "email" in o || "role" in o)) o.avatar = AVATARS[o.name];
   return o;
 }
 
@@ -68,7 +84,7 @@ const fakePhone = (p) => {
 };
 const NAMES = ["Tolani Adeyemi", "Chinedu Okafor", "Zainab Musa", "Kemi Ogunleye", "Ifeoma Nwankwo", "Babatunde Ajayi", "Halima Bello", "Segun Adekunle", "Amaka Eze", "Femi Oladipo", "Ngozi Obi", "Yusuf Danjuma"];
 export const renameText = (s) => {
-  const placeholder = /^Customer (d+)$/.exec(s);
+  const placeholder = /^Customer (\d+)$/.exec(s);
   if (placeholder) return NAMES[(Number(placeholder[1]) - 1) % NAMES.length];
   let out = s;
   for (const [a, b] of RENAMES) out = out.split(a).join(b);
@@ -150,8 +166,12 @@ export function apply(routes) {
   // Rename everything (keys too: storefront routes contain the slug); real product photos.
   for (const [k, v] of Object.entries(routes)) {
     const nk = renameText(k);
-    const nv = k === "__dashboard" ? v : withPhotos(rename(v));
+    const nv = k === "__dashboard" ? v : withAvatars(withPhotos(rename(v)));
     if (nk !== k) delete routes[k];
     routes[nk] = nv;
+  }
+  // The shop logo wherever a store or business logo shows.
+  for (const k of [`GET /api/store/${SAMPLE.slug}`, "GET /api/store/my-store", "GET /api/business-profile"]) {
+    if (routes[k] && typeof routes[k] === "object") routes[k] = { ...routes[k], logo: LOGO };
   }
 }

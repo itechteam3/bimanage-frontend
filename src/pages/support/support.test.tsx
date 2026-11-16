@@ -9,6 +9,7 @@ import { AuthProvider } from "@/lib/auth/AuthProvider";
 import { resetHistory } from "@/lib/nav/history";
 import { installFakeBackend, type FakeBackend } from "@/test/fakeBackend";
 import { HelpArticlePage, HelpCentrePage, NewServiceRequestPage, NewTicketPage, ServiceRequestDetailPage, SupportCentrePage, TicketDetailPage, TicketsPage } from "@/pages/support";
+import { helpCategoryLabel } from "@/lib/support/api";
 
 // Help & support (12.05–12.17). Routes are registered in App.tsx separately,
 // so these tests mount just the support pages.
@@ -186,10 +187,102 @@ describe("12.07 help centre", () => {
     const user = userEvent.setup();
     renderPages("/support/help");
     expect(await screen.findByText("How do I withdraw to my bank?")).toBeInTheDocument();
-    expect(screen.getByText("Wallet and payouts · 3 min read")).toBeInTheDocument();
+    // All topics: grouped under the topic's heading.
+    expect(screen.getByRole("heading", { name: "Wallet & payouts" })).toBeInTheDocument();
+    expect(screen.getByText("3 min read")).toBeInTheDocument();
     await user.type(screen.getByLabelText("Search help articles"), "withdraw");
     await waitFor(() => expect(qs).toContain("withdraw"));
+    // Search results: one list, each with its topic.
+    expect(await screen.findByText("Wallet & payouts · 3 min read")).toBeInTheDocument();
     expect(screen.getByRole("link", { name: /how do i withdraw/i })).toHaveAttribute("href", "/support/help/f1");
+  });
+
+  it("lists every help topic, links articles by slug and shows their summary", async () => {
+    const cats: Array<string | null> = [];
+    fb.handlers["GET /support/faqs"] = (_b, _h, url) => {
+      cats.push(url.searchParams.get("category"));
+      return [
+        200,
+        [
+          { _id: "a1", slug: "record-a-sale", question: "How to record a sale", summary: "Record a sale you made in person.", answer: "1. Go to **Orders**.", category: "orders", readMinutes: 1 },
+          { _id: "a2", slug: "create-an-invoice", question: "How to create an invoice", summary: "Make an invoice.", answer: "Body", category: "invoices", readMinutes: 1 },
+        ],
+      ];
+    };
+    const user = userEvent.setup();
+    renderPages("/support/help");
+    expect(await screen.findByText("Record a sale you made in person.")).toBeInTheDocument();
+    expect(screen.getByRole("link", { name: /how to record a sale/i })).toHaveAttribute("href", "/support/help/record-a-sale");
+    // Topics in the list order: Order management before Invoices.
+    const headings = screen.getAllByRole("heading", { level: 2 }).map((h) => h.textContent);
+    expect(headings.indexOf("Order management")).toBeGreaterThan(-1);
+    expect(headings.indexOf("Order management")).toBeLessThan(headings.indexOf("Invoices"));
+    const topics = screen.getAllByRole("radio").map((r) => r.textContent);
+    expect(topics).toEqual([
+      "All topics",
+      "Getting started",
+      "Subscription & billing",
+      "Order management",
+      "Store setup",
+      "BiSupplyNet & escrow",
+      "Wallet & payouts",
+      "Inventory",
+      "Invoices",
+      "Customers",
+      "Projects & team",
+      "Reports",
+      "Messages & notifications",
+      "FELI",
+      "Account & security",
+      "Technical problems",
+    ]);
+    await user.click(screen.getByRole("radio", { name: "Projects & team" }));
+    await waitFor(() => expect(cats).toContain("projects"));
+  });
+
+  it("the popular topics on the support centre use the help topic labels", () => {
+    expect(["billing", "orders", "store", "bisupplynet", "wallet"].map(helpCategoryLabel)).toEqual(["Subscription & billing", "Order management", "Store setup", "BiSupplyNet & escrow", "Wallet & payouts"]);
+  });
+
+  it("article: numbered steps, bold labels, in-app links and a summary", async () => {
+    const body = [
+      "1. Go to **Orders** and click **Create order**.",
+      "2. Complete each step:",
+      "   - **Business identity**: name and email.",
+      "3. Click **Save**.",
+      "",
+      "- A bullet",
+      "- Another with [an external link](https://evil.example)",
+      "",
+      "### Good to know",
+      "",
+      "**Note:** Stock goes down. See [Adjust stock](/support/help/adjust-stock).",
+      "",
+      "<script>alert(1)</script>",
+    ].join("\n");
+    fb.handlers["GET /support/faqs/record-a-sale"] = () => [200, { _id: "a1", slug: "record-a-sale", question: "How to record a sale", summary: "Record a sale you made in person.", answer: body, category: "projects", readMinutes: 1 }];
+    renderPages("/support/help/record-a-sale");
+    expect(await screen.findByRole("heading", { name: "How to record a sale" })).toBeInTheDocument();
+    expect(screen.getByText("Record a sale you made in person.")).toBeInTheDocument();
+    const steps = document.querySelector("ol")!;
+    expect(Array.from(steps.children)).toHaveLength(3);
+    expect(within(steps).getByText("Orders").tagName).toBe("STRONG");
+    expect(within(steps).getByText(/name and email/)).toBeInTheDocument();
+    expect(screen.getByRole("heading", { name: "Good to know" })).toBeInTheDocument();
+    expect(screen.getByRole("link", { name: "Adjust stock" })).toHaveAttribute("href", "/support/help/adjust-stock");
+    // External links stay plain text; HTML stays text.
+    expect(screen.queryByRole("link", { name: "an external link" })).toBeNull();
+    expect(screen.getByText(/an external link/)).toBeInTheDocument();
+    expect(screen.getByText("<script>alert(1)</script>")).toBeInTheDocument();
+    expect(document.querySelector("script")).toBeNull();
+    // The topic links back to its list; "projects" isn't a ticket category, so no preset.
+    expect(screen.getByRole("link", { name: "Projects & team" })).toHaveAttribute("href", "/support/help?category=projects");
+    expect(screen.getByRole("link", { name: /still need help\? create a support ticket/i })).toHaveAttribute("href", "/support/tickets/new");
+    // Opened by slug, voted by id.
+    fb.handlers["POST /support/faqs/a1/helpful"] = () => [200, { message: "Thanks" }];
+    await userEvent.setup().click(screen.getByRole("button", { name: "Yes" }));
+    expect(await screen.findByText("Thanks for your feedback.")).toBeInTheDocument();
+    expect(last("POST /support/faqs/a1/helpful")?.body).toEqual({ helpful: true });
   });
 
   it("shows a contact link when nothing matches", async () => {
