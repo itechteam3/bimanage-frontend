@@ -4,6 +4,7 @@ import { IconAlertTriangle, IconCheck, IconMail, IconPhone, IconSearch } from "@
 import { Button, ButtonLink, Dialog, Status } from "@/components/ui";
 import { DetailRows, HelpPanel, IntroCard, PageTitle, Panel } from "@/components/page/Blocks";
 import { ErrorNote } from "@/components/feedback/ErrorNote";
+import { TestPaymentBadge, TestPaymentNotice, isTestPayment } from "@/components/feedback/TestPaymentBadge";
 import { UpdatedNote, newRowClass } from "@/components/feedback/UpdatedNote";
 import { useNewItems } from "@/lib/realtime/useLiveList";
 import { count, naira, shortDate } from "@/lib/format";
@@ -126,8 +127,9 @@ function StoreOrders({ store }: { store: Store }) {
                       <span className="truncate text-body-sm text-ink-muted md:order-2">
                         {o.customerName} · {count(units)} {units === 1 ? "item" : "items"} · {shortDate(o.createdAt)}
                       </span>
-                      <span className="justify-self-end md:order-4">
+                      <span className="flex flex-wrap justify-end gap-1 justify-self-end md:order-4">
                         <Status tone={b.tone}>{b.label}</Status>
+                        {isTestPayment(o) && <TestPaymentBadge />}
                       </span>
                     </li>
                   );
@@ -250,7 +252,7 @@ function StoreOrderDetail({ store, id }: { store: Store; id: string }) {
       <PageTitle
         actions={
           <span className="flex flex-wrap gap-2">
-            {o.paymentMode === "test" && <Status tone="neutral">Test payment (no money moved)</Status>}
+            {isTestPayment(o) && <TestPaymentBadge />}
             <Status tone={b.tone}>{b.label}</Status>
           </span>
         }
@@ -260,6 +262,7 @@ function StoreOrderDetail({ store, id }: { store: Store; id: string }) {
       <p className="-mt-4 text-body-sm text-ink-muted">
         Placed {shortDate(o.createdAt)} · {count(units)} {units === 1 ? "item" : "items"} · {o.isPaid ? `paid ${shortDate(o.paidAt)}` : "not paid"}
       </p>
+      {isTestPayment(o) && <TestPaymentNotice />}
       <IntroCard eyebrow={opsEyebrow(store)} title={o.isPaid ? "Prepare, ship and complete this order." : "This order hasn't been paid. Don't send anything yet."} />
       {refund && (
         <section role="alert" className="flex gap-3 rounded-xl bg-danger-bg px-5 py-4">
