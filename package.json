@@ -10,7 +10,7 @@
   "scripts": {
     "tokens": "node scripts/build-tokens.mjs",
     "dev": "npm run tokens && vite",
-    "build": "npm run tokens && tsc -b && vite build && node scripts/check-bundle.mjs",
+    "build": "npm run tokens && tsc -b && vite build && node scripts/check-bundle.mjs && node scripts/check-csp.mjs",
     "check:layout": "node scripts/check-layout.mjs",
     "check:layout:charts": "node scripts/check-layout-charts.mjs",
     "build:layout": "npm run tokens && node scripts/layout/build.mjs",
