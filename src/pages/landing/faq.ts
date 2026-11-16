@@ -49,6 +49,14 @@ export const FAQ_GROUPS: FaqGroup[] = [
         ],
       },
       {
+        id: "who-owns-bimanage",
+        q: "Who owns BiManage?",
+        a: [
+          "BiManage is a product of BiTechTeam Limited (bitechteam.org), a company that helps people start and manage businesses. BiManage is its business management platform for business owners.",
+          "BiTechTeam was founded in June 2023 and registered as BiTechTeam Limited in December 2025. Its founder and CEO is Samuel Inyima, and its co-founder and CTO is Elijah Ayanlere.",
+        ],
+      },
+      {
         id: "how-to-start",
         featured: true,
         q: "How do I get started?",

@@ -16,6 +16,11 @@ export const COMPANY = {
   legalName: "BiTechTeam Limited",
   product: "BiManage",
   website: "https://bitechteam.org",
+  // Approved public facts (from BiTechTeam, 2026-11-16). Use exactly these; no other names or details.
+  founded: "June 2023",
+  registered: "December 2025",
+  founder: { name: "Samuel Inyima", role: "Founder and CEO" },
+  cofounder: { name: "Elijah Ayanlere", role: "Co-founder and CTO" },
   supportEmail: SUPPORT_EMAIL,
 } as const;
 
