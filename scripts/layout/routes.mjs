@@ -29,6 +29,7 @@ const IDS = [
   [/^\/admin\/reviews\//, { id: "rv1" }],
   [/^\/admin\/bisupplynet\/disputes\//, { id: "d1" }],
   [/^\/admin\/bisupplynet\/orders\//, { id: "o1" }],
+  [/^\/admin\/store-orders\//, { orderNumber: "BM-7K2Q-9MXA" }],
   [/^\/admin\/support\/tickets\//, { id: "t1" }],
   [/^\/admin\/support\/service-requests\//, { id: "s1" }],
   [/^\/admin\/announcements\//, { id: "n1" }],

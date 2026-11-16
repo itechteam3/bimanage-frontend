@@ -32,6 +32,10 @@ import {
   usePublicProduct,
   verifyStorePayment,
   browser,
+  confirmStoreDelivery,
+  reportStoreProblem,
+  PROBLEM_REASONS,
+  type ProblemReason,
   type PublicOrder,
   type PublicProduct,
   type StoreOrderStatus,
@@ -773,6 +777,118 @@ export function PaymentPage() {
 
 // ── 08.19 Guest order tracking ────────────────────────────────────────────
 
+const problemSchema = z.object({
+  reason: z.enum(["not_received", "wrong_item", "damaged", "not_as_described", "other"], { message: "Choose what went wrong." }),
+  message: z.string().trim().min(10, "Tell us a little more about what happened (at least 10 characters).").max(2000, "Keep it under 2,000 characters."),
+});
+
+/**
+ * "I received my order" (the store gets paid) and "Report a problem" (the
+ * store's payment waits while BiManage support looks into it). Security fix P0-1.
+ */
+function DeliveryActions({ o, email, onChange }: { o: PublicOrder; email: string; onChange: (o: PublicOrder) => void }) {
+  const d = o.delivery!;
+  const [reporting, setReporting] = useState(false);
+  const [confirming, setConfirming] = useState(false);
+  const [error, setError] = useState<unknown>(null);
+  const [done, setDone] = useState<string | null>(null);
+  const { register, handleSubmit, formState, setError: setFieldError } = useForm<z.infer<typeof problemSchema>>({ resolver: zodResolver(problemSchema), defaultValues: { reason: undefined, message: "" } });
+
+  const confirm = async () => {
+    setError(null);
+    setConfirming(true);
+    try {
+      const r = await confirmStoreDelivery(o.trackingNo, email);
+      setDone(r.message);
+      onChange(r.order);
+    } catch (err) {
+      setError(err);
+    } finally {
+      setConfirming(false);
+    }
+  };
+  const report = handleSubmit(async (v) => {
+    setError(null);
+    try {
+      const r = await reportStoreProblem({ orderNumber: o.trackingNo, email, reason: v.reason as ProblemReason, message: v.message });
+      setReporting(false);
+      setDone(r.message);
+      onChange(r.order);
+    } catch (err) {
+      if (!applyFieldErrors(err, setFieldError, ["reason", "message"])) setError(err);
+    }
+  });
+
+  if (d.problemOpen) {
+    return (
+      <section role="status" className="mt-4 rounded-md bg-surface-tint-warm px-4 py-3">
+        <p className="font-semibold text-ink-strong">You reported a problem with this order</p>
+        <p className="mt-1 text-body-sm text-ink-secondary">{done ?? "BiManage support is looking into it and will be in touch by email."}</p>
+      </section>
+    );
+  }
+  if (d.confirmed) {
+    return (
+      <section role="status" className="mt-4 rounded-md bg-success-bg px-4 py-3">
+        <p className="font-semibold text-ink-strong">You confirmed you received this order</p>
+        <p className="mt-1 text-body-sm text-ink-secondary">{done ?? "Thanks for letting the store know."}</p>
+      </section>
+    );
+  }
+  if (!d.canConfirm && !d.canReport) return null;
+  return (
+    <section aria-labelledby="delivery-actions" className="mt-4 rounded-md bg-surface-pale px-4 py-4">
+      <h3 id="delivery-actions" className="font-semibold text-ink-strong">
+        {d.canConfirm ? "Did your order arrive?" : "Something wrong with this order?"}
+      </h3>
+      <p className="mt-1 text-body-sm text-ink-secondary">
+        {d.canConfirm ? "Confirm once you have it. If something's wrong, report it and the store's payment waits while BiManage support helps." : "Report it and BiManage support will help. The store's payment waits until it's sorted."}
+      </p>
+      <ErrorNote error={error} fallback="We couldn't save that. Please try again." className="mt-3" />
+      {!reporting ? (
+        <div className="mt-3 flex flex-col gap-2 md:flex-row">
+          {d.canConfirm && (
+            <Button size="md" onClick={() => void confirm()} loading={confirming} loadingText="Confirming…">
+              Yes, I received my order
+            </Button>
+          )}
+          {d.canReport && (
+            <Button size="md" variant="secondary" onClick={() => setReporting(true)} disabled={confirming}>
+              Report a problem
+            </Button>
+          )}
+        </div>
+      ) : (
+        <form noValidate onSubmit={report} className="mt-3 flex flex-col gap-3">
+          <Field label="What went wrong?" required error={formState.errors.reason?.message}>
+            <SelectInput defaultValue="" {...register("reason")}>
+              <option value="" disabled>
+                Choose one
+              </option>
+              {PROBLEM_REASONS.map(([value, label]) => (
+                <option key={value} value={value}>
+                  {label}
+                </option>
+              ))}
+            </SelectInput>
+          </Field>
+          <Field label="Tell us what happened" required error={formState.errors.message?.message}>
+            <TextArea rows={4} {...register("message")} />
+          </Field>
+          <div className="flex flex-col gap-2 md:flex-row">
+            <Button type="submit" size="md" loading={formState.isSubmitting} loadingText="Sending…">
+              Send report
+            </Button>
+            <Button type="button" size="md" variant="secondary" onClick={() => setReporting(false)}>
+              Cancel
+            </Button>
+          </div>
+        </form>
+      )}
+    </section>
+  );
+}
+
 const TIMELINE: Array<{ key: string; title: string; body: string; reached: (o: PublicOrder) => boolean }> = [
   { key: "placed", title: "Order placed", body: "Purchase recorded", reached: () => true },
   { key: "paid", title: "Payment verified", body: "Paystack confirmation received", reached: (o) => o.isPaid },
@@ -798,7 +914,7 @@ function PaymentNotice({ o, onRetry, retrying }: { o: PublicOrder; onRetry: () =
     awaiting_payment: { title: "This order hasn't been paid yet", body: p.holdExpiresAt ? `Your items are held until ${time(p.holdExpiresAt)}. Pay before then to keep them.` : "Pay to confirm your order." },
     payment_failed: { title: "Your payment didn't go through", body: p.holdExpiresAt ? `You weren't charged. Your items are held until ${time(p.holdExpiresAt)}, so you can try again.` : "You weren't charged." },
     expired: { title: "This order wasn't paid and has expired", body: "Your bag was released, so the items are back on sale. Place a new order to buy them." },
-    cancelled: { title: "This order was cancelled", body: o.isPaid ? "If you paid, the store will arrange your refund. Contact them below if you have questions." : "Nothing was charged." },
+    cancelled: { title: "This order was cancelled", body: o.isPaid ? "Your payment is being refunded to you. Contact the store below if you have questions." : "Nothing was charged." },
     refunded: { title: "This order was refunded", body: "The payment was returned to you." },
   };
   const c = copy[p.state];
@@ -908,6 +1024,7 @@ export function TrackOrderPage() {
               })}
             </ol>
           )}
+          {o && o.delivery && <DeliveryActions o={o} email={trackedEmail} onChange={setResult} />}
         </Panel>
         <Panel title="Order details">
           {o ? (

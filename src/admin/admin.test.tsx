@@ -414,3 +414,47 @@ describe("admin invites", () => {
     expect(await screen.findByText(/The old link no longer works/)).toBeInTheDocument();
   });
 });
+
+describe("store order money (security fix P0-1)", () => {
+  const MONEY = {
+    order: { trackingNo: "BM-7K2Q-9MXA", status: "delivered", isPaid: true, paidAt: "2026-11-12T09:05:00Z", paymentMode: "live", total: 50000, commissionAmount: 1500, vendorPayout: 48500, customerName: "Amina", customerEmail: "amina@example.com", deliveredAt: "2026-11-13T09:00:00Z", deliveryConfirmedAt: null, statusHistory: [], createdAt: "2026-11-12T09:00:00Z" },
+    store: { storeName: "Elijah Apparel", storeSlug: "elijahapparel" },
+    payout: { status: "held", holdDays: 7, holdEndsAt: "2026-11-20T09:00:00Z", customerConfirmed: false, disputeOpen: true, releasedAt: null, releaseReason: null },
+    dispute: { status: "open", reason: "damaged", message: "The shirt arrived torn.", openedAt: "2026-11-14T09:00:00Z", resolvedAt: null, outcome: null, note: null },
+    refund: { status: null, amount: null, refundedAt: null },
+    ledger: [{ type: "held", amount: 48500, mode: "live", status: "completed", failureReason: null, note: null, at: "2026-11-12T09:05:00Z" }],
+  };
+
+  it("finance resolves a reported problem: refund the customer, with a note", async () => {
+    signedInAs("finance");
+    fb.handlers["GET /admin/store-orders/BM-7K2Q-9MXA"] = () => [200, MONEY];
+    fb.handlers["POST /admin/store-orders/BM-7K2Q-9MXA/dispute/resolve"] = () => [200, { result: "refunded", message: "Resolved: the customer is being refunded in full." }];
+    const user = userEvent.setup();
+    renderApp("/admin/store-orders/BM-7K2Q-9MXA");
+    expect(await screen.findByText("The shirt arrived torn.")).toBeInTheDocument();
+    await user.click(screen.getByRole("button", { name: "Refund the customer" }));
+    const dialog = await screen.findByRole("dialog");
+    await user.type(within(dialog).getByRole("textbox"), "Photos show the damage clearly.");
+    await user.click(within(dialog).getByRole("button", { name: "Confirm decision" }));
+    await waitFor(() => expect(last("POST /admin/store-orders/BM-7K2Q-9MXA/dispute/resolve")?.body).toEqual({ outcome: "refund", note: "Photos show the damage clearly." }));
+    expect(await screen.findByText("Resolved: the customer is being refunded in full.")).toBeInTheDocument();
+  });
+
+  it("support can see the case but not decide; a failed refund can be retried by finance", async () => {
+    signedInAs("support");
+    fb.handlers["GET /admin/store-orders/BM-7K2Q-9MXA"] = () => [200, { ...MONEY, dispute: null, refund: { status: "failed", amount: 50000, refundedAt: null } }];
+    renderApp("/admin/store-orders/BM-7K2Q-9MXA");
+    expect(await screen.findByText(/Only Finance or a superadmin can retry refunds/)).toBeInTheDocument();
+    expect(screen.queryByRole("button", { name: "Retry refund" })).toBeNull();
+  });
+
+  it("finance retries a failed refund", async () => {
+    signedInAs("finance");
+    fb.handlers["GET /admin/store-orders/BM-7K2Q-9MXA"] = () => [200, { ...MONEY, dispute: null, refund: { status: "failed", amount: 50000, refundedAt: null } }];
+    fb.handlers["POST /admin/store-orders/BM-7K2Q-9MXA/retry-refund"] = () => [200, { result: "pending", message: "Refund sent to Paystack." }];
+    const user = userEvent.setup();
+    renderApp("/admin/store-orders/BM-7K2Q-9MXA");
+    await user.click(await screen.findByRole("button", { name: "Retry refund" }));
+    expect(await screen.findByText("Refund sent to Paystack.")).toBeInTheDocument();
+  });
+});
