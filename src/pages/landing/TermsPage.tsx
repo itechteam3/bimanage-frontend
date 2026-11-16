@@ -97,7 +97,7 @@ const SECTIONS: LegalSection[] = [
         </p>
         <ul>
           <li><strong>Commission.</strong> BiManage takes a commission of 3% on each paid store order, calculated on the order total (including delivery fees) and deducted once, at the time of the sale. The rest is credited to your BiManage wallet.</li>
-          <li><strong>Order completion.</strong> Your share is held as pending until the order is completed. You can mark a delivered order as completed; delivered orders also complete automatically 7 days after they are marked delivered. Earnings then become available to withdraw.</li>
+          <li><strong>Payout hold.</strong> Your share of a store order is held until the customer confirms they received it, or until a hold period (currently 7 days) after you mark it delivered, if the customer hasn't reported a problem. Only the business owner or an admin can complete or cancel a paid order, and completing an order doesn't end the hold early. If the customer reports a problem, the money stays on hold until BiManage resolves it, and it may be refunded to the customer. A paid order that is cancelled is refunded to the customer. Earnings become available to withdraw once the hold ends.</li>
           <li><strong>Cancellations after payment.</strong> If a paid order is cancelled, the pending earnings for it are taken back from your wallet, and the shopper must be refunded. Contact us so the refund can be arranged through Paystack.</li>
           <li><strong>Test-mode money</strong> is kept separately in your wallet and can never be withdrawn.</li>
         </ul>

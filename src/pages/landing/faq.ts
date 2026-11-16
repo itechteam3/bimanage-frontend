@@ -167,7 +167,7 @@ export const FAQ_GROUPS: FaqGroup[] = [
         id: "payouts",
         q: "When can I withdraw my earnings?",
         a: [
-          "When a shopper pays, your share shows as pending in your wallet. It becomes available once the order is completed: you can mark it completed after delivery, and delivered orders complete on their own 7 days after you mark them delivered.",
+          "When a shopper pays, your share shows as on hold in your wallet. It becomes available when the customer confirms they received the order, or 7 days after you mark it delivered if they haven't reported a problem. If they report a problem, the money stays on hold until BiManage support resolves it.",
           "You can withdraw available money to your verified Nigerian bank account on the schedule you choose (weekly, every two weeks, monthly or every 7 to 90 days). The minimum withdrawal is NGN 1,000.",
         ],
         help: "/help/withdraw-to-bank",
