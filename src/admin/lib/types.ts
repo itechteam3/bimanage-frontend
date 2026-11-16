@@ -136,6 +136,8 @@ export interface TicketDetail extends TicketRow {
   business: { _id: string; name: string | null } | null;
   replies: Array<{ _id: string; by: "user" | "admin"; name?: string; avatar?: string | null; message: string; attachments: Array<{ url: string; name: string }>; createdAt: string }>;
   links: { customer: string | null };
+  /** "Report an issue" tickets: the page, app and device it came from. */
+  meta?: { issueContext?: import("@/lib/support/issues").IssueContext | null } | null;
 }
 export interface ServiceRequest {
   _id: string;

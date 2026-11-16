@@ -8,6 +8,7 @@ import { Spinner } from "@/components/ui";
 import { PhotoDialog } from "@/components/profile/PhotoDialog";
 import { useSubscription } from "@/lib/workspace/subscription";
 import { DisplayPreferences } from "@/lib/account/preferences";
+import { ReportIssue } from "@/components/feedback/ReportIssue";
 
 // Signed-in pages render inside this. Routes declare their breadcrumb with
 // `handle: { section: "Dashboard" }`. Owners who haven't chosen an onboarding
@@ -60,6 +61,8 @@ export function WorkspaceLayout() {
       <DisplayPreferences />
       <Outlet />
       <PhotoDialog open={photoOpen} onClose={() => setPhotoOpen(false)} />
+      {/* Workspace screens only: never the landing page, storefronts or /admin. */}
+      <ReportIssue userId={user?._id} screen={section} />
     </AppShell>
   );
 }

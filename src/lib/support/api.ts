@@ -6,8 +6,9 @@ import type { StatusTone } from "@/components/ui";
 // and the public help centre (FAQs). Every query key starts with "support".
 
 import type { Attachment } from "@/lib/attachments";
+import type { IssueContext } from "./issues";
 
-export type TicketCategory = "billing" | "wallet" | "orders" | "store" | "inventory" | "bisupplynet" | "account" | "technical" | "other";
+export type TicketCategory = "billing" | "wallet" | "orders" | "store" | "inventory" | "bisupplynet" | "account" | "technical" | "technical_issue" | "other";
 export type TicketPriority = "low" | "medium" | "high";
 export type TicketStatus = "open" | "in_progress" | "awaiting_reply" | "resolved" | "closed";
 export type TicketFilter = "active" | "resolved" | "closed";
@@ -42,6 +43,8 @@ export interface Ticket extends TicketSummary {
   replies?: TicketReply[];
   resolvedAt?: string | null;
   closedAt?: string | null;
+  /** "Report an issue" tickets: the page, app and device it came from. */
+  meta?: { issueContext?: IssueContext | null } | null;
 }
 
 export interface NewTicket {

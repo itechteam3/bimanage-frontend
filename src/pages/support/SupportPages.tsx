@@ -17,6 +17,7 @@ import { cn } from "@/lib/cn";
 import type { Attachment } from "@/lib/attachments";
 import { AttachmentPicker } from "@/components/attachments/AttachmentPicker";
 import { ArticleBody } from "./ArticleBody";
+import { issueContextRows } from "@/lib/support/issues";
 import {
   HELP_CATEGORIES,
   PREFERRED_STARTS,
@@ -530,22 +531,29 @@ function TicketDetail({ t, created }: { t: Ticket; created: boolean }) {
           <ReplyBox t={t} done={done} />
           <ErrorNote error={close.error} fallback="We couldn't close this ticket. Please try again." />
         </div>
-        <Panel tone="pale" title="Ticket details">
-          <DetailRows
-            rows={[
-              ["Status", <Status tone={st.tone}>{st.label}</Status>],
-              ["Category", categoryLabel(t.category)],
-              ["Priority", priorityLabel(t.priority)],
-              ...(t.relatedReference ? ([["Reference", t.relatedReference]] as Array<[string, ReactNode]>) : []),
-              ["Opened", shortDate(t.createdAt)],
-              ["Updated", shortDate(t.updatedAt)],
-              ...(t.contactEmail ? ([["Contact email", <span className="break-all">{t.contactEmail}</span>]] as Array<[string, ReactNode]>) : []),
-            ]}
-          />
-          <ButtonLink to="/support/tickets" variant="outlined" size="md" className="mt-5">
-            All my tickets
-          </ButtonLink>
-        </Panel>
+        <div className="flex min-w-0 flex-col gap-5">
+          <Panel tone="pale" title="Ticket details">
+            <DetailRows
+              rows={[
+                ["Status", <Status tone={st.tone}>{st.label}</Status>],
+                ["Category", categoryLabel(t.category)],
+                ["Priority", priorityLabel(t.priority)],
+                ...(t.relatedReference ? ([["Reference", t.relatedReference]] as Array<[string, ReactNode]>) : []),
+                ["Opened", shortDate(t.createdAt)],
+                ["Updated", shortDate(t.updatedAt)],
+                ...(t.contactEmail ? ([["Contact email", <span className="break-all">{t.contactEmail}</span>]] as Array<[string, ReactNode]>) : []),
+              ]}
+            />
+            <ButtonLink to="/support/tickets" variant="outlined" size="md" className="mt-5">
+              All my tickets
+            </ButtonLink>
+          </Panel>
+          {issueContextRows(t.meta?.issueContext).length > 0 && (
+            <Panel tone="pale" title="Technical details" subtitle="Sent with your report so support can see where it happened.">
+              <DetailRows rows={issueContextRows(t.meta?.issueContext).map(([k, v]) => [k, <span className="break-words">{v}</span>] as [string, ReactNode])} />
+            </Panel>
+          )}
+        </div>
       </div>
       <Dialog
         open={confirmClose}

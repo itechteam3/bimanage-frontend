@@ -32,7 +32,9 @@ const WEB_PORT = Number(args.webPort ?? 4179);
 const ORIGIN = args.origin ?? `http://127.0.0.1:${WEB_PORT}`;
 const ONLY = args.only ? args.only.split(",") : null;
 const DIALOGS = args.dialogs !== "off";
-const SHOTS_ALL = args.shots === "all"; // --shots=all saves every page, not just failures
+const SHOTS_ALL = args.shots === "all"; // --shots=all saves every page (and opened dialog), not just failures
+// Widths at which dialog openers are pressed (default phone 360 + desktop 1440).
+const DIALOG_WIDTHS = (args.dialogWidths ?? "360,1440").split(",").map(Number);
 const PHONE = 430;
 
 const BROWSER = [process.env.CHROME_PATH, "C:/Program Files (x86)/Microsoft/Edge/Application/msedge.exe", "C:/Program Files/Google/Chrome/Application/chrome.exe",
@@ -243,7 +245,7 @@ async function runWidth(width, port) {
     if (problems.length || SHOTS_ALL) await b.shot(slug + ".png");
     results.push({ path: r.path, url: r.url, width, landed, problems });
     // Dialogs: press likely openers (phone and desktop widths only, to keep it quick).
-    if (DIALOGS && (width === 360 || width === 1440)) {
+    if (DIALOGS && DIALOG_WIDTHS.includes(width)) {
       const labels = (await b.evaluate(`JSON.stringify([...document.querySelectorAll('main button, [role="main"] button, button')].filter((e) => { const r = e.getBoundingClientRect(); return r.width > 0 && !e.disabled && ${DIALOG_OPENERS}.test((e.textContent || e.getAttribute('aria-label') || '').trim()); }).map((e) => (e.textContent || e.getAttribute('aria-label') || '').trim()).filter((v, i, a) => a.indexOf(v) === i).slice(0, 4))`)) ?? "[]";
       for (const label of JSON.parse(labels)) {
         const opened = await b.evaluate(`(async () => {
@@ -257,7 +259,7 @@ async function runWidth(width, port) {
           await sleep(250);
           const dp = ((await b.evaluate(AUDIT(width <= PHONE))) ?? []).filter((p) => p.type !== "sideways-scroll" || true);
           const name = `${r.path} › dialog "${label}"`;
-          if (dp.length) await b.shot(`${slug}-dialog-${label.replace(/[^a-z0-9]+/gi, "-").slice(0, 30)}.png`);
+          if (dp.length || SHOTS_ALL) await b.shot(`${slug}-dialog-${label.replace(/[^a-z0-9]+/gi, "-").slice(0, 30)}.png`);
           results.push({ path: name, url: r.url, width, landed: r.url, problems: dp });
         }
         // Back to a clean page for the next opener.

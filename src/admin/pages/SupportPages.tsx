@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useState, type ReactNode } from "react";
 import { Link, useParams, useSearchParams } from "react-router-dom";
 import { count } from "@/lib/format";
 import { Button, Field, SelectInput, TextArea } from "@/components/ui";
@@ -6,6 +6,7 @@ import { cn } from "@/lib/cn";
 import { AdminPage, AdminName, Toolbar, SearchBox, FilterSelect, Metrics, Records, Guidance, Pager, Section, Facts, Pill, ErrorBox, Loading, dateTime, words, useDebounced, type Column } from "../components/AdminKit";
 import { useAdminAction, useAdminMe, useAssignees, useOverview, useServiceRequest, useServiceRequests, useTicket, useTickets } from "../lib/hooks";
 import type { ServiceRequest, Sla, TicketRow } from "../lib/types";
+import { issueContextRows } from "@/lib/support/issues";
 
 // 16.05 Support operations: tickets (first reply due by priority: urgent 2h,
 // high 4h, medium 24h, low 72h; claim or assign) and custom service requests.
@@ -242,6 +243,11 @@ export function TicketDetailPage() {
               {assign.error ? <ErrorBox error={assign.error} /> : null}
             </div>
           </Section>
+          {issueContextRows(d.meta?.issueContext).length > 0 && (
+            <Section title="Technical details">
+              <Facts rows={issueContextRows(d.meta?.issueContext).map(([k, v]) => [k, <span key={k} className="break-words">{v}</span>] as [string, ReactNode])} />
+            </Section>
+          )}
           <Section title="Customer">
             <Facts rows={[["Name", d.user ? <Link key="u" to={`/admin/users/${d.user._id}`} className="font-semibold text-ink-brand">{d.user.name}</Link> : "—"], ["Email", d.contactEmail || d.user?.email || "—"], ["Business", d.business?.name || "—"]]} />
           </Section>
