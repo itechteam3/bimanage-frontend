@@ -67,6 +67,9 @@
   --color-kpi-stock-bg: #FCEEF0;
   --color-kpi-stock-fg: #A44257;
   --color-kpi-stock-line: #A44257;
+  --color-kpi-info-bg: #E7F3FC;
+  --color-kpi-info-fg: #00456B;
+  --color-kpi-info-line: #00456B;
 
   /* type */
   --text-*: initial;
