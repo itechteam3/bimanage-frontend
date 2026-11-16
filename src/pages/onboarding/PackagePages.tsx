@@ -1,3 +1,4 @@
+import { TEST_PAYMENT_REFUSED } from "@/components/feedback/TestPaymentBadge";
 import { useEffect, useRef, useState } from "react";
 import { Link, useNavigate, useParams, useSearchParams } from "react-router-dom";
 import { IconCheck, IconArrowRight, IconAlertTriangle } from "@tabler/icons-react";
@@ -313,7 +314,7 @@ export function PaymentStatusPage() {
       <div className="flex flex-col gap-6">
         <PageTitle>Payment was unsuccessful</PageTitle>
         <IntroCard eyebrow="Payment / Needs attention" title="Let's get your payment sorted.">
-          Your payment hasn't been confirmed, so no package has been activated.
+          {state?.failureReason === "test_payment" ? TEST_PAYMENT_REFUSED : "Your payment hasn't been confirmed, so no package has been activated."}
         </IntroCard>
         <Stepper steps={["Selected", "Checkout", "Not confirmed", "Resolve"]} current={2} />
         <div className="grid grid-cols-[minmax(0,1fr)] gap-5 lg:grid-cols-[minmax(0,1.7fr)_minmax(0,1fr)]">

@@ -261,7 +261,27 @@ export interface PublicOrder {
   store?: { storeName: string; storeSlug: string; contactEmail: string | null; contactPhone: string | null };
   /** Where the order stands for the shopper (backend #26; absent on older servers). */
   payment?: { state: "paid" | "awaiting_payment" | "payment_failed" | "expired" | "cancelled" | "refunded"; holdExpiresAt: string | null; canRetryPayment: boolean };
+  /** "I received my order" / "Report a problem" (absent on older servers). */
+  delivery?: ShopperDelivery;
 }
+
+export interface ShopperDelivery {
+  confirmed: boolean;
+  confirmedAt: string | null;
+  problemReported: boolean;
+  problemOpen: boolean;
+  canConfirm: boolean;
+  canReport: boolean;
+}
+
+export type ProblemReason = "not_received" | "wrong_item" | "damaged" | "not_as_described" | "other";
+export const PROBLEM_REASONS: Array<[ProblemReason, string]> = [
+  ["not_received", "I didn't receive it"],
+  ["wrong_item", "Wrong item"],
+  ["damaged", "Damaged or faulty"],
+  ["not_as_described", "Not as described"],
+  ["other", "Something else"],
+];
 
 export interface CheckoutInput {
   customerName: string;
@@ -520,6 +540,14 @@ export const retryStorePayment = (slug: string, trackingNo: string, email: strin
 
 export const trackStoreOrder = (orderNumber: string, email: string) => api<PublicOrder>("/store-orders/track", { auth: false, query: { orderNumber, email } });
 
+/** The shopper confirms they received the order (releases the store's earnings). */
+export const confirmStoreDelivery = (orderNumber: string, email: string) =>
+  api<{ result: string; message: string; order: PublicOrder }>("/store-orders/track/confirm-delivery", { method: "POST", auth: false, body: { orderNumber, email } });
+
+/** The shopper reports a problem (the store's payout waits; BiManage support is told). */
+export const reportStoreProblem = (input: { orderNumber: string; email: string; reason: ProblemReason; message: string }) =>
+  api<{ result: string; message: string; order: PublicOrder }>("/store-orders/track/report-problem", { method: "POST", auth: false, body: input });
+
 /** Leave the app for Paystack (a separate object so tests can stub it). */
 export const browser = { go: (url: string) => window.location.assign(url) };
 
@@ -553,6 +581,20 @@ export interface MerchantStoreOrder {
   statusHistory: Array<{ status: StoreOrderStatus; at: string }>;
   createdAt: string;
   nextStatuses?: StoreOrderStatus[];
+  /** The merchant's earnings for this order (backend security fix P0-1). */
+  payout?: StorePayout;
+}
+
+export interface StorePayout {
+  status: "held" | "released" | "reversed" | "none";
+  holdDays: number;
+  /** When the hold ends (set once the order is delivered). */
+  holdEndsAt: string | null;
+  customerConfirmed: boolean;
+  disputeOpen: boolean;
+  releasedAt: string | null;
+  releaseReason: "customer_confirmed" | "hold_expired" | "dispute_resolved" | null;
+  refundStatus: "pending" | "processed" | "failed" | null;
 }
 
 export type StoreOrderFilter = "all" | "payment_confirmed" | "processing" | "shipped" | "delivered" | "completed" | "pending" | "cancelled";
@@ -586,7 +628,7 @@ export function useSetStoreOrderStatus(id: string) {
   const qc = useQueryClient();
   return useMutation({
     mutationFn: (status: "processing" | "shipped" | "delivered" | "completed" | "cancelled") =>
-      api<MerchantStoreOrder & { refundNeeded?: boolean; message?: string }>(`/store-orders/${encodeURIComponent(id)}/status`, { method: "PUT", body: { status } }),
+      api<MerchantStoreOrder & { refund?: "pending" | "processed" | "failed" | "already_refunded"; message?: string }>(`/store-orders/${encodeURIComponent(id)}/status`, { method: "PUT", body: { status } }),
     onSuccess: (order) => {
       qc.setQueryData(["store", "order", id], order);
       void qc.invalidateQueries({ queryKey: ["store"] });

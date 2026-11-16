@@ -12,8 +12,12 @@ const STEP = /^\d+\.\s+/;
 const BULLET = /^-\s+/;
 const SUB = /^\s+-\s+/;
 
+/** Where an in-app link in an article points (the public help centre maps /support/help → /help). */
+export type HrefFor = (href: string) => string;
+const same: HrefFor = (href) => href;
+
 /** **bold** and [text](/path) inside a line. */
-export function inline(text: string): ReactNode[] {
+export function inline(text: string, hrefFor: HrefFor = same): ReactNode[] {
   const out: ReactNode[] = [];
   const re = /\*\*([^*]+)\*\*|\[([^\]]+)\]\(([^)\s]+)\)/g;
   let last = 0;
@@ -24,7 +28,7 @@ export function inline(text: string): ReactNode[] {
     if (bold !== undefined) out.push(<strong key={m.index} className="font-semibold text-ink-strong">{bold}</strong>);
     else if (href.startsWith("/") && !href.startsWith("//"))
       out.push(
-        <Link key={m.index} to={href} className="font-semibold text-ink-brand underline underline-offset-2">
+        <Link key={m.index} to={hrefFor(href)} className="font-semibold text-ink-brand underline underline-offset-2">
           {label}
         </Link>
       );
@@ -68,13 +72,14 @@ export function parseArticle(body: string): Block[] {
   return blocks;
 }
 
-export function ArticleBody({ body }: { body: string }) {
+/** One renderer for the in-app help centre and the public /help pages. */
+export function ArticleBody({ body, hrefFor = same }: { body: string; hrefFor?: HrefFor }) {
   return (
     <div className="flex flex-col gap-4 text-body-lg text-ink-secondary">
       {parseArticle(body).map((b, i) =>
         b.kind === "heading" ? (
           <h2 key={i} className="text-title-sm text-ink-strong">
-            {inline(b.text)}
+            {inline(b.text, hrefFor)}
           </h2>
         ) : b.kind === "steps" ? (
           <ol key={i} className="flex flex-col gap-3">
@@ -84,11 +89,11 @@ export function ArticleBody({ body }: { body: string }) {
                   {n + 1}
                 </span>
                 <span className="min-w-0 pt-0.5">
-                  {inline(item.text)}
+                  {inline(item.text, hrefFor)}
                   {item.sub.length > 0 && (
                     <ul className="mt-2 flex list-disc flex-col gap-1 pl-5">
                       {item.sub.map((s, k) => (
-                        <li key={k}>{inline(s)}</li>
+                        <li key={k}>{inline(s, hrefFor)}</li>
                       ))}
                     </ul>
                   )}
@@ -99,7 +104,7 @@ export function ArticleBody({ body }: { body: string }) {
         ) : b.kind === "bullets" ? (
           <ul key={i} className="flex list-disc flex-col gap-2 pl-5">
             {b.items.map((item, n) => (
-              <li key={n}>{inline(item)}</li>
+              <li key={n}>{inline(item, hrefFor)}</li>
             ))}
           </ul>
         ) : (
@@ -107,7 +112,7 @@ export function ArticleBody({ body }: { body: string }) {
             {b.text.split("\n").map((line, n) => (
               <Fragment key={n}>
                 {n > 0 && "\n"}
-                {inline(line)}
+                {inline(line, hrefFor)}
               </Fragment>
             ))}
           </p>

@@ -583,10 +583,10 @@ function DomainSettings({ store }: { store: Store }) {
               <CopyValue label="BiManage address" value={d.bimanageAddress.replace(/^https?:\/\//, "")} />
               {planAllows ? (
                 <form noValidate onSubmit={onSave} className="flex flex-col gap-3 md:flex-row md:items-end">
-                  <Field label="Custom domain" error={formState.errors.domain?.message} hint="Use a sub-domain you own, such as shop.yourbusiness.com." className="flex-1">
+                  <Field label="Custom domain" error={formState.errors.domain?.message} hint="Use a sub-domain you own, such as shop.yourbusiness.com." className="min-w-0 flex-1">
                     <TextInput placeholder="shop.yourbusiness.com" autoCapitalize="none" spellCheck={false} {...register("domain")} />
                   </Field>
-                  <Button type="submit" variant="secondary" size="md" loading={save.isPending} loadingText="Saving…" className="md:mb-0.5">
+                  <Button type="submit" variant="secondary" size="md" loading={save.isPending} loadingText="Saving…" className="shrink-0 md:mb-0.5">
                     {d.customDomain ? "Change domain" : "Save domain"}
                   </Button>
                 </form>

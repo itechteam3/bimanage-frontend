@@ -1,3 +1,4 @@
+import { TestPaymentBadge, isTestPayment } from "@/components/feedback/TestPaymentBadge";
 import { useEffect, useMemo, useRef, useState, type ReactNode } from "react";
 import { Link, Navigate, useLocation, useNavigate, useParams } from "react-router-dom";
 import { useForm, useWatch } from "react-hook-form";
@@ -775,9 +776,10 @@ export function SellerOrdersPage() {
                   </Link>,
                   `${count(o.quantity)} × ${o.productName}${o.client?.name ? ` • ${o.client.name}` : ""}`,
                   `${naira(o.totalAmount)} • ${shortDate(o.createdAt)}`,
-                  <Status key="s" tone={st.tone}>
-                    {st.label}
-                  </Status>,
+                  <span key="s" className="flex flex-wrap gap-1">
+                    <Status tone={st.tone}>{st.label}</Status>
+                    {isTestPayment(o) && <TestPaymentBadge />}
+                  </span>,
                 ],
               };
             })}

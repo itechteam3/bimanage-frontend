@@ -11,7 +11,7 @@ import { FeliGuestChat } from "./FeliGuestChat";
 import "./landing.css";
 
 // The public site's shared frame: navbar and footer used by the landing page
-// ("/", "/home") and the other public pages (/contact, /faq, /terms, /privacy).
+// ("/", "/home") and the other public pages (/contact, /faq, /terms, /privacy, /help).
 
 export const reducedMotion = () =>
   typeof window !== "undefined" && (window.matchMedia?.("(prefers-reduced-motion: reduce)").matches || document.documentElement.classList.contains("reduce-motion"));
@@ -118,6 +118,7 @@ export function NavBar() {
                 <a key={href} href={navHref(href, base)} className="text-nav text-ink-on-brand-muted transition-colors hover:text-ink-on-brand">{label}</a>
               )
             ))}
+            <Link to="/help" className="text-nav text-ink-on-brand-muted transition-colors hover:text-ink-on-brand">Help</Link>
             <Link to="/contact" className="text-nav text-ink-on-brand-muted transition-colors hover:text-ink-on-brand">Contact us</Link>
           </nav>
           <div className="hidden items-center gap-3 lg:flex">
@@ -159,8 +160,9 @@ export function NavBar() {
                   <a key={href} href={navHref(href, base)} onClick={close} {...item(i)}>{label}</a>
                 )
               ))}
-              <Link to="/contact" onClick={close} {...item(NAV.length)}>Contact us</Link>
-              <div className="lp-menu-item mt-4 flex w-full max-w-[20rem] flex-col gap-3" style={{ ["--lp-i" as string]: NAV.length + 1 }}>
+              <Link to="/help" onClick={close} {...item(NAV.length)}>Help</Link>
+              <Link to="/contact" onClick={close} {...item(NAV.length + 1)}>Contact us</Link>
+              <div className="lp-menu-item mt-4 flex w-full max-w-[20rem] flex-col gap-3" style={{ ["--lp-i" as string]: NAV.length + 2 }}>
                 {signedIn ? (
                   <ButtonLink to="/start" variant="tonal" fullWidth onClick={close}>Go to dashboard</ButtonLink>
                 ) : (
@@ -194,6 +196,7 @@ export function Footer() {
               <Link key={to} to={to} className={linkClass}>{l}</Link>
             ))}
             <Link to="/faq" className={linkClass}>FAQ</Link>
+            <Link to="/help" className={linkClass}>Help centre</Link>
             <Link to="/contact" className={linkClass}>Contact us</Link>
           </nav>
         </div>

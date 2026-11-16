@@ -130,7 +130,7 @@ export function FaqAccordion({
                       ))}
                       {f.help && (
                         <li>
-                          <Link to="/support/help" className="inline-flex min-h-11 items-center text-body-sm font-semibold text-ink-brand hover:underline">More in the help centre (sign in)</Link>
+                          <Link to={f.help} className="inline-flex min-h-11 items-center text-body-sm font-semibold text-ink-brand hover:underline">Step-by-step guide in the help centre</Link>
                         </li>
                       )}
                     </ul>

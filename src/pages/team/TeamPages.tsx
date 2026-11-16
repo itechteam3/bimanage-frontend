@@ -112,7 +112,7 @@ function MembersPanel({ compact = false }: { compact?: boolean }) {
       <label className="flex h-control-lg items-center gap-2 rounded-md bg-surface-pale px-3">
         <IconSearch aria-hidden="true" className="size-icon text-ink-muted" />
         <span className="sr-only">Search members</span>
-        <input value={q} onChange={(e) => setQ(e.target.value)} placeholder="Search members, emails or roles" className="h-full flex-1 bg-transparent text-input text-ink-strong outline-none placeholder:text-ink-muted" />
+        <input value={q} onChange={(e) => setQ(e.target.value)} placeholder="Search members, emails or roles" className="h-full min-w-0 flex-1 bg-transparent text-input text-ink-strong outline-none placeholder:text-ink-muted" />
       </label>
       {members.isLoading || invites.isLoading ? (
         <Loading />

@@ -147,6 +147,7 @@ export const uploadProductImage = (id: string, file: File) => {
 export const findInInventory = (code: string) => api<Product[]>(`/barcode/inventory/${encodeURIComponent(code)}`);
 
 /** Public product databases, to prefill a new product. 404 when unknown. */
-export const lookupBarcode = (code: string) => api<BarcodeInfo>(`/barcode/lookup/${encodeURIComponent(code)}`, { auth: false });
+// Signed in (the API calls outside barcode services for it).
+export const lookupBarcode = (code: string) => api<BarcodeInfo>(`/barcode/lookup/${encodeURIComponent(code)}`);
 
 export const downloadInventoryCsv = (status?: "low") => apiDownload("/inventory/export", { query: { status } });
