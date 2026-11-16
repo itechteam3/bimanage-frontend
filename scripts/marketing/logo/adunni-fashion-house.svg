@@ -1,0 +1,8 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" width="512" height="512">
+  <title>Adunni Fashion House (sample logo)</title>
+  <rect width="512" height="512" rx="112" fill="#3d1f4f"/>
+  <polygon points="226,104 286,104 400,400 336,400 256,184 176,400 112,400" fill="#e6b85c"/>
+  <polygon points="203,300 309,300 325,344 187,344" fill="#e6b85c"/>
+  <circle cx="392" cy="140" r="20" fill="#f08a6c"/>
+  <rect x="112" y="428" width="288" height="12" rx="6" fill="#e6b85c" opacity="0.55"/>
+</svg>
