@@ -16,7 +16,8 @@ import { cn } from "@/lib/cn";
 import { useUrlState } from "@/lib/nav/useUrlState";
 import { useLeaveGuard } from "@/lib/nav/useLeaveGuard";
 import {
-  TX_TYPE,
+  txLabel,
+  txOrderNo,
   downloadReceipt,
   downloadTransactionsCsv,
   isTestTx,
@@ -141,7 +142,7 @@ function Overview({ w }: { w: Wallet }) {
       <IntroCard eyebrow={EYEBROW} title="Store earnings become available when an order is completed (or 7 days after delivery)." />
       <UpdatedNote updatedAt={dataUpdatedAt} className="-mb-2" />
       <div className="grid grid-cols-2 gap-3 lg:grid-cols-4 lg:gap-4">
-        <KpiCard tone="stock" label="Total earnings" value={naira(f.totalEarned.value)} caption="Store payments (after BiManage's 3%)" badge={badge(f.totalEarned)} note={testNote(f.totalEarned.test)} />
+        <KpiCard tone="stock" label="Total earnings" value={naira(f.totalEarned.value)} caption="Store and BiSupplyNet sales (after BiManage's 3%)" badge={badge(f.totalEarned)} note={testNote(f.totalEarned.test)} />
         <KpiCard tone="revenue" label="Available" value={naira(f.available.value)} caption={f.includeTest ? `Available to withdraw: ${naira(f.withdrawable)}` : "Ready to withdraw"} badge={badge(f.available)} note={testNote(f.available.test)} />
         <KpiCard tone="invoices" label="On hold" value={naira(f.onHold.value)} caption="Orders not completed yet" badge={badge(f.onHold)} note={testNote(f.onHold.test)} />
         <KpiCard tone="orders" label="Payouts" value={count(w.payoutsCount ?? 0)} caption="Completed transfers" />
@@ -149,7 +150,7 @@ function Overview({ w }: { w: Wallet }) {
       <TestMoneyNote w={w} />
       <div className="grid grid-cols-[minmax(0,1fr)] gap-5 lg:grid-cols-[minmax(0,2fr)_minmax(0,1fr)]">
         <Panel title="Transaction activity" subtitle="Latest money in and out.">
-          {txs.isLoading ? <Loading /> : txs.error ? <ErrorNote error={txs.error} fallback="We couldn't load your transactions." onRetry={() => void txs.refetch()} /> : <TxList items={txs.data?.transactions ?? []} empty="No transactions yet. Store sales appear here." />}
+          {txs.isLoading ? <Loading /> : txs.error ? <ErrorNote error={txs.error} fallback="We couldn't load your transactions." onRetry={() => void txs.refetch()} /> : <TxList items={txs.data?.transactions ?? []} empty="No transactions yet. Store and BiSupplyNet sales appear here." />}
           <Link to="/wallet/transactions" className="mt-3 inline-block text-action font-semibold text-ink-brand hover:underline">
             See all transactions
           </Link>
@@ -202,14 +203,14 @@ function TxList({ items, empty }: { items: WalletTx[]; empty: string }) {
         return (
           <li key={t._id} className="grid grid-cols-[minmax(0,1fr)_auto] items-center gap-x-4 gap-y-1 py-3 md:grid-cols-[1.2fr_minmax(0,1fr)_auto_auto]">
             <Link to={`/wallet/transactions/${t._id}`} className="truncate font-semibold text-ink-strong hover:underline">
-              {t.order && typeof t.order === "object" ? t.order.trackingNo : t.reference || TX_TYPE[t.type]}
+              {txOrderNo(t) ?? (t.reference || txLabel(t))}
             </Link>
             <span className="text-right font-semibold text-ink-strong md:order-3">
               {out ? "−" : ""}
               {naira(t.amount)}
             </span>
             <span className="flex flex-wrap items-center gap-2 text-body-sm text-ink-muted md:order-2">
-              {TX_TYPE[t.type]} · {shortDate(t.createdAt)}
+              {txLabel(t)} · {shortDate(t.createdAt)}
               {isTestTx(t) && <Status tone="neutral">Test</Status>}
             </span>
             <span className="justify-self-end md:order-4">
@@ -680,6 +681,9 @@ export function TransactionsPage() {
 
 function Transactions({ w }: { w: Wallet }) {
   const [type, setType] = useUrlState<string>("type", "", ["", "credit", "withdrawal", "commission", "refund"]);
+  // Sales by where they came from: the store or BiSupplyNet supply orders.
+  const [source, setSource] = useUrlState<string>("source", "", ["", "store", "bisupplynet"]);
+  const kind = type === "credit" && source ? `credit:${source}` : type;
   const [status, setStatus] = useUrlState<string>("status", "", ["", "pending", "completed", "failed"]);
   const [search, setSearch] = useUrlState<string>("q", "");
   const [pageKey, setPageKey] = useUrlState<string>("page", "1");
@@ -687,6 +691,7 @@ function Transactions({ w }: { w: Wallet }) {
   const page = Math.max(1, Number(pageKey) || 1);
   const q: Record<string, string> = { page: String(page) };
   if (type) q.type = type;
+  if (type === "credit" && source) q.source = source;
   if (status) q.status = status;
   if (search) q.search = search;
   const txs = useWalletTransactions(q);
@@ -753,14 +758,18 @@ function Transactions({ w }: { w: Wallet }) {
             <label className="md:w-48">
               <span className="sr-only">Type</span>
               <SelectInput
-                value={type}
+                value={kind}
                 onChange={(e) => {
-                  setType(e.target.value);
+                  const [t = "", s = ""] = e.target.value.split(":");
+                  setType(t);
+                  setSource(s);
                   setPageKey("1");
                 }}
               >
                 <option value="">All types</option>
-                <option value="credit">Store sales</option>
+                <option value="credit">All sales</option>
+                <option value="credit:store">Store sales</option>
+                <option value="credit:bisupplynet">BiSupplyNet sales</option>
                 <option value="withdrawal">Payouts</option>
                 <option value="commission">Fees</option>
                 <option value="refund">Refunds</option>
@@ -857,7 +866,7 @@ function TransactionDetail({ id }: { id: string }) {
           )
         }
       >
-        {failedPayout ? "Payout could not be completed" : `${TX_TYPE[t.type]} ${t.reference ? `· ${t.reference}` : ""}`}
+        {failedPayout ? "Payout could not be completed" : `${txLabel(t)} ${t.reference ? `· ${t.reference}` : ""}`}
       </PageTitle>
       <IntroCard eyebrow={EYEBROW} title={failedPayout ? "The money, including fees, is back in your wallet. Check your bank details, then retry." : t.description} />
       <section className="mx-auto w-full max-w-3xl rounded-2xl border border-line-card bg-surface-card p-5 shadow-card lg:p-8">
@@ -870,9 +879,10 @@ function TransactionDetail({ id }: { id: string }) {
           <DetailRows
             rows={[
               ["Date", shortDate(t.createdAt)],
-              ["Type", TX_TYPE[t.type]],
+              ["Type", txLabel(t)],
               ...(t.reference ? ([["Reference", t.reference]] as Array<[string, string]>) : []),
               ...(t.order && typeof t.order === "object" ? ([["Order", <Link key="o" to={`/store/orders/${t.order._id}`} className="text-ink-brand hover:underline">{t.order.trackingNo}</Link>]] as Array<[string, ReactNode]>) : []),
+              ...(t.supplyOrder && typeof t.supplyOrder === "object" ? ([["BiSupplyNet order", <Link key="so" to={`/bisupplynet/orders/${t.supplyOrder._id}`} className="text-ink-brand hover:underline">{t.supplyOrder.trackingNo}</Link>]] as Array<[string, ReactNode]>) : []),
               ...(t.grossAmount ? ([["Amount", naira(t.grossAmount)], ["Fees", naira(t.fee)], ["Net payout", naira(t.amount)]] as Array<[string, string]>) : ([["Amount", naira(t.amount)]] as Array<[string, string]>)),
               ...(t.bank && t.type === "withdrawal" ? ([["Bank", `${t.bank.bankName} •••• ${t.bank.last4}`]] as Array<[string, string]>) : []),
               ...(t.failureReason ? ([["Reason", t.failureReason]] as Array<[string, string]>) : []),

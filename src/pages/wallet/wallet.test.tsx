@@ -137,6 +137,46 @@ describe("wallet", () => {
     expect(within(row).getByText("Test")).toBeInTheDocument();
   });
 
+  it("BiSupplyNet supplier earnings are labelled BiSupplyNet sale, store orders Store sale (list, detail, filter)", async () => {
+    const SUPPLY = TX({ _id: "t3", amount: 97000, description: "BiSupplyNet order SN-4H2K: on hold until the buyer confirms delivery", reference: "so1:held", order: null, supplyOrder: { _id: "so1", trackingNo: "SN-4H2K" }, source: "bisupplynet", label: "BiSupplyNet sale" });
+    // An older backend without `source`: the description still tells them apart.
+    const LEGACY = TX({ _id: "t4", description: "BiSupplyNet order SN-OLD1: on hold until the buyer confirms delivery", reference: "x:held", order: null });
+    fb.handlers["GET /wallet/transactions"] = () => [200, { transactions: [TX({ source: "store", label: "Store sale" }), SUPPLY, LEGACY], total: 3, page: 1, totalPages: 1 }];
+    fb.handlers["GET /wallet/transactions/t3"] = () => [200, { ...SUPPLY, related: [], bank: WALLET.bank }];
+    const user = userEvent.setup();
+    const router = renderApp("/wallet/transactions");
+    const store = (await screen.findByRole("link", { name: "BM-AAAA-BBBB" })).closest("li")!;
+    expect(within(store).getByText(/Store sale/)).toBeInTheDocument();
+    const supply = screen.getByRole("link", { name: "SN-4H2K" }).closest("li")!;
+    expect(within(supply).getByText(/BiSupplyNet sale/)).toBeInTheDocument();
+    expect(within(supply).queryByText(/Store sale/)).not.toBeInTheDocument();
+    const legacy = screen.getByRole("link", { name: "x:held" }).closest("li")!;
+    expect(within(legacy).getByText(/BiSupplyNet sale/)).toBeInTheDocument();
+
+    await user.selectOptions(screen.getByRole("combobox", { name: "Type" }), "credit:bisupplynet");
+    await waitFor(() => expect(router.state.location.search).toContain("source=bisupplynet"));
+    const call = [...fb.calls].reverse().find((c) => c.key === "GET /wallet/transactions");
+    expect(call).toBeDefined();
+    await waitFor(() => expect(fb.calls.some((c) => c.key === "GET /wallet/transactions")).toBe(true));
+
+    await router.navigate("/wallet/transactions/t3");
+    expect(await screen.findByRole("heading", { level: 1, name: /BiSupplyNet sale/ })).toBeInTheDocument();
+    expect(screen.getByRole("link", { name: "SN-4H2K" })).toHaveAttribute("href", "/bisupplynet/orders/so1");
+  });
+
+  it("the type filter sends type=credit&source=store for store sales", async () => {
+    const urls: string[] = [];
+    fb.handlers["GET /wallet/transactions"] = (_b, _h, url) => {
+      urls.push(url.search);
+      return [200, { transactions: [TX()], total: 1, page: 1, totalPages: 1 }];
+    };
+    const user = userEvent.setup();
+    renderApp("/wallet/transactions");
+    await screen.findByRole("link", { name: "BM-AAAA-BBBB" });
+    await user.selectOptions(screen.getByRole("combobox", { name: "Type" }), "credit:store");
+    await waitFor(() => expect(urls.some((u) => u.includes("type=credit") && u.includes("source=store"))).toBe(true));
+  });
+
   it("06.03: custom interval needs 7–90 days; saving sends the schedule", async () => {
     fb.handlers["PUT /wallet/withdrawal-schedule"] = (b) => [200, { wallet: { ...WALLET, schedule: { ...WALLET.schedule, interval: b.interval, days: b.days ?? 30, nextWithdrawalDate: "2026-12-10T09:00:00Z", eligibleNow: false } } }];
     const user = userEvent.setup();

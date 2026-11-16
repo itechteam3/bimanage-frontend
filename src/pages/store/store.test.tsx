@@ -195,6 +195,14 @@ describe("merchant store", () => {
     expect(await screen.findByText(/1 added to your store/)).toBeInTheDocument();
   });
 
+  it("08.06: says only stock stays in step with Inventory; the store price is set separately", async () => {
+    fb.handlers["GET /inventory/products"] = () => [200, [{ _id: "i1", name: "Canvas tote", sellingPrice: 12000, stockQuantity: 9, totalSold: 0 }]];
+    renderApp("/store/products/sync");
+    expect(await screen.findByText("Bring products over from Inventory. Only stock stays in step with it; the store price is set separately.")).toBeInTheDocument();
+    expect(screen.getByText("Set on the store product (starts at the inventory price)")).toBeInTheDocument();
+    expect(screen.queryByText(/price and stock stay in step/i)).not.toBeInTheDocument();
+  });
+
   it("08.08: templates the plan doesn't include show an upgrade link", async () => {
     fb.handlers["GET /store/templates"] = () => [200, { current: "basic", plan: "standard", templates: [{ key: "basic", name: "Basic", allowed: true }, { key: "standard", name: "Standard", allowed: true }, { key: "premium", name: "Premium", allowed: false }] }];
     fb.handlers["PUT /store/template"] = (b) => [200, { ...STORE, template: b.template }];
