@@ -1,11 +1,12 @@
 import { useCallback, useEffect, useLayoutEffect, useRef, useState, type FormEvent, type ReactNode } from "react";
 import { Link } from "react-router-dom";
 import { useQuery } from "@tanstack/react-query";
-import { IconMessageChatbot, IconSend, IconSparkles, IconX } from "@tabler/icons-react";
+import { IconSend, IconX } from "@tabler/icons-react";
 import { Button, ButtonLink } from "@/components/ui/Button";
 import { ApiError } from "@/lib/api/client";
 import { useAuth } from "@/lib/auth/AuthProvider";
 import { cn } from "@/lib/cn";
+import { FeliAvatar } from "@/components/feli/FeliAvatar";
 import { cleanFeliText } from "@/lib/feli/clean";
 import {
   FELI_GUEST_MAX,
@@ -193,7 +194,8 @@ function ReplyText({ text }: { text: string }) {
 function Message({ turn }: { turn: FeliGuestTurn }) {
   const mine = turn.role === "user";
   return (
-    <div className={cn("flex min-w-0 max-w-[88%] flex-col", mine ? "self-end" : "self-start")}>
+    <div className={cn("flex min-w-0 max-w-[88%] items-end gap-2", mine ? "self-end" : "self-start")}>
+      {!mine && <FeliAvatar size="sm" decorative />}
       <p className="sr-only">{mine ? "You said:" : "FELI said:"}</p>
       <div className={cn("min-w-0 break-words rounded-2xl px-4 py-2.5 text-body-sm [overflow-wrap:anywhere]", mine ? "rounded-br-md bg-brand-navy text-ink-on-brand" : "rounded-bl-md bg-surface-tint-feli text-ink-strong")}>
         {mine ? <p className="whitespace-pre-wrap">{turn.content}</p> : <ReplyText text={turn.content} />}
@@ -204,11 +206,14 @@ function Message({ turn }: { turn: FeliGuestTurn }) {
 
 function Typing() {
   return (
-    <div role="status" className="flex items-center gap-1 self-start rounded-2xl rounded-bl-md bg-surface-tint-feli px-4 py-3" data-testid="feli-typing">
-      <span className="sr-only">FELI is typing…</span>
-      {[0, 1, 2].map((i) => (
-        <span key={i} aria-hidden="true" className="fg-dot size-2 rounded-full bg-ink-muted" style={{ ["--fg-i" as string]: i }} />
-      ))}
+    <div className="flex items-end gap-2 self-start">
+      <FeliAvatar size="sm" decorative />
+      <div role="status" className="flex items-center gap-1 rounded-2xl rounded-bl-md bg-surface-tint-feli px-4 py-3" data-testid="feli-typing">
+        <span className="sr-only">FELI is typing…</span>
+        {[0, 1, 2].map((i) => (
+          <span key={i} aria-hidden="true" className="fg-dot size-2 rounded-full bg-ink-muted" style={{ ["--fg-i" as string]: i }} />
+        ))}
+      </div>
     </div>
   );
 }
@@ -394,9 +399,12 @@ export function FeliGuestChat() {
         aria-controls={PANEL_ID}
         aria-label="Talk to FELI"
         onClick={() => (open ? closeChat() : openChat())}
-        className="fg-bubble fixed bottom-[max(1rem,env(safe-area-inset-bottom))] right-[max(1rem,env(safe-area-inset-right))] z-[15] flex h-14 min-w-14 items-center justify-center gap-2 rounded-full bg-brand-navy px-4 text-ink-on-brand shadow-floating md:bottom-6 md:right-6 md:px-5"
+        className={cn(
+          "fg-bubble fixed bottom-[max(1rem,env(safe-area-inset-bottom))] right-[max(1rem,env(safe-area-inset-right))] z-[15] flex h-14 min-w-14 items-center justify-center gap-2 rounded-full bg-brand-navy text-ink-on-brand shadow-floating md:bottom-6 md:right-6",
+          open ? "px-4 md:px-5" : "px-1 md:pl-1 md:pr-5"
+        )}
       >
-        {open ? <IconX className="size-6" aria-hidden="true" /> : <IconMessageChatbot className="size-7" aria-hidden="true" />}
+        {open ? <IconX className="size-6" aria-hidden="true" /> : <FeliAvatar size="lg" decorative />}
         <span className="hidden text-action md:inline">Talk to FELI</span>
       </button>
 
@@ -415,9 +423,7 @@ export function FeliGuestChat() {
             )}
           >
             <header className="flex items-center gap-3 border-b border-line-subtle px-4 py-3">
-              <span aria-hidden="true" className="flex size-10 shrink-0 items-center justify-center rounded-full bg-brand-navy text-ink-on-brand">
-                <IconSparkles className="size-5" />
-              </span>
+              <FeliAvatar size="md" decorative />
               <div className="min-w-0 flex-1">
                 <h2 id="fg-title" className="text-card-heading text-ink-strong">FELI</h2>
                 <p className="text-body-sm text-ink-muted">Ask about BiManage</p>
