@@ -11,6 +11,7 @@ import { UpdatedNote } from "@/components/feedback/UpdatedNote";
 import { ApiError, saveBlob } from "@/lib/api/client";
 import { applyFieldErrors } from "@/lib/api/errorMessage";
 import { useAuth } from "@/lib/auth/AuthProvider";
+import { useAccountProfile } from "@/lib/account/api";
 import { count, naira, shortDate } from "@/lib/format";
 import { cn } from "@/lib/cn";
 import { useUrlState } from "@/lib/nav/useUrlState";
@@ -25,6 +26,7 @@ import {
   useBanks,
   useSaveSchedule,
   useSetupBank,
+  requestBankChangeCode,
   useWallet,
   useWalletTransaction,
   useWalletTransactions,
@@ -138,6 +140,7 @@ function Overview({ w }: { w: Wallet }) {
       </PageTitle>
       <p className="-mt-4 text-body-sm text-ink-muted">Track earnings, money on hold and payouts.</p>
       <WalletTabs />
+      <PayoutsPausedNote until={w.payoutsPausedUntil} />
       <IntroCard eyebrow={EYEBROW} title="Store earnings become available when an order is completed (or 7 days after delivery)." />
       <UpdatedNote updatedAt={dataUpdatedAt} className="-mb-2" />
       <div className="grid grid-cols-2 gap-3 lg:grid-cols-4 lg:gap-4">
@@ -227,7 +230,26 @@ function TxList({ items, empty }: { items: WalletTx[]; empty: string }) {
 const bankSchema = z.object({
   bankCode: z.string().min(1, "Choose your bank."),
   accountNumber: z.string().trim().regex(/^\d{10}$/, "Enter the 10-digit account number (NUBAN)."),
+  // Confirming it's you (security fix P1-2): the password, or an emailed code.
+  currentPassword: z.string().optional(),
+  code: z.string().optional(),
 });
+
+const pausedDate = (iso: string) => new Date(iso).toLocaleString("en-GB", { day: "numeric", month: "short", hour: "2-digit", minute: "2-digit", timeZone: "Africa/Lagos" });
+
+/** Payouts wait after a bank account change: say until when. */
+export function PayoutsPausedNote({ until, className }: { until?: string | null; className?: string }) {
+  if (!until || new Date(until) <= new Date()) return null;
+  return (
+    <section role="status" className={cn("flex gap-3 rounded-xl bg-surface-tint-warm px-5 py-4", className)}>
+      <IconLock aria-hidden="true" className="mt-0.5 size-5 shrink-0 text-ink-brand" />
+      <div>
+        <p className="font-semibold text-ink-strong">Payouts paused until {pausedDate(until)}</p>
+        <p className="text-body-sm text-ink-secondary">For your security, payouts wait 48 hours after the bank account is changed. If you didn&apos;t change it, reset your password and contact support.</p>
+      </div>
+    </section>
+  );
+}
 
 export function BankAccountPage() {
   return <WithWallet>{(w) => <BankAccount w={w} />}</WithWallet>;
@@ -236,10 +258,14 @@ export function BankAccountPage() {
 function BankAccount({ w }: { w: Wallet }) {
   const banks = useBanks();
   const save = useSetupBank();
+  const profile = useAccountProfile();
+  const googleOnly = profile.data?.hasPassword === false;
+  const [codeNote, setCodeNote] = useState<string | null>(null);
+  const [codeSending, setCodeSending] = useState(false);
   const [holder, setHolder] = useState<{ state: "idle" | "checking" | "ok" | "failed"; name?: string; message?: string }>({ state: "idle" });
   const [formError, setFormError] = useState<unknown>(null);
   const [saved, setSaved] = useState(false);
-  const { register, handleSubmit, watch, setError, setValue, formState, reset } = useForm<z.infer<typeof bankSchema>>({ resolver: zodResolver(bankSchema), defaultValues: { bankCode: w.bank?.bankCode ?? "", accountNumber: "" } });
+  const { register, handleSubmit, watch, setError, setValue, formState, reset } = useForm<z.infer<typeof bankSchema>>({ resolver: zodResolver(bankSchema), defaultValues: { bankCode: w.bank?.bankCode ?? "", accountNumber: "", currentPassword: "", code: "" } });
   const guard = useLeaveGuard(formState.isDirty && !formState.isSubmitSuccessful);
   const bankCode = watch("bankCode");
   const accountNumber = watch("accountNumber");
@@ -261,18 +287,35 @@ function BankAccount({ w }: { w: Wallet }) {
     };
   }, [bankCode, accountNumber]);
 
+  const sendCode = async () => {
+    setFormError(null);
+    setCodeSending(true);
+    try {
+      setCodeNote((await requestBankChangeCode()).message);
+    } catch (err) {
+      setFormError(err);
+    } finally {
+      setCodeSending(false);
+    }
+  };
+
   const onSubmit = handleSubmit(async (v) => {
     setFormError(null);
     setSaved(false);
+    if (googleOnly ? !/^\d{6}$/.test((v.code ?? "").trim()) : !v.currentPassword) {
+      setError(googleOnly ? "code" : "currentPassword", { message: googleOnly ? "Enter the 6-digit code we emailed you." : "Enter your BiManage password." });
+      return;
+    }
     try {
       const bankName = banks.data?.find((b) => b.code === v.bankCode)?.name;
-      await save.mutateAsync({ ...v, bankName });
+      await save.mutateAsync({ bankCode: v.bankCode, accountNumber: v.accountNumber, bankName, ...(googleOnly ? { code: v.code?.trim() } : { currentPassword: v.currentPassword }) });
       guard.allow();
-      reset({ bankCode: v.bankCode, accountNumber: "" });
+      reset({ bankCode: v.bankCode, accountNumber: "", currentPassword: "", code: "" });
+      setCodeNote(null);
       setSaved(true);
     } catch (err) {
       if (err instanceof ApiError && (err.data as { code?: string }).code === "bank_validation_failed") setHolder({ state: "failed", message: err.message });
-      if (!applyFieldErrors(err, setError, ["accountNumber", "bankCode"])) setFormError(err);
+      if (!applyFieldErrors(err, setError, ["accountNumber", "bankCode", "currentPassword", "code"])) setFormError(err);
     }
   });
   const paymentsOff = banks.error instanceof ApiError && banks.error.status === 503;
@@ -284,6 +327,7 @@ function BankAccount({ w }: { w: Wallet }) {
       <p className="-mt-4 text-body-sm text-ink-muted">Where your payouts are sent. We check the account name with your bank.</p>
       <WalletTabs />
       <IntroCard eyebrow={EYEBROW} title={w.bank ? `Payouts go to ${masked(w)} (${w.bank.accountName}).` : "Add the account your payouts should go to."} />
+      <PayoutsPausedNote until={w.payoutsPausedUntil} />
       <div className="grid grid-cols-[minmax(0,1fr)] gap-5 lg:grid-cols-[minmax(0,1.7fr)_minmax(0,1fr)]">
         <form noValidate onSubmit={onSubmit} className="flex flex-col gap-5">
           <Panel title={w.bank ? "Change bank account" : "Bank details"} subtitle="Nigerian bank accounts in naira.">
@@ -303,6 +347,20 @@ function BankAccount({ w }: { w: Wallet }) {
                 <Field label="Currency">
                   <TextInput readOnly value="NGN (Nigerian naira)" />
                 </Field>
+                {googleOnly ? (
+                  <Field label="Code from your email" required error={formState.errors.code?.message} hint={codeNote ?? "To confirm it's you, we email you a 6-digit code."} className="md:col-span-2">
+                    <div className="flex flex-col gap-2 md:flex-row">
+                      <TextInput inputMode="numeric" autoComplete="one-time-code" maxLength={6} className="min-w-0 flex-1" {...register("code")} />
+                      <Button type="button" variant="secondary" size="md" onClick={() => void sendCode()} loading={codeSending} loadingText="Sending…">
+                        {codeNote ? "Send a new code" : "Email me a code"}
+                      </Button>
+                    </div>
+                  </Field>
+                ) : (
+                  <Field label="Your BiManage password" required error={formState.errors.currentPassword?.message} hint="To confirm it's you before payouts go to a new account." className="md:col-span-2">
+                    <TextInput type="password" autoComplete="current-password" {...register("currentPassword")} />
+                  </Field>
+                )}
               </div>
             )}
             {holder.state === "failed" && (
@@ -339,6 +397,7 @@ function BankAccount({ w }: { w: Wallet }) {
             ["Payout provider", "Paystack"],
             ["Current account", masked(w)],
             ["Privacy", "Only the last 4 digits are shown"],
+            ["Security", "Changing the account needs your password and pauses payouts for 48 hours"],
           ]}
         />
       </div>
@@ -485,6 +544,7 @@ function Withdraw({ w }: { w: Wallet }) {
       </PageTitle>
       <p className="-mt-4 text-body-sm text-ink-muted">Transfer available earnings to your bank account.</p>
       <WalletTabs />
+      <PayoutsPausedNote until={w.payoutsPausedUntil} />
       <IntroCard eyebrow={EYEBROW} title="Money on hold and test money can't be withdrawn." />
       <TestMoneyNote w={w} />
       <div className="grid grid-cols-[minmax(0,1fr)] gap-5 lg:grid-cols-[minmax(0,1.7fr)_minmax(0,1fr)]">

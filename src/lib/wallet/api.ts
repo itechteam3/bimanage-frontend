@@ -35,6 +35,8 @@ export interface Wallet {
   fees: { withdrawalRate: number; paystackTransferFee: boolean; minWithdrawal: number };
   paymentsMode: "test" | "live" | null;
   payoutsCount?: number;
+  /** Payouts wait after a bank account change (backend P1-2); null when not paused. */
+  payoutsPausedUntil?: string | null;
 }
 
 export interface WithdrawalQuote {
@@ -122,7 +124,12 @@ function useWalletMutation<V, R>(fn: (v: V) => Promise<R>) {
   return useMutation({ mutationFn: fn, onSuccess: () => qc.invalidateQueries({ queryKey: ["wallet"] }) });
 }
 
-export const useSetupBank = () => useWalletMutation((v: { accountNumber: string; bankCode: string; bankName?: string }) => api<{ accountName: string; wallet: Wallet }>("/wallet/setup-bank", { method: "POST", body: v }));
+/** Saving the payout account needs the password, or an emailed code for Google-only accounts (P1-2). */
+export const useSetupBank = () =>
+  useWalletMutation((v: { accountNumber: string; bankCode: string; bankName?: string; currentPassword?: string; code?: string }) =>
+    api<{ accountName: string; wallet: Wallet; message?: string }>("/wallet/setup-bank", { method: "POST", body: v })
+  );
+export const requestBankChangeCode = () => api<{ message: string }>("/wallet/bank-change-code", { method: "POST" });
 
 export const useSaveSchedule = () =>
   useWalletMutation((v: { interval: Wallet["schedule"]["interval"]; days?: number; notificationEmail?: string; payoutReminder?: boolean }) => api<{ wallet: Wallet }>("/wallet/withdrawal-schedule", { method: "PUT", body: v }));
