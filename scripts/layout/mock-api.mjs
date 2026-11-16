@@ -237,6 +237,9 @@ routes["GET /api/subscriptions/current"] = { ...routes["GET /api/subscriptions/c
 // Public landing endpoints (signed-out "/").
 routes["GET /api/public/plans"] = { currency: "NGN", plans: routes["GET /api/subscriptions/plans"], startupPackages: [{ id: "starter", name: "Starter", amount: 199999, currency: "NGN", summary: "Core business features for 30 days", days: 30 }] };
 routes["GET /api/public/stats"] = { businesses: { count: 12, show: false }, storesLive: { count: 3, show: false }, ordersProcessed: { count: 40, show: false }, reviews: { count: 1, average: 5, show: false } };
+// "Talk to FELI" guest chat (public; no Turnstile in fixtures).
+routes["GET /api/public/feli/config"] = { enabled: true, limit: 10, remaining: 7, suggestions: ["What is BiManage?", "How much does it cost?", "Who owns BiManage?", "How do I start?"], turnstileSiteKey: null, disclaimer: "FELI can make mistakes; for account help, contact us." };
+routes["POST /api/public/feli"] = { reply: "BiManage helps small businesses run sales, inventory, invoices, an online store and payouts in one place.\n\nWith it you can:\n- record sales and send invoices\n- track stock across products\n- open your own online store", suggestions: ["How much does it cost?", "How do I start?"], remaining: 6, limit: 10 };
 routes["GET /api/support/faqs"] ||= [];
 
 // Optional overlay (e.g. the marketing sample business): FIXTURE_OVERLAY=path/to/module.mjs

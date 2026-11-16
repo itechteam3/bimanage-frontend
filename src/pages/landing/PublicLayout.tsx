@@ -7,6 +7,7 @@ import { ErrorNote } from "@/components/feedback/ErrorNote";
 import { cn } from "@/lib/cn";
 import { useAuth } from "@/lib/auth/AuthProvider";
 import { useNewsletterSignup } from "@/lib/landing/api";
+import { FeliGuestChat } from "./FeliGuestChat";
 import "./landing.css";
 
 // The public site's shared frame: navbar and footer used by the landing page
@@ -223,6 +224,7 @@ export function PublicLayout({ children, className, rootRef }: { children: React
       <NavBar />
       <main id="main">{children}</main>
       <Footer />
+      <FeliGuestChat />
     </div>
   );
 }

@@ -153,7 +153,7 @@ describe("landing page (/)", () => {
     expect(screen.getByAltText(/in BiManage on a phone\.$/)).toHaveAttribute("loading", "lazy");
   });
 
-  it("every Contact us link goes to /contact (navbar, mobile menu, floating button, footer)", async () => {
+  it("every Contact us link goes to /contact (navbar, mobile menu, footer)", async () => {
     const user = userEvent.setup();
     renderApp("/");
     await screen.findByRole("heading", { level: 1 });
@@ -163,7 +163,7 @@ describe("landing page (/)", () => {
     await user.click(screen.getByRole("button", { name: "Open menu" }));
     expect(within(screen.getByRole("navigation", { name: "Menu" })).getByRole("link", { name: "Contact us" })).toHaveAttribute("href", "/contact");
     const links = screen.getAllByRole("link", { name: "Contact us" });
-    expect(links).toHaveLength(4);
+    expect(links).toHaveLength(3);
     for (const a of links) expect(a).toHaveAttribute("href", "/contact");
   });
 
