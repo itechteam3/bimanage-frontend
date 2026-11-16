@@ -114,6 +114,8 @@ describe("inventory (09.xx)", () => {
     await user.clear(field);
     await user.type(field, "5000112637922{Enter}");
     expect(await screen.findByText("Cola 330ml")).toBeInTheDocument();
+    // Signed in: the API now requires it for outside lookups.
+    expect(last("GET /barcode/lookup/5000112637922")!.headers.Authorization).toMatch(/^Bearer /);
     await user.click(screen.getByRole("button", { name: /add as a new product/i }));
     await waitFor(() => expect(router.state.location.pathname).toBe("/inventory/products/new"));
     expect(await screen.findByLabelText(/product name/i)).toHaveValue("Cola 330ml");
