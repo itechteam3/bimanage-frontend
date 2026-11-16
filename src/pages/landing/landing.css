@@ -36,6 +36,22 @@
 }
 .lp-scroll-hint { animation: lp-bob 2.2s ease-in-out 1.2s infinite; }
 
+/* Hero "live" cards (sample UI): each floats on its own slow loop after the
+   staggered entrance; the order card has a soft live pulse. */
+.lp-hcard-float { animation: lp-float var(--lp-fdur, 6s) ease-in-out var(--lp-fdelay, 1.6s) infinite; }
+@keyframes lp-live {
+  0% { box-shadow: 0 0 0 0 color-mix(in srgb, var(--color-success) 55%, transparent); }
+  70%, 100% { box-shadow: 0 0 0 6px color-mix(in srgb, var(--color-success) 0%, transparent); }
+}
+.lp-live-dot { animation: lp-live 2s ease-out 1.2s infinite; }
+/* Short laptop screens: less padding, and three cards instead of four, so
+   the hero never grows taller than the screen. */
+@media (min-width: 1024px) and (max-height: 640px) {
+  .lp-hero-pad { padding-top: 2rem; padding-bottom: 4rem; }
+  .lp-hcards { gap: 0.75rem; }
+  .lp-hcard-extra { display: none; }
+}
+
 /* How it works: the dashed line between step icons (side by side). */
 .lp-step-line {
   border-top: 2px dashed color-mix(in srgb, var(--color-brand-navy) 22%, transparent);
@@ -68,10 +84,12 @@
 
 @media (prefers-reduced-motion: reduce) {
   .lp-js [data-reveal] { opacity: 1; transform: none; transition: none; }
-  .lp-rise, .lp-preview, .lp-float, .lp-fade, .lp-scroll-hint { animation: none; }
+  .lp-rise, .lp-preview, .lp-float, .lp-fade, .lp-scroll-hint, .lp-hcard-float, .lp-live-dot { animation: none; }
   .lp-lift:hover { transform: none; }
 }
 html.reduce-motion .lp-js [data-reveal] { opacity: 1; transform: none; transition: none; }
+html.reduce-motion .lp-hcard-float,
+html.reduce-motion .lp-live-dot,
 html.reduce-motion .lp-rise,
 html.reduce-motion .lp-preview,
 html.reduce-motion .lp-float,

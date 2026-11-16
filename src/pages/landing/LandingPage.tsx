@@ -2,7 +2,11 @@ import { useEffect, useRef, useState } from "react";
 import { Link } from "react-router-dom";
 import {
   IconBarcode,
+  IconBuildingBank,
   IconBuildingStore,
+  IconCalendarCheck,
+  IconPackage,
+  IconShoppingBag,
   IconChevronDown,
   IconChartBar,
   IconCheck,
@@ -198,27 +202,124 @@ function SectionTitle({ eyebrow, title, subtitle, light }: { eyebrow?: string; t
   );
 }
 
+// Hero trust row: short, TRUE facts only.
+//   14-day free trial: backend onboardingController.startTrial (+14 days), FAQ "How does the free trial work?"
+//   Paystack: backend src/utils/paystack.js (store checkout, subscriptions, escrow), Trust section below
+//   Phone and laptop: every screen is checked at 360 to 1440px (scripts/check-layout.mjs)
+const HERO_TRUST = [
+  { icon: IconCalendarCheck, text: "14-day free trial" },
+  { icon: IconCreditCard, text: "Payments through Paystack" },
+  { icon: IconDevices, text: "Works on phone and laptop" },
+] as const;
+
+// Floating "live" cards beside the hero text. Sample values, styled like the
+// app's cards; the whole cluster is decorative (aria-hidden), so screen
+// readers never hear made-up amounts.
+type HeroCard = { key: string; icon?: typeof IconReceipt; tone?: string; title: string; value?: string; meta: string; live?: boolean };
+const HERO_CARDS: HeroCard[] = [
+  { key: "order", icon: IconShoppingBag, tone: "bg-kpi-orders-bg text-kpi-orders-fg", title: "New order", value: "₦45,000", meta: "Paid online · just now", live: true },
+  { key: "stock", icon: IconPackage, tone: "bg-kpi-stock-bg text-kpi-stock-fg", title: "Low stock: Ankara dress", meta: "3 left · time to restock" },
+  { key: "payout", icon: IconBuildingBank, tone: "bg-success-bg text-success-ink", title: "Payout sent to your bank", value: "₦120,000", meta: "Today, 10:42" },
+  { key: "feli", title: "FELI suggested 3 tasks", meta: "Waiting for your approval" },
+];
+
+function HeroCardView({ c, compact }: { c: HeroCard; compact?: boolean }) {
+  const Icon = c.icon;
+  return (
+    <div className={cn("lp-hcard flex items-center gap-3 rounded-xl border border-line-card bg-surface-card text-left shadow-floating", compact ? "h-full p-2.5" : "p-3.5")}>
+      {Icon ? (
+        <span className={cn("flex shrink-0 items-center justify-center rounded-md", c.tone, compact ? "size-8" : "size-10")}>
+          <Icon className={compact ? "size-4" : "size-5"} />
+        </span>
+      ) : (
+        <FeliAvatar size={compact ? "sm" : "md"} decorative />
+      )}
+      <span className="min-w-0 flex-1">
+        <span className={cn("flex items-center gap-1.5 font-semibold text-ink-strong", compact ? "text-caption" : "text-body-sm")}>
+          {c.live && <span className="lp-live-dot size-2 shrink-0 rounded-full bg-success" />}
+          <span className="min-w-0">{c.title}</span>
+        </span>
+        {!compact && <span className="mt-0.5 block text-caption text-ink-muted">{c.meta}</span>}
+        {compact && c.value && <span className="block text-caption text-ink-muted">{c.value}</span>}
+      </span>
+      {!compact && c.value && <span className="shrink-0 text-body-sm font-semibold tabular-nums text-ink-brand">{c.value}</span>}
+    </div>
+  );
+}
+
+/** Desktop: four cards, staggered in, each floating on its own slow loop. */
+function HeroCards() {
+  return (
+    <div className="lp-hcards relative hidden flex-col gap-4 lg:flex" aria-hidden="true">
+      {HERO_CARDS.map((c, i) => (
+        <div key={c.key} className={cn("lp-rise w-[19rem]", i % 2 ? "ml-10" : "ml-0", i === 3 && "lp-hcard-extra")} style={{ ["--lp-delay" as string]: `${420 + i * 160}ms` }}>
+          <div className="lp-hcard-float" style={{ ["--lp-fdur" as string]: `${5.5 + i * 0.7}s`, ["--lp-fdelay" as string]: `${1.4 + i * 0.45}s` }}>
+            <HeroCardView c={c} />
+          </div>
+        </div>
+      ))}
+    </div>
+  );
+}
+
+/** Phones and tablets: two small cards under the buttons. */
+function HeroCardsCompact() {
+  const pick = HERO_CARDS.filter((c) => c.key === "order" || c.key === "feli");
+  return (
+    <div className="mt-6 grid max-w-[26rem] grid-cols-2 gap-3 lg:hidden" aria-hidden="true">
+      {pick.map((c, i) => (
+        <div key={c.key} className="lp-rise h-full min-w-0" style={{ ["--lp-delay" as string]: `${420 + i * 160}ms` }}>
+          <div className="lp-hcard-float h-full" style={{ ["--lp-fdur" as string]: `${5.5 + i * 0.9}s`, ["--lp-fdelay" as string]: `${1.4 + i * 0.5}s` }}>
+            <HeroCardView c={c} compact />
+          </div>
+        </div>
+      ))}
+    </div>
+  );
+}
+
 function Hero() {
   return (
     // Full-bleed hero, on its own: the Figma city photo across the whole
-    // width, a navy shade for legible text, the headline and the two buttons.
+    // width, a navy shade for legible text, the headline, the buttons and a
+    // trust row; on desktop a cluster of sample "live" cards on the right.
     <section className="lp-hero-full relative isolate flex items-center overflow-hidden bg-brand-navy text-ink-on-brand">
       <picture>
         <source media="(min-width: 768px)" srcSet={heroImg} />
         <img src={heroSmImg} alt="" width={1600} height={809} fetchPriority="high" decoding="async" className="absolute inset-0 -z-20 h-full w-full object-cover" />
       </picture>
       <div className="lp-hero-shade absolute inset-0 -z-10" aria-hidden="true" />
-      <Container className="w-full py-16 md:py-20 lg:py-24">
-        <div className="max-w-[42rem]">
-          <h1 className="lp-rise text-title-lg md:text-display lg:text-hero" style={{ ["--lp-delay" as string]: "60ms" }}>
-            Smart business starts with BiManage
-          </h1>
-          <p className="lp-rise mt-4 text-body-lg text-ink-on-brand-muted" style={{ ["--lp-delay" as string]: "160ms" }}>
-            Sales, inventory, invoices, your online store, customers, payouts and wholesale buying, in one dashboard built for Nigerian businesses.
-          </p>
-          <div className="lp-rise mt-6 flex flex-wrap gap-3" style={{ ["--lp-delay" as string]: "260ms" }}>
-            <AuthCtas />
+      <Container className="lp-hero-pad w-full py-12 md:py-20 lg:py-14">
+        <div className="lp-hero-inner grid grid-cols-[minmax(0,1fr)] items-center gap-10 lg:grid-cols-[minmax(0,1fr)_minmax(0,22rem)]">
+          <div className="max-w-[42rem]">
+            <p className="lp-rise inline-flex max-w-full items-center gap-2 rounded-full bg-brand-navy-panel py-1 pl-1 pr-3 text-body-sm text-ink-on-brand ring-1 ring-line-on-brand" style={{ ["--lp-delay" as string]: "0ms" }}>
+              <FeliAvatar size="xs" decorative />
+              <span className="rounded-full bg-surface-tint-feli px-2 text-caption font-semibold text-ink-brand">New</span>
+              <span className="min-w-0">Meet FELI, your AI business assistant</span>
+            </p>
+            <h1 className="lp-rise mt-5 text-title-lg md:text-display lg:text-hero" style={{ ["--lp-delay" as string]: "60ms" }}>
+              Smart business starts with BiManage
+            </h1>
+            <p className="lp-rise mt-4 text-body-lg text-ink-on-brand-muted" style={{ ["--lp-delay" as string]: "160ms" }}>
+              Sales, inventory, invoices, your online store, customers, payouts and wholesale buying, in one dashboard built for Nigerian businesses.
+            </p>
+            <div className="lp-rise mt-6 flex flex-wrap gap-3" style={{ ["--lp-delay" as string]: "260ms" }}>
+              <AuthCtas />
+            </div>
+            <ul aria-label="Why it's easy to start" className="lp-rise mt-5 flex flex-wrap gap-x-5 gap-y-2 text-body-sm text-ink-on-brand-muted" style={{ ["--lp-delay" as string]: "340ms" }}>
+              {HERO_TRUST.map((t) => {
+                const Icon = t.icon;
+                return (
+                  <li key={t.text} className="flex items-center gap-1.5">
+                    <Icon aria-hidden="true" className="size-4 shrink-0 text-ink-on-brand-accent" />
+                    {t.text}
+                  </li>
+                );
+              })}
+            </ul>
+            <HeroCardsCompact />
           </div>
+          <HeroCards />
         </div>
       </Container>
       <a href="#lp-dashboard" aria-label="Scroll to the dashboard" className="lp-scroll-hint absolute bottom-[max(1rem,env(safe-area-inset-bottom))] left-1/2 flex size-11 -translate-x-1/2 items-center justify-center rounded-full text-ink-on-brand-muted hover:text-ink-on-brand md:bottom-6">

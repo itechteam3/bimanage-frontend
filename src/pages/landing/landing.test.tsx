@@ -153,6 +153,24 @@ describe("landing page (/)", () => {
     expect(document.getElementById("lp-dashboard")).toHaveAccessibleName("Everything your business needs, in one dashboard");
   });
 
+  it("the hero has the FELI badge, a trust row of true facts and decorative sample cards", async () => {
+    renderApp("/");
+    const h1 = await screen.findByRole("heading", { level: 1 });
+    const hero = h1.closest("section") as HTMLElement;
+    expect(within(hero).getByText("Meet FELI, your AI business assistant")).toBeInTheDocument();
+    const trust = within(hero).getByRole("list", { name: "Why it's easy to start" });
+    expect(within(trust).getAllByRole("listitem").map((li) => li.textContent)).toEqual(["14-day free trial", "Payments through Paystack", "Works on phone and laptop"]);
+    // The trial length matches what the backend grants and the FAQ says.
+    expect(readFileSync("src/pages/landing/faq.ts", "utf8")).toContain("14-day free trial");
+    // Sample "live" cards (desktop cluster + phone pair): hidden from screen readers.
+    const cards = [...hero.querySelectorAll(".lp-hcard")];
+    expect(cards.length).toBe(6);
+    for (const c of cards) expect(c.closest('[aria-hidden="true"]')).not.toBeNull();
+    expect(hero.textContent).toContain("₦45,000");
+    expect(within(hero).queryByRole("img", { name: /feli/i })).toBeNull();
+    expect(hero.textContent).not.toMatch(/[–—]/);
+  });
+
   it("How it works: three numbered steps with icons, no images", async () => {
     renderApp("/");
     await screen.findByRole("heading", { level: 1 });
