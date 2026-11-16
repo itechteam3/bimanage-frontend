@@ -65,8 +65,8 @@ export function installFakeSockets() {
   };
   return {
     sockets,
-    /** The newest socket to this URL suffix ("" = signed-in app, "/shop"). */
-    latest: (suffix = "") => [...sockets].reverse().find((s) => (suffix ? s.url.endsWith(suffix) : !s.url.endsWith("/shop")) && !s.closed),
+    /** The newest socket to this URL suffix ("" = signed-in app, "/shop", "/admin"). */
+    latest: (suffix = "") => [...sockets].reverse().find((s) => (suffix ? s.url.endsWith(suffix) : !s.url.endsWith("/shop") && !s.url.endsWith("/admin")) && !s.closed),
     restore: () => (transport.create = orig),
   };
 }

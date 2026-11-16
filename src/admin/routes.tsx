@@ -41,6 +41,9 @@ const AdminAccountPage = page(account, "AdminAccountPage");
 const AdminForgotPasswordPage = page(account, "AdminForgotPasswordPage");
 const AdminResetPasswordPage = page(account, "AdminResetPasswordPage");
 const AdminMorePage = page(shell, "AdminMorePage");
+const notifications = () => import("./pages/NotificationsPages");
+const NotificationsPage = page(notifications, "NotificationsPage");
+const NotificationSettingsPage = page(notifications, "NotificationSettingsPage");
 const RequireCan = lazy(() => shell().then((m) => ({ default: m.RequireCan as ComponentType<{ can: Capability; children: ReactNode }> })));
 
 const Wait = () => (
@@ -83,6 +86,8 @@ export const adminRoutes: RouteObject[] = [
       { path: "roles", element: gate("admins.manage", <RolesPage />), handle: { section: "Admin Roles" } },
       { path: "audit", element: gate("audit.read", <AuditPage />), handle: { section: "Audit trail" } },
       { path: "account", element: s(<AdminAccountPage />), handle: { section: "My account" } },
+      { path: "notifications", element: s(<NotificationsPage />), handle: { section: "Notifications" } },
+      { path: "notifications/settings", element: s(<NotificationSettingsPage />), handle: { section: "Notifications" } },
       { path: "more", element: s(<AdminMorePage />), handle: { section: "More" } },
       { path: "*", element: <Navigate to="/admin" replace /> },
     ],
