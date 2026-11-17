@@ -221,11 +221,6 @@ export function Footer() {
           <ErrorNote error={signup.error} fallback="We couldn't sign you up. Please try again." className="mt-3" />
         </div>
       </Container>
-      <Container className="pb-6">
-        <p className="max-w-[48rem] text-body-sm text-ink-on-brand-muted">
-          BiTechTeam helps people start and manage businesses; BiManage is its business management platform for business owners. Founded in {COMPANY.founded} and registered as {COMPANY.legalName} in {COMPANY.registered}. {COMPANY.founder.role}: {COMPANY.founder.name}. {COMPANY.cofounder.role}: {COMPANY.cofounder.name}.
-        </p>
-      </Container>
       <div className="border-t border-line-on-brand">
         <Container className="flex flex-col gap-2 py-5 md:flex-row md:items-center md:justify-between">
           <p className="text-body-sm text-ink-on-brand-muted">
