@@ -31,16 +31,15 @@ describe("approved BiTechTeam facts on the public site", async () => {
   const { serverStatus } = await import("@/lib/api/serverStatus");
   const { ALL_FAQS } = await import("@/pages/landing/faq");
 
-  it("the footer names the company, its dates, founder and co-founder, and links bitechteam.org", async () => {
+  it("the footer has only the copyright line, with BiTechTeam Limited linking to bitechteam.org (no company paragraph)", async () => {
     serverStatus.set("up");
     const fb = installFakeBackend();
     fb.handlers["GET /public/plans"] = () => [200, { plans: [] }];
     fb.handlers["GET /support/faqs"] = () => [200, []];
     renderApp("/faq");
     const footer = await screen.findByRole("contentinfo");
-    expect(footer).toHaveTextContent("Founded in June 2023 and registered as BiTechTeam Limited in December 2025.");
-    expect(footer).toHaveTextContent("Founder and CEO: Samuel Inyima.");
-    expect(footer).toHaveTextContent("Co-founder and CTO: Elijah Ayanlere.");
+    expect(footer).not.toHaveTextContent("Founder and CEO");
+    expect(footer).not.toHaveTextContent("BiTechTeam helps people start and manage businesses");
     const link = screen.getByRole("link", { name: "BiTechTeam Limited" });
     expect(link).toHaveAttribute("href", "https://bitechteam.org");
     expect(footer).toHaveTextContent(/BiManage, a product of BiTechTeam Limited. All rights reserved./);
