@@ -10,6 +10,7 @@ import { errorMessage } from "@/lib/api/errorMessage";
 import { useAuth } from "@/lib/auth/AuthProvider";
 import { authApi } from "@/lib/auth/api";
 import { LEGAL_LAST_UPDATED } from "@/config/legal";
+import { pendingNext } from "@/lib/auth/pending";
 
 // 02.06B "Compare onboarding paths" (Figma 2234:676): starting a business
 // (paid 30-day startup package) or existing business (14-day free trial).
@@ -66,6 +67,16 @@ export function PathPage() {
   const needsTerms = Boolean(user) && !user?.termsAcceptedAt;
   const [agreed, setAgreed] = useState(false);
   const [termsError, setTermsError] = useState<string | null>(null);
+  // Retailer (buys in bulk on BiSupplyNet, sells in their own store) or
+  // wholesaler (sells on BiSupplyNet). Everyone starts as a retailer; a
+  // wholesaler applies after onboarding and BiTechTeam approves it, so we
+  // only remember to open the application when onboarding is done.
+  const [kind, setKind] = useState<"retailer" | "wholesaler">(() => (pendingNext.get() === "/bisupplynet/sell/apply" ? "wholesaler" : "retailer"));
+  const chooseKind = (k: "retailer" | "wholesaler") => {
+    setKind(k);
+    if (k === "wholesaler") pendingNext.set("/bisupplynet/sell/apply");
+    else pendingNext.clear();
+  };
 
   /** Records the agreement first if it's still needed; false = stop. */
   const termsOk = async () => {
@@ -117,6 +128,23 @@ export function PathPage() {
         We'll guide you through the setup process, whichever path you choose.
       </IntroCard>
       {error && <AuthNote tone="danger">{error}</AuthNote>}
+      <fieldset className="flex min-w-0 flex-col gap-3 rounded-xl border border-line-card bg-surface-card p-4">
+        <legend className="px-1 text-title-sm text-ink-strong">Are you a retailer or a wholesaler?</legend>
+        {(
+          [
+            ["retailer", "Retailer", "You sell to customers. Buy in bulk on BiSupplyNet and resell in your own online store."],
+            ["wholesaler", "Wholesaler", "You sell in bulk to other businesses on BiSupplyNet. After setup you'll apply, and BiTechTeam reviews your business. Wholesalers don't buy on BiSupplyNet."],
+          ] as const
+        ).map(([value, label, hint]) => (
+          <label key={value} className="flex cursor-pointer items-start gap-3 rounded-lg p-2 text-body-lg text-ink-strong hover:bg-surface-pale">
+            <input type="radio" name="business-kind" value={value} checked={kind === value} onChange={() => chooseKind(value)} className="mt-1 size-5 shrink-0 accent-brand-navy" />
+            <span className="min-w-0">
+              <span className="font-semibold">{label}</span>
+              <span className="block text-body-sm text-ink-muted">{hint}</span>
+            </span>
+          </label>
+        ))}
+      </fieldset>
       {needsTerms && (
         <div className="flex flex-col gap-1 rounded-xl border border-line-card bg-surface-card p-4">
           <label className="flex cursor-pointer items-start gap-3 text-body-lg text-ink-strong">

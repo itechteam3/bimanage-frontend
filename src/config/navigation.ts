@@ -54,6 +54,8 @@ export interface NavItem {
   feature?: Feature;
   /** Owner only (billing). */
   ownerOnly?: boolean;
+  /** Hidden for wholesaler accounts (they sell on BiSupplyNet and don't run a retail store). */
+  retailOnly?: boolean;
 }
 
 // Desktop sidebar, in Figma order (1889:1781; Customers per 09.01).
@@ -66,7 +68,7 @@ export const SIDEBAR_NAV: NavItem[] = [
   { label: "Reports", to: "/reports", icon: IconReportAnalytics, feature: "analytics", permission: "viewAnalytics" },
   { label: "Projects", to: "/projects", icon: IconLayoutKanban, feature: "projects" },
   { label: "Team", to: "/settings/team", icon: IconUsersGroup, permission: "manageTeam" },
-  { label: "Online Store", to: "/store", icon: IconBuildingStore, feature: "store" },
+  { label: "Online Store", to: "/store", icon: IconBuildingStore, feature: "store", retailOnly: true },
   { label: "BiSupplyNet", to: "/bisupplynet", icon: IconTruckDelivery, feature: "bisupplynet", permission: ["accessBiSupplyNet", "sellOnBiSupplyNet"] },
   { label: "Wallet", to: "/wallet", icon: IconWallet, ownerOnly: true },
   { label: "FELI AI", to: "/feli", icon: IconSparkles },

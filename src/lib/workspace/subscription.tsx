@@ -31,6 +31,11 @@ export interface CurrentSubscription {
   /** What the current paid plan costs per cycle (0 on Freemium); from the server. */
   price?: number;
   canManageBilling?: boolean;
+  /** Retailer (buys on BiSupplyNet) or wholesaler (sells there); see lib/workspace/businessType.tsx. */
+  businessType?: "retailer" | "wholesaler";
+  businessTypeRequest?: import("./businessType").BusinessTypeRequest | null;
+  /** Wholesalers may run a retail online store (server setting, off by default). */
+  wholesalerRetailStore?: boolean;
 }
 
 export const useSubscription = () =>

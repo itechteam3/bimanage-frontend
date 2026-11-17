@@ -6,6 +6,7 @@ import { IntroCard, Panel } from "@/components/page/Blocks";
 import { StateCard } from "@/components/page/StateCard";
 import { useCan } from "@/lib/auth/useCan";
 import { useFeature, useSubscription } from "@/lib/workspace/subscription";
+import { useBusinessType } from "@/lib/workspace/businessType";
 import { planName } from "@/lib/subscription/api";
 import { cn } from "@/lib/cn";
 
@@ -39,10 +40,12 @@ export function Heading({ title, subtitle, action }: { title: ReactNode; subtitl
 }
 
 export function useBsnAccess() {
-  const canBuy = useCan("accessBiSupplyNet");
+  const buyPermission = useCan("accessBiSupplyNet");
   const canSell = useCan("sellOnBiSupplyNet");
   const sell = useFeature("bisupplynetSell");
-  return { canBuy, canSell, sellPlan: sell.access === true, loading: sell.loading };
+  // Retailers buy, wholesalers sell (lib/workspace/businessType.tsx); the server enforces it.
+  const { isWholesaler } = useBusinessType();
+  return { canBuy: buyPermission && !isWholesaler, canSell, isWholesaler, sellPlan: sell.access === true, loading: sell.loading };
 }
 
 function Tabs({ label, tabs }: { label: string; tabs: Array<[string, string, boolean?]> }) {
@@ -141,9 +144,9 @@ function SellUpgradeCard() {
 
 /** Buying pages: the "Buy from wholesalers" permission (the plan is checked by the route). */
 export function BuyGate({ children }: { children: ReactNode }) {
-  const { canBuy, canSell } = useBsnAccess();
+  const { canBuy, canSell, isWholesaler } = useBsnAccess();
   if (canBuy) return <>{children}</>;
-  if (canSell) return <Navigate to="/bisupplynet/sell" replace />;
+  if (canSell || isWholesaler) return <Navigate to="/bisupplynet/sell" replace />;
   return <PermissionCard what="buy from wholesalers" />;
 }
 
@@ -164,7 +167,8 @@ export function SellGate({ children }: { children: ReactNode }) {
 
 /** /bisupplynet: buying if allowed, otherwise selling. */
 export function BsnHome() {
-  const { canBuy, canSell } = useBsnAccess();
+  const { canBuy, canSell, isWholesaler } = useBsnAccess();
+  if (isWholesaler && canSell) return <Navigate to="/bisupplynet/sell" replace />;
   if (canBuy) return <Navigate to="/bisupplynet/suppliers" replace />;
   if (canSell) return <Navigate to="/bisupplynet/sell" replace />;
   return <PermissionCard what="use BiSupplyNet" />;

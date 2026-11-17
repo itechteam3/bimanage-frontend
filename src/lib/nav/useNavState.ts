@@ -20,6 +20,7 @@ export function useNavState(): (item: NavItem) => NavState {
   const isOwner = !workspace || workspace.role === "owner";
   return (item) => {
     if (item.ownerOnly && !isOwner) return "hidden";
+    if (item.retailOnly && sub.data?.businessType === "wholesaler" && !sub.data?.wholesalerRetailStore) return "hidden";
     const perms = item.permission ? ([] as Permission[]).concat(item.permission) : [];
     if (!isOwner && perms.length && workspace && perms.every((p) => permissionValue(workspace.permissions, p) === false)) return "hidden";
     if (item.feature && sub.data) {

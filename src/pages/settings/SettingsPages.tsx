@@ -1,3 +1,4 @@
+import { BusinessTypeCard } from "@/lib/workspace/businessType";
 import { useEffect, useState, type ReactNode } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { useForm } from "react-hook-form";
@@ -207,6 +208,7 @@ export function BusinessProfilePage() {
           </dl>
         </Panel>
       </div>
+      <BusinessTypeCard />
     </div>
   );
 }

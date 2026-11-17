@@ -1,4 +1,5 @@
 import { lazy, Suspense } from "react";
+import { RetailStoreGate, WholesalerGate } from "@/lib/workspace/businessType";
 import { createBrowserRouter, Navigate, Outlet, RouterProvider, ScrollRestoration } from "react-router-dom";
 import { back, SCREENS } from "@/lib/nav/backNav";
 import { useTrackHistory } from "@/lib/nav/history";
@@ -438,18 +439,18 @@ export const routes = [
           {
             element: gated("store", "Online Store"),
             children: [
-              { path: "/store", element: <StoreOverviewPage />, handle: { section: "Online Store" } },
-              { path: "/store/create", element: <CreateStorePage />, handle: { section: "Online Store", back: back("/dashboard", SCREENS.dashboard) } },
-              { path: "/store/settings", element: <StoreSettingsPage />, handle: { section: "Online Store", back: back("/store", SCREENS.store) } },
-              { path: "/store/templates", element: <TemplatesPage />, handle: { section: "Online Store", back: back("/store", SCREENS.store) } },
-              { path: "/store/domain", element: <DomainPage />, handle: { section: "Online Store", back: back("/store", SCREENS.store) } },
-              { path: "/store/analytics", element: <StoreAnalyticsPage />, handle: { section: "Online Store", back: back("/store", SCREENS.store) } },
-              { path: "/store/products", element: <CataloguePage />, handle: { section: "Online Store", back: back("/store", SCREENS.store) } },
-              { path: "/store/products/new", element: <StoreProductFormPage />, handle: { section: "Online Store", back: back("/store/products", SCREENS.store) } },
-              { path: "/store/products/bulk", element: <BulkUploadPage />, handle: { section: "Online Store", back: back("/store/products", SCREENS.store) } },
-              { path: "/store/products/sync", element: <SyncInventoryPage />, handle: { section: "Online Store", back: back("/store/products", SCREENS.store) } },
-              { path: "/store/products/:id", element: <StoreProductDetailPage />, handle: { section: "Online Store", back: back("/store/products", SCREENS.store) } },
-              { path: "/store/products/:id/edit", element: <StoreProductFormPage key="edit" />, handle: { section: "Online Store", back: back("/store/products/:id", SCREENS.store) } },
+              { path: "/store", element: <RetailStoreGate><StoreOverviewPage /></RetailStoreGate>, handle: { section: "Online Store" } },
+              { path: "/store/create", element: <RetailStoreGate><CreateStorePage /></RetailStoreGate>, handle: { section: "Online Store", back: back("/dashboard", SCREENS.dashboard) } },
+              { path: "/store/settings", element: <RetailStoreGate><StoreSettingsPage /></RetailStoreGate>, handle: { section: "Online Store", back: back("/store", SCREENS.store) } },
+              { path: "/store/templates", element: <RetailStoreGate><TemplatesPage /></RetailStoreGate>, handle: { section: "Online Store", back: back("/store", SCREENS.store) } },
+              { path: "/store/domain", element: <RetailStoreGate><DomainPage /></RetailStoreGate>, handle: { section: "Online Store", back: back("/store", SCREENS.store) } },
+              { path: "/store/analytics", element: <RetailStoreGate><StoreAnalyticsPage /></RetailStoreGate>, handle: { section: "Online Store", back: back("/store", SCREENS.store) } },
+              { path: "/store/products", element: <RetailStoreGate><CataloguePage /></RetailStoreGate>, handle: { section: "Online Store", back: back("/store", SCREENS.store) } },
+              { path: "/store/products/new", element: <RetailStoreGate><StoreProductFormPage /></RetailStoreGate>, handle: { section: "Online Store", back: back("/store/products", SCREENS.store) } },
+              { path: "/store/products/bulk", element: <RetailStoreGate><BulkUploadPage /></RetailStoreGate>, handle: { section: "Online Store", back: back("/store/products", SCREENS.store) } },
+              { path: "/store/products/sync", element: <RetailStoreGate><SyncInventoryPage /></RetailStoreGate>, handle: { section: "Online Store", back: back("/store/products", SCREENS.store) } },
+              { path: "/store/products/:id", element: <RetailStoreGate><StoreProductDetailPage /></RetailStoreGate>, handle: { section: "Online Store", back: back("/store/products", SCREENS.store) } },
+              { path: "/store/products/:id/edit", element: <RetailStoreGate><StoreProductFormPage key="edit" /></RetailStoreGate>, handle: { section: "Online Store", back: back("/store/products/:id", SCREENS.store) } },
               { path: "/store/orders", element: <StoreOrdersPage />, handle: { section: "Online Store", back: back("/store", SCREENS.store) } },
               { path: "/store/orders/:id", element: <StoreOrderDetailPage />, handle: { section: "Online Store", back: back("/store/orders", SCREENS.store) } },
               { path: "/store/*", element: <Navigate to="/store" replace /> },
@@ -543,11 +544,11 @@ export const routes = [
               { path: "/bisupplynet/sell", element: sell(<SellHomePage />), handle: { section: "BiSupplyNet", back: back("/bisupplynet/suppliers", SCREENS.bisupplynet) } },
               { path: "/bisupplynet/sell/apply", element: sell(<ApplyPage />), handle: { section: "BiSupplyNet", back: back("/bisupplynet/suppliers", SCREENS.bisupplynet) } },
               { path: "/bisupplynet/sell/application", element: sell(<ApplicationPage />), handle: { section: "BiSupplyNet", back: back("/bisupplynet/suppliers", SCREENS.bisupplynet) } },
-              { path: "/bisupplynet/sell/listings", element: sell(<ListingsPage />), handle: { section: "BiSupplyNet", back: back("/bisupplynet/sell/earnings", SCREENS.selling) } },
-              { path: "/bisupplynet/sell/listings/new", element: sell(<ListingFormPage />), handle: { section: "BiSupplyNet", back: back("/bisupplynet/sell/listings", SCREENS.selling) } },
-              { path: "/bisupplynet/sell/listings/:id/edit", element: sell(<ListingFormPage key="edit" />), handle: { section: "BiSupplyNet", back: back("/bisupplynet/sell/listings", SCREENS.selling) } },
+              { path: "/bisupplynet/sell/listings", element: sell(<WholesalerGate><ListingsPage /></WholesalerGate>), handle: { section: "BiSupplyNet", back: back("/bisupplynet/sell/earnings", SCREENS.selling) } },
+              { path: "/bisupplynet/sell/listings/new", element: sell(<WholesalerGate><ListingFormPage /></WholesalerGate>), handle: { section: "BiSupplyNet", back: back("/bisupplynet/sell/listings", SCREENS.selling) } },
+              { path: "/bisupplynet/sell/listings/:id/edit", element: sell(<WholesalerGate><ListingFormPage key="edit" /></WholesalerGate>), handle: { section: "BiSupplyNet", back: back("/bisupplynet/sell/listings", SCREENS.selling) } },
               { path: "/bisupplynet/sell/orders", element: sell(<SellerOrdersPage />), handle: { section: "BiSupplyNet", back: back("/bisupplynet/sell/earnings", SCREENS.selling) } },
-              { path: "/bisupplynet/sell/connections", element: sell(<ConnectionsPage />), handle: { section: "BiSupplyNet", back: back("/bisupplynet/sell/earnings", SCREENS.selling) } },
+              { path: "/bisupplynet/sell/connections", element: sell(<WholesalerGate><ConnectionsPage /></WholesalerGate>), handle: { section: "BiSupplyNet", back: back("/bisupplynet/sell/earnings", SCREENS.selling) } },
               { path: "/bisupplynet/sell/disputes", element: sell(<SellerDisputesPage />), handle: { section: "BiSupplyNet", back: back("/bisupplynet/sell/earnings", SCREENS.selling) } },
               { path: "/bisupplynet/sell/earnings", element: sell(<EarningsPage />), handle: { section: "BiSupplyNet" } },
               // Older links in notifications.
