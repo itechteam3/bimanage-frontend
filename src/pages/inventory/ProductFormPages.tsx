@@ -3,10 +3,11 @@ import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
 import { Link, useLocation, useNavigate, useParams } from "react-router-dom";
-import { IconCamera, IconPhoto, IconScan, IconTrash, IconHistory } from "@tabler/icons-react";
+import { IconPhoto, IconScan, IconTrash, IconHistory } from "@tabler/icons-react";
 import { Button, ButtonLink, Dialog, Field, SelectInput, Spinner, TextInput } from "@/components/ui";
 import { DetailRows, HelpPanel, IntroCard, PageTitle, Panel } from "@/components/page/Blocks";
 import { AuthNote } from "@/components/layout/AuthLayout";
+import { ScanButton } from "@/components/scanner/ScanButton";
 import { StockBadge } from "@/components/inventory/StockBadge";
 import {
   findInInventory,
@@ -120,7 +121,7 @@ export function ProductFormPage() {
   const [formError, setFormError] = useState<unknown>(null);
   const [confirmDelete, setConfirmDelete] = useState(false);
 
-  const { register, handleSubmit, reset, setError, formState } = useForm<ProductValues>({
+  const { register, handleSubmit, reset, setError, setValue, formState } = useForm<ProductValues>({
     resolver: zodResolver(productSchema),
     defaultValues: {
       name: prefill.name ?? "",
@@ -203,7 +204,7 @@ export function ProductFormPage() {
                 <TextInput placeholder="APP-101" autoCapitalize="characters" {...register("sku")} />
               </Field>
               <Field label="Barcode" error={formState.errors.barcode?.message}>
-                <TextInput inputMode="numeric" placeholder="8901234567890" {...register("barcode")} />
+                <TextInput inputMode="numeric" placeholder="8901234567890" {...register("barcode")} trailing={<ScanButton iconOnly onCode={(c) => setValue("barcode", c, { shouldDirty: true, shouldValidate: true })} className="mr-1 min-h-0 px-3 py-2" />} />
               </Field>
               <Field label="Selling price (₦)" required error={formState.errors.sellingPrice?.message}>
                 <TextInput inputMode="decimal" placeholder="22,500" {...register("sellingPrice")} />
@@ -285,7 +286,7 @@ export function AddFirstProduct() {
   const create = useCreateProduct();
   const [formError, setFormError] = useState<unknown>(null);
   const schema = productSchema.extend({ sku: z.string().trim().max(40).optional(), lowStockThreshold: whole("Enter a number.").optional() });
-  const { register, handleSubmit, setError, formState } = useForm<z.infer<typeof schema>>({ resolver: zodResolver(schema) });
+  const { register, handleSubmit, setError, setValue, formState } = useForm<z.infer<typeof schema>>({ resolver: zodResolver(schema) });
   const guard = useLeaveGuard(formState.isDirty && !formState.isSubmitSuccessful);
   const onSubmit = handleSubmit(async (v) => {
     setFormError(null);
@@ -323,7 +324,7 @@ export function AddFirstProduct() {
                 <TextInput placeholder="APP-101" {...register("sku")} />
               </Field>
               <Field label="Barcode / product code" error={formState.errors.barcode?.message}>
-                <TextInput inputMode="numeric" placeholder="Enter or scan barcode" {...register("barcode")} />
+                <TextInput inputMode="numeric" placeholder="Enter or scan barcode" {...register("barcode")} trailing={<ScanButton iconOnly onCode={(c) => setValue("barcode", c, { shouldDirty: true, shouldValidate: true })} className="mr-1 min-h-0 px-3 py-2" />} />
               </Field>
             </div>
           </Panel>
@@ -356,6 +357,18 @@ export function AdjustStockPage() {
   const historyRef = useRef<HTMLElement>(null);
   const [formError, setFormError] = useState<unknown>(null);
   const [saved, setSaved] = useState<string | null>(null);
+  const [scanNote, setScanNote] = useState<string | null>(null);
+  // Scan another product (camera or a barcode reader) and jump to its adjustment.
+  const jumpTo = async (code: string) => {
+    setScanNote(null);
+    try {
+      const found = await findInInventory(code);
+      if (found[0]) navigate(`/inventory/products/${found[0]._id}/adjust`);
+      else setScanNote(`No product in your inventory matches “${code}”.`);
+    } catch (err) {
+      setScanNote(errorMessage(err, "We couldn't look that up. Check your connection and try again."));
+    }
+  };
 
   const schema = z.object({
     type: z.enum(["increase", "decrease", "set"]),
@@ -402,15 +415,19 @@ export function AdjustStockPage() {
     <div className="flex flex-col gap-6">
       <PageTitle
         actions={
-          <Button size="md" onClick={() => historyRef.current?.scrollIntoView({ behavior: "smooth" })}>
-            <IconHistory aria-hidden="true" className="size-icon" /> View stock history
-          </Button>
+          <div className="flex flex-wrap gap-3">
+            <ScanButton label="Scan another product" onCode={(c) => void jumpTo(c)} />
+            <Button size="md" onClick={() => historyRef.current?.scrollIntoView({ behavior: "smooth" })}>
+              <IconHistory aria-hidden="true" className="size-icon" /> View stock history
+            </Button>
+          </div>
         }
       >
         Adjust stock quantity
       </PageTitle>
       {guard.dialog}
       <p className="-mt-4 text-body-sm text-ink-muted">Record corrections and received inventory.</p>
+      {scanNote && <AuthNote tone="danger">{scanNote}</AuthNote>}
       <IntroCard eyebrow="Workspace / Inventory" title="Every manual adjustment is recorded in the product audit trail." />
       <div className="grid grid-cols-[minmax(0,1fr)] gap-5 lg:grid-cols-[minmax(0,1.7fr)_minmax(0,1fr)]">
         <form noValidate onSubmit={onSubmit} className="flex flex-col gap-5">
@@ -525,48 +542,6 @@ type LookupResult =
   | { kind: "catalogue"; info: BarcodeInfo }
   | { kind: "none"; code: string };
 
-function CameraScanner({ open, onClose, onCode }: { open: boolean; onClose: () => void; onCode: (code: string) => void }) {
-  const video = useRef<HTMLVideoElement>(null);
-  const [error, setError] = useState<string | null>(null);
-  useEffect(() => {
-    if (!open) return;
-    let stream: MediaStream | null = null;
-    let timer: ReturnType<typeof setInterval> | undefined;
-    const Detector = (window as unknown as { BarcodeDetector?: new (o: { formats: string[] }) => { detect: (v: HTMLVideoElement) => Promise<Array<{ rawValue: string }>> } }).BarcodeDetector;
-    (async () => {
-      try {
-        if (!Detector) throw new Error("unsupported");
-        stream = await navigator.mediaDevices.getUserMedia({ video: { facingMode: "environment" } });
-        if (video.current) {
-          video.current.srcObject = stream;
-          await video.current.play();
-        }
-        const detector = new Detector({ formats: ["ean_13", "ean_8", "upc_a", "upc_e", "code_128", "code_39", "qr_code"] });
-        timer = setInterval(async () => {
-          if (!video.current) return;
-          const found = await detector.detect(video.current).catch(() => []);
-          if (found[0]?.rawValue) {
-            onCode(found[0].rawValue);
-            onClose();
-          }
-        }, 300);
-      } catch (e) {
-        setError((e as Error).message === "unsupported" ? "This browser can't read barcodes from the camera. Type the code, or use a barcode scanner." : "Camera access was blocked or isn't available.");
-      }
-    })();
-    return () => {
-      if (timer) clearInterval(timer);
-      stream?.getTracks().forEach((t) => t.stop());
-      setError(null);
-    };
-  }, [open, onClose, onCode]);
-  return (
-    <Dialog open={open} onClose={onClose} title="Scan a barcode" description="Point the camera at the barcode." icon={<IconCamera className="size-7" />} actions={<Button variant="outlined" onClick={onClose}>Cancel</Button>}>
-      {error ? <AuthNote tone="danger">{error}</AuthNote> : <video ref={video} muted playsInline className="aspect-video w-full rounded-lg bg-ink-strong object-cover" />}
-    </Dialog>
-  );
-}
-
 export function BarcodeLookupPage() {
   const navigate = useNavigate();
   const canEdit = useCan("manageInventory");
@@ -574,8 +549,6 @@ export function BarcodeLookupPage() {
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [result, setResult] = useState<LookupResult | null>(null);
-  const [camera, setCamera] = useState(false);
-  const hasCamera = typeof window !== "undefined" && "BarcodeDetector" in window && Boolean(navigator.mediaDevices?.getUserMedia);
 
   const find = async (raw: string) => {
     const c = raw.trim();
@@ -605,7 +578,7 @@ export function BarcodeLookupPage() {
       <IntroCard eyebrow="Workspace / Inventory" title="Existing products load instantly without duplicate entry." />
       <div className="grid grid-cols-[minmax(0,1fr)] gap-5 lg:grid-cols-[minmax(0,1.7fr)_minmax(0,1fr)]">
         <div className="flex flex-col gap-5">
-          <Panel title="Barcode and product lookup" subtitle="Scan with a barcode reader, use the camera, or type a code.">
+          <Panel title="Barcode and product lookup" subtitle="Scan with the camera, use a barcode reader, or type a code.">
             <form
               noValidate
               className="flex flex-col gap-4 md:flex-row md:items-end"
@@ -620,11 +593,12 @@ export function BarcodeLookupPage() {
                 </Field>
               </div>
               <div className="flex shrink-0 gap-3">
-                {hasCamera && (
-                  <Button variant="secondary" onClick={() => setCamera(true)} aria-label="Scan with camera">
-                    <IconCamera aria-hidden="true" className="size-icon" />
-                  </Button>
-                )}
+                <ScanButton
+                  onCode={(c) => {
+                    setCode(c);
+                    void find(c);
+                  }}
+                />
                 <Button type="submit" loading={busy} loadingText="Finding…">
                   <IconScan aria-hidden="true" className="size-icon" /> Find product
                 </Button>
@@ -683,14 +657,13 @@ export function BarcodeLookupPage() {
         </div>
         <HelpPanel
           items={[
-            ["Scanner", hasCamera ? "Camera or barcode reader" : "Barcode reader or keyboard"],
+            ["Scanner", "Phone or laptop camera, barcode reader or keyboard"],
             ["No match", "Add a new product"],
             ["Duplicate check", "Existing SKU and barcode are re-used"],
           ]}
           callout={{ title: "Tip", body: <>USB and Bluetooth barcode scanners type the code and press Enter — just scan into the field. <Link to="/inventory/products" className="font-semibold text-ink-brand hover:underline">Browse products</Link></> }}
         />
       </div>
-      <CameraScanner open={camera} onClose={() => setCamera(false)} onCode={(c) => { setCode(c); void find(c); }} />
     </div>
   );
 }
