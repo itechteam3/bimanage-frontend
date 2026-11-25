@@ -2,7 +2,7 @@ import { useCallback, useEffect, useRef, useState } from "react";
 import { IconBolt, IconBoltOff, IconCamera, IconCameraRotate } from "@tabler/icons-react";
 import { Button, Dialog } from "@/components/ui";
 import { AuthNote } from "@/components/layout/AuthLayout";
-import { listCameras, SCAN_ERROR_TEXT, scanErrorKind, startScan, type ScanErrorKind, type ScanSession } from "@/lib/scanner/scanner";
+import { interpretScan, listCameras, SCAN_ERROR_TEXT, scanErrorKind, startScan, type ScanErrorKind, type ScanSession } from "@/lib/scanner/scanner";
 import { cn } from "@/lib/cn";
 
 // "Scan with camera" (09.04+): opens the phone or laptop camera, reads a
@@ -19,6 +19,8 @@ export function ScanDialog({ open, onClose, onCode, title = "Scan a barcode" }: 
   const [cameras, setCameras] = useState<MediaDeviceInfo[]>([]);
   const [deviceId, setDeviceId] = useState<string | undefined>(undefined);
   const [attempt, setAttempt] = useState(0);
+  // A QR code holding a link that isn't a product code: shown, never opened or filled in.
+  const [link, setLink] = useState<string | null>(null);
   const done = useRef(onCode);
   done.current = onCode;
   const close = useRef(onClose);
@@ -28,14 +30,17 @@ export function ScanDialog({ open, onClose, onCode, title = "Scan a barcode" }: 
     if (!open || !video.current) return;
     let cancelled = false;
     setError(null);
+    setLink(null);
     setStarting(true);
     setTorch(false);
     startScan({
       video: video.current,
       deviceId,
-      onCode: (code) => {
+      onCode: (raw) => {
         session.current = null;
-        done.current(code);
+        const meant = interpretScan(raw);
+        if (meant.kind === "link") return setLink(meant.host);
+        done.current(meant.code);
         close.current();
       },
     })
@@ -70,7 +75,7 @@ export function ScanDialog({ open, onClose, onCode, title = "Scan a barcode" }: 
     }
   };
 
-  const help = error ? SCAN_ERROR_TEXT[error] : null;
+  const help = error ? SCAN_ERROR_TEXT[error] : link ? { title: "This QR code is a link, not a product code", body: `It points to ${link}. We haven't opened it. Scan the product's barcode or a BiManage label instead.` } : null;
   return (
     <Dialog
       open={open}
@@ -83,7 +88,7 @@ export function ScanDialog({ open, onClose, onCode, title = "Scan a barcode" }: 
           <Button variant="outlined" onClick={onClose}>
             Cancel
           </Button>
-          {error && error !== "insecure" && error !== "unsupported" && <Button onClick={() => setAttempt((n) => n + 1)}>Try again</Button>}
+          {link ? <Button onClick={() => setAttempt((n) => n + 1)}>Scan again</Button> : error && error !== "insecure" && error !== "unsupported" && <Button onClick={() => setAttempt((n) => n + 1)}>Try again</Button>}
         </>
       }
     >
