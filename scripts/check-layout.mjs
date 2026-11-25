@@ -280,7 +280,7 @@ const SETTLE = `(async () => {
   return location.pathname;
 })()`;
 
-const routes = allRoutes().filter((r) => !ONLY || ONLY.some((o) => r.path === o || (!args.exact && r.url.startsWith(o))));
+const routes = allRoutes().filter((r) => !ONLY || ONLY.some((o) => r.path === o || (!("exact" in args) && r.url.startsWith(o))));
 console.log(`layout check: ${routes.length} screens × ${WIDTHS.length} widths (${WIDTHS.join(", ")}) → ${routes.length * WIDTHS.length} page checks${DIALOGS ? " + dialogs" : ""}`);
 
 const results = [];
