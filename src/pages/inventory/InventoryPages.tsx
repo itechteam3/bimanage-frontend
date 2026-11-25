@@ -4,7 +4,7 @@ import { LoadMore } from "@/components/page/LoadMore";
 import { useNewItems } from "@/lib/realtime/useLiveList";
 import { Link, useLocation, useNavigate } from "react-router-dom";
 import { IconDownload, IconPlus, IconSearch, IconScan, IconFileSpreadsheet, IconAlertTriangle } from "@tabler/icons-react";
-import { Button, ButtonLink, Field, Spinner, TextInput, buttonClasses } from "@/components/ui";
+import { Button, ButtonLink, Field, TextInput, buttonClasses, ListSkeleton } from "@/components/ui";
 import { DetailRows, IntroCard, KpiCard, PageTitle, Panel } from "@/components/page/Blocks";
 import { AuthNote } from "@/components/layout/AuthLayout";
 import { StockBadge } from "@/components/inventory/StockBadge";
@@ -18,12 +18,8 @@ import { cn } from "@/lib/cn";
 import { AddFirstProduct } from "./ProductFormPages";
 import { useUrlState } from "@/lib/nav/useUrlState";
 
-const Loading = ({ label = "Loading…" }: { label?: string }) => (
-  <div className="flex justify-center py-16 text-ink-brand" role="status">
-    <Spinner className="size-8" />
-    <span className="sr-only">{label}</span>
-  </div>
-);
+/** Skeleton rows while the screen loads (not a lone spinner). */
+const Loading = ({ label }: { label?: string }) => <ListSkeleton label={label} />;
 
 /** Shared download button: saves the CSV and opens the "export ready" page. */
 /** Rows shown at a time in long tables ("Load more"). */
@@ -202,7 +198,7 @@ export function ProductsPage() {
                     <th scope="col" className="px-3 py-3">Status</th>
                   </tr>
                 </thead>
-                <tbody>
+                <tbody className="motion-rows">
                   {list.slice(0, shown).map((p, i) => (
                     <tr key={p._id} data-new={fresh.has(p._id) || undefined} className={cn(i % 2 === 1 && "bg-surface-pale", fresh.has(p._id) && newRowClass)}>
                       <td className="rounded-l-lg px-3 py-4">

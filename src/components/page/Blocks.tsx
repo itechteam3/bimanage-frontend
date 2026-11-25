@@ -1,4 +1,4 @@
-import type { ReactNode } from "react";
+import { useId, type ReactNode } from "react";
 import { cn } from "@/lib/cn";
 
 // Recurring layout blocks on app screens (Figma 02.xx, 03.xx, 07.xx).
@@ -134,7 +134,7 @@ const kpiTone: Record<KpiTone, { bg: string; fg: string; line: string }> = {
 export function KpiCard({ tone, label, value, caption, trend, badge, note }: { tone: KpiTone; label: string; value: ReactNode; caption: string; trend?: number[]; badge?: string; note?: ReactNode }) {
   const t = kpiTone[tone];
   return (
-    <section className={cn("flex min-h-32 min-w-0 flex-col justify-between gap-2 rounded-lg border border-line-card p-4 shadow-card", t.bg)}>
+    <section className={cn("motion-lift flex min-h-32 min-w-0 flex-col justify-between gap-2 rounded-lg border border-line-card p-4 shadow-card", t.bg)}>
       <h3 className="flex flex-wrap items-center gap-2 text-caption font-semibold uppercase text-ink-muted">
         {label}
         {badge && (
@@ -167,16 +167,24 @@ export function sparklinePoints(values: number[]): Array<[number, number]> {
   return values.map((v, i) => [pad + (i / n) * (w - 2 * pad), h - pad - ((v - min) / (max - min || 1)) * (h - 2 * pad)]);
 }
 
+// Draws in from left to right (a clip rect grows, transform only), then the
+// end dot pops in — see motion-spark-* in src/styles/motion.css.
 function Sparkline({ values, className }: { values: number[]; className?: string }) {
+  const clipId = `spark${useId().replace(/:/g, "")}`;
   const pts = sparklinePoints(values);
   const line = pts.map(([x, y], i) => `${i ? "L" : "M"}${x.toFixed(1)},${y.toFixed(1)}`).join(" ");
   const first = pts[0]!;
   const last = pts[pts.length - 1]!;
   return (
     <svg viewBox={`0 0 ${SPARK.w} ${SPARK.h}`} preserveAspectRatio="xMidYMid meet" className={className} aria-hidden="true" data-sparkline>
-      <path d={`${line} L${last[0].toFixed(1)},${SPARK.h} L${first[0].toFixed(1)},${SPARK.h} Z`} fill="currentColor" opacity="0.09" />
-      <path d={line} fill="none" stroke="currentColor" strokeWidth="2" vectorEffect="non-scaling-stroke" strokeLinecap="round" strokeLinejoin="round" />
-      <circle cx={last[0]} cy={last[1]} r="2.6" fill="currentColor" stroke="var(--color-surface-card)" strokeWidth="1.2" />
+      <clipPath id={clipId}>
+        <rect className="motion-spark-reveal" x="0" y="0" width={SPARK.w} height={SPARK.h} />
+      </clipPath>
+      <g clipPath={`url(#${clipId})`}>
+        <path d={`${line} L${last[0].toFixed(1)},${SPARK.h} L${first[0].toFixed(1)},${SPARK.h} Z`} fill="currentColor" opacity="0.09" />
+        <path d={line} fill="none" stroke="currentColor" strokeWidth="2" vectorEffect="non-scaling-stroke" strokeLinecap="round" strokeLinejoin="round" />
+      </g>
+      <circle className="motion-spark-dot" cx={last[0]} cy={last[1]} r="2.6" fill="currentColor" stroke="var(--color-surface-card)" strokeWidth="1.2" />
     </svg>
   );
 }
