@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import { Navigate, Outlet, useLocation, useMatches, useNavigate } from "react-router-dom";
 import { AppShell } from "./AppShell";
+import { PageTransition } from "./PageTransition";
 import { useAuth } from "@/lib/auth/AuthProvider";
 import { useBusinessProfile, useOnboardingStatus, useUnreadCounts } from "@/lib/workspace/api";
 import { useNavState } from "@/lib/nav/useNavState";
@@ -10,6 +11,7 @@ import { useSubscription } from "@/lib/workspace/subscription";
 import { DisplayPreferences } from "@/lib/account/preferences";
 import { ReportIssue } from "@/components/feedback/ReportIssue";
 import { pendingNext } from "@/lib/auth/pending";
+import { TourProvider } from "@/components/tour/TourProvider";
 
 // Signed-in pages render inside this. Routes declare their breadcrumb with
 // `handle: { section: "Dashboard" }`. Owners who haven't chosen an onboarding
@@ -51,25 +53,30 @@ export function WorkspaceLayout() {
     if (onboarding.data && !onboarding.data.userPath) return <Navigate to="/onboarding" replace />;
   }
 
+  // Guided tours (coach marks) and the help menu's "Show me around".
   return (
-    <AppShell
-      section={section}
-      user={{
-        name: user?.name ?? "",
-        businessName: workspace?.business?.name ?? profile.data?.businessName,
-        avatarUrl: user?.avatar,
-        verified: user?.isVerified,
-      }}
-      navState={navState}
-      unread={unread.data}
-      onLogout={() => void signOut().then(() => navigate("/login", { replace: true }))}
-      onChangePhoto={() => setPhotoOpen(true)}
-    >
-      <DisplayPreferences />
-      <Outlet />
-      <PhotoDialog open={photoOpen} onClose={() => setPhotoOpen(false)} />
-      {/* Workspace screens only: never the landing page, storefronts or /admin. */}
-      <ReportIssue userId={user?._id} screen={section} />
-    </AppShell>
+    <TourProvider>
+      <AppShell
+        section={section}
+        user={{
+          name: user?.name ?? "",
+          businessName: workspace?.business?.name ?? profile.data?.businessName,
+          avatarUrl: user?.avatar,
+          verified: user?.isVerified,
+        }}
+        navState={navState}
+        unread={unread.data}
+        onLogout={() => void signOut().then(() => navigate("/login", { replace: true }))}
+        onChangePhoto={() => setPhotoOpen(true)}
+      >
+        <DisplayPreferences />
+        <PageTransition>
+          <Outlet />
+        </PageTransition>
+        <PhotoDialog open={photoOpen} onClose={() => setPhotoOpen(false)} />
+        {/* Workspace screens only: never the landing page, storefronts or /admin. */}
+        <ReportIssue userId={user?._id} screen={section} />
+      </AppShell>
+    </TourProvider>
   );
 }

@@ -88,6 +88,13 @@ export function buildThemeCss(tokens) {
     extras.push(`  --border-width-${name}: ${val(t)};`);
   }
 
+  // Motion (not in Figma): the one shared set of animation settings. ease-* →
+  // --ease-*, everything else → --motion-* (see src/styles/motion.css, src/lib/motion.ts).
+  for (const [name, t] of Object.entries(tokens.motion ?? {})) {
+    if (name.startsWith("$")) continue;
+    extras.push(`  --${name.startsWith("ease-") ? name : `motion-${name}`}: ${val(t)};`);
+  }
+
   const gradientUtilities = Object.keys(tokens.gradient)
     .filter((n) => !n.startsWith("$") && !n.startsWith("glow"))
     .map((n) => `@utility bg-gradient-${n} {\n  background-image: var(--gradient-${n});\n}`)

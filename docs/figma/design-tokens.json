@@ -835,6 +835,18 @@
       "$description": "Desktop frame width."
     }
   },
+  "motion": {
+    "$description": "Not in Figma: the one shared set of animation settings (durations, easing, distances). Mostly 150–300ms, ease-out; only transform and opacity are animated; everything is off for prefers-reduced-motion and the workspace Reduce motion setting. Mirrored for JS in src/lib/motion.ts.",
+    "fast": { "$type": "duration", "$value": "150ms", "$description": "Press, hover, small exits (dialog out, menu)." },
+    "base": { "$type": "duration", "$value": "220ms", "$description": "Most entrances: pages, cards, rows, dialogs." },
+    "slow": { "$type": "duration", "$value": "300ms", "$description": "Larger movement: drawers, sheets, chart bars." },
+    "count": { "$type": "duration", "$value": "600ms", "$description": "KPI count-up and sparkline draw (the real value is always available to screen readers)." },
+    "stagger": { "$type": "duration", "$value": "40ms", "$description": "Delay between items that appear one after another (capped at 8 items)." },
+    "distance": { "$type": "dimension", "$value": "8px", "$description": "How far things rise as they fade in." },
+    "distance-lg": { "$type": "dimension", "$value": "16px", "$description": "Toasts and banners sliding in." },
+    "ease-out": { "$type": "cubicBezier", "$value": "cubic-bezier(0.2, 0.8, 0.2, 1)", "$description": "Entrances and feedback." },
+    "ease-in": { "$type": "cubicBezier", "$value": "cubic-bezier(0.4, 0, 1, 1)", "$description": "Exits." }
+  },
   "component": {
     "$description": "Component specs, as measured (px).",
     "button": {
