@@ -17,6 +17,7 @@
 //   node scripts/check-layout.mjs --only=/settings/team/invite --widths=360,1440
 //   LAYOUT_API_PORT=5199 npm run build:layout && node scripts/check-layout.mjs --apiPort=5199 --webPort=4279 --cdpPort=9500   # beside another check
 //   node scripts/check-layout.mjs --data=normal --shots=all --full --widths=1440   # ordinary data, whole pages, for Figma comparison
+//   node scripts/check-layout.mjs --tours --only=/dashboard,/inventory --exact     # every guided-tour step: on screen, tappable, not covering its target
 //
 // Screenshots of every failure go to layout-check/ (gitignored), with
 // report.json. Exit code 1 when anything fails.
@@ -34,7 +35,8 @@ const WEB_PORT = Number(args.webPort ?? 4179);
 const CDP_PORT = Number(args.cdpPort ?? 9400); // headless browsers use CDP_PORT, CDP_PORT+1, … (one per width)
 const ORIGIN = args.origin ?? `http://127.0.0.1:${WEB_PORT}`;
 const ONLY = args.only ? args.only.split(",") : null;
-const DIALOGS = args.dialogs !== "off";
+const TOURS = "tours" in args; // --tours: step through each page's guided tour and check every pop-up
+const DIALOGS = args.dialogs !== "off" && !TOURS;
 const SHOTS_ALL = args.shots === "all"; // --shots=all saves every page, not just failures
 const FULL = "full" in args; // --full: screenshots cover the whole page height, not just the first screen
 const LONG = args.data !== "normal"; // --data=normal uses ordinary fixture strings (for visual comparison with Figma)
@@ -69,7 +71,7 @@ if (taken.length) { console.error(`Port(s) ${taken.join(", ")} already in use (a
 
 if (!args.origin) {
   if (!existsSync("dist/index.html")) { console.error("No dist/: run `npm run build:layout` first."); process.exit(2); }
-  children.push(spawn(process.execPath, ["scripts/layout/mock-api.mjs", String(API_PORT)], { stdio: "ignore", env: { ...process.env, LAYOUT_LONG: LONG ? "1" : "0" } }));
+  children.push(spawn(process.execPath, ["scripts/layout/mock-api.mjs", String(API_PORT)], { stdio: "ignore", env: { ...process.env, LAYOUT_LONG: LONG ? "1" : "0", LAYOUT_TOURS: TOURS ? "1" : "0" } }));
   // Served with the production Content-Security-Policy for the fixture API (vite.config.ts).
   children.push(spawn(process.execPath, ["node_modules/vite/bin/vite.js", "preview", "--port", String(WEB_PORT), "--strictPort", "--host", "127.0.0.1"], { stdio: "ignore", env: { ...process.env, VITE_API_BASE_URL: `http://127.0.0.1:${API_PORT}/api`, VITE_SOCKET_URL: `http://127.0.0.1:${API_PORT}` } }));
   await waitFor(`http://127.0.0.1:${API_PORT}/__mode/${LONG ? "long" : "normal"}`);
@@ -122,6 +124,29 @@ async function browser(width, port) {
   };
   return { send, evaluate, shot, close };
 }
+
+// One guided-tour step: the pop-up is fully on screen, its buttons are
+// tappable on phones, the page doesn't scroll sideways, and it doesn't hide a
+// target that would fit beside it.
+const TOUR_STEP = (phone) => `(() => {
+  const W = document.documentElement.clientWidth, H = innerHeight;
+  const pop = document.querySelector('[data-tour-root] [role="dialog"]');
+  if (!pop) return null;
+  const title = (pop.querySelector('h2')?.textContent || '').trim();
+  const problems = [];
+  const r = pop.getBoundingClientRect();
+  if (r.left < -0.5 || r.top < -0.5 || r.right > W + 0.5 || r.bottom > H + 0.5) problems.push({ type: 'tour-offscreen', el: title, detail: [r.left, r.top, r.right, r.bottom].map(Math.round).join(',') });
+  if (document.scrollingElement.scrollWidth > W + 1) problems.push({ type: 'tour-hscroll', el: title, detail: document.scrollingElement.scrollWidth + ' > ' + W });
+  if (${phone}) for (const btn of pop.querySelectorAll('button')) { const b = btn.getBoundingClientRect(); if (b.height < 43.5 || b.width < 43.5) problems.push({ type: 'tour-tap', el: (btn.textContent || btn.getAttribute('aria-label') || '').trim(), detail: Math.round(b.width) + 'x' + Math.round(b.height) }); }
+  const spot = document.querySelector('[data-tour-root] .tour-spot');
+  if (spot) {
+    const s = spot.getBoundingClientRect();
+    if (s.width < 4 || s.height < 4) problems.push({ type: 'tour-no-target', el: title, detail: 'highlight has no size' });
+    const ix = Math.max(0, Math.min(s.right, r.right) - Math.max(s.left, r.left)), iy = Math.max(0, Math.min(s.bottom, r.bottom) - Math.max(s.top, r.top));
+    if (s.height < H * 0.45 && ix * iy > s.width * s.height * 0.3) problems.push({ type: 'tour-covers-target', el: title, detail: Math.round((100 * ix * iy) / (s.width * s.height)) + '% hidden' });
+  }
+  return { title, problems };
+})()`;
 
 // In-page audit. Returns a list of { type, detail } problems.
 const AUDIT = (phone) => `(() => {
@@ -255,7 +280,7 @@ const SETTLE = `(async () => {
   return location.pathname;
 })()`;
 
-const routes = allRoutes().filter((r) => !ONLY || ONLY.some((o) => r.path === o || (!args.exact && r.url.startsWith(o))));
+const routes = allRoutes().filter((r) => !ONLY || ONLY.some((o) => r.path === o || (!("exact" in args) && r.url.startsWith(o))));
 console.log(`layout check: ${routes.length} screens × ${WIDTHS.length} widths (${WIDTHS.join(", ")}) → ${routes.length * WIDTHS.length} page checks${DIALOGS ? " + dialogs" : ""}`);
 
 const results = [];
@@ -268,6 +293,21 @@ async function runWidth(width, port) {
   await b.evaluate(`localStorage.setItem("bimanage.session", "layout-check-token"); localStorage.setItem("bimanage.admin.session", "layout-check-admin"); true`);
   for (const r of routes.filter((x) => !x.guest)) await check(r);
   await b.close();
+
+  // Guided tour: wait for it, then check each step and press Next until Done.
+  async function checkTour(r, slug) {
+    const appeared = await b.evaluate(`(async () => { for (let t = 0; t < 40; t++) { if (document.querySelector('[data-tour-root] [role="dialog"]')) return true; await new Promise((r) => setTimeout(r, 200)); } return false; })()`, 12000);
+    if (!appeared) return results.push({ path: r.path + " (tour)", url: r.url, width, landed: r.url, problems: [{ type: "tour-missing", el: "", detail: "no guided tour appeared" }] });
+    for (let n = 1; n <= 12; n++) {
+      await sleep(500);
+      const step = await b.evaluate(TOUR_STEP(width <= PHONE));
+      if (!step) break;
+      if (step.problems.length || SHOTS_ALL) await b.shot(`${slug}-tour-${n}.png`);
+      results.push({ path: `${r.path} (tour ${n}: ${step.title})`, url: r.url, width, landed: r.url, problems: step.problems });
+      const more = await b.evaluate(`(() => { const p = document.querySelector('[data-tour-root] [role="dialog"]'); const btn = p && [...p.querySelectorAll('button')].find((e) => /^(Next|Done)$/.test(e.textContent.trim())); if (!btn) return false; const done = btn.textContent.trim() === 'Done'; btn.click(); return !done; })()`);
+      if (!more) break;
+    }
+  }
 
   async function cspProblems() {
     const list = JSON.parse((await b.evaluate("JSON.stringify([...new Set(window.__csp || [])]); ")) ?? "[]");
@@ -284,6 +324,7 @@ async function runWidth(width, port) {
     const slug = (r.url.replace(/[?].*$/, "").replace(/[^a-z0-9]+/gi, "-").replace(/^-|-$/g, "") || "root") + "-" + width;
     if (problems.length || SHOTS_ALL) await b.shot(slug + ".png");
     results.push({ path: r.path, url: r.url, width, landed, problems });
+    if (TOURS) await checkTour(r, slug);
     // Dialogs: press likely openers (phone and desktop widths only, to keep it quick).
     if (DIALOGS && (width === 360 || width === 1440)) {
       const labels = (await b.evaluate(`JSON.stringify([...document.querySelectorAll('main button, [role="main"] button, button')].filter((e) => { const r = e.getBoundingClientRect(); return r.width > 0 && !e.disabled && ${DIALOG_OPENERS}.test((e.textContent || e.getAttribute('aria-label') || '').trim()); }).map((e) => (e.textContent || e.getAttribute('aria-label') || '').trim()).filter((v, i, a) => a.indexOf(v) === i).slice(0, 4))`)) ?? "[]";

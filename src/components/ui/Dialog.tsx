@@ -1,5 +1,6 @@
 import { useEffect, useId, useRef, type ReactNode } from "react";
 import { cn } from "@/lib/cn";
+import { cancelDialogClose, closeDialogWithMotion } from "@/lib/motion";
 
 // BiManage / Dialog / Premium v2 (Figma 2186:12052): 630px, r=22, 58px icon
 // surface, 26/39 title, 14/21 body, two 52px actions side by side.
@@ -36,8 +37,9 @@ export function Dialog({
   useEffect(() => {
     const el = ref.current;
     if (!el) return;
-    if (open && !el.open) el.showModal();
-    if (!open && el.open) el.close();
+    // Scales in on open (CSS) and out before closing (src/styles/motion.css).
+    if (open && !cancelDialogClose(el) && !el.open) el.showModal();
+    if (!open && el.open) closeDialogWithMotion(el);
   }, [open]);
 
   return (

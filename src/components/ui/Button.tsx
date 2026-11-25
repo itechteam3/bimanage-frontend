@@ -33,7 +33,7 @@ export const buttonClasses = ({
   fullWidth,
 }: { variant?: ButtonVariant; size?: ButtonSize; fullWidth?: boolean } = {}) =>
   cn(
-    "inline-flex select-none items-center justify-center gap-2 rounded-md transition-colors",
+    "motion-press inline-flex select-none items-center justify-center gap-2 rounded-md",
     sizes[size],
     variants[variant],
     fullWidth && "w-full"
@@ -89,7 +89,7 @@ export const Button = forwardRef<HTMLButtonElement, ButtonProps>(function Button
       disabled={isDisabled}
       aria-busy={loading || undefined}
       className={cn(
-        "inline-flex select-none items-center justify-center gap-2 rounded-md transition-colors",
+        "motion-press inline-flex select-none items-center justify-center gap-2 rounded-md",
         "disabled:cursor-not-allowed",
         sizes[size],
         success
@@ -109,7 +109,7 @@ export const Button = forwardRef<HTMLButtonElement, ButtonProps>(function Button
         </>
       ) : success ? (
         <>
-          <IconCheck aria-hidden="true" className="size-icon" stroke={2.25} />
+          <IconCheck aria-hidden="true" className="motion-success-tick size-icon" stroke={2.25} />
           <span>{successText}</span>
         </>
       ) : (

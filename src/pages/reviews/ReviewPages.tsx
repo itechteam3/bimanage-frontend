@@ -4,7 +4,7 @@ import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
 import { IconCircleCheck, IconMessageCircle, IconRosetteDiscountCheck, IconStar, IconStarFilled } from "@tabler/icons-react";
-import { Button, ButtonLink, Dialog, EmptyState, Field, SelectInput, Spinner, Status, TextArea, TextInput } from "@/components/ui";
+import { Button, ButtonLink, Dialog, EmptyState, Field, SelectInput, Status, TextArea, TextInput, ListSkeleton } from "@/components/ui";
 import { DetailRows, IntroCard, PageTitle, Panel, TipList } from "@/components/page/Blocks";
 import { ErrorNote } from "@/components/feedback/ErrorNote";
 import { applyFieldErrors } from "@/lib/api/errorMessage";
@@ -30,12 +30,8 @@ import {
 
 // Public reviews (Figma 12.15 public page, 12.16 write, 12.18 submitted).
 
-const Loading = ({ label = "Loading…" }: { label?: string }) => (
-  <div className="flex justify-center py-16 text-ink-brand" role="status">
-    <Spinner className="size-8" />
-    <span className="sr-only">{label}</span>
-  </div>
-);
+/** Skeleton rows while the screen loads (not a lone spinner). */
+const Loading = ({ label }: { label?: string }) => <ListSkeleton label={label} />;
 
 const WRITE = "/reviews/write";
 

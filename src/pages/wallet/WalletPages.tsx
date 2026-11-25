@@ -4,7 +4,7 @@ import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
 import { IconAlertTriangle, IconCheck, IconDownload, IconLock, IconSearch, IconWallet } from "@tabler/icons-react";
-import { BankPicker, Button, ButtonLink, EmptyState, Field, SelectInput, Spinner, Status, TextInput } from "@/components/ui";
+import { BankPicker, Button, ButtonLink, EmptyState, Field, SelectInput, Status, TextInput, ListSkeleton } from "@/components/ui";
 import { DetailRows, HelpPanel, IntroCard, KpiCard, PageTitle, Panel } from "@/components/page/Blocks";
 import { ErrorNote } from "@/components/feedback/ErrorNote";
 import { UpdatedNote } from "@/components/feedback/UpdatedNote";
@@ -39,12 +39,8 @@ import {
 } from "@/lib/wallet/api";
 
 const EYEBROW = "Workspace / Wallet & payouts";
-const Loading = () => (
-  <div className="flex justify-center py-16 text-ink-brand" role="status">
-    <Spinner className="size-8" />
-    <span className="sr-only">Loading…</span>
-  </div>
-);
+/** Skeleton rows while the screen loads (not a lone spinner). */
+const Loading = ({ label }: { label?: string }) => <ListSkeleton label={label} />;
 const masked = (w: Pick<Wallet, "bank">) => (w.bank ? `${w.bank.bankName} •••• ${w.bank.last4}` : "Not linked");
 
 // Wallet sections (06.xx mobile tabs: Wallet · Payout · History · More).

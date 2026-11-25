@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState, type ReactNode } from "react";
+import { useEffect, useLayoutEffect, useRef, useState, type ReactNode, type RefObject } from "react";
 import { NavLink, Link, useLocation } from "react-router-dom";
 import { IconBell, IconCamera, IconMail, IconLogout, IconMenu2, IconLock, IconChevronDown, IconRosetteDiscountCheckFilled, IconSettings, IconUserCircle, IconX } from "@tabler/icons-react";
 import { cn } from "@/lib/cn";
@@ -6,6 +6,8 @@ import { Logo } from "@/components/brand/Logo";
 import { Avatar as AvatarImage, IconButton } from "@/components/ui";
 import { SIDEBAR_NAV, MOBILE_TABS, type NavItem } from "@/config/navigation";
 import { BackBar, HeaderBackButton } from "./BackNav";
+import { HelpMenu } from "@/components/tour/HelpMenu";
+import { MOTION, usePresence } from "@/lib/motion";
 
 export interface ShellUser {
   name: string;
@@ -33,9 +35,49 @@ const Avatar = ({ user, onBrand }: { user?: ShellUser; onBrand?: boolean }) => (
   <AvatarImage name={user?.name} src={user?.avatarUrl} className={onBrand ? "ring-2 ring-line-on-brand" : undefined} />
 );
 
+/**
+ * The highlight behind the selected page. One element that slides (transform)
+ * to whichever link is current, rather than each link painting its own.
+ * Placed before paint; the slide only starts after the first placement.
+ */
+function useActiveIndicator(list: RefObject<HTMLUListElement | null>, marker: RefObject<HTMLSpanElement | null>) {
+  const { pathname } = useLocation();
+  useLayoutEffect(() => {
+    const ul = list.current;
+    const el = marker.current;
+    if (!ul || !el) return;
+    const place = () => {
+      // The most specific current link wins (e.g. /store/orders over /store).
+      const links = Array.from(ul.querySelectorAll<HTMLAnchorElement>('a[aria-current="page"]'));
+      const active = links.sort((a, b) => (b.getAttribute("href")?.length ?? 0) - (a.getAttribute("href")?.length ?? 0))[0];
+      if (!active) {
+        el.removeAttribute("data-placed");
+        return;
+      }
+      el.style.transform = `translateY(${active.offsetTop}px)`;
+      el.style.height = `${active.offsetHeight}px`;
+      el.setAttribute("data-placed", "");
+    };
+    place();
+    // Enable the slide only once it has been placed (no slide-in from the top on load).
+    const t = window.setTimeout(() => el.setAttribute("data-ready", ""), MOTION.fast);
+    // Larger text, fonts loading or a resize can move the links.
+    const ro = typeof ResizeObserver !== "undefined" ? new ResizeObserver(place) : null;
+    ro?.observe(ul);
+    return () => {
+      window.clearTimeout(t);
+      ro?.disconnect();
+    };
+  }, [pathname, list, marker]);
+}
+
 function NavList({ navState, onNavigate }: { navState?: AppShellProps["navState"]; onNavigate?: () => void }) {
+  const list = useRef<HTMLUListElement>(null);
+  const marker = useRef<HTMLSpanElement>(null);
+  useActiveIndicator(list, marker);
   return (
-    <ul className="flex flex-col gap-1">
+    <ul ref={list} className="relative flex flex-col gap-1">
+      <span ref={marker} aria-hidden="true" data-nav-indicator="" className="motion-nav-indicator pointer-events-none absolute inset-x-0 top-0 rounded-lg bg-surface-nav-active" />
       {SIDEBAR_NAV.map((item) => {
         const state = navState?.(item) ?? "visible";
         if (state === "hidden") return null;
@@ -47,12 +89,13 @@ function NavList({ navState, onNavigate }: { navState?: AppShellProps["navState"
               onClick={onNavigate}
               className={({ isActive }) =>
                 cn(
-                  "flex h-control-sm items-center gap-2 rounded-md px-2 py-1 text-nav transition-colors",
-                  isActive ? "rounded-lg bg-surface-nav-active text-ink-brand" : "text-ink-on-brand hover:bg-line-on-brand"
+                  // The active background is the sliding indicator above.
+                  "motion-icon-host relative flex h-control-sm items-center gap-2 rounded-md px-2 py-1 text-nav transition-colors",
+                  isActive ? "rounded-lg text-ink-brand" : "text-ink-on-brand hover:bg-line-on-brand"
                 )
               }
             >
-              <span className="flex size-nav-icon-slot items-center justify-center">
+              <span className="motion-icon flex size-nav-icon-slot items-center justify-center">
                 <Icon aria-hidden="true" className="size-icon" stroke={1.75} />
               </span>
               <span className="flex-1 truncate">{item.label}</span>
@@ -131,7 +174,7 @@ function UserMenu({ user, onLogout, onChangePhoto }: Pick<AppShellProps, "user" 
         <IconChevronDown aria-hidden="true" className={cn("size-icon text-ink-strong transition-transform", open && "rotate-180")} />
       </button>
       {open && (
-        <div role="menu" className="absolute right-0 top-full z-30 mt-2 w-60 rounded-xl border border-line-subtle bg-surface-card p-2 shadow-floating">
+        <div role="menu" className="motion-menu absolute right-0 top-full z-30 mt-2 w-60 rounded-xl border border-line-subtle bg-surface-card p-2 shadow-floating">
           <div className="flex items-center gap-3 border-b border-line-subtle px-3 pb-3 pt-1">
             <Avatar user={user} />
             <span className="min-w-0 truncate text-body-sm font-medium text-ink-strong">{user?.name}</span>
@@ -176,6 +219,7 @@ function DesktopHeader({ section, user, unread, onLogout, onChangePhoto }: Pick<
         <span>{section}</span>
       </p>
       <div className="flex items-center gap-3">
+        <HelpMenu />
         <Link to="/notifications" className="relative flex size-header-action items-center justify-center rounded-full bg-surface-pale text-ink-strong hover:bg-surface-tonal" aria-label={n ? `Notifications, ${n} unread` : "Notifications"}>
           <IconBell aria-hidden="true" className="size-icon" />
           <Badge show={n > 0} />
@@ -196,6 +240,8 @@ function MobileHeader({ user, navState, onLogout }: Pick<AppShellProps, "user" |
   const [open, setOpen] = useState(false);
   const location = useLocation();
   useEffect(() => setOpen(false), [location.pathname]);
+  // Slides in from the left and back out (the backdrop fades) before unmounting.
+  const drawer = usePresence(open, MOTION.base);
   return (
     <>
       <header className="sticky top-0 z-20 flex h-mobile-header items-center justify-between bg-brand-navy px-5 lg:hidden">
@@ -205,12 +251,15 @@ function MobileHeader({ user, navState, onLogout }: Pick<AppShellProps, "user" |
             <Logo tone="on-brand" compact />
           </Link>
         </div>
-        <IconButton tone="on-brand" size="sm" label="Open menu" aria-expanded={open} icon={<IconMenu2 aria-hidden="true" className="size-6" />} onClick={() => setOpen(true)} />
+        <div className="flex items-center gap-1">
+          <HelpMenu onBrand />
+          <IconButton tone="on-brand" size="sm" label="Open menu" aria-expanded={open} icon={<IconMenu2 aria-hidden="true" className="size-6" />} onClick={() => setOpen(true)} />
+        </div>
       </header>
-      {open && (
-        <div className="fixed inset-0 z-40 lg:hidden">
-          <button type="button" aria-label="Close menu" className="absolute inset-0 bg-surface-overlay" onClick={() => setOpen(false)} />
-          <aside className="absolute inset-y-0 left-0 flex w-sidebar flex-col overflow-y-auto rounded-r-2xl bg-brand-navy px-3 pb-6 pt-5 text-ink-on-brand shadow-floating">
+      {drawer.mounted && (
+        <div data-state={drawer.state} {...(open ? {} : ({ inert: "" } as Record<string, string>))} className="motion-drawer fixed inset-0 z-40 lg:hidden">
+          <button type="button" aria-label="Close menu" className="motion-drawer-backdrop absolute inset-0 bg-surface-overlay" onClick={() => setOpen(false)} />
+          <aside className="motion-drawer-panel absolute inset-y-0 left-0 flex w-sidebar flex-col overflow-y-auto rounded-r-2xl bg-brand-navy px-3 pb-6 pt-5 text-ink-on-brand shadow-floating">
             <div className="flex items-center justify-between px-2">
               <Logo tone="on-brand" />
               <IconButton tone="on-brand" size="sm" label="Close menu" icon={<IconX aria-hidden="true" className="size-6" />} onClick={() => setOpen(false)} />

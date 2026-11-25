@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { Link } from "react-router-dom";
 import { IconArrowRight } from "@tabler/icons-react";
-import { ButtonLink, Spinner } from "@/components/ui";
+import { ButtonLink, ListSkeleton } from "@/components/ui";
 import { IntroCard, KpiCard, PageTitle, Panel } from "@/components/page/Blocks";
 import { ErrorNote } from "@/components/feedback/ErrorNote";
 import { OrderTable } from "@/pages/orders/OrderPages";
@@ -11,12 +11,8 @@ import { useOrders } from "@/lib/sales/api";
 import { count, nairaCompact } from "@/lib/format";
 import { cn } from "@/lib/cn";
 
-const Loading = () => (
-  <div className="flex justify-center py-16 text-ink-brand" role="status">
-    <Spinner className="size-8" />
-    <span className="sr-only">Loading…</span>
-  </div>
-);
+/** Skeleton rows while the screen loads (not a lone spinner). */
+const Loading = ({ label }: { label?: string }) => <ListSkeleton label={label} />;
 
 // 05.01 Sales dashboard
 export function SalesOverviewPage() {
@@ -146,7 +142,7 @@ export function BarChart({ data, format, title, valueLabel = "Revenue" }: { data
               <th scope="col">{valueLabel}</th>
             </tr>
           </thead>
-          <tbody>
+          <tbody className="motion-rows">
             {data.map((d) => (
               <tr key={d.key}>
                 <th scope="row">{d.long}</th>

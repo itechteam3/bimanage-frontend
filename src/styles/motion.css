@@ -1,0 +1,212 @@
+/* App motion. One shared set of settings: --motion-fast/base/slow/count,
+   --motion-stagger, --motion-distance(-lg), --ease-out/--ease-in (generated
+   into theme.css from docs/figma/design-tokens.json; JS mirror in
+   src/lib/motion.ts). Only transform and opacity animate. Every animation and
+   transform below sits behind prefers-reduced-motion: no-preference AND
+   html:not(.reduce-motion) (the workspace "Reduce motion" setting), so with
+   either one set everything simply appears in its final state. */
+
+@keyframes motion-fade-in {
+  from { opacity: 0; }
+}
+@keyframes motion-fade-out {
+  to { opacity: 0; }
+}
+@keyframes motion-rise {
+  from { opacity: 0; transform: translateY(var(--motion-distance)); }
+}
+@keyframes motion-drop {
+  from { opacity: 0; transform: translateY(calc(-1 * var(--motion-distance-lg))); }
+}
+@keyframes motion-lift-in {
+  from { opacity: 0; transform: translateY(var(--motion-distance-lg)); }
+}
+@keyframes motion-pop {
+  from { opacity: 0; transform: scale(0.96) translateY(calc(-0.5 * var(--motion-distance))); }
+}
+@keyframes motion-pop-in {
+  from { opacity: 0; transform: scale(0.4); }
+  60% { opacity: 1; transform: scale(1.15); }
+}
+@keyframes motion-dialog-in {
+  from { opacity: 0; transform: translateY(var(--motion-distance)) scale(0.96); }
+}
+@keyframes motion-dialog-out {
+  to { opacity: 0; transform: translateY(calc(0.5 * var(--motion-distance))) scale(0.97); }
+}
+@keyframes motion-drawer-in {
+  from { transform: translateX(-100%); }
+}
+@keyframes motion-drawer-out {
+  to { transform: translateX(-100%); }
+}
+@keyframes motion-shake {
+  0%, 100% { transform: none; }
+  20% { transform: translateX(-6px); }
+  40% { transform: translateX(5px); }
+  60% { transform: translateX(-3px); }
+  80% { transform: translateX(2px); }
+}
+@keyframes motion-grow-x {
+  from { transform: scaleX(0); }
+}
+@keyframes motion-grow-y {
+  from { transform: scaleY(0); }
+}
+@keyframes motion-shimmer {
+  from { transform: translateX(-100%); }
+  to { transform: translateX(100%); }
+}
+
+/* Colour changes on press/hover stay quick in every mode. */
+.motion-press {
+  transition-property: color, background-color, border-color, box-shadow, transform;
+  transition-duration: var(--motion-fast);
+  transition-timing-function: var(--ease-out);
+}
+
+/* Skeleton block: a resting shape; the shimmer sweeps over it when motion is on. */
+.motion-skeleton {
+  position: relative;
+  overflow: hidden;
+}
+
+/* Sidebar active-item indicator: positioned from JS, hidden until placed. */
+.motion-nav-indicator {
+  opacity: 0;
+}
+.motion-nav-indicator[data-placed] {
+  opacity: 1;
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  /* ---- Feedback: press, hover, success, error ---- */
+  html:not(.reduce-motion) .motion-press:not(:disabled):active {
+    transform: scale(0.97);
+  }
+  html:not(.reduce-motion) .motion-success-tick {
+    animation: motion-pop-in var(--motion-slow) var(--ease-out);
+  }
+  html:not(.reduce-motion) .motion-shake[data-invalid] {
+    animation: motion-shake var(--motion-slow) var(--ease-out);
+  }
+  /* Messages that report a result (success / error notes) and toasts. */
+  html:not(.reduce-motion) .motion-note {
+    animation: motion-rise var(--motion-base) var(--ease-out);
+  }
+  html:not(.reduce-motion) .motion-toast-top {
+    animation: motion-drop var(--motion-slow) var(--ease-out);
+  }
+  html:not(.reduce-motion) .motion-toast-bottom {
+    animation: motion-lift-in var(--motion-slow) var(--ease-out);
+  }
+
+  /* ---- Cards: lift gently on hover (pointer devices only) ---- */
+  @media (hover: hover) {
+    html:not(.reduce-motion) .motion-lift {
+      transition: transform var(--motion-base) var(--ease-out);
+    }
+    html:not(.reduce-motion) .motion-lift:hover {
+      transform: translateY(-2px);
+    }
+    html:not(.reduce-motion) .motion-icon {
+      transition: transform var(--motion-fast) var(--ease-out);
+    }
+    html:not(.reduce-motion) .motion-icon-host:hover .motion-icon {
+      transform: scale(1.12);
+    }
+  }
+
+  /* ---- Content appearing one after another ---- */
+  html:not(.reduce-motion) .motion-stagger > * {
+    animation: motion-rise var(--motion-base) var(--ease-out) backwards;
+  }
+  html:not(.reduce-motion) .motion-stagger > :nth-child(2) { animation-delay: calc(1 * var(--motion-stagger)); }
+  html:not(.reduce-motion) .motion-stagger > :nth-child(3) { animation-delay: calc(2 * var(--motion-stagger)); }
+  html:not(.reduce-motion) .motion-stagger > :nth-child(4) { animation-delay: calc(3 * var(--motion-stagger)); }
+  html:not(.reduce-motion) .motion-stagger > :nth-child(5) { animation-delay: calc(4 * var(--motion-stagger)); }
+  html:not(.reduce-motion) .motion-stagger > :nth-child(6) { animation-delay: calc(5 * var(--motion-stagger)); }
+  html:not(.reduce-motion) .motion-stagger > :nth-child(7) { animation-delay: calc(6 * var(--motion-stagger)); }
+  html:not(.reduce-motion) .motion-stagger > :nth-child(n + 8) { animation-delay: calc(7 * var(--motion-stagger)); }
+
+  /* ---- Lists and tables: rows fade in as they arrive, fade out as they go ---- */
+  html:not(.reduce-motion) .motion-rows > * {
+    animation: motion-fade-in var(--motion-base) var(--ease-out);
+  }
+  html:not(.reduce-motion) [data-new] {
+    animation: motion-rise var(--motion-base) var(--ease-out);
+  }
+  html:not(.reduce-motion) [data-leaving] {
+    animation: motion-fade-out var(--motion-base) var(--ease-in) forwards;
+  }
+
+  /* ---- Charts draw in ---- */
+  html:not(.reduce-motion) .motion-bar-y {
+    transform-origin: bottom;
+    animation: motion-grow-y var(--motion-slow) var(--ease-out) backwards;
+    animation-delay: calc(var(--motion-i, 0) * var(--motion-stagger));
+  }
+  html:not(.reduce-motion) .motion-bar-x {
+    transform-origin: left;
+    animation: motion-grow-x var(--motion-slow) var(--ease-out) backwards;
+    animation-delay: calc(var(--motion-i, 0) * var(--motion-stagger));
+  }
+  /* Sparkline: a clip rect sweeps left to right, then the end dot appears. */
+  html:not(.reduce-motion) .motion-spark-reveal {
+    transform-box: fill-box;
+    transform-origin: left;
+    animation: motion-grow-x var(--motion-count) var(--ease-out) backwards;
+  }
+  html:not(.reduce-motion) .motion-spark-dot {
+    transform-box: fill-box;
+    transform-origin: center;
+    animation: motion-pop-in var(--motion-base) var(--ease-out) backwards;
+    animation-delay: calc(var(--motion-count) - var(--motion-fast));
+  }
+
+  /* ---- Skeleton shimmer (transform only) ---- */
+  html:not(.reduce-motion) .motion-skeleton::after {
+    content: "";
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(90deg, transparent, rgb(255 255 255 / 0.6), transparent);
+    transform: translateX(-100%);
+    animation: motion-shimmer 1.4s ease-in-out infinite;
+  }
+
+  /* ---- Sidebar ---- */
+  html:not(.reduce-motion) .motion-nav-indicator[data-placed][data-ready] {
+    transition: transform var(--motion-base) var(--ease-out), opacity var(--motion-fast) var(--ease-out);
+  }
+  html:not(.reduce-motion) .motion-drawer[data-state="open"] > .motion-drawer-backdrop {
+    animation: motion-fade-in var(--motion-base) var(--ease-out);
+  }
+  html:not(.reduce-motion) .motion-drawer[data-state="open"] > .motion-drawer-panel {
+    animation: motion-drawer-in var(--motion-slow) var(--ease-out);
+  }
+  html:not(.reduce-motion) .motion-drawer[data-state="closed"] > .motion-drawer-backdrop {
+    animation: motion-fade-out var(--motion-base) var(--ease-in) forwards;
+  }
+  html:not(.reduce-motion) .motion-drawer[data-state="closed"] > .motion-drawer-panel {
+    animation: motion-drawer-out var(--motion-base) var(--ease-in) forwards;
+  }
+  /* Menus drop open. */
+  html:not(.reduce-motion) .motion-menu {
+    transform-origin: top right;
+    animation: motion-pop var(--motion-fast) var(--ease-out);
+  }
+
+  /* ---- Dialogs scale in and out (the Report-an-issue sheet has its own) ---- */
+  html:not(.reduce-motion) dialog:not(.report-issue-panel)[open] {
+    animation: motion-dialog-in var(--motion-base) var(--ease-out);
+  }
+  html:not(.reduce-motion) dialog:not(.report-issue-panel)[open]::backdrop {
+    animation: motion-fade-in var(--motion-base) var(--ease-out);
+  }
+  html:not(.reduce-motion) dialog[open][data-closing] {
+    animation: motion-dialog-out var(--motion-fast) var(--ease-in) forwards;
+  }
+  html:not(.reduce-motion) dialog[open][data-closing]::backdrop {
+    animation: motion-fade-out var(--motion-fast) var(--ease-in) forwards;
+  }
+}

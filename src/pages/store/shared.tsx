@@ -1,16 +1,12 @@
 import type { ReactNode } from "react";
 import { Navigate, NavLink } from "react-router-dom";
-import { Spinner } from "@/components/ui";
+import { ListSkeleton } from "@/components/ui";
 import { ErrorNote } from "@/components/feedback/ErrorNote";
 import { cn } from "@/lib/cn";
 import { useMyStore, type Store } from "@/lib/store/api";
 
-export const Loading = () => (
-  <div className="flex justify-center py-16 text-ink-brand" role="status">
-    <Spinner className="size-8" />
-    <span className="sr-only">Loading…</span>
-  </div>
-);
+/** Skeleton rows while the screen loads (not a lone spinner). */
+export const Loading = ({ label }: { label?: string }) => <ListSkeleton label={label} />;
 
 // Store sections (Figma 08.xx mobile tabs: Store · Products · Analytics · More).
 const TABS: Array<[string, string, boolean?]> = [

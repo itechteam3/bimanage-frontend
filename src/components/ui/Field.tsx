@@ -50,8 +50,8 @@ export function Field({ label, required = false, hint, hintTone = "muted", error
       <div
         data-invalid={error ? "" : undefined}
         className={cn(
-          // mobile: filled block
-          "flex flex-col gap-2 rounded-sm bg-surface-pale px-4 py-2.5",
+          // mobile: filled block. motion-shake: a short shake when an error appears.
+          "motion-shake flex flex-col gap-2 rounded-sm bg-surface-pale px-4 py-2.5",
           "data-[invalid]:shadow-[inset_0_0_0_1px_var(--color-danger)]",
           // desktop: label above an outlined control
           "lg:gap-1.5 lg:bg-transparent lg:p-0 lg:data-[invalid]:shadow-none",
@@ -77,7 +77,7 @@ export function Field({ label, required = false, hint, hintTone = "muted", error
           </p>
         )}
         {error && (
-          <p id={errorId} role="alert" className="text-body-lg text-danger">
+          <p id={errorId} role="alert" className="motion-note text-body-lg text-danger">
             {error}
           </p>
         )}
