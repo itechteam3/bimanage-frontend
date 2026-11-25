@@ -4,7 +4,7 @@ import { LoadMore } from "@/components/page/LoadMore";
 import { useNewItems } from "@/lib/realtime/useLiveList";
 import { Link, useLocation, useNavigate } from "react-router-dom";
 import { ScanButton } from "@/components/scanner/ScanButton";
-import { IconDownload, IconPlus, IconSearch, IconScan, IconFileSpreadsheet, IconAlertTriangle } from "@tabler/icons-react";
+import { IconDownload, IconPlus, IconPrinter, IconSearch, IconScan, IconFileSpreadsheet, IconAlertTriangle } from "@tabler/icons-react";
 import { Button, ButtonLink, Field, Spinner, TextInput, buttonClasses } from "@/components/ui";
 import { DetailRows, IntroCard, KpiCard, PageTitle, Panel } from "@/components/page/Blocks";
 import { AuthNote } from "@/components/layout/AuthLayout";
@@ -164,15 +164,27 @@ export function ProductsPage() {
   const all = products.data ?? [];
   const categories = [...new Set(all.map((p) => p.category).filter(Boolean))];
   const needRestock = all.filter((p) => stockState(p) !== "ok").length;
+  // Select products to print labels for (up to 200 at a time).
+  const navigate = useNavigate();
+  const [picked, setPicked] = useState<Set<string>>(new Set());
+  const toggle = (id: string) => setPicked((s) => { const n = new Set(s); if (n.has(id)) n.delete(id); else if (n.size < 200) n.add(id); return n; });
+  const visible = list.slice(0, shown);
+  const allPicked = visible.length > 0 && visible.every((p) => picked.has(p._id));
+  const printLabels = () => navigate("/inventory/labels", { state: { ids: [...picked] } });
 
   return (
     <div className="flex flex-col gap-6">
       <PageTitle
         actions={
           canEdit && (
-            <ButtonLink to="/inventory/products/new" size="md">
-              <IconPlus aria-hidden="true" className="size-icon" /> Add product
-            </ButtonLink>
+            <div className="flex flex-wrap gap-3">
+              <Button size="md" variant="secondary" disabled={!picked.size} onClick={printLabels} title={picked.size ? undefined : "Select products below first"}>
+                <IconPrinter aria-hidden="true" className="size-icon" /> {picked.size ? `Print labels (${count(picked.size)})` : "Print labels"}
+              </Button>
+              <ButtonLink to="/inventory/products/new" size="md">
+                <IconPlus aria-hidden="true" className="size-icon" /> Add product
+              </ButtonLink>
+            </div>
           )
         }
       >
@@ -198,6 +210,19 @@ export function ProductsPage() {
                 <caption className="sr-only">Inventory products</caption>
                 <thead className="text-caption font-semibold uppercase text-ink-muted">
                   <tr>
+                    {canEdit && (
+                      <th scope="col" className="w-12 px-3 py-3">
+                        <label className="-m-3 flex size-11 cursor-pointer items-center justify-center">
+                        <input
+                          type="checkbox"
+                          aria-label="Select all shown products for labels"
+                          checked={allPicked}
+                          onChange={() => setPicked((s) => { const n = new Set(s); for (const p of visible) { if (allPicked) n.delete(p._id); else if (n.size < 200) n.add(p._id); } return n; })}
+                          className="size-5 accent-[var(--color-ink-brand)]"
+                        />
+                        </label>
+                      </th>
+                    )}
                     <th scope="col" className="px-3 py-3">Product</th>
                     <th scope="col" className="px-3 py-3">Price</th>
                     <th scope="col" className="px-3 py-3">Stock</th>
@@ -207,7 +232,12 @@ export function ProductsPage() {
                 <tbody>
                   {list.slice(0, shown).map((p, i) => (
                     <tr key={p._id} data-new={fresh.has(p._id) || undefined} className={cn(i % 2 === 1 && "bg-surface-pale", fresh.has(p._id) && newRowClass)}>
-                      <td className="rounded-l-lg px-3 py-4">
+                      {canEdit && (
+                        <td className="rounded-l-lg px-3 py-4">
+                          <label className="-m-3 flex size-11 cursor-pointer items-center justify-center"><input type="checkbox" aria-label={`Select ${p.name} for labels`} checked={picked.has(p._id)} onChange={() => toggle(p._id)} className="size-5 accent-[var(--color-ink-brand)]" /></label>
+                        </td>
+                      )}
+                      <td className={cn("px-3 py-4", !canEdit && "rounded-l-lg")}>
                         <Link to={`/inventory/products/${p._id}`} className="font-semibold text-ink-strong hover:underline">
                           {p.name}
                         </Link>

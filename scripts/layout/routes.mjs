@@ -45,7 +45,7 @@ const SKIP = new Set(["/ui-kit"]);
 
 const STOREFRONT = ["/s/elijahapparel", "/s/elijahapparel/products/p1", "/s/elijahapparel/cart", "/s/elijahapparel/checkout", "/s/elijahapparel/payment", "/s/elijahapparel/track", "/s/elijahapparel/chat"];
 // Query strings some screens need to show their real content.
-const QUERY = { "/newsletter/confirm": "?e=a&t=b", "/newsletter/unsubscribe": "?e=a&t=b", "/reset-password": "?token=x", "/admin/reset-password": "?token=x", "/admin/invite": "?token=x", "/invite/accept": "?token=x", "/unsubscribe": "?u=u1&topic=announcements&t=s" };
+const QUERY = { "/newsletter/confirm": "?e=a&t=b", "/newsletter/unsubscribe": "?e=a&t=b", "/reset-password": "?token=x", "/admin/reset-password": "?token=x", "/admin/invite": "?token=x", "/invite/accept": "?token=x", "/unsubscribe": "?u=u1&topic=announcements&t=s", "/inventory/labels": "?ids=inv0,inv9" };
 
 export function allRoutes(root = ".") {
   const app = readFileSync(`${root}/src/App.tsx`, "utf8");
