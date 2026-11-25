@@ -1,0 +1,113 @@
+/* Guided tours (coach marks). Only transform and opacity animate; the shared
+   motion settings are used when present (--motion-*, --ease-out), with the
+   same 200ms ease-out as a fallback. Off for reduced motion. */
+
+.tour-root {
+  position: fixed;
+  inset: 0;
+  z-index: 60;
+}
+
+.tour-shield {
+  position: absolute;
+  inset: 0;
+}
+.tour-shield-dim {
+  background: var(--color-surface-overlay, rgb(15 23 42 / 0.5));
+  animation: tour-fade var(--motion-base, 200ms) var(--ease-out, cubic-bezier(0.2, 0.8, 0.2, 1)) both;
+}
+
+.tour-spot {
+  position: absolute;
+  top: 0;
+  left: 0;
+  border-radius: 16px;
+  /* Everything outside the target is dimmed. */
+  box-shadow: 0 0 0 9999px var(--color-surface-overlay, rgb(15 23 42 / 0.5));
+  outline: 2px solid var(--color-ink-on-brand, #fff);
+  transition: transform var(--motion-base, 200ms) var(--ease-out, cubic-bezier(0.2, 0.8, 0.2, 1));
+  pointer-events: none;
+}
+
+.tour-pop {
+  position: absolute;
+  width: min(360px, calc(100vw - 32px));
+  border-radius: 20px;
+  border: 1px solid var(--color-line-subtle, #e5e7eb);
+  background: var(--color-surface-card, #fff);
+  padding: 16px 20px 20px;
+  box-shadow: var(--shadow-floating, 0 20px 40px rgb(0 0 0 / 0.18));
+  outline: none;
+  animation: tour-in var(--motion-base, 200ms) var(--ease-out, cubic-bezier(0.2, 0.8, 0.2, 1)) both;
+}
+.tour-pop:focus-visible {
+  box-shadow:
+    0 0 0 3px var(--color-ink-brand, #1e3a8a),
+    var(--shadow-floating, 0 20px 40px rgb(0 0 0 / 0.18));
+}
+
+.tour-pop-center {
+  top: 50%;
+  left: 50%;
+  translate: -50% -50%;
+}
+
+/* Phones: a sheet docked to the bottom (or top when the target is low). */
+.tour-pop-sheet {
+  left: 16px;
+  right: 16px;
+  bottom: max(16px, env(safe-area-inset-bottom));
+  width: auto;
+}
+.tour-pop-sheet-top {
+  bottom: auto;
+  top: max(16px, env(safe-area-inset-top));
+}
+
+.tour-arrow {
+  position: absolute;
+  top: -7px;
+  width: 14px;
+  height: 14px;
+  margin-left: -7px;
+  background: inherit;
+  border-left: 1px solid var(--color-line-subtle, #e5e7eb);
+  border-top: 1px solid var(--color-line-subtle, #e5e7eb);
+  transform: rotate(45deg);
+}
+.tour-pop-above .tour-arrow {
+  top: auto;
+  bottom: -7px;
+  transform: rotate(225deg);
+}
+
+@keyframes tour-in {
+  from {
+    opacity: 0;
+    transform: translateY(6px) scale(0.98);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+@keyframes tour-fade {
+  from {
+    opacity: 0;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .tour-pop,
+  .tour-shield-dim,
+  .tour-spot {
+    animation: none;
+    transition: none;
+  }
+}
+html.reduce-motion .tour-pop,
+html.reduce-motion .tour-shield-dim,
+html.reduce-motion .tour-spot {
+  animation: none;
+  transition: none;
+}

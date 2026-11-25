@@ -6,6 +6,7 @@ import { Logo } from "@/components/brand/Logo";
 import { Avatar as AvatarImage, IconButton } from "@/components/ui";
 import { SIDEBAR_NAV, MOBILE_TABS, type NavItem } from "@/config/navigation";
 import { BackBar, HeaderBackButton } from "./BackNav";
+import { HelpMenu } from "@/components/tour/HelpMenu";
 import { MOTION, usePresence } from "@/lib/motion";
 
 export interface ShellUser {
@@ -218,6 +219,7 @@ function DesktopHeader({ section, user, unread, onLogout, onChangePhoto }: Pick<
         <span>{section}</span>
       </p>
       <div className="flex items-center gap-3">
+        <HelpMenu />
         <Link to="/notifications" className="relative flex size-header-action items-center justify-center rounded-full bg-surface-pale text-ink-strong hover:bg-surface-tonal" aria-label={n ? `Notifications, ${n} unread` : "Notifications"}>
           <IconBell aria-hidden="true" className="size-icon" />
           <Badge show={n > 0} />
@@ -249,7 +251,10 @@ function MobileHeader({ user, navState, onLogout }: Pick<AppShellProps, "user" |
             <Logo tone="on-brand" compact />
           </Link>
         </div>
-        <IconButton tone="on-brand" size="sm" label="Open menu" aria-expanded={open} icon={<IconMenu2 aria-hidden="true" className="size-6" />} onClick={() => setOpen(true)} />
+        <div className="flex items-center gap-1">
+          <HelpMenu onBrand />
+          <IconButton tone="on-brand" size="sm" label="Open menu" aria-expanded={open} icon={<IconMenu2 aria-hidden="true" className="size-6" />} onClick={() => setOpen(true)} />
+        </div>
       </header>
       {drawer.mounted && (
         <div data-state={drawer.state} {...(open ? {} : ({ inert: "" } as Record<string, string>))} className="motion-drawer fixed inset-0 z-40 lg:hidden">
