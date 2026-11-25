@@ -4,7 +4,8 @@ import { LoadMore } from "@/components/page/LoadMore";
 import { useFieldArray, useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
-import { IconArrowRight, IconPlus, IconSearch, IconTrash } from "@tabler/icons-react";
+import { IconArrowRight, IconPlus, IconScan, IconSearch, IconTrash } from "@tabler/icons-react";
+import { ScanButton } from "@/components/scanner/ScanButton";
 import { Button, ButtonLink, Field, SelectInput, Status, TextInput, ListSkeleton } from "@/components/ui";
 import { DetailRows, InfoStrip, IntroCard, KpiCard, PageTitle, Panel, TipList } from "@/components/page/Blocks";
 import { ErrorNote } from "@/components/feedback/ErrorNote";
@@ -219,7 +220,7 @@ export function CreateOrderPage() {
   const products = useProducts();
   const create = useCreateOrder();
   const [formError, setFormError] = useState<unknown>(null);
-  const { register, control, handleSubmit, watch, setError, formState } = useForm<OrderValues>({
+  const { register, control, handleSubmit, watch, setError, getValues, setValue, formState } = useForm<OrderValues>({
     resolver: zodResolver(orderSchema),
     defaultValues: {
       customerName: prefill?.name ?? "",
@@ -234,6 +235,30 @@ export function CreateOrderPage() {
     } as unknown as OrderValues,
   });
   const { fields, append, remove } = useFieldArray({ control, name: "items" });
+  // Scan (camera or a USB/Bluetooth reader) or type a barcode/SKU to add a line.
+  const [scanCode, setScanCode] = useState("");
+  const [scanNote, setScanNote] = useState<{ ok: boolean; text: string } | null>(null);
+  const addByCode = (raw: string) => {
+    const code = raw.trim();
+    if (!code) return;
+    const lc = code.toLowerCase();
+    const p = (products.data ?? []).find((x) => x.barcode?.toLowerCase() === lc || x.sku?.toLowerCase() === lc);
+    if (!p) return setScanNote({ ok: false, text: `No product matches “${code}”. Check the code or add the product first.` });
+    if (p.stockQuantity <= 0) return setScanNote({ ok: false, text: `${p.name} is out of stock.` });
+    const items = getValues("items") ?? [];
+    const same = items.findIndex((i) => i.productId === p._id);
+    if (same >= 0) {
+      const qty = (Number(String(items[same]?.quantity ?? "").replace(/[,s]/g, "")) || 0) + 1;
+      setValue(`items.${same}.quantity` as const, qty as never, { shouldDirty: true });
+      setScanNote({ ok: true, text: `${p.name}: quantity now ${count(qty)}.` });
+    } else {
+      const empty = items.findIndex((i) => !i.productId);
+      if (empty >= 0) setValue(`items.${empty}.productId` as const, p._id as never, { shouldDirty: true });
+      else append({ productId: p._id, quantity: 1 } as never);
+      setScanNote({ ok: true, text: `Added ${p.name}.` });
+    }
+    setScanCode("");
+  };
   const guard = useLeaveGuard(formState.isDirty && !formState.isSubmitSuccessful);
   const byId = useMemo(() => new Map((products.data ?? []).map((p) => [p._id, p])), [products.data]);
 
@@ -334,6 +359,36 @@ export function CreateOrderPage() {
             </div>
 
             <h3 className="mt-8 text-title-sm text-ink-strong">Items in this sale</h3>
+            <div className="mt-3 flex flex-col gap-3 md:flex-row md:items-end">
+              <div className="min-w-0 flex-1">
+                <Field label="Scan or type a barcode / SKU" hint="Barcode readers work too: scan into this field.">
+                  <TextInput
+                    inputMode="search"
+                    autoComplete="off"
+                    placeholder="8901234567890"
+                    value={scanCode}
+                    onChange={(e) => setScanCode(e.target.value)}
+                    onKeyDown={(e) => {
+                      if (e.key === "Enter") {
+                        e.preventDefault();
+                        addByCode(scanCode);
+                      }
+                    }}
+                    trailing={
+                      <button type="button" onClick={() => addByCode(scanCode)} aria-label="Add scanned product" className="mr-2 text-ink-brand">
+                        <IconScan aria-hidden="true" className="size-icon" />
+                      </button>
+                    }
+                  />
+                </Field>
+              </div>
+              <ScanButton onCode={addByCode} />
+            </div>
+            {scanNote && (
+              <p role="status" className={scanNote.ok ? "mt-2 text-body-sm text-success" : "mt-2 text-body-sm text-danger"}>
+                {scanNote.text}
+              </p>
+            )}
             <ul className="mt-3 flex flex-col gap-3">
               {fields.map((f, n) => {
                 const l = lines[n];

@@ -3,6 +3,7 @@ import { UpdatedNote, newRowClass } from "@/components/feedback/UpdatedNote";
 import { LoadMore } from "@/components/page/LoadMore";
 import { useNewItems } from "@/lib/realtime/useLiveList";
 import { Link, useLocation, useNavigate } from "react-router-dom";
+import { ScanButton } from "@/components/scanner/ScanButton";
 import { IconDownload, IconPlus, IconSearch, IconScan, IconFileSpreadsheet, IconAlertTriangle } from "@tabler/icons-react";
 import { Button, ButtonLink, Field, TextInput, buttonClasses, ListSkeleton } from "@/components/ui";
 import { DetailRows, IntroCard, KpiCard, PageTitle, Panel } from "@/components/page/Blocks";
@@ -178,10 +179,11 @@ export function ProductsPage() {
 
       <div className="grid grid-cols-[minmax(0,1fr)] gap-5 lg:grid-cols-[minmax(0,2fr)_minmax(0,1fr)]">
         <Panel title="Inventory product register" subtitle="Search, edit, export or restock products.">
-          <div className="max-w-sm">
-            <Field label="Search">
+          <div className="flex max-w-md items-end gap-3">
+            <Field label="Search" className="min-w-0 flex-1">
               <TextInput type="search" placeholder="Search products, SKU or barcode" value={q} onChange={(e) => setQ(e.target.value)} trailing={<IconSearch aria-hidden="true" className="mr-2 size-icon text-ink-muted" />} />
             </Field>
+            <ScanButton iconOnly label="Scan a barcode to search" onCode={setQ} />
           </div>
           {products.isLoading && <Loading />}
           <ErrorNote error={products.error} fallback="We couldn't load your products. Please try again." onRetry={() => void products.refetch()} />
