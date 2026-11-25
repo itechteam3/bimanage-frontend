@@ -6,6 +6,7 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
 import { IconArrowRight, IconPlus, IconScan, IconSearch, IconTrash } from "@tabler/icons-react";
 import { ScanButton } from "@/components/scanner/ScanButton";
+import { interpretScan } from "@/lib/scanner/scanner";
 import { Button, ButtonLink, Field, SelectInput, Spinner, Status, TextInput } from "@/components/ui";
 import { DetailRows, InfoStrip, IntroCard, KpiCard, PageTitle, Panel, TipList } from "@/components/page/Blocks";
 import { ErrorNote } from "@/components/feedback/ErrorNote";
@@ -243,7 +244,9 @@ export function CreateOrderPage() {
   const [scanCode, setScanCode] = useState("");
   const [scanNote, setScanNote] = useState<{ ok: boolean; text: string } | null>(null);
   const addByCode = (raw: string) => {
-    const code = raw.trim();
+    const meant = interpretScan(raw);
+    if (meant.kind === "link") return setScanNote({ ok: false, text: `This QR code is a link to ${meant.host}, not a product code.` });
+    const code = meant.code;
     if (!code) return;
     const lc = code.toLowerCase();
     const p = (products.data ?? []).find((x) => x.barcode?.toLowerCase() === lc || x.sku?.toLowerCase() === lc);

@@ -2,12 +2,13 @@ import { useEffect, useRef, useState } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
-import { Link, useLocation, useNavigate, useParams } from "react-router-dom";
+import { Link, useLocation, useNavigate, useParams, useSearchParams } from "react-router-dom";
 import { IconPhoto, IconScan, IconTrash, IconHistory } from "@tabler/icons-react";
 import { Button, ButtonLink, Dialog, Field, SelectInput, Spinner, TextInput } from "@/components/ui";
 import { DetailRows, HelpPanel, IntroCard, PageTitle, Panel } from "@/components/page/Blocks";
 import { AuthNote } from "@/components/layout/AuthLayout";
 import { ScanButton } from "@/components/scanner/ScanButton";
+import { interpretScan } from "@/lib/scanner/scanner";
 import { StockBadge } from "@/components/inventory/StockBadge";
 import {
   findInInventory,
@@ -551,7 +552,10 @@ export function BarcodeLookupPage() {
   const [result, setResult] = useState<LookupResult | null>(null);
 
   const find = async (raw: string) => {
-    const c = raw.trim();
+    const meant = interpretScan(raw);
+    if (meant.kind === "link") return setError(`This QR code is a link to ${meant.host}, not a product code.`);
+    const c = meant.code;
+    if (meant.code !== raw.trim()) setCode(c);
     if (!c) return setError("Enter a barcode, SKU or product name.");
     setBusy(true);
     setError(null);
@@ -571,6 +575,18 @@ export function BarcodeLookupPage() {
     }
   };
 
+
+  // A BiManage label's QR code opens /inventory/lookup?code=… (phone camera): look it up straight away.
+  const [params] = useSearchParams();
+  const fromLabel = params.get("code");
+  const looked = useRef<string | null>(null);
+  useEffect(() => {
+    if (!fromLabel || looked.current === fromLabel) return;
+    looked.current = fromLabel;
+    setCode(fromLabel);
+    void find(fromLabel);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [fromLabel]);
   return (
     <div className="flex flex-col gap-6">
       <PageTitle>Scan or enter barcode</PageTitle>

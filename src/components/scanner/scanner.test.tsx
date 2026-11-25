@@ -112,10 +112,64 @@ describe("scanning into a new order", () => {
     expect(screen.getByRole("button", { name: /scan with camera/i })).toBeInTheDocument();
   });
 
+  it("a barcode reader typing a QR link: only a product code is used", async () => {
+    renderApp("/orders/new");
+    const user = userEvent.setup();
+    const box = await screen.findByLabelText(/scan or type a barcode/i);
+    await user.type(box, "https://www.instagram.com/x{Enter}");
+    expect(screen.getByText(/link to www.instagram.com, not a product code/i)).toBeInTheDocument();
+    expect((screen.getAllByLabelText(/^product/i)[0] as HTMLSelectElement).value).toBe("");
+    await user.type(box, "https://id.gs1.org/01/05901234123457{Enter}");
+    expect(screen.getByText(/added linen shirt/i)).toBeInTheDocument();
+  });
+
+  it("a BiManage label opened by a phone camera looks the product up straight away", async () => {
+    fb.handlers["GET /barcode/inventory/5901234123457"] = () => [200, [{ _id: "p1", name: "Linen shirt", sellingPrice: 25000, stockQuantity: 18, barcode: "5901234123457" }]];
+    renderApp("/inventory/lookup?code=5901234123457");
+    expect(await screen.findByRole("heading", { name: "Linen shirt" })).toBeInTheDocument();
+  });
+
   it("product form: both typing and the camera button are offered for the barcode", async () => {
     fb.handlers["GET /inventory/stats"] = () => [200, {}];
     renderApp("/inventory/products/new");
     expect(await screen.findByRole("button", { name: /scan with camera/i })).toBeInTheDocument();
     expect(screen.getByRole("textbox", { name: /^barcode/i })).toBeInTheDocument();
+  });
+});
+
+describe("QR codes holding links", () => {
+  beforeEach(() => {
+    // The dialog's own <video>: playing, with frames to read.
+    vi.spyOn(HTMLMediaElement.prototype, "play").mockResolvedValue(undefined);
+    vi.spyOn(HTMLMediaElement.prototype, "readyState", "get").mockReturnValue(4);
+    vi.spyOn(HTMLVideoElement.prototype, "videoWidth", "get").mockReturnValue(640);
+    vi.spyOn(HTMLVideoElement.prototype, "videoHeight", "get").mockReturnValue(480);
+  });
+  it("camera: a link that isn't a product code is shown, never filled in, and Scan again restarts", async () => {
+    fakeCamera();
+    vi.stubGlobal("BarcodeDetector", class {
+      static getSupportedFormats = async () => ["ean_13", "qr_code"];
+      detect = async () => [{ rawValue: "https://www.instagram.com/somebrand" }];
+    });
+    const onCode = vi.fn();
+    const onClose = vi.fn();
+    render(<ScanDialog open onClose={onClose} onCode={onCode} />);
+    expect(await screen.findByText(/this qr code is a link, not a product code/i)).toBeInTheDocument();
+    expect(screen.getByText(/www\.instagram\.com/)).toBeInTheDocument();
+    expect(screen.queryByRole("link")).not.toBeInTheDocument();
+    expect(onCode).not.toHaveBeenCalled();
+    expect(onClose).not.toHaveBeenCalled();
+    expect(screen.getByRole("button", { name: /scan again/i })).toBeInTheDocument();
+  });
+
+  it("camera: a GS1 Digital Link fills in the barcode number", async () => {
+    fakeCamera();
+    vi.stubGlobal("BarcodeDetector", class {
+      static getSupportedFormats = async () => ["ean_13", "qr_code"];
+      detect = async () => [{ rawValue: "https://id.gs1.org/01/05901234123457" }];
+    });
+    const onCode = vi.fn();
+    render(<ScanDialog open onClose={() => undefined} onCode={onCode} />);
+    await waitFor(() => expect(onCode).toHaveBeenCalledWith("5901234123457"));
   });
 });

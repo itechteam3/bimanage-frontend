@@ -5,6 +5,8 @@
 // The camera stream is always stopped by stop(): on a successful scan, on
 // cancel, and when the dialog unmounts.
 
+import { SITE_URL } from "@/lib/seo/meta";
+
 export const SCAN_FORMATS = ["ean_13", "ean_8", "upc_a", "upc_e", "code_128", "code_39", "code_93", "codabar", "itf", "qr_code", "data_matrix"] as const;
 
 export type ScanErrorKind = "insecure" | "unsupported" | "blocked" | "missing" | "busy" | "failed";
@@ -199,4 +201,49 @@ export function feedback() {
   } catch {
     /* audio blocked */
   }
+}
+
+// ---------------------------------------------------------------------------
+// What a scan means. Barcodes are product codes. QR codes can also hold a
+// link: we take the product code out of links that carry one (GS1 Digital
+// Link, ?barcode= / ?sku=, and BiManage label links), and refuse any other
+// link. A link is never opened and never put in a field.
+
+export type ScanMeaning = { kind: "code"; code: string } | { kind: "link"; host: string };
+
+/** Hosts that serve BiManage label links (…/inventory/lookup?code=…). */
+const ownHosts = () => {
+  const hosts = new Set([new URL(SITE_URL).host]);
+  if (typeof window !== "undefined" && window.location?.host) hosts.add(window.location.host);
+  return hosts;
+};
+
+/** The link printed in a product label's QR code (labels PR). */
+export const labelLink = (code: string) => `${SITE_URL}/inventory/lookup?code=${encodeURIComponent(code)}`;
+
+const CODE = /^[A-Za-z0-9-]{1,64}$/;
+
+export function interpretScan(raw: string): ScanMeaning {
+  const text = raw.trim();
+  if (!/^[a-z][a-z0-9+.-]*:\/\//i.test(text) && !/^www\./i.test(text)) return { kind: "code", code: text };
+  let url: URL;
+  try {
+    url = new URL(/^www\./i.test(text) ? `https://${text}` : text);
+  } catch {
+    return { kind: "code", code: text };
+  }
+  const host = url.host || url.protocol.replace(/:$/, "");
+  const ok = (v: string | null) => (v && CODE.test(v.trim()) ? v.trim() : null);
+  // BiManage label: /inventory/lookup?code=…
+  if (ownHosts().has(url.host)) {
+    const own = ok(url.searchParams.get("code"));
+    if (own) return { kind: "code", code: own };
+  }
+  // ?barcode= / ?sku= on any site
+  const param = ok(url.searchParams.get("barcode")) ?? ok(url.searchParams.get("sku"));
+  if (param) return { kind: "code", code: param };
+  // GS1 Digital Link: …/01/<GTIN-8/12/13/14>/…  (a GTIN-14 starting 0 is the EAN-13/UPC)
+  const gtin = url.pathname.match(/\/01\/(\d{8}|\d{12,14})(?:\/|$)/)?.[1];
+  if (gtin) return { kind: "code", code: gtin.length === 14 && gtin.startsWith("0") ? gtin.slice(1) : gtin };
+  return { kind: "link", host };
 }
