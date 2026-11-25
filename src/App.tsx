@@ -75,6 +75,7 @@ const AdjustStockPage = inventory("AdjustStockPage");
 const LowStockPage = inventory("LowStockPage");
 const ExportReadyPage = inventory("ExportReadyPage");
 const BarcodeLookupPage = inventory("BarcodeLookupPage");
+const LabelsPage = inventory("LabelsPage");
 // Sales, orders and invoices (Phase 5) load as one chunk.
 const sales = (name: keyof typeof import("@/pages/sales/index")) => lazy(() => import("@/pages/sales/index").then((m) => ({ default: m[name] })));
 const SalesOverviewPage = sales("SalesOverviewPage");
@@ -331,6 +332,7 @@ export const routes = [
               { path: "/inventory/low-stock", element: <LowStockPage />, handle: { section: "Inventory", back: back("/inventory", SCREENS.inventory) } },
               { path: "/inventory/export", element: <ExportReadyPage />, handle: { section: "Inventory", back: back("/inventory", SCREENS.inventory) } },
               { path: "/inventory/lookup", element: <BarcodeLookupPage />, handle: { section: "Inventory", back: back("/inventory", SCREENS.inventory) } },
+              { path: "/inventory/labels", element: <LabelsPage />, handle: { section: "Inventory", back: back("/inventory/products", SCREENS.inventory) } },
             ],
           },
           // Sales, orders and invoices (Figma 05.01–05.13)

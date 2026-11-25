@@ -3,7 +3,7 @@ import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
 import { Link, useLocation, useNavigate, useParams, useSearchParams } from "react-router-dom";
-import { IconPhoto, IconScan, IconTrash, IconHistory } from "@tabler/icons-react";
+import { IconPhoto, IconPrinter, IconScan, IconTrash, IconHistory } from "@tabler/icons-react";
 import { Button, ButtonLink, Dialog, Field, SelectInput, Spinner, TextInput } from "@/components/ui";
 import { DetailRows, HelpPanel, IntroCard, PageTitle, Panel } from "@/components/page/Blocks";
 import { AuthNote } from "@/components/layout/AuthLayout";
@@ -181,9 +181,14 @@ export function ProductFormPage() {
       <PageTitle
         actions={
           editing && (
-            <ButtonLink to={`/inventory/products/${id}/adjust`} size="md">
-              Adjust stock
-            </ButtonLink>
+            <div className="flex flex-wrap gap-3">
+              <ButtonLink to={`/inventory/labels?ids=${id}`} size="md" variant="secondary">
+                <IconPrinter aria-hidden="true" className="size-icon" /> Print label
+              </ButtonLink>
+              <ButtonLink to={`/inventory/products/${id}/adjust`} size="md">
+                Adjust stock
+              </ButtonLink>
+            </div>
           )
         }
       >
