@@ -256,6 +256,9 @@ if (process.env.FIXTURE_OVERLAY) {
 
 // ── Long data: the worst realistic values a screen must still handle ──
 let long = process.env.LAYOUT_LONG === "1";
+// LAYOUT_TOURS=1: nobody has seen a tour yet, so every page's guided tour starts
+// (check-layout --tours). Otherwise /api/tours 404s and tours never pop up.
+const tours = process.env.LAYOUT_TOURS === "1";
 const LONG_NAME = " Adewale-Okonkwo Enterprises International Limited";
 const LONG_TEXT = " — with a much longer description than usual that has to wrap neatly across several lines on a phone";
 const NAMEISH = /^(name|storeName|businessName|clientName|customerName|productName|fullName|title|subject|projectTitle|headline|label|companyName|accountName|bankName|counterpartName)$/;
@@ -298,6 +301,7 @@ http.createServer((req, res) => {
   if (path === "/__mode/long") long = true;
   if (path === "/__mode/normal") long = false;
   if (path.startsWith("/__mode/")) { res.writeHead(200, cors); return res.end(JSON.stringify({ long, populated })); }
+  if (key === "GET /api/tours") { res.writeHead(tours ? 200 : 404, cors); return res.end(JSON.stringify(tours ? { tours: {} } : { message: "no fixture" })); }
   let body = key === "GET /api/dashboard" ? (routes.__dashboard ?? dashboard()) : feliRoute(key) ?? routes[key];
   if (body && overlayRename && key !== "GET /api/dashboard") body = overlayRename(body);
   // Writes succeed with an empty object so forms and dialogs can be opened and submitted.
