@@ -1,7 +1,8 @@
 import { useEffect, useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { IconBell, IconChecks, IconDownload, IconLock, IconSettings, IconTrash } from "@tabler/icons-react";
-import { Button, ButtonLink, Dialog, Spinner } from "@/components/ui";
+import { Button, ButtonLink, Dialog, ListSkeleton, Spinner } from "@/components/ui";
+import { usePresenceList } from "@/lib/motion";
 import { IntroCard, KpiCard, PageTitle, Panel, TipList } from "@/components/page/Blocks";
 import { ErrorNote } from "@/components/feedback/ErrorNote";
 import { UpdatedNote } from "@/components/feedback/UpdatedNote";
@@ -89,6 +90,7 @@ export function NotificationsPage() {
     }
   };
   const s = summary.data;
+  const shown = usePresenceList(list.data?.notifications ?? [], (n) => n._id);
 
   return (
     <div className="flex flex-col gap-6">
@@ -124,10 +126,7 @@ export function NotificationsPage() {
             </div>
           </div>
           {list.isLoading ? (
-            <div className="flex justify-center py-8 text-ink-brand" role="status">
-              <Spinner />
-              <span className="sr-only">Loading notifications…</span>
-            </div>
+            <ListSkeleton label="Loading notifications…" rows={4} />
           ) : list.error ? (
             <ErrorNote error={list.error} fallback="We couldn't load your notifications." onRetry={() => void list.refetch()} />
           ) : !list.data?.notifications.length ? (
@@ -136,9 +135,10 @@ export function NotificationsPage() {
               <p className="mt-1 text-body-sm text-ink-muted">New orders, payments, stock alerts and messages will appear here.</p>
             </div>
           ) : (
-            <ul className="flex flex-col divide-y divide-line-subtle">
-              {list.data.notifications.map((n) => (
-                <li key={n._id} className="flex items-start gap-3 py-3">
+            <ul className="motion-rows flex flex-col divide-y divide-line-subtle">
+              {/* A deleted notification fades out before it goes. */}
+              {shown.map(({ item: n, leaving }) => (
+                <li key={n._id} data-leaving={leaving || undefined} aria-hidden={leaving || undefined} className={cn("flex items-start gap-3 py-3", leaving && "pointer-events-none")}>
                   <span aria-hidden="true" className={cn("mt-2 size-2 shrink-0 rounded-full", n.isRead ? "bg-transparent" : "bg-brand-navy")} />
                   <button type="button" onClick={() => open(n)} className="min-w-0 flex-1 text-left">
                     <span className="flex flex-wrap items-baseline justify-between gap-x-3">

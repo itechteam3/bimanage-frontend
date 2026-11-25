@@ -11,7 +11,7 @@ import { ServerWakeBanner } from "@/components/feedback/ServerWakeBanner";
 import { UpgradeDialog } from "@/components/feedback/UpgradeDialog";
 import { VersionBanner } from "@/components/feedback/VersionBanner";
 import { RealtimeProvider } from "@/lib/realtime/RealtimeProvider";
-import { Spinner } from "@/components/ui";
+import { ListSkeleton, Spinner } from "@/components/ui";
 import { NotFoundPage } from "@/pages/NotFoundPage";
 import { SignInPage } from "@/pages/auth/SignInPage";
 import { RegisterPage } from "@/pages/auth/RegisterPage";
@@ -228,12 +228,8 @@ const Loading = () => (
   </div>
 );
 
-const SectionLoading = () => (
-  <div className="flex justify-center py-16 text-ink-brand" role="status">
-    <Spinner className="size-8" />
-    <span className="sr-only">Loading…</span>
-  </div>
-);
+/** In-page loading for a lazy section: skeleton rows, not a lone spinner. */
+const SectionLoading = () => <ListSkeleton />;
 
 function RootLayout() {
   useTrackHistory();

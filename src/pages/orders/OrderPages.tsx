@@ -6,7 +6,7 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
 import { IconArrowRight, IconPlus, IconScan, IconSearch, IconTrash } from "@tabler/icons-react";
 import { ScanButton } from "@/components/scanner/ScanButton";
-import { Button, ButtonLink, Field, SelectInput, Spinner, Status, TextInput } from "@/components/ui";
+import { Button, ButtonLink, Field, SelectInput, Status, TextInput, ListSkeleton } from "@/components/ui";
 import { DetailRows, InfoStrip, IntroCard, KpiCard, PageTitle, Panel, TipList } from "@/components/page/Blocks";
 import { ErrorNote } from "@/components/feedback/ErrorNote";
 import { UpdatedNote, newRowClass } from "@/components/feedback/UpdatedNote";
@@ -35,12 +35,8 @@ import { cn } from "@/lib/cn";
 import { useLeaveGuard } from "@/lib/nav/useLeaveGuard";
 import type { CustomerPrefill } from "@/lib/customers/api";
 
-const Loading = () => (
-  <div className="flex justify-center py-16 text-ink-brand" role="status">
-    <Spinner className="size-8" />
-    <span className="sr-only">Loading…</span>
-  </div>
-);
+/** Skeleton rows while the screen loads (not a lone spinner). */
+const Loading = ({ label }: { label?: string }) => <ListSkeleton label={label} />;
 
 const FILTERS: Array<[OrderFilter, string]> = [
   ["all", "All"],
@@ -66,7 +62,7 @@ export function OrderTable({ orders, empty }: { orders: Order[]; empty: React.Re
             <th scope="col" className="rounded-r-lg px-3 py-3">Status</th>
           </tr>
         </thead>
-        <tbody>
+        <tbody className="motion-rows">
           {orders.map((o) => {
             const b = orderBadge(o);
             return (

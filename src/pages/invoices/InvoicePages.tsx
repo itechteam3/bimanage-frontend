@@ -5,7 +5,7 @@ import { useFieldArray, useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
 import { IconDownload, IconMail, IconPlus, IconTrash } from "@tabler/icons-react";
-import { Button, ButtonLink, Dialog, Field, Spinner, Status, TextArea, TextInput } from "@/components/ui";
+import { Button, ButtonLink, Dialog, Field, Status, TextArea, TextInput, ListSkeleton } from "@/components/ui";
 import { InfoStrip, IntroCard, PageTitle, Panel } from "@/components/page/Blocks";
 import { ErrorNote } from "@/components/feedback/ErrorNote";
 import { useBusinessProfile } from "@/lib/workspace/api";
@@ -31,12 +31,8 @@ import { useUrlState } from "@/lib/nav/useUrlState";
 import { useLeaveGuard } from "@/lib/nav/useLeaveGuard";
 import type { CustomerPrefill } from "@/lib/customers/api";
 
-const Loading = () => (
-  <div className="flex justify-center py-16 text-ink-brand" role="status">
-    <Spinner className="size-8" />
-    <span className="sr-only">Loading…</span>
-  </div>
-);
+/** Skeleton rows while the screen loads (not a lone spinner). */
+const Loading = ({ label }: { label?: string }) => <ListSkeleton label={label} />;
 
 const toDateInput = (iso?: string | null) => (iso ? new Date(iso).toISOString().slice(0, 10) : "");
 
@@ -113,7 +109,7 @@ export function InvoicesPage() {
                     <th scope="col" className="rounded-r-lg px-3 py-3">Status</th>
                   </tr>
                 </thead>
-                <tbody>
+                <tbody className="motion-rows">
                   {list.map((i) => (
                     <tr key={i._id} className="border-b border-line-subtle last:border-0">
                       <td className="px-3 py-4">

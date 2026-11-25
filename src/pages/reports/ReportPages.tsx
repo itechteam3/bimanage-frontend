@@ -1,7 +1,7 @@
 import { useEffect, useState, type ReactNode } from "react";
 import { Link, NavLink } from "react-router-dom";
 import { IconDownload, IconLock, IconSearch } from "@tabler/icons-react";
-import { Button, ButtonLink, EmptyState, Field, SelectInput, Spinner, Status, TextInput } from "@/components/ui";
+import { Button, ButtonLink, EmptyState, Field, SelectInput, Status, TextInput, ListSkeleton } from "@/components/ui";
 import { IntroCard, KpiCard, PageTitle, Panel } from "@/components/page/Blocks";
 import { ErrorNote } from "@/components/feedback/ErrorNote";
 import { BarChart, type BarDatum } from "@/pages/sales/SalesPages";
@@ -34,12 +34,8 @@ import {
 // Reports (Figma 14.01–14.04). Plan gate "analytics" sits on the routes;
 // the "View analytics" permission is checked here.
 
-const Loading = () => (
-  <div className="flex justify-center py-16 text-ink-brand" role="status">
-    <Spinner className="size-8" />
-    <span className="sr-only">Loading…</span>
-  </div>
-);
+/** Skeleton rows while the screen loads (not a lone spinner). */
+const Loading = ({ label }: { label?: string }) => <ListSkeleton label={label} />;
 
 /** Team members without "View analytics" see why, not an error. */
 function ReportsAccess({ children }: { children: ReactNode }) {

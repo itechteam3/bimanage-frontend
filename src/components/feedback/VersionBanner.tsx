@@ -27,7 +27,7 @@ export function VersionBanner() {
     <div
       role="status"
       aria-live="polite"
-      className="fixed inset-x-4 bottom-24 z-50 mx-auto flex max-w-dialog items-center gap-3 rounded-lg border border-line-subtle bg-surface-card px-4 py-3 shadow-floating lg:bottom-6"
+      className="motion-toast-bottom fixed inset-x-4 bottom-24 z-50 mx-auto flex max-w-dialog items-center gap-3 rounded-lg border border-line-subtle bg-surface-card px-4 py-3 shadow-floating lg:bottom-6"
     >
       <span aria-hidden="true" className="flex size-10 shrink-0 items-center justify-center rounded-lg bg-surface-tint-blue text-ink-brand">
         <IconRefresh className="size-icon" />

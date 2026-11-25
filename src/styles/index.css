@@ -1,5 +1,6 @@
 @import "tailwindcss";
 @import "./theme.css";
+@import "./motion.css";
 
 /* Poppins, self-hosted (no third-party font requests). Weights used by the design: 400/500/600. */
 @import "@fontsource/poppins/400.css";

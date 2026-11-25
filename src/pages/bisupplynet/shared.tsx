@@ -1,7 +1,7 @@
 import type { ReactNode } from "react";
 import { Navigate, NavLink } from "react-router-dom";
 import { IconLock, IconUserShield } from "@tabler/icons-react";
-import { Button, ButtonLink, Spinner } from "@/components/ui";
+import { Button, ButtonLink, ListSkeleton } from "@/components/ui";
 import { IntroCard, Panel } from "@/components/page/Blocks";
 import { StateCard } from "@/components/page/StateCard";
 import { useCan } from "@/lib/auth/useCan";
@@ -13,12 +13,8 @@ import { cn } from "@/lib/cn";
 // tabs, the plan and permission states, the striped record rows (stacked
 // cards on phones) and the "Details & actions" side panel.
 
-export const Loading = ({ label = "Loading…" }: { label?: string }) => (
-  <div className="flex justify-center py-16 text-ink-brand" role="status">
-    <Spinner className="size-8" />
-    <span className="sr-only">{label}</span>
-  </div>
-);
+/** Skeleton rows while the screen loads (not a lone spinner). */
+export const Loading = ({ label }: { label?: string }) => <ListSkeleton label={label} />;
 
 export const EYEBROW = "Workspace / BiSupplyNet";
 
