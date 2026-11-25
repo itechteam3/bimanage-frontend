@@ -4,7 +4,7 @@ import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
 import { IconArrowRight, IconBook, IconCircleCheck, IconLifebuoy, IconPaperclip, IconSearch, IconSearchOff, IconThumbDown, IconThumbUp, IconTicket } from "@tabler/icons-react";
-import { Button, ButtonLink, Dialog, EmptyState, Field, SelectInput, Spinner, Status, TextArea, TextInput } from "@/components/ui";
+import { Button, ButtonLink, Dialog, EmptyState, Field, SelectInput, Status, TextArea, TextInput, ListSkeleton } from "@/components/ui";
 import { DetailRows, HelpPanel, IntroCard, PageTitle, Panel, TipList } from "@/components/page/Blocks";
 import { ErrorNote } from "@/components/feedback/ErrorNote";
 import { applyFieldErrors } from "@/lib/api/errorMessage";
@@ -56,12 +56,8 @@ import {
 // Help & support (Figma 12.05–12.17): support centre, tickets, the help
 // centre (FAQs) and BiTechTeam service requests.
 
-const Loading = ({ label = "Loading…" }: { label?: string }) => (
-  <div className="flex justify-center py-16 text-ink-brand" role="status">
-    <Spinner className="size-8" />
-    <span className="sr-only">{label}</span>
-  </div>
-);
+/** Skeleton rows while the screen loads (not a lone spinner). */
+const Loading = ({ label }: { label?: string }) => <ListSkeleton label={label} />;
 
 const dateTime = (iso?: string | null) =>
   iso ? new Date(iso).toLocaleString("en-NG", { day: "numeric", month: "short", year: "numeric", hour: "numeric", minute: "2-digit" }) : "";

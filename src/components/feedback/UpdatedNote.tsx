@@ -25,5 +25,5 @@ export function UpdatedNote({ updatedAt, className }: { updatedAt: number; class
   );
 }
 
-/** Background for a row that just arrived live. */
+/** Background for a row that just arrived live (rows with data-new also rise in: src/styles/motion.css). */
 export const newRowClass = "bg-surface-tint-blue transition-colors duration-700";

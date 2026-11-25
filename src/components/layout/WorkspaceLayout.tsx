@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import { Navigate, Outlet, useLocation, useMatches, useNavigate } from "react-router-dom";
 import { AppShell } from "./AppShell";
+import { PageTransition } from "./PageTransition";
 import { useAuth } from "@/lib/auth/AuthProvider";
 import { useBusinessProfile, useOnboardingStatus, useUnreadCounts } from "@/lib/workspace/api";
 import { useNavState } from "@/lib/nav/useNavState";
@@ -66,7 +67,9 @@ export function WorkspaceLayout() {
       onChangePhoto={() => setPhotoOpen(true)}
     >
       <DisplayPreferences />
-      <Outlet />
+      <PageTransition>
+        <Outlet />
+      </PageTransition>
       <PhotoDialog open={photoOpen} onClose={() => setPhotoOpen(false)} />
       {/* Workspace screens only: never the landing page, storefronts or /admin. */}
       <ReportIssue userId={user?._id} screen={section} />

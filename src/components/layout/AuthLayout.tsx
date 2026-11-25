@@ -182,6 +182,8 @@ export function AuthNote({ tone = "muted", className, children }: { tone?: "mute
       role={tone === "danger" ? "alert" : undefined}
       className={cn(
         "text-body-lg",
+        // Results (saved, failed) rise into view; plain guidance doesn't move.
+        tone !== "muted" && "motion-note",
         tone === "muted" && "text-ink-secondary",
         tone === "success" && "text-success-ink",
         tone === "danger" && "text-danger",

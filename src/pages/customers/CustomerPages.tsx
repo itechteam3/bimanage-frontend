@@ -19,7 +19,7 @@ import {
   IconUsers,
   IconX,
 } from "@tabler/icons-react";
-import { Button, ButtonLink, Dialog, EmptyState, Field, SelectInput, Spinner, Status, TextArea, TextInput } from "@/components/ui";
+import { Button, ButtonLink, Dialog, EmptyState, Field, SelectInput, Status, TextArea, TextInput, ListSkeleton } from "@/components/ui";
 import { DetailRows, IntroCard, KpiCard, PageTitle, Panel, TipList } from "@/components/page/Blocks";
 import { LoadMore } from "@/components/page/LoadMore";
 import { ErrorNote } from "@/components/feedback/ErrorNote";
@@ -57,12 +57,8 @@ import {
   type SortDir,
 } from "@/lib/customers/api";
 
-const Loading = () => (
-  <div className="flex justify-center py-16 text-ink-brand" role="status">
-    <Spinner className="size-8" />
-    <span className="sr-only">Loading…</span>
-  </div>
-);
+/** Skeleton rows while the screen loads (not a lone spinner). */
+const Loading = ({ label }: { label?: string }) => <ListSkeleton label={label} />;
 
 /** Who may see and change customers (config/customers.ts decides the keys). */
 export function useCustomerAccess() {
@@ -129,7 +125,7 @@ function CustomerTable({ customers, fresh }: { customers: Customer[]; fresh: Set
             <th scope="col" className="rounded-r-lg px-3 py-3">Last order</th>
           </tr>
         </thead>
-        <tbody>
+        <tbody className="motion-rows">
           {customers.map((c) => (
             <tr key={c._id} data-new={fresh.has(c._id) || undefined} className={cn("border-b border-line-subtle last:border-0", fresh.has(c._id) && newRowClass)}>
               <td className="px-3 py-4">

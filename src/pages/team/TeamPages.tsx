@@ -4,7 +4,7 @@ import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
 import { IconLock, IconMailForward, IconSearch, IconTrash, IconUserPlus } from "@tabler/icons-react";
-import { Avatar, Button, ButtonLink, Dialog, EmptyState, Field, SelectInput, Spinner, Status, TextInput } from "@/components/ui";
+import { Avatar, Button, ButtonLink, Dialog, EmptyState, Field, SelectInput, Status, TextInput, ListSkeleton } from "@/components/ui";
 import { InfoStrip, IntroCard, PageTitle, Panel } from "@/components/page/Blocks";
 import { ErrorNote } from "@/components/feedback/ErrorNote";
 import { useAuth } from "@/lib/auth/AuthProvider";
@@ -34,12 +34,8 @@ import {
 import { useUrlState } from "@/lib/nav/useUrlState";
 import { useLeaveGuard } from "@/lib/nav/useLeaveGuard";
 
-const Loading = () => (
-  <div className="flex justify-center py-16 text-ink-brand" role="status">
-    <Spinner className="size-8" />
-    <span className="sr-only">Loading…</span>
-  </div>
-);
+/** Skeleton rows while the screen loads (not a lone spinner). */
+const Loading = ({ label }: { label?: string }) => <ListSkeleton label={label} />;
 
 /** Shown to people without team management. */
 function NoTeamAccess() {

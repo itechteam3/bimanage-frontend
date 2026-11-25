@@ -1,12 +1,13 @@
 import { Link, useLocation } from "react-router-dom";
 import { IconArrowRight, IconFileCheck, IconListCheck } from "@tabler/icons-react";
-import { ButtonLink, Spinner } from "@/components/ui";
+import { ButtonLink, CountUp, DashboardSkeleton } from "@/components/ui";
 import { IntroCard, KpiCard, PageTitle, Panel } from "@/components/page/Blocks";
 import { AuthNote } from "@/components/layout/AuthLayout";
 import { useDashboard, useSetupSteps, type DashboardSummary } from "@/lib/workspace/api";
 import { count, naira, nairaCompact } from "@/lib/format";
 import { errorMessage } from "@/lib/api/errorMessage";
 import { cn } from "@/lib/cn";
+import { staggerStyle } from "@/lib/motion";
 
 // 03.01 Dashboard / Empty state, 03.02 Dashboard / Populated (Figma 1889:1388, 1889:1781).
 
@@ -43,7 +44,7 @@ function SetupBanner() {
         </p>
       </div>
       <div className="hidden h-2 w-40 overflow-hidden rounded-full bg-surface-disabled md:block" aria-hidden="true">
-        <div className="h-full rounded-full bg-success" style={{ width: `${steps.data.percentage}%` }} />
+        <div className="motion-bar-x h-full rounded-full bg-success" style={{ width: `${steps.data.percentage}%` }} />
       </div>
       <IconArrowRight aria-hidden="true" className="size-5 text-ink-brand" />
     </Link>
@@ -57,12 +58,13 @@ function SalesTrend({ data }: { data: Array<{ label: string; value: number }> })
     <figure>
       {/* Bars are sized as a share of the plot area, so the chart scales with its container. */}
       <div className="flex h-40 min-w-0 justify-between gap-2 pt-4 md:gap-8" data-sales-trend>
-        {data.map((d) => (
+        {data.map((d, i) => (
           <div key={d.label} className="flex min-w-0 flex-1 flex-col items-center gap-2">
             <div className="flex w-full flex-1 items-end justify-center border-b border-line-subtle">
+              {/* Bars grow up from the axis, one after another. */}
               <div
-                className="w-full max-w-16 rounded-t-[4px] bg-brand-navy"
-                style={{ height: d.value > 0 ? `${Math.max((d.value / max) * 100, 3)}%` : 0 }}
+                className="motion-bar-y w-full max-w-16 rounded-t-[4px] bg-brand-navy"
+                style={{ ...staggerStyle(i), height: d.value > 0 ? `${Math.max((d.value / max) * 100, 3)}%` : 0 }}
                 title={`${d.label}: ${naira(d.value)}`}
               />
             </div>
@@ -103,21 +105,17 @@ export function DashboardPage() {
         Follow orders, revenue, stock and invoices in one view.
       </IntroCard>
 
-      {dash.isLoading && (
-        <div className="flex justify-center py-16 text-ink-brand" role="status">
-          <Spinner className="size-8" />
-          <span className="sr-only">Loading dashboard…</span>
-        </div>
-      )}
+      {dash.isLoading && <DashboardSkeleton />}
       {dash.error && <AuthNote tone="danger">{errorMessage(dash.error, "We couldn't load your dashboard. Please refresh.")}</AuthNote>}
 
       {dash.data && (
-        <>
-          <div className="grid grid-cols-2 gap-3.5 lg:grid-cols-4">
-            <KpiCard tone="revenue" label="Revenue" value={nairaCompact(s?.revenue ?? s?.totalSales)} caption="Completed orders" trend={trend.map((t) => t.value)} />
-            <KpiCard tone="orders" label="Total orders" value={count(s?.totalOrders ?? dash.data.analytics.totalOrders)} caption="All recorded orders" />
-            <KpiCard tone="invoices" label="Open invoices" value={count(s?.openInvoices ?? 0)} caption="Awaiting payment" />
-            <KpiCard tone="stock" label="Low stock" value={count(s?.lowStock ?? 0)} caption="Restock reminders" />
+        // Sections arrive one after another; the KPI figures count up.
+        <div className="motion-stagger contents">
+          <div className="motion-stagger grid grid-cols-2 gap-3.5 lg:grid-cols-4">
+            <KpiCard tone="revenue" label="Revenue" value={<KpiFigure value={s?.revenue ?? s?.totalSales} format={nairaCompact} />} caption="Completed orders" trend={trend.map((t) => t.value)} />
+            <KpiCard tone="orders" label="Total orders" value={<KpiFigure value={s?.totalOrders ?? dash.data.analytics.totalOrders} format={count} />} caption="All recorded orders" />
+            <KpiCard tone="invoices" label="Open invoices" value={<KpiFigure value={s?.openInvoices ?? 0} format={count} />} caption="Awaiting payment" />
+            <KpiCard tone="stock" label="Low stock" value={<KpiFigure value={s?.lowStock ?? 0} format={count} />} caption="Restock reminders" />
           </div>
 
           <div className="grid grid-cols-[minmax(0,1fr)] gap-5 lg:grid-cols-[minmax(0,1.95fr)_minmax(0,1fr)]">
@@ -132,7 +130,7 @@ export function DashboardPage() {
                       <th scope="col" className="rounded-r-lg bg-surface-pale px-3 py-4">Status</th>
                     </tr>
                   </thead>
-                  <tbody className="text-body-sm">
+                  <tbody className="motion-rows text-body-sm">
                     {orders.slice(0, 5).map((o) => (
                       <tr key={o.trackingNo}>
                         <td className="px-3 py-6 font-semibold text-ink-strong">{o.trackingNo}</td>
@@ -211,7 +209,7 @@ export function DashboardPage() {
                         <p className="truncate text-body font-semibold text-ink-strong">{p.name}</p>
                         <p className="text-caption text-ink-muted">{count(p.totalSold)} sold</p>
                         <div className="mt-2 h-1 rounded-full bg-surface-disabled" aria-hidden="true">
-                          <div className={cn("h-full rounded-full", barTones[i])} style={{ width: `${(p.totalSold / maxSold) * 100}%` }} />
+                          <div className={cn("motion-bar-x h-full rounded-full", barTones[i])} style={{ ...staggerStyle(i), width: `${(p.totalSold / maxSold) * 100}%` }} />
                         </div>
                       </div>
                     </li>
@@ -221,8 +219,14 @@ export function DashboardPage() {
               </>
             )}
           </Panel>
-        </>
+        </div>
       )}
     </div>
   );
+}
+
+/** A KPI number that counts up; non-numbers (missing data) show as the formatter does. */
+function KpiFigure({ value, format }: { value: number | undefined | null; format: (n: number | undefined | null) => string }) {
+  if (typeof value !== "number" || !Number.isFinite(value)) return <>{format(value)}</>;
+  return <CountUp value={value} format={format} />;
 }
