@@ -121,9 +121,13 @@ describe("wallet", () => {
   });
 
   it("after a bank change, the wallet says payouts are paused until when", async () => {
-    fb.handlers["GET /wallet"] = () => [200, { ...WALLET, payoutsPausedUntil: "2026-11-18T10:00:00Z" }];
+    // Three days from now (a fixed date stops showing once it has passed).
+    const until = new Date(Date.now() + 3 * 86400000);
+    until.setUTCHours(10, 0, 0, 0);
+    const label = until.toLocaleDateString("en-GB", { day: "numeric", month: "short", timeZone: "Africa/Lagos" });
+    fb.handlers["GET /wallet"] = () => [200, { ...WALLET, payoutsPausedUntil: until.toISOString() }];
     renderApp("/wallet");
-    expect(await screen.findByText(/Payouts paused until 18 Nov/)).toBeInTheDocument();
+    expect(await screen.findByText(new RegExp(`Payouts paused until ${label}`))).toBeInTheDocument();
   });
 
   it("06.04 → 06.05 → 06.06: amount, Paystack fee and net shown; nothing sent until Confirm", async () => {
