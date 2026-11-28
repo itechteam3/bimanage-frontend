@@ -220,6 +220,19 @@ export const TOURS: Tour[] = [
     ],
   },
   {
+    id: "selling-channels",
+    paths: ["/settings/channels"],
+    name: "Selling channels",
+    version: 1,
+    steps: [
+      { title: "Your selling channels", body: "Sell retail, wholesale or both from one account and one shared stock balance." },
+      { target: { label: "Business channels" }, title: "Where things stand", body: "See at a glance which channels are on. Your records are always kept." },
+      { target: { heading: "Your selling channels" }, title: "Switch channels yourself", body: "Activate a channel, turn one off, or bring one back with its saved prices." },
+      { target: { heading: "Channel management" }, title: "Nothing is lost", body: "Turning a channel off never deletes products, customers or history." },
+      HELP,
+    ],
+  },
+  {
     id: "settings",
     paths: ["/settings"],
     name: "Settings",

@@ -11,6 +11,8 @@ const routes = {
   "GET /": { message: "ok" },
   "GET /api/auth/me": { _id: "u1", name: "Samuel Adebayo", email: "sam@x.com", isVerified: true },
   // Selling channels (26 Nov plan): both on but not yet chosen, so every onboarding channel screen renders.
+  "GET /api/selling-channels/wholesale/deactivation-check": { channel: "wholesale", status: "active", blockers: { activeOrders: 3, unsettledPayments: 2, openDisputes: 1 }, lastChannel: false, canDeactivate: false },
+  "GET /api/selling-channels/retail/deactivation-check": { channel: "retail", status: "active", blockers: { activeOrders: 0, unsettledPayments: 0, openDisputes: 0 }, lastChannel: false, canDeactivate: true },
   "GET /api/selling-channels": { channels: { retail: { status: "active", activatedAt: null, pausedAt: null }, wholesale: { status: "active", activatedAt: null, pausedAt: null }, mode: "both", chosen: false }, isOwner: true },
   "GET /api/settings/my-role": { role: "owner", permissions: {}, businessId: "u1" },
   "GET /api/business-profile": { businessName: "Dior Factory LTD.", businessType: "limited_liability", businessCategory: "fashion", businessPhone: "+234 803 555 0190", businessEmail: "hello@elijahapparel.com", businessAddress: "14 Adebayo St, Yaba", cacNumber: "RC 1234567" },
