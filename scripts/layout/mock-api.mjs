@@ -294,6 +294,30 @@ function stretch(v, key = "") {
   return v;
 }
 
+// Channel dashboard (GET /api/dashboard?channel=…): a fortnight of sales on both channels.
+function channelDashboard(channel = "all") {
+  const days = Array.from({ length: 30 }, (_, i) => new Date(Date.UTC(2026, 9, 30 + i)).toISOString().slice(0, 10));
+  const series = days.map((date, i) => ({ date, retail: populated ? 40000 + ((i * 7919) % 60000) : 0, wholesale: populated ? (i % 3 ? 150000 + ((i * 3571) % 200000) : 0) : 0 }));
+  const sum = (k) => series.reduce((s, p) => s + p[k], 0);
+  const k = (revenue, orders) => ({ revenue, orders, averageOrder: orders ? Math.round(revenue / orders) : 0, unitsSold: orders * 3 });
+  const retail = k(sum("retail"), populated ? 64 : 0), wholesale = k(sum("wholesale"), populated ? 18 : 0);
+  const all = k(retail.revenue + wholesale.revenue, retail.orders + wholesale.orders);
+  const kpis = channel === "retail" ? retail : channel === "wholesale" ? wholesale : all;
+  const orders = [
+    { id: "o1", ref: "ORD-1024", name: "Amara Yusuf", channel: "retail", total: 46000, status: "Completed", link: "/orders/o1", at: "2026-11-27T10:00:00Z" },
+    { id: "so1", ref: "BM-WQ8Q-E9GD", name: "Sola Stores", channel: "wholesale", total: 840000, status: "Processing", link: "/store/orders/so1", at: "2026-11-26T10:00:00Z" },
+    { id: "o2", ref: "ORD-1025", name: "Tunde Adeyemi", channel: "retail", total: 82500, status: "Awaiting payment", link: "/orders/o1", at: "2026-11-25T10:00:00Z" },
+    { id: "so2", ref: "BM-AB12-CD34", name: "Maven Retail", channel: "wholesale", total: 1150000, status: "Paid", link: "/store/orders/so1", at: "2026-11-24T10:00:00Z" },
+  ].filter((o) => populated && (channel === "all" || o.channel === channel));
+  return {
+    channel, range: { from: days[0], to: days[29] }, kpis, previous: k(Math.round(kpis.revenue * 0.92), kpis.orders), change: { revenue: populated ? 8.4 : null, orders: null },
+    byChannel: { retail, wholesale }, series, recentOrders: orders,
+    wholesale: { bulkOrders: wholesale.orders, tradeBuyers: populated ? 12 : 0, quotesAwaitingApproval: null, overdueTradeInvoices: null },
+    inventory: { totalProducts: populated ? 124 : 0, stockValue: populated ? 31000000 : 0, lowStock: populated ? 4 : 0, outOfStock: populated ? 1 : 0 },
+    sellingChannels: { retail: { status: "active" }, wholesale: { status: "active" }, mode: "both", chosen: true }, generatedAt: "2026-11-28T10:00:00Z",
+  };
+}
+
 http.createServer((req, res) => {
   const cors = { "Access-Control-Allow-Origin": req.headers.origin ?? "*", "Access-Control-Allow-Headers": "content-type,authorization,x-session-id", "Access-Control-Allow-Methods": "GET,POST,PUT,DELETE,OPTIONS", "Content-Type": "application/json" };
   if (req.method === "OPTIONS") { res.writeHead(204, cors); return res.end(); }
@@ -311,7 +335,7 @@ http.createServer((req, res) => {
   if (path === "/__mode/normal") long = false;
   if (path.startsWith("/__mode/")) { res.writeHead(200, cors); return res.end(JSON.stringify({ long, populated })); }
   if (key === "GET /api/tours") { res.writeHead(tours ? 200 : 404, cors); return res.end(JSON.stringify(tours ? { tours: {} } : { message: "no fixture" })); }
-  let body = key === "GET /api/dashboard" ? (routes.__dashboard ?? dashboard()) : feliRoute(key) ?? routes[key];
+  let body = key === "GET /api/dashboard" ? (qs.has("channel") ? channelDashboard(qs.get("channel")) : routes.__dashboard ?? dashboard()) : feliRoute(key) ?? routes[key];
   if (body && overlayRename && key !== "GET /api/dashboard") body = overlayRename(body);
   // Writes succeed with an empty object so forms and dialogs can be opened and submitted.
   if (!body && req.method !== "GET") body = { message: "ok" };

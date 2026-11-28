@@ -42,7 +42,7 @@ function waitForSteps(tour: Tour, signal: { cancelled: boolean }, maxMs = 4000):
       const steps = found();
       const n = steps.length - (tour.steps.length - targeted.length);
       // Settled: every target is there, or the count stopped changing after a while.
-      if (n === targeted.length || (n === last && Date.now() - t0 > 1200) || Date.now() - t0 > maxMs) return resolve(steps);
+      if (n === targeted.length || (n === last && Date.now() - t0 > 900) || Date.now() - t0 > maxMs) return resolve(steps);
       last = n;
       setTimeout(tick, 300);
     };

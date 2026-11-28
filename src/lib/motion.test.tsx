@@ -173,7 +173,7 @@ describe("skeletons and the sidebar indicator", () => {
     const ready = new Promise<void>((r) => (release = r));
     fb.handlers["GET /dashboard"] = async () => {
       await ready;
-      return [200, { ...EMPTY_DASHBOARD, stats: { ...EMPTY_DASHBOARD.stats, totalOrders: 1234, revenue: 250000 } }];
+      return [200, { ...EMPTY_DASHBOARD, kpis: { revenue: 250000, orders: 1234, averageOrder: 203, unitsSold: 1300 } }];
     };
     renderApp("/dashboard");
     const loading = await screen.findByText("Loading dashboard…");
@@ -187,7 +187,7 @@ describe("skeletons and the sidebar indicator", () => {
   it("the sidebar has one active-item indicator, placed on the current page", async () => {
     installFakeBackend();
     renderApp("/dashboard");
-    await screen.findByRole("heading", { name: "Business dashboard" });
+    await screen.findByRole("heading", { level: 1, name: /dashboard$/i });
     const nav = screen.getAllByRole("navigation", { name: "Main" })[0]!;
     const indicators = nav.querySelectorAll("[data-nav-indicator]");
     expect(indicators).toHaveLength(1);

@@ -26,6 +26,18 @@ export const EMPTY_DASHBOARD = {
   topSelling: [],
   salesChart: [],
   analytics: { totalOrders: 0, sale: 0, distribute: 0, return: 0 },
+  // Channel view (GET /dashboard?channel=…, backend #120/#122).
+  channel: "all",
+  range: { from: "2026-10-30", to: "2026-11-28" },
+  kpis: { revenue: 0, orders: 0, averageOrder: 0, unitsSold: 0 },
+  previous: { revenue: 0, orders: 0, averageOrder: 0, unitsSold: 0 },
+  change: { revenue: null, orders: null },
+  byChannel: { retail: { revenue: 0, orders: 0, averageOrder: 0, unitsSold: 0 }, wholesale: { revenue: 0, orders: 0, averageOrder: 0, unitsSold: 0 } },
+  series: [],
+  wholesale: { bulkOrders: 0, tradeBuyers: 0, quotesAwaitingApproval: null, overdueTradeInvoices: null },
+  inventory: { totalProducts: 0, stockValue: 0, lowStock: 0, outOfStock: 0 },
+  sellingChannels: null,
+  generatedAt: "2026-11-28T10:00:00Z",
 };
 
 /** A list endpoint that pages when asked (?page=): { [key]: items, total, page, totalPages }. */

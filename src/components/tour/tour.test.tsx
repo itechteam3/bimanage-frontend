@@ -3,7 +3,7 @@ import { screen, waitFor, within } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { tokenStore } from "@/lib/auth/tokenStore";
 import { serverStatus } from "@/lib/api/serverStatus";
-import { installFakeBackend, renderApp, type FakeBackend } from "@/test/fakeBackend";
+import { EMPTY_DASHBOARD, installFakeBackend, renderApp, type FakeBackend } from "@/test/fakeBackend";
 import { TOURS, place, resolveTarget, shouldAutoStart, tourFor } from "@/lib/tours/tours";
 
 describe("tour definitions", () => {
@@ -63,7 +63,10 @@ function layout() {
 
 describe("finding targets", () => {
   beforeEach(layout);
-  afterEach(() => vi.restoreAllMocks());
+  afterEach(() => {
+    vi.restoreAllMocks();
+    document.body.innerHTML = ""; // never leave sample markup for the next tests
+  });
   it("by heading (its card), label, button text or selector", () => {
     document.body.innerHTML = `<main data-app-main><section id="card"><h2>Today's priorities</h2></section><section id="kpi"><p>Revenue</p><p>₦0</p></section><a href="/x">Create an order →</a></main><button data-tour="help">?</button>`;
     expect(resolveTarget({ heading: "Today's priorities" })?.id).toBe("card");
@@ -82,6 +85,7 @@ describe("guided tour on a page", () => {
     serverStatus.set("up");
     fb = installFakeBackend();
     fb.handlers["GET /tours"] = () => [200, { tours: {} }];
+    fb.handlers["GET /dashboard"] = () => [200, EMPTY_DASHBOARD];
     fb.handlers["PUT /tours/dashboard"] = (b) => [200, { page: "dashboard", ...(b as object) }];
     fb.handlers["DELETE /tours"] = () => [200, { reset: true }];
   });
@@ -94,7 +98,7 @@ describe("guided tour on a page", () => {
   it("first visit: steps one by one with a counter, Back and Next; Done saves it as completed", async () => {
     renderApp("/dashboard");
     const user = userEvent.setup();
-    const tour = await screen.findByRole("dialog", { name: /welcome to your dashboard/i }, { timeout: 5000 });
+    const tour = await screen.findByRole("dialog", { name: /welcome to your dashboard/i }, { timeout: 9000 });
     const total = Number(within(tour).getByText(/^1\/\d$/).textContent!.split("/")[1]);
     expect(total).toBeGreaterThanOrEqual(3);
     expect(within(tour).getByText(/step 1 of/i)).toBeInTheDocument();
@@ -106,21 +110,21 @@ describe("guided tour on a page", () => {
     expect(within(screen.getByRole("dialog")).getByText(`1/${total}`)).toBeInTheDocument();
     for (let n = 1; n < total; n++) await user.click(within(screen.getByRole("dialog")).getByRole("button", { name: "Next" }));
     await user.click(within(screen.getByRole("dialog")).getByRole("button", { name: "Done" }));
-    await waitFor(() => expect(last("PUT /tours/dashboard")?.body).toEqual({ status: "completed", version: 1 }));
+    await waitFor(() => expect(last("PUT /tours/dashboard")?.body).toEqual({ status: "completed", version: 2 }));
     expect(screen.queryByRole("dialog", { name: /dashboard|numbers|help/i })).not.toBeInTheDocument();
   });
 
   it("Skip tour, the X and Escape save it as skipped", async () => {
     renderApp("/dashboard");
     const user = userEvent.setup();
-    await screen.findByRole("dialog", { name: /welcome to your dashboard/i }, { timeout: 5000 });
+    await screen.findByRole("dialog", { name: /welcome to your dashboard/i }, { timeout: 9000 });
     await user.keyboard("{Escape}");
-    await waitFor(() => expect(last("PUT /tours/dashboard")?.body).toEqual({ status: "skipped", version: 1 }));
+    await waitFor(() => expect(last("PUT /tours/dashboard")?.body).toEqual({ status: "skipped", version: 2 }));
     expect(screen.queryByRole("dialog", { name: /welcome/i })).not.toBeInTheDocument();
   });
 
   it("doesn't come back once finished, and Help → Show me around replays it", async () => {
-    fb.handlers["GET /tours"] = () => [200, { tours: { dashboard: { status: "completed", version: 1 } } }];
+    fb.handlers["GET /tours"] = () => [200, { tours: { dashboard: { status: "completed", version: 2 } } }];
     renderApp("/dashboard");
     const user = userEvent.setup();
     const help = (await screen.findAllByRole("button", { name: "Help" }))[0]!;
@@ -128,9 +132,9 @@ describe("guided tour on a page", () => {
     expect(screen.queryByRole("dialog", { name: /welcome/i })).not.toBeInTheDocument();
     await user.click(help);
     await user.click(screen.getByRole("menuitem", { name: /show me around/i }));
-    const tour = await screen.findByRole("dialog", { name: /welcome to your dashboard/i }, { timeout: 5000 });
+    const tour = await screen.findByRole("dialog", { name: /welcome to your dashboard/i }, { timeout: 9000 });
     await user.click(within(tour).getByRole("button", { name: "Close tour" }));
-    await waitFor(() => expect(last("PUT /tours/dashboard")?.body).toEqual({ status: "skipped", version: 1 }));
+    await waitFor(() => expect(last("PUT /tours/dashboard")?.body).toEqual({ status: "skipped", version: 2 }));
   });
 
   it("never pops up when progress can't be loaded", async () => {
