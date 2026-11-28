@@ -3,10 +3,9 @@ import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
 import { Link, useLocation, useNavigate, useParams, useSearchParams } from "react-router-dom";
-import { IconPhoto, IconPrinter, IconScan, IconTrash, IconHistory } from "@tabler/icons-react";
-import { Button, ButtonLink, Dialog, Field, SelectInput, Spinner, TextInput } from "@/components/ui";
+import { IconPhoto, IconPrinter, IconScan, IconTrash } from "@tabler/icons-react";
+import { Button, ButtonLink, Dialog, Field, Spinner, TextInput } from "@/components/ui";
 import { DetailRows, HelpPanel, IntroCard, PageTitle, Panel } from "@/components/page/Blocks";
-import { AuthNote } from "@/components/layout/AuthLayout";
 import { ScanButton } from "@/components/scanner/ScanButton";
 import { ChannelPricingEditor, ChannelPricingSummary, channelsFrom, draftFrom, type ChannelDraft } from "@/components/inventory/ChannelPricing";
 import { useSellingChannels } from "@/lib/workspace/channels";
@@ -17,11 +16,9 @@ import {
   lookupBarcode,
   thresholdOf,
   uploadProductImage,
-  useAdjustStock,
   useCreateProduct,
   useDeleteProduct,
   useProduct,
-  useStockHistory,
   useUpdateProduct,
   type BarcodeInfo,
   type Product,
@@ -29,9 +26,8 @@ import {
 import { ApiError } from "@/lib/api/client";
 import { applyFieldErrors, errorMessage } from "@/lib/api/errorMessage";
 import { ErrorNote } from "@/components/feedback/ErrorNote";
-import { count, naira, shortDate } from "@/lib/format";
+import { count, naira } from "@/lib/format";
 import { useCan } from "@/lib/auth/useCan";
-import { cn } from "@/lib/cn";
 import { useLeaveGuard } from "@/lib/nav/useLeaveGuard";
 import { useReturnTo } from "@/lib/nav/history";
 
@@ -395,196 +391,7 @@ export function AddFirstProduct() {
   );
 }
 
-// 09.06 Adjust stock quantity (+ stock history)
-const REASONS = ["Goods received", "Returned by customer", "Damaged", "Lost or stolen", "Stock count correction", "Other"];
-
-export function AdjustStockPage() {
-  const { id } = useParams();
-  const navigate = useNavigate();
-  const product = useProduct(id);
-  const history = useStockHistory(id);
-  const adjust = useAdjustStock(id ?? "");
-  const historyRef = useRef<HTMLElement>(null);
-  const [formError, setFormError] = useState<unknown>(null);
-  const [saved, setSaved] = useState<string | null>(null);
-  const [scanNote, setScanNote] = useState<string | null>(null);
-  // Scan another product (camera or a barcode reader) and jump to its adjustment.
-  const jumpTo = async (code: string) => {
-    setScanNote(null);
-    try {
-      const found = await findInInventory(code);
-      if (found[0]) navigate(`/inventory/products/${found[0]._id}/adjust`);
-      else setScanNote(`No product in your inventory matches “${code}”.`);
-    } catch (err) {
-      setScanNote(errorMessage(err, "We couldn't look that up. Check your connection and try again."));
-    }
-  };
-
-  const schema = z.object({
-    type: z.enum(["increase", "decrease", "set"]),
-    quantity: whole("Enter a quantity."),
-    reason: z.string().min(2, "Choose a reason."),
-    location: z.string().trim().max(80).optional(),
-    reference: z.string().trim().max(60).optional(),
-    notes: z.string().trim().max(500).optional(),
-  });
-  type Values = z.infer<typeof schema>;
-  const { register, handleSubmit, watch, reset, setError, formState } = useForm<Values>({
-    resolver: zodResolver(schema),
-    defaultValues: { type: "increase", reason: "" } as unknown as Values,
-  });
-  const guard = useLeaveGuard(formState.isDirty);
-
-  const current = product.data?.stockQuantity ?? 0;
-  const type = watch("type");
-  const qty = Number(String(watch("quantity") ?? "").replace(/[,\s]/g, "")) || 0;
-  const updated = type === "increase" ? current + qty : type === "decrease" ? current - qty : qty;
-
-  const onSubmit = handleSubmit(async (v) => {
-    setFormError(null);
-    setSaved(null);
-    if (v.type === "decrease" && v.quantity > current) {
-      setError("quantity", { message: `Only ${count(current)} in stock.` });
-      return;
-    }
-    try {
-      const res = await adjust.mutateAsync(clean(v) as never);
-      setSaved(`Stock updated to ${count(res.product.stockQuantity)} units.`);
-      reset({ type: "increase", reason: "" } as unknown as Values);
-      void history.refetch();
-    } catch (err) {
-      if (!applyFieldErrors(err, setError, ["quantity", "reason", "location", "reference", "notes"])) setFormError(err);
-    }
-  });
-
-  if (product.isLoading) return <Loading />;
-  if (product.error || !product.data) return <ErrorNote error={product.error ?? true} fallback="We couldn't load this product. Please try again." onRetry={() => void product.refetch()} />;
-  const p = product.data;
-
-  return (
-    <div className="flex flex-col gap-6">
-      <PageTitle
-        actions={
-          <div className="flex flex-wrap gap-3">
-            <ScanButton label="Scan another product" onCode={(c) => void jumpTo(c)} />
-            <Button size="md" onClick={() => historyRef.current?.scrollIntoView({ behavior: "smooth" })}>
-              <IconHistory aria-hidden="true" className="size-icon" /> View stock history
-            </Button>
-          </div>
-        }
-      >
-        Adjust stock quantity
-      </PageTitle>
-      {guard.dialog}
-      <p className="-mt-4 text-body-sm text-ink-muted">Record corrections and received inventory.</p>
-      {scanNote && <AuthNote tone="danger">{scanNote}</AuthNote>}
-      <IntroCard eyebrow="Workspace / Inventory" title="Every manual adjustment is recorded in the product audit trail." />
-      <div className="grid grid-cols-[minmax(0,1fr)] gap-5 lg:grid-cols-[minmax(0,1.7fr)_minmax(0,1fr)]">
-        <form noValidate onSubmit={onSubmit} className="flex flex-col gap-5">
-          <Panel title="Quantity adjustment details" subtitle={`Product: ${p.name}${p.sku ? ` / ${p.sku}` : ""}.`}>
-            <div className="grid grid-cols-[minmax(0,1fr)] gap-4 md:grid-cols-2 md:gap-x-10 md:gap-y-6">
-              <Field label="Current stock">
-                <TextInput value={`${count(current)} units`} readOnly disabled />
-              </Field>
-              <Field label="Change type" required>
-                <SelectInput {...register("type")}>
-                  <option value="increase">Increase stock</option>
-                  <option value="decrease">Decrease stock</option>
-                  <option value="set">Set to a counted quantity</option>
-                </SelectInput>
-              </Field>
-              <Field label={type === "set" ? "Counted quantity" : "Quantity change"} required error={formState.errors.quantity?.message}>
-                <TextInput inputMode="numeric" placeholder={type === "set" ? "40" : "12"} {...register("quantity")} />
-              </Field>
-              <Field label="Updated quantity">
-                <TextInput value={`${count(Math.max(updated, 0))} units`} readOnly disabled aria-live="polite" className={cn(updated < 0 && "lg:border-danger")} />
-              </Field>
-              <Field label="Reason" required error={formState.errors.reason?.message}>
-                <SelectInput {...register("reason")}>
-                  <option value="">Choose…</option>
-                  {REASONS.map((r) => (
-                    <option key={r}>{r}</option>
-                  ))}
-                </SelectInput>
-              </Field>
-              <Field label="Location">
-                <TextInput placeholder="Main warehouse" {...register("location")} />
-              </Field>
-              <Field label="Document reference">
-                <TextInput placeholder="GRN-0042" {...register("reference")} />
-              </Field>
-              <Field label="Adjustment notes">
-                <TextInput placeholder="Checked and counted" {...register("notes")} />
-              </Field>
-            </div>
-            {updated < 0 && <AuthNote tone="danger" className="mt-4">Stock can't go below zero.</AuthNote>}
-          </Panel>
-          <ErrorNote error={formError} fallback="We couldn't record this adjustment. Check your connection and try again." onRetry={() => void onSubmit()} />
-          {saved && <AuthNote tone="success">{saved}</AuthNote>}
-          <div className="flex flex-col-reverse gap-3 md:flex-row md:justify-between">
-            <Button variant="secondary" size="md" onClick={() => navigate(`/inventory/products/${p._id}`)}>
-              Edit product details
-            </Button>
-            <Button type="submit" loading={formState.isSubmitting} loadingText="Saving…" disabled={updated < 0}>
-              Confirm adjustment
-            </Button>
-          </div>
-        </form>
-        <HelpPanel
-          items={[
-            ["Audit", "Logs time, reason and who made the change"],
-            ["Inventory", "Quantity recalculated"],
-            ["Validation", "Prevents negative stock"],
-          ]}
-          callout={{ title: "Alert threshold", body: `${p.name} alerts at ${count(thresholdOf(p))} units.` }}
-        />
-      </div>
-
-      <section ref={historyRef} aria-labelledby="history-title">
-        <Panel title={<span id="history-title">Stock history</span>} subtitle="Every change to this product's quantity, newest first.">
-          {history.isLoading && <Loading />}
-          {history.data?.length === 0 && <p className="py-4 text-body-lg text-ink-secondary">No stock changes recorded yet.</p>}
-          {history.data && history.data.length > 0 && (
-            <div className="overflow-x-auto">
-              <table className="w-full min-w-[40rem] text-left text-body-sm">
-                <thead className="text-caption font-semibold uppercase text-ink-muted">
-                  <tr>
-                    <th scope="col" className="px-3 py-3">Date</th>
-                    <th scope="col" className="px-3 py-3">Change</th>
-                    <th scope="col" className="px-3 py-3">Stock</th>
-                    <th scope="col" className="px-3 py-3">Reason</th>
-                    <th scope="col" className="px-3 py-3">By</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {history.data.map((h, i) => {
-                    const delta = h.after - h.before;
-                    return (
-                      <tr key={h._id} className={cn(i % 2 === 0 && "bg-surface-pale")}>
-                        <td className="px-3 py-3 text-ink-muted">{shortDate(h.createdAt)}</td>
-                        <td className={cn("px-3 py-3 font-semibold", delta > 0 ? "text-success" : delta < 0 ? "text-danger" : "text-ink-strong")}>
-                          {h.type === "initial" ? "Opening" : delta > 0 ? `+${count(delta)}` : delta < 0 ? `−${count(-delta)}` : "±0"}
-                        </td>
-                        <td className="px-3 py-3 text-ink-strong">
-                          {count(h.before)} → {count(h.after)}
-                        </td>
-                        <td className="px-3 py-3 text-ink-strong">
-                          {h.reason}
-                          {h.reference && <span className="text-ink-muted"> · {h.reference}</span>}
-                        </td>
-                        <td className="px-3 py-3 text-ink-muted">{h.actor?.name ?? "—"}</td>
-                      </tr>
-                    );
-                  })}
-                </tbody>
-              </table>
-            </div>
-          )}
-        </Panel>
-      </section>
-    </div>
-  );
-}
+// 09.06 Adjust stock: see StockFlowPages.tsx (shared stock flow, 26 Nov designs).
 
 // 09.04 Scan or enter barcode
 type LookupResult =
