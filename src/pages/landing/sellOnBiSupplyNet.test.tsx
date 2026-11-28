@@ -108,6 +108,12 @@ describe("pending destination after sign-up", () => {
     fb.handlers["PUT /business-profile"] = (b) => [200, b];
     await userEvent.click(await screen.findByRole("button", { name: /start existing-business setup/i }));
     await userEvent.click(await screen.findByRole("link", { name: /continue setting up/i }));
+    // Selling channels (26 Nov plan): chosen before the business profile.
+    const none = { status: "available", activatedAt: null, pausedAt: null };
+    fb.handlers["GET /selling-channels"] = () => [200, { channels: { retail: none, wholesale: none, mode: "none", chosen: false }, isOwner: true }];
+    fb.handlers["POST /selling-channels/choose"] = () => [200, { channels: { retail: { ...none, status: "active" }, wholesale: none, mode: "retail", chosen: true }, message: "ok" }];
+    await userEvent.click(await screen.findByRole("radio", { name: /^retail/i }));
+    await userEvent.click(screen.getByRole("button", { name: "Continue with retail" }));
     await userEvent.type(await screen.findByLabelText(/legal business name/i), "Elijah Apparel Ltd");
     await userEvent.selectOptions(screen.getByLabelText(/business type/i), "limited_liability");
     await userEvent.selectOptions(screen.getByLabelText(/business category/i), "fashion");

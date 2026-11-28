@@ -27,6 +27,10 @@
   --color-surface-pale: #EFF7FB;
   --color-surface-tint-blue: #E9F5FC;
   --color-surface-tint-aqua: #E9FAF8;
+  --color-surface-tint-violet: #F3F0FC;
+  --color-surface-halo-violet: #E9E4FB;
+  --color-surface-halo-blue: #DFEFFA;
+  --color-surface-tint-gold: #FFF5E7;
   --color-surface-tint-lavender: #F1F1FF;
   --color-surface-tint-warm: #FFF8F1;
   --color-surface-tint-feli: #F5F8FF;
@@ -55,6 +59,12 @@
   --color-neutral-bg: #EFF7FB;
   --color-danger-on-brand: #FA5250;
   --color-success-ink: #145C3D;
+  --color-accent-blue: #1674A3;
+  --color-accent-lavender: #7D67B6;
+  --color-accent-teal: #16857D;
+  --color-accent-green: #208A79;
+  --color-accent-navy: #145B89;
+  --color-accent-gold: #B88744;
   --color-kpi-revenue-bg: #EAF7F2;
   --color-kpi-revenue-fg: #176A55;
   --color-kpi-revenue-line: #17836E;

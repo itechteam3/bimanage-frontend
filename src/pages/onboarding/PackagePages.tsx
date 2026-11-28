@@ -291,7 +291,7 @@ export function PaymentStatusPage() {
                   ["Next step", "Complete the business setup tracker"],
                 ]}
               />
-              <Button fullWidth onClick={() => navigate("/onboarding/business")}>
+              <Button fullWidth onClick={() => navigate("/onboarding/channels")}>
                 Start setting up your business <IconArrowRight aria-hidden="true" className="size-4" />
               </Button>
             </div>
