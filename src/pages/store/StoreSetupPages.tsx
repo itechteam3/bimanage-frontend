@@ -29,7 +29,7 @@ import {
   type Store,
   type TemplateKey,
 } from "@/lib/store/api";
-import { Loading, StoreTabs, WithStore, opsEyebrow, storefrontPath } from "./shared";
+import { CALM, Loading, SmallStep, StoreTabs, WithStore, opsEyebrow, storefrontPath } from "./shared";
 
 const slugOf = (name: string) => name.toLowerCase().replace(/[^a-z0-9]/g, "");
 const money = z.preprocess((v) => (v === "" || v === null || v === undefined ? undefined : Number(String(v).replace(/[₦,\s]/g, ""))), z.number({ invalid_type_error: "Enter an amount." }).min(0, "Can't be negative.").optional());
@@ -79,7 +79,9 @@ export function CreateStorePage() {
       {guard.dialog}
       <PageTitle>Create your online store</PageTitle>
       <p className="-mt-4 text-body-sm text-ink-muted">Set up a storefront customers can buy from without an account.</p>
-      <IntroCard eyebrow="Store operations / New store" title="Your store starts as a draft. Only you can see it until you publish." />
+      <IntroCard eyebrow="Store operations / New store" title="Your free store URL is generated automatically.">
+        Your storefront should feel like your business. Start simple and make it yours as you grow.
+      </IntroCard>
       <div className="grid grid-cols-[minmax(0,1fr)] gap-5 lg:grid-cols-[minmax(0,1.7fr)_minmax(0,1fr)]">
         <form noValidate onSubmit={onSubmit} className="flex flex-col gap-5">
           <Panel title="Store details" subtitle="Fields marked * are required.">
@@ -118,11 +120,21 @@ export function CreateStorePage() {
         </form>
         <HelpPanel
           items={[
-            ["Starts as", "Draft (private)"],
-            ["Checkout", "Guest checkout, no customer account needed"],
-            ["Payments", "Paystack"],
-            ["Next", "Add products, choose a template, publish"],
+            ["Launch steps", "Business details · Template · Products · Payments"],
+            ["Checkout", "Paystack card, transfer and USSD. No customer account needed"],
+            ["Store address", "Included with every account"],
+            ["Starts as", "Draft: only you can see it until you publish"],
           ]}
+          callout={{
+            title: "Publishing checklist",
+            body: (
+              <ol className="flex flex-col gap-1 text-body-sm">
+                <li>01 Check product and store details</li>
+                <li>02 Preview the customer experience</li>
+                <li>03 Publish when ready</li>
+              </ol>
+            ),
+          }}
         />
       </div>
     </div>
@@ -176,7 +188,9 @@ function StoreOverview({ store }: { store: Store }) {
       </PageTitle>
       <p className="-mt-4 text-body-sm text-ink-muted">{live ? "Customers can visit your store and buy from it." : "Finish every step before sharing your store."}</p>
       <StoreTabs />
-      <IntroCard eyebrow={opsEyebrow(store)} title="All critical store settings in one place." />
+      <IntroCard eyebrow={opsEyebrow(store)} title="All critical store settings in one place.">
+        {live ? "Share your store link and keep an eye on new orders." : "You're getting close. A quick checklist review can help you launch with confidence."}
+      </IntroCard>
       {checklist.isLoading ? (
         <Loading />
       ) : !c ? (
@@ -252,6 +266,7 @@ function StoreOverview({ store }: { store: Store }) {
                   </div>
                 ))}
               </dl>
+              <SmallStep />
             </Panel>
           </div>
         </>
@@ -414,7 +429,9 @@ function Templates({ store }: { store: Store }) {
       <PageTitle>Choose a storefront template</PageTitle>
       <p className="-mt-4 text-body-sm text-ink-muted">Pick the look that fits your subscription.</p>
       <StoreTabs />
-      <IntroCard eyebrow={opsEyebrow(store)} title="Products and checkout stay the same when you switch." />
+      <IntroCard eyebrow={opsEyebrow(store)} title="Products and checkout stay the same when you switch.">
+        {CALM}
+      </IntroCard>
       {templates.isLoading ? (
         <Loading />
       ) : !templates.data ? (
@@ -575,7 +592,9 @@ function DomainSettings({ store }: { store: Store }) {
       </PageTitle>
       <p className="-mt-4 text-body-sm text-ink-muted">Manage your public address and custom domain.</p>
       <StoreTabs />
-      <IntroCard eyebrow={opsEyebrow(store)} title="Custom domains require Standard or Premium." />
+      <IntroCard eyebrow={opsEyebrow(store)} title="Custom domains are part of the Premium plan.">
+        {CALM}
+      </IntroCard>
       <div className="grid grid-cols-[minmax(0,1fr)] gap-5 lg:grid-cols-[minmax(0,1.7fr)_minmax(0,1fr)]">
         <div className="flex flex-col gap-5">
           <Panel title="Your addresses" subtitle="The BiManage address always works, on every plan.">
@@ -592,7 +611,7 @@ function DomainSettings({ store }: { store: Store }) {
                 </form>
               ) : (
                 <div className="flex flex-col gap-3 rounded-md bg-surface-pale px-4 py-3 md:flex-row md:items-center md:justify-between">
-                  <p className="text-body-sm text-ink-secondary">Your own domain (like shop.yourbusiness.com) is part of the Standard and Premium plans.</p>
+                  <p className="text-body-sm text-ink-secondary">Your own domain (like shop.yourbusiness.com) is part of the Premium plan. A domain you already connected keeps working.</p>
                   <ButtonLink to="/subscription" size="md" variant="tonal">
                     <IconLock aria-hidden="true" className="size-4" /> See plans
                   </ButtonLink>
@@ -652,7 +671,7 @@ function DomainSettings({ store }: { store: Store }) {
         <HelpPanel
           items={[
             ["Free address", "Works on every plan"],
-            ["Custom address", "Standard and Premium"],
+            ["Custom address", "Premium feature"],
             ["DNS record", dns ? `${dns.type} ${dns.host} → ${dns.value}` : "Shown after you save a domain"],
             ["Verification", d.customDomain ? (d.verified ? "Verified" : "Awaiting DNS") : "—"],
             ["Hosting (BiManage)", d.customDomain ? (hosting === "added" ? "Connected" : "Waiting for BiManage") : "—"],

@@ -53,5 +53,18 @@ export function WithStore({ children }: { children: (store: Store) => ReactNode 
   return <>{children(store.data)}</>;
 }
 
+/** Reassuring second line under the "Store operations" strip (Figma 26 Nov). */
+export const CALM = "You're in control. Review the details and take the next step when it feels right.";
+
+/** "A small step for today" at the foot of the insights panel. */
+export function SmallStep({ children = "Complete one storefront detail that helps customers feel confident." }: { children?: ReactNode }) {
+  return (
+    <div className="mt-6 flex flex-col gap-3">
+      <p className="text-caption font-semibold uppercase text-ink-brand">A small step for today</p>
+      <p className="text-body-sm text-ink-muted">{children}</p>
+    </div>
+  );
+}
+
 /** Shopper-facing link for a store (preview works for drafts). */
 export const storefrontPath = (store: Pick<Store, "storeSlug">) => `/s/${store.storeSlug}`;

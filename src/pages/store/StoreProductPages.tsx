@@ -30,7 +30,7 @@ import {
   type Store,
   type StoreProduct,
 } from "@/lib/store/api";
-import { Loading, StoreTabs, WithStore, opsEyebrow, storefrontPath } from "./shared";
+import { Loading, StoreTabs, WithStore, opsEyebrow, storefrontPath, CALM } from "./shared";
 
 const MAX_IMAGES = 8;
 const visibility = (p: Pick<StoreProduct, "isAvailable">) => (p.isAvailable ? { label: "Published", tone: "success" as const } : { label: "Draft", tone: "neutral" as const });
@@ -82,7 +82,9 @@ function Catalogue({ store }: { store: Store }) {
       <p className="-mt-4 text-body-sm text-ink-muted">Everything customers can see and buy in your store.</p>
       <StoreTabs />
       {/* Counts only once the list has loaded (it used to flash "0 products"). */}
-      <IntroCard eyebrow={opsEyebrow(store)} title={products.isLoading ? "Loading your products…" : products.error ? "Store products" : `${count(all.length)} ${all.length === 1 ? "product" : "products"} · ${count(published)} published`} />
+      <IntroCard eyebrow={opsEyebrow(store)} title={products.isLoading ? "Loading your products…" : products.error ? "Store products" : `${count(all.length)} ${all.length === 1 ? "product" : "products"} · ${count(published)} published`}>
+        Clear product details help customers make confident decisions.
+      </IntroCard>
       <div className="grid grid-cols-[minmax(0,1fr)] gap-5 lg:grid-cols-[minmax(0,2.3fr)_minmax(0,1fr)]">
         <Panel>
           <div className="flex flex-col gap-3 md:flex-row md:flex-wrap">
@@ -270,7 +272,9 @@ function ProductFormInner({ store, product }: { store: Store; product?: StorePro
         {product ? `Edit ${product.name}` : "Add a product"}
       </PageTitle>
       <p className="-mt-4 text-body-sm text-ink-muted">Create a complete listing from one place.</p>
-      <IntroCard eyebrow={opsEyebrow(store)} title={linked ? "Stock for this product comes from Inventory. Set a storefront price here." : "Set a storefront price, photos and stock."} />
+      <IntroCard eyebrow={opsEyebrow(store)} title={linked ? "Stock for this product comes from Inventory. Set a storefront price here." : "Set a storefront price, photos and stock."}>
+        Add the details you have now. You can always come back to refine your product later.
+      </IntroCard>
       <div className="grid grid-cols-[minmax(0,1fr)] gap-5 lg:grid-cols-[minmax(0,1.7fr)_minmax(0,1fr)]">
         <form noValidate onSubmit={submit("keep")} className="flex flex-col gap-5">
           <Panel title="Product details" subtitle="Photos and category are required to publish.">
@@ -393,7 +397,9 @@ function ProductDetail({ store, id }: { store: Store; id: string }) {
   return (
     <div className="flex flex-col gap-6">
       <PageTitle actions={canEdit && <Button size="md" onClick={() => navigate(`/store/products/${p._id}/edit`)}>Edit product</Button>}>{p.name}</PageTitle>
-      <IntroCard eyebrow={opsEyebrow(store)} title={<span className="flex flex-wrap items-center gap-2">{categoryLabel(p.category)} <Status tone={v.tone}>{v.label}</Status></span>} />
+      <IntroCard eyebrow={opsEyebrow(store)} title={<span className="flex flex-wrap items-center gap-2">{categoryLabel(p.category)} <Status tone={v.tone}>{v.label}</Status></span>}>
+        Take a moment to check the product details before sharing them with customers.
+      </IntroCard>
       <div className="grid grid-cols-[minmax(0,1fr)] gap-5 lg:grid-cols-[minmax(0,1.7fr)_minmax(0,1fr)]">
         <Panel title="Product details">
           {p.images.length > 0 && (
@@ -624,7 +630,9 @@ function BulkUpload({ store }: { store: Store }) {
         Bulk upload products
       </PageTitle>
       <p className="-mt-4 text-body-sm text-ink-muted">Add up to {MAX_ROWS} products from a spreadsheet.</p>
-      <IntroCard eyebrow={opsEyebrow(store)} title="Each row is checked on its own. Good rows are added; you'll see what to fix in the others." />
+      <IntroCard eyebrow={opsEyebrow(store)} title="Each row is checked on its own. Good rows are added; you'll see what to fix in the others.">
+        {CALM}
+      </IntroCard>
       <div className="grid grid-cols-[minmax(0,1fr)] gap-5 lg:grid-cols-[minmax(0,1.7fr)_minmax(0,1fr)]">
         <div className="flex flex-col gap-5">
           <Panel title="Import file" subtitle="CSV with the template's columns. Categories use the keys in the template (e.g. fashion_men).">
@@ -750,7 +758,9 @@ function SyncInventory({ store }: { store: Store }) {
         Sync from inventory
       </PageTitle>
       <p className="-mt-4 text-body-sm text-ink-muted">Bring products over from Inventory. Only stock stays in step with it; the store price is set separately.</p>
-      <IntroCard eyebrow={opsEyebrow(store)} title="Synced products use your inventory stock, so you never sell what you don't have." />
+      <IntroCard eyebrow={opsEyebrow(store)} title="Synced products use your inventory stock, so you never sell what you don't have.">
+        {CALM}
+      </IntroCard>
       <div className="grid grid-cols-[minmax(0,1fr)] gap-5 lg:grid-cols-[minmax(0,2.3fr)_minmax(0,1fr)]">
         <Panel>
           <label className="flex h-control-lg items-center gap-2 rounded-md bg-surface-pale px-3">

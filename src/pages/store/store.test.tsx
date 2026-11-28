@@ -240,7 +240,7 @@ describe("merchant store", () => {
   it("08.09: Freemium sees custom domains as an upgrade", async () => {
     fb.handlers["GET /store/custom-domain"] = () => [200, { bimanageAddress: STORE.publicUrl, customDomain: null, verified: false, status: "none", ssl: null, dnsInstructions: null, planAllows: false }];
     renderApp("/store/domain");
-    expect(await screen.findByText(/part of the Standard and Premium plans/)).toBeInTheDocument();
+    expect(await screen.findByText(/is part of the Premium plan. A domain you already connected/)).toBeInTheDocument();
     expect(screen.queryByLabelText(/custom domain/i)).toBeNull();
   });
 

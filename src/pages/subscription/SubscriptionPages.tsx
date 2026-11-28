@@ -374,7 +374,7 @@ function Plans() {
           <p className="text-body-sm text-ink-secondary">Freemium gives 100 daily credits and 20 FELI messages. Standard and Premium don't use credits.</p>
         </Panel>
         <Panel tone="pale" title="Store & domain">
-          <p className="text-body-sm text-ink-secondary">Publish your store and connect a custom domain on Standard and Premium. Premium adds the premium template.</p>
+          <p className="text-body-sm text-ink-secondary">Publish your store on Standard and Premium. Premium adds the premium template and your own custom domain.</p>
         </Panel>
         <Panel tone="pale" title="Payment status">
           <p className="text-body-sm text-ink-secondary">{paymentsOn ? "Pay securely with Paystack. Plans renew automatically; cancel any time and keep access to the end of the period." : "Online checkout isn't available yet. You can keep using Freemium or a startup package."}</p>
