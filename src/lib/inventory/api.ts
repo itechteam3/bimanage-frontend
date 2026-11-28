@@ -19,7 +19,35 @@ export interface Product {
   lowStockThreshold?: number;
   createdAt?: string;
   updatedAt?: string;
+  /** Selling rules per channel (backend #118); always present in answers. */
+  channels?: ProductChannels;
+  channelBadge?: "both" | "retail" | "wholesale" | "none";
+  /** On hand / reserved / available (backend #119), on single products and paged lists. */
+  stock?: StockLevels;
+  costPrice?: number | null;
 }
+
+export interface PriceTier {
+  minQty: number;
+  unitPrice: number;
+}
+export interface ProductChannels {
+  retail: { enabled: boolean; price: number | null };
+  wholesale: { enabled: boolean; moq: number | null; tiers: PriceTier[] };
+}
+export interface StockLevels {
+  onHand: number;
+  reserved: number;
+  available: number;
+}
+
+/** A retail product without a usable price (shown as "Set a retail price"). */
+export const needsRetailPrice = (p: Pick<Product, "channels" | "sellingPrice">) => {
+  const r = p.channels?.retail;
+  const enabled = r ? r.enabled : true;
+  const price = r?.price ?? p.sellingPrice;
+  return enabled && !(Number(price) > 0);
+};
 
 export type StockState = "ok" | "low" | "out";
 export const DEFAULT_THRESHOLD = 10;

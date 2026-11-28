@@ -214,7 +214,7 @@ describe("never overwrite what the user is typing", () => {
     await user.type(name, "Linen shirt (new season)");
     server = { ...SHIRT, name: "Renamed elsewhere", sellingPrice: 24000 };
     sockets.latest()!.fire("bm:change", { topic: "inventory", at: "", by: "someone-else" });
-    await waitFor(() => expect(screen.getByLabelText(/selling price/i)).toHaveValue("24000"));
+    await waitFor(() => expect(screen.getByLabelText(/retail price/i)).toHaveValue("24000"));
     expect(name).toHaveValue("Linen shirt (new season)");
   });
 });

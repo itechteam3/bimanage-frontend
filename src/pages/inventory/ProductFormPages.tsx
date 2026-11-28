@@ -8,6 +8,8 @@ import { Button, ButtonLink, Dialog, Field, SelectInput, Spinner, TextInput } fr
 import { DetailRows, HelpPanel, IntroCard, PageTitle, Panel } from "@/components/page/Blocks";
 import { AuthNote } from "@/components/layout/AuthLayout";
 import { ScanButton } from "@/components/scanner/ScanButton";
+import { ChannelPricingEditor, ChannelPricingSummary, channelsFrom, draftFrom, type ChannelDraft } from "@/components/inventory/ChannelPricing";
+import { useSellingChannels } from "@/lib/workspace/channels";
 import { interpretScan } from "@/lib/scanner/scanner";
 import { StockBadge } from "@/components/inventory/StockBadge";
 import {
@@ -121,8 +123,14 @@ export function ProductFormPage() {
   const [photo, setPhoto] = useState<File | null>(null);
   const [formError, setFormError] = useState<unknown>(null);
   const [confirmDelete, setConfirmDelete] = useState(false);
+  // Selling rules per channel (backend #118): retail price is the price field below.
+  const [draft, setDraft] = useState<ChannelDraft>(() => draftFrom());
+  const [draftDirty, setDraftDirty] = useState(false);
+  const [channelErrors, setChannelErrors] = useState<Record<string, string>>({});
+  const channels = useSellingChannels();
+  const wholesaleSetUp = (channels.data?.channels.wholesale.status ?? "available") !== "available";
 
-  const { register, handleSubmit, reset, setError, setValue, formState } = useForm<ProductValues>({
+  const { register, handleSubmit, reset, setError, setValue, watch, formState } = useForm<ProductValues>({
     resolver: zodResolver(productSchema),
     defaultValues: {
       name: prefill.name ?? "",
@@ -133,7 +141,7 @@ export function ProductFormPage() {
       lowStockThreshold: 10,
     } as unknown as ProductValues,
   });
-  const guard = useLeaveGuard((formState.isDirty || Boolean(photo)) && !formState.isSubmitSuccessful);
+  const guard = useLeaveGuard((formState.isDirty || draftDirty || Boolean(photo)) && !formState.isSubmitSuccessful);
   const returnTo = useReturnTo();
 
   useEffect(() => {
@@ -149,28 +157,45 @@ export function ProductFormPage() {
       lowStockThreshold: thresholdOf(p),
       brand: p.brand ?? "",
     }, { keepDirtyValues: true });
+    if (!draftDirty) setDraft(draftFrom(p));
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [existing.data, reset]);
 
   const onSubmit = handleSubmit(async (v) => {
     setFormError(null);
+    setChannelErrors({});
+    const channelRules = channelsFrom(draft, Number(v.sellingPrice) || undefined);
     try {
       if (editing) {
         const { stockQuantity: _ignored, ...rest } = v;
         void _ignored;
-        await update.mutateAsync({ ...clean(rest), sku: v.sku, barcode: v.barcode ?? "" } as never);
+        await update.mutateAsync({ ...clean(rest), sku: v.sku, barcode: v.barcode ?? "", channels: channelRules } as never);
         guard.allow();
         returnTo("/inventory/products");
       } else {
-        const product = await create.mutateAsync({ ...(clean(v) as ProductValues), image: prefill.image ?? undefined });
+        const product = await create.mutateAsync({ ...(clean(v) as ProductValues), channels: channelRules, image: prefill.image ?? undefined } as never);
         if (photo) await uploadProductImage(product._id, photo).catch(() => undefined);
         guard.allow();
         returnTo("/inventory/products");
       }
     } catch (err) {
+      const data = err instanceof ApiError ? (err.data as { field?: string; errors?: Array<{ field: string; message: string }> }) : undefined;
       if (err instanceof ApiError && err.status === 409) setError("sku", { message: "Another product already uses this SKU. Use a different one." });
-      else if (!applyFieldErrors(err, setError, ["name", "category", "sku", "barcode", "sellingPrice", "stockQuantity", "lowStockThreshold", "brand"])) setFormError(err);
+      else if (data?.field?.startsWith("channels")) {
+        // Retail price problems belong on the price field; the rest on the channel section.
+        const list = data.errors ?? [{ field: data.field, message: err instanceof Error ? err.message : "" }];
+        const out: Record<string, string> = {};
+        for (const e of list) {
+          if (e.field === "channels.retail.price") setError("sellingPrice", { message: e.message });
+          else out[e.field] = out[e.field] ?? e.message;
+        }
+        setChannelErrors(out);
+      } else if (!applyFieldErrors(err, setError, ["name", "category", "sku", "barcode", "sellingPrice", "stockQuantity", "lowStockThreshold", "brand"])) setFormError(err);
     }
   });
+
+  const priceNow = Number(String(watch("sellingPrice") ?? "").replace(/[₦,\s]/g, "")) || 0;
+  const liveChannels = channelsFrom(draft, priceNow || undefined);
 
   if (editing && existing.isLoading) return <Loading />;
   if (editing && existing.error) return <ErrorNote error={existing.error} fallback="We couldn't load this product. Please try again." onRetry={() => void existing.refetch()} />;
@@ -212,11 +237,11 @@ export function ProductFormPage() {
               <Field label="Barcode" error={formState.errors.barcode?.message}>
                 <TextInput inputMode="numeric" placeholder="8901234567890" {...register("barcode")} trailing={<ScanButton iconOnly onCode={(c) => setValue("barcode", c, { shouldDirty: true, shouldValidate: true })} className="mr-1 min-h-0 px-3 py-2" />} />
               </Field>
-              <Field label="Selling price (₦)" required error={formState.errors.sellingPrice?.message}>
-                <TextInput inputMode="decimal" placeholder="22,500" {...register("sellingPrice")} />
-              </Field>
               {editing ? (
-                <Field label="Current stock" hint="Change quantities with a stock adjustment, so it's recorded.">
+                <Field
+                  label="Current stock"
+                  hint={existing.data?.stock ? `On hand ${count(existing.data.stock.onHand)} · Reserved ${count(existing.data.stock.reserved)} · Available ${count(existing.data.stock.available)}. Change quantities with a stock adjustment, so it's recorded.` : "Change quantities with a stock adjustment, so it's recorded."}
+                >
                   <TextInput value={`${count(existing.data?.stockQuantity)} units`} readOnly disabled />
                 </Field>
               ) : (
@@ -228,6 +253,22 @@ export function ProductFormPage() {
                 <TextInput inputMode="numeric" placeholder="10" {...register("lowStockThreshold")} />
               </Field>
               <PhotoField productId={id} image={existing.data?.image ?? prefill.image} onPicked={setPhoto} />
+            </div>
+            <div className="mt-6">
+              <ChannelPricingEditor
+                value={draft}
+                onChange={(d) => {
+                  setDraft(d);
+                  setDraftDirty(true);
+                }}
+                errors={channelErrors}
+                wholesaleAvailable={wholesaleSetUp}
+                retailPriceField={
+                  <Field label="Retail price (₦)" required error={formState.errors.sellingPrice?.message}>
+                    <TextInput inputMode="decimal" placeholder="22,500" {...register("sellingPrice")} />
+                  </Field>
+                }
+              />
             </div>
             <div className="mt-6 rounded-xl bg-surface-pale p-4">
               <p className="text-caption font-semibold uppercase text-ink-brand">Stock integrity</p>
@@ -248,7 +289,10 @@ export function ProductFormPage() {
             </Button>
           </div>
         </form>
-        <HelpPanel items={stockHelp} callout={{ title: "Audit and verification", body: "Keep a barcode, SKU and adjustment reason where needed." }} />
+        <div className="flex flex-col gap-5">
+          <ChannelPricingSummary channels={liveChannels} available={existing.data?.stock?.available ?? existing.data?.stockQuantity ?? 0} />
+          <HelpPanel items={stockHelp} callout={{ title: "Audit and verification", body: "Keep a barcode, SKU and adjustment reason where needed." }} />
+        </div>
       </div>
       <Dialog
         open={confirmDelete}

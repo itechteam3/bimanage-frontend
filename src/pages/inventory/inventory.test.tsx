@@ -54,7 +54,7 @@ describe("inventory (09.xx)", () => {
     await user.type(await screen.findByLabelText(/product name/i), "Linen trousers");
     await user.type(screen.getByLabelText(/category/i), "Clothing");
     await user.type(screen.getByLabelText(/^sku/i), "APP-101");
-    await user.type(screen.getByLabelText(/selling price/i), "18,000");
+    await user.type(screen.getByLabelText(/retail price/i), "18,000");
     await user.type(screen.getByLabelText(/initial quantity/i), "12");
     await user.click(screen.getByRole("button", { name: /save inventory item/i }));
     expect(await screen.findByText(/another product already uses this sku/i)).toBeInTheDocument();
@@ -70,7 +70,7 @@ describe("inventory (09.xx)", () => {
     fb.handlers["PUT /inventory/products/p1"] = (b) => [200, { ...SHIRT, ...b }];
     renderApp("/inventory/products/p1");
     const user = userEvent.setup();
-    const price = await screen.findByLabelText(/selling price/i);
+    const price = await screen.findByLabelText(/retail price/i);
     await waitFor(() => expect(price).toHaveValue("22500"));
     await user.clear(price);
     await user.type(price, "24000");

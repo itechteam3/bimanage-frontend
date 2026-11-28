@@ -9,7 +9,9 @@ import { Button, ButtonLink, Field, TextInput, buttonClasses, ListSkeleton } fro
 import { DetailRows, IntroCard, KpiCard, PageTitle, Panel } from "@/components/page/Blocks";
 import { AuthNote } from "@/components/layout/AuthLayout";
 import { StockBadge } from "@/components/inventory/StockBadge";
-import { downloadInventoryCsv, stockState, useInventoryStats, useProducts } from "@/lib/inventory/api";
+import { downloadInventoryCsv, needsRetailPrice, stockState, useInventoryStats, useProducts } from "@/lib/inventory/api";
+import { ChannelBadge } from "@/components/inventory/ChannelPricing";
+import { FlowTile, FlowTiles } from "@/components/page/FlowLayout";
 import { saveBlob } from "@/lib/api/client";
 import { useCan } from "@/lib/auth/useCan";
 import { count, naira, nairaCompact } from "@/lib/format";
@@ -187,7 +189,13 @@ export function ProductsPage() {
         Inventory products
       </PageTitle>
       <p className="-mt-4 text-body-sm text-ink-muted">Update quantities, pricing, barcodes and categories.</p>
-      <IntroCard eyebrow="Inventory" title={`${count(all.length)} products · ${count(needRestock)} need restocking`} />
+      {/* One catalogue, one shared stock balance (Figma 4255:1189 "Shared inventory overview"). */}
+      <FlowTiles>
+        <FlowTile tone="teal" label="Shared products" value={count(all.length)} caption={needRestock ? `${count(needRestock)} need restocking` : "One catalogue"} />
+        <FlowTile tone="violet" label="Available stock" value={count(all.reduce((n, p) => n + Math.max(0, p.stockQuantity), 0))} caption="Shared by every channel" />
+        <FlowTile tone="blue" label="Retail enabled" value={count(all.filter((p) => p.channelBadge === "retail" || p.channelBadge === "both").length)} caption="Per-item pricing" />
+        <FlowTile tone="gold" label="Wholesale enabled" value={count(all.filter((p) => p.channelBadge === "wholesale" || p.channelBadge === "both").length)} caption="Bulk tiers and MOQ" />
+      </FlowTiles>
 
       <div className="grid grid-cols-[minmax(0,1fr)] gap-5 lg:grid-cols-[minmax(0,2fr)_minmax(0,1fr)]">
         <Panel title="Inventory product register" subtitle="Search, edit, export or restock products.">
@@ -237,10 +245,24 @@ export function ProductsPage() {
                         <Link to={`/inventory/products/${p._id}`} className="font-semibold text-ink-strong hover:underline">
                           {p.name}
                         </Link>
-                        {p.sku && <span className="block text-caption text-ink-muted">{p.sku}</span>}
+                        <span className="mt-1 flex flex-wrap items-center gap-2">
+                          {p.sku && <span className="text-caption text-ink-muted">{p.sku}</span>}
+                          <ChannelBadge badge={p.channelBadge} />
+                        </span>
                       </td>
-                      <td className="px-3 py-4 text-ink-strong">{naira(p.sellingPrice)}</td>
-                      <td className="px-3 py-4 text-ink-strong">{count(p.stockQuantity)} available</td>
+                      <td className="px-3 py-4 text-ink-strong">
+                        {needsRetailPrice(p) ? (
+                          <Link to={`/inventory/products/${p._id}`} className="inline-flex items-center gap-1 font-semibold text-warning hover:underline">
+                            <IconAlertTriangle aria-hidden="true" className="size-icon-sm" /> Set a retail price
+                          </Link>
+                        ) : (
+                          naira(p.channels?.retail.enabled === false ? (p.channels.wholesale.tiers[0]?.unitPrice ?? p.sellingPrice) : p.sellingPrice)
+                        )}
+                      </td>
+                      <td className="px-3 py-4 text-ink-strong">
+                        {count(p.stock?.available ?? p.stockQuantity)} available
+                        {p.stock && p.stock.reserved > 0 && <span className="block text-caption text-ink-muted">{count(p.stock.onHand)} on hand</span>}
+                      </td>
                       <td className="rounded-r-lg px-3 py-4">
                         <StockBadge product={p} />
                       </td>
