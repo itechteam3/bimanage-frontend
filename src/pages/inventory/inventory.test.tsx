@@ -81,25 +81,8 @@ describe("inventory (09.xx)", () => {
     expect(body).not.toHaveProperty("stockQuantity");
   });
 
-  it("adjusts stock, refuses going below zero and shows the history", async () => {
-    fb.handlers["POST /inventory/products/p1/adjust"] = () => [200, { product: { ...SHIRT, stockQuantity: 40 }, adjustment: {} }];
-    renderApp("/inventory/products/p1/adjust");
-    const user = userEvent.setup();
-    expect(await screen.findByText("Opening stock")).toBeInTheDocument();
+  // Adjust stock is the shared stock flow now: see stockFlow.test.tsx.
 
-    await user.selectOptions(screen.getByLabelText(/change type/i), "decrease");
-    await user.type(screen.getByLabelText(/quantity change/i), "30");
-    expect(screen.getByText(/can't go below zero/i)).toBeInTheDocument();
-    expect(screen.getByRole("button", { name: /confirm adjustment/i })).toBeDisabled();
-
-    await user.selectOptions(screen.getByLabelText(/change type/i), "increase");
-    await user.clear(screen.getByLabelText(/quantity change/i));
-    await user.type(screen.getByLabelText(/quantity change/i), "12");
-    await user.selectOptions(screen.getByLabelText(/reason/i), "Goods received");
-    await user.click(screen.getByRole("button", { name: /confirm adjustment/i }));
-    expect(await screen.findByText(/stock updated to 40 units/i)).toBeInTheDocument();
-    expect(last("POST /inventory/products/p1/adjust")!.body).toMatchObject({ type: "increase", quantity: 12, reason: "Goods received" });
-  });
 
   it("barcode lookup finds stock, or offers to add a catalogue product", async () => {
     fb.handlers["GET /barcode/inventory/8901234567890"] = () => [200, [SHIRT]];

@@ -78,6 +78,7 @@ const InventoryOverviewPage = inventory("InventoryOverviewPage");
 const ProductsPage = inventory("ProductsPage");
 const ProductFormPage = inventory("ProductFormPage");
 const AdjustStockPage = inventory("AdjustStockPage");
+const StockHistoryPage = inventory("StockHistoryPage");
 const LowStockPage = inventory("LowStockPage");
 const ExportReadyPage = inventory("ExportReadyPage");
 const BarcodeLookupPage = inventory("BarcodeLookupPage");
@@ -338,6 +339,7 @@ export const routes = [
               { path: "/inventory/products/new", element: <ProductFormPage />, handle: { section: "Inventory", back: back("/inventory/products", SCREENS.inventory) } },
               { path: "/inventory/products/:id", element: <ProductFormPage key="edit" />, handle: { section: "Inventory", back: back("/inventory/products", SCREENS.inventory) } },
               { path: "/inventory/products/:id/adjust", element: <AdjustStockPage />, handle: { section: "Inventory", back: back("/inventory/products/:id", SCREENS.inventory) } },
+              { path: "/inventory/products/:id/history", element: <StockHistoryPage />, handle: { section: "Inventory", back: back("/inventory/products/:id", SCREENS.inventory) } },
               { path: "/inventory/low-stock", element: <LowStockPage />, handle: { section: "Inventory", back: back("/inventory", SCREENS.inventory) } },
               { path: "/inventory/export", element: <ExportReadyPage />, handle: { section: "Inventory", back: back("/inventory", SCREENS.inventory) } },
               { path: "/inventory/lookup", element: <BarcodeLookupPage />, handle: { section: "Inventory", back: back("/inventory", SCREENS.inventory) } },

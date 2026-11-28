@@ -77,6 +77,11 @@ export interface StockAdjustment {
   notes?: string;
   actor?: { _id: string; name: string };
   createdAt: string;
+  /** Movement for the history (backend #119): received, issued, corrected or sale. */
+  movement?: "received" | "issued" | "corrected" | "sale" | null;
+  channel?: "retail" | "wholesale" | null;
+  /** History label: Received, Retail, Wholesale or Adjusted. */
+  tag?: "Received" | "Retail" | "Wholesale" | "Adjusted";
 }
 
 export interface ProductInput {
