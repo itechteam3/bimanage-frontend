@@ -6,6 +6,7 @@ import { readFileSync } from "node:fs";
 
 // :param → fixture id, by route prefix (first match wins).
 const IDS = [
+  [/^\/settings\/channels\//, { channel: "wholesale" }],
   [/^\/onboarding\/packages\//, { packageId: "starter" }],
   [/^\/inventory\//, { id: "p1" }],
   [/^\/customers\//, { id: "c1" }],

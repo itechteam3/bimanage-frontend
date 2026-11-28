@@ -6,6 +6,7 @@ import { z } from "zod";
 import {
   IconBell,
   IconBuildingStore,
+  IconBuildingWarehouse,
   IconChevronRight,
   IconCreditCard,
   IconDeviceDesktop,
@@ -83,6 +84,7 @@ export function SettingsHubPage() {
       <ul className="grid grid-cols-[minmax(0,1fr)] gap-3 md:grid-cols-2">
         <HubLink to="/settings/profile" icon={<IconUserCircle className="size-icon" />} title="Profile" body="Your name, photo and contact details." />
         <HubLink to="/settings/business" icon={<IconBuildingStore className="size-icon" />} title="Business profile" body="The details on your invoices, store and supplier profile." />
+        <HubLink to="/settings/channels" icon={<IconBuildingWarehouse className="size-icon" />} title="Selling channels" body="Sell retail, wholesale or both from one account and one stock balance." />
         <HubLink to="/settings/preferences" icon={<IconAdjustments className="size-icon" />} title="Workspace preferences" body="Start page, larger text and reduced motion." />
         <HubLink to="/settings/security" icon={<IconShieldLock className="size-icon" />} title="Security and password" body="Change your password and keep your account safe." />
         <HubLink

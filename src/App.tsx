@@ -55,6 +55,11 @@ const UiKitPage = lazy(() => import("@/pages/dev/UiKitPage"));
 // Settings (13.xx), reports (14.xx) and social (15.01), each its own chunk.
 const settings = (name: keyof typeof import("@/pages/settings/SettingsPages")) => lazy(() => import("@/pages/settings/SettingsPages").then((m) => ({ default: m[name] as React.ComponentType })));
 const SettingsHubPage = settings("SettingsHubPage");
+const channelSettings = (name: keyof typeof import("@/pages/settings/ChannelSettingsPages")) => lazy(() => import("@/pages/settings/ChannelSettingsPages").then((m) => ({ default: m[name] as React.ComponentType })));
+const ChannelSettingsPage = channelSettings("ChannelSettingsPage");
+const ChannelActivatePage = channelSettings("ChannelActivatePage");
+const ChannelDeactivatePage = channelSettings("ChannelDeactivatePage");
+const ChannelDonePage = channelSettings("ChannelDonePage");
 const BusinessProfilePage = settings("BusinessProfilePage");
 const EditBusinessProfilePage = settings("EditBusinessProfilePage");
 const WorkspacePreferencesPage = settings("WorkspacePreferencesPage");
@@ -427,6 +432,10 @@ export const routes = [
               { path: "/settings/business/edit", element: <EditBusinessProfilePage />, handle: { section: "Settings", back: back("/settings/business", SCREENS.settings) } },
               { path: "/settings/preferences", element: <WorkspacePreferencesPage />, handle: { section: "Settings", back: back("/settings", SCREENS.settings) } },
               { path: "/settings/security", element: <SecurityPage />, handle: { section: "Settings", back: back("/settings", SCREENS.settings) } },
+              { path: "/settings/channels", element: <ChannelSettingsPage />, handle: { section: "Selling channels", back: back("/settings", SCREENS.settings) } },
+              { path: "/settings/channels/:channel/activate", element: <ChannelActivatePage />, handle: { section: "Selling channels", back: back("/settings/channels", SCREENS.settings) } },
+              { path: "/settings/channels/:channel/deactivate", element: <ChannelDeactivatePage />, handle: { section: "Selling channels", back: back("/settings/channels", SCREENS.settings) } },
+              { path: "/settings/channels/done", element: <ChannelDonePage />, handle: { section: "Selling channels", back: back("/settings/channels", SCREENS.settings) } },
               { path: "/settings/sessions", element: <SessionsPage />, handle: { section: "Settings", back: back("/settings", SCREENS.settings) } },
               { path: "/settings/notifications", element: <Navigate to="/notifications/preferences" replace />, handle: { back: back("/settings", SCREENS.settings) } },
               { path: "/settings/close-account", element: <CloseAccountPage />, handle: { section: "Settings", back: back("/settings", SCREENS.settings) } },
