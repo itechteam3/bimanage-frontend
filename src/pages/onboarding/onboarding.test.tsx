@@ -178,32 +178,66 @@ describe("business identity (02.03) and checklist (02.05)", () => {
   });
 });
 
-describe("dashboard (03.01 / 03.02)", () => {
-  it("empty state", async () => {
+describe("dashboard by selling channel (03.03-03.10)", () => {
+  const kp = (revenue: number, orders: number) => ({ revenue, orders, averageOrder: orders ? Math.round(revenue / orders) : 0, unitsSold: orders * 2 });
+  const BOTH = { retail: { status: "active", activatedAt: null, pausedAt: null }, wholesale: { status: "active", activatedAt: null, pausedAt: null }, mode: "both", chosen: true };
+  const data = (channel: string) => ({
+    ...EMPTY_DASHBOARD,
+    channel,
+    kpis: channel === "retail" ? kp(1280000, 64) : channel === "wholesale" ? kp(4850000, 18) : kp(6130000, 82),
+    change: { revenue: channel === "all" ? null : 8.4, orders: null },
+    byChannel: { retail: kp(1280000, 64), wholesale: kp(4850000, 18) },
+    series: [{ date: "2026-11-27", retail: 46000, wholesale: 840000 }],
+    recentOrders: [
+      { id: "so1", ref: "BULK-201", name: "Sola Stores", channel: "wholesale", total: 840000, status: "Processing", link: "/store/orders/so1", at: "2026-11-27T10:00:00Z" },
+      { id: "o1", ref: "ORD-1024", name: "Amara Yusuf", channel: "retail", total: 46000, status: "Completed", link: "/orders/o1", at: "2026-11-26T10:00:00Z" },
+    ].filter((o) => channel === "all" || o.channel === channel),
+    wholesale: { bulkOrders: 18, tradeBuyers: 12, quotesAwaitingApproval: null, overdueTradeInvoices: null },
+    inventory: { totalProducts: 124, stockValue: 1, lowStock: 4, outOfStock: 1 },
+  });
+
+  it("no activity yet: getting started, with the first actions", async () => {
     renderApp("/dashboard");
-    expect(await screen.findByText(/no orders recorded yet/i)).toBeInTheDocument();
-    expect(screen.getByText(/your sales trend appears here/i)).toBeInTheDocument();
+    expect(await screen.findByText("Your workspace is ready")).toBeInTheDocument();
+    expect(screen.getByText("No sales to display yet")).toBeInTheDocument();
+    expect(screen.getByRole("link", { name: "Create your first order" })).toHaveAttribute("href", "/orders/new");
     expect(screen.getByText(/finish setting up your business/i)).toBeInTheDocument();
   });
 
-  it("populated state with real figures", async () => {
-    const today = new Date();
-    fb.handlers["GET /dashboard"] = () => [
-      200,
-      {
-        ...EMPTY_DASHBOARD,
-        stats: { ...EMPTY_DASHBOARD.stats, revenue: 1280400, totalOrders: 64, openInvoices: 9, lowStock: 5 },
-        recentOrders: [{ _id: "o1", trackingNo: "ORD-1001", productName: "Classic linen shirt", price: 45000, quantity: 1, totalAmount: 45000, status: "completed", date: today.toISOString() }],
-        topSelling: [{ _id: "p1", name: "Classic linen shirt", sellingPrice: 45000, totalSold: 28 }],
-        salesChart: [{ _id: { year: today.getFullYear(), month: today.getMonth() + 1, day: today.getDate() }, totalSales: 45000, totalOrders: 1 }],
-      },
-    ];
+  it("combined view, then the wholesale tab: figures, orders and the view note follow the filter", async () => {
+    fb.handlers["GET /selling-channels"] = () => [200, { channels: BOTH, isOwner: true }];
+    fb.handlers["GET /dashboard"] = (_b, _h, url) => [200, data(url.searchParams.get("channel") ?? "all")];
     renderApp("/dashboard");
-    expect(await screen.findByText("₦1.28m")).toBeInTheDocument();
-    expect(screen.getByText("64")).toBeInTheDocument();
-    expect(screen.getByText("9")).toBeInTheDocument();
-    expect(screen.getByText("ORD-1001")).toBeInTheDocument();
-    expect(screen.getByText("Paid")).toBeInTheDocument();
-    expect(screen.getByText("28 sold")).toBeInTheDocument();
+    const user = userEvent.setup();
+    expect(await screen.findByRole("heading", { name: "Combined business dashboard" })).toBeInTheDocument();
+    expect(await screen.findByText("₦6.13m")).toBeInTheDocument();
+    expect(screen.getByText("64 retail · 18 wholesale")).toBeInTheDocument();
+    expect(screen.getByText("BULK-201")).toBeInTheDocument();
+    expect(screen.getByText("ORD-1024")).toBeInTheDocument();
+    expect(screen.getByText("Wholesale leads revenue")).toBeInTheDocument();
+    await user.click(screen.getByRole("tab", { name: "Wholesale" }));
+    expect(await screen.findByRole("heading", { name: "Wholesale dashboard" })).toBeInTheDocument();
+    expect(await screen.findByText("₦4.85m")).toBeInTheDocument();
+    expect(screen.getByText("+8.4% vs previous 30 days")).toBeInTheDocument();
+    expect(screen.getByText("Viewing wholesale only · Retail remains active")).toBeInTheDocument();
+    expect(screen.queryByText("ORD-1024")).not.toBeInTheDocument();
+    const call = [...fb.calls].reverse().find((c) => c.key === "GET /dashboard");
+    expect(call).toBeTruthy();
+  });
+
+  it("a retail-only business sees its retail view without tabs", async () => {
+    fb.handlers["GET /selling-channels"] = () => [200, { channels: { ...BOTH, wholesale: { status: "available", activatedAt: null, pausedAt: null }, mode: "retail" }, isOwner: true }];
+    fb.handlers["GET /dashboard"] = (_b, _h, url) => [200, data(url.searchParams.get("channel") ?? "all")];
+    renderApp("/dashboard");
+    expect(await screen.findByRole("heading", { name: "Retail dashboard" })).toBeInTheDocument();
+    expect(screen.queryByRole("tablist")).not.toBeInTheDocument();
+  });
+
+  it("refresh failed: says nothing changed and offers a retry", async () => {
+    fb.handlers["GET /dashboard"] = () => [500, { message: "boom at dashboardChannels.js" }];
+    renderApp("/dashboard");
+    expect(await screen.findByText("Data is temporarily unavailable", {}, { timeout: 5000 })).toBeInTheDocument();
+    expect(screen.getByRole("button", { name: /refresh dashboard/i })).toBeInTheDocument();
+    expect(screen.queryByText(/dashboardChannels\.js/)).not.toBeInTheDocument();
   });
 });
