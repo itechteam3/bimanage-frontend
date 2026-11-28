@@ -25,6 +25,7 @@ import { DashboardPage } from "@/pages/app/DashboardPage";
 import { MorePage } from "@/pages/app/MorePage";
 import { CUSTOMERS_FEATURE } from "@/config/customers";
 import { PathPage } from "@/pages/onboarding/PathPage";
+import { BothChannelsPage, ChannelsExplainedPage, ChooseChannelsPage } from "@/pages/onboarding/ChannelPages";
 import { CheckoutPage, PackagesPage, PaymentStatusPage } from "@/pages/onboarding/PackagePages";
 import { BusinessIdentityPage, ChecklistPage, TrialStartedPage } from "@/pages/onboarding/SetupPages";
 import { FeatureGate } from "@/lib/workspace/subscription";
@@ -311,6 +312,9 @@ export const routes = [
           { path: "/onboarding/packages/:packageId", element: <CheckoutPage />, handle: { section: "Subscription", back: back("/onboarding/packages", SCREENS.onboarding) } },
           { path: "/onboarding/payment", element: <PaymentStatusPage />, handle: { section: "Subscription", back: back("/onboarding/packages", SCREENS.onboarding) } },
           { path: "/onboarding/trial", element: <TrialStartedPage />, handle: { section: "Subscription" } },
+          { path: "/onboarding/channels", element: <ChooseChannelsPage />, handle: { section: "Onboarding", back: back("/onboarding", SCREENS.onboarding) } },
+          { path: "/onboarding/channels/explained", element: <ChannelsExplainedPage />, handle: { section: "Onboarding", back: back("/onboarding/channels", SCREENS.onboarding) } },
+          { path: "/onboarding/channels/both", element: <BothChannelsPage />, handle: { section: "Onboarding", back: back("/onboarding/channels", SCREENS.onboarding) } },
           { path: "/onboarding/business", element: <BusinessIdentityPage />, handle: { section: "Onboarding", back: back("/onboarding", SCREENS.onboarding) } },
           { path: "/onboarding/checklist", element: <ChecklistPage />, handle: { section: "Dashboard", back: back("/dashboard", SCREENS.dashboard) } },
           // Inventory and barcode (Figma 09.04–09.11), gated by plan

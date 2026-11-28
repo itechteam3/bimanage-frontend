@@ -102,6 +102,10 @@
         "$value": "#E9FAF8",
         "$description": "DS 'Aqua tint' (1917:1416)."
       },
+      "tint-violet": { "$value": "#F3F0FC", "$description": "Context stripe and illustration ground, 'Both channels' screens. 26 Nov 2026 frames (selling channels, onboarding 4216:677 / 4216:961 / 4216:825)." },
+      "halo-violet": { "$value": "#E9E4FB", "$description": "Depth halo, 'Both channels' screens. 26 Nov 2026 frames (selling channels, onboarding 4216:677 / 4216:961 / 4216:825)." },
+      "halo-blue": { "$value": "#DFEFFA", "$description": "Depth halo, blue screens. 26 Nov 2026 frames (selling channels, onboarding 4216:677 / 4216:961 / 4216:825)." },
+      "tint-gold": { "$value": "#FFF5E7", "$description": "Wholesale channel warm surface. 26 Nov 2026 frames (selling channels, onboarding 4216:677 / 4216:961 / 4216:825)." },
       "tint-lavender": {
         "$value": "#F1F1FF",
         "$description": "DS 'Lavender tint' (1917:1419)."
@@ -217,6 +221,14 @@
         "$value": "#145C3D",
         "$description": "Reassurance text on auth, e.g. 'Your connection is encrypted.' (1882:1388)."
       }
+    },
+    "accent": {
+      "blue": { "$value": "#1674A3", "$description": "Eyebrows and illustration lines, blue screens. 26 Nov 2026 frames (selling channels, onboarding 4216:677 / 4216:961 / 4216:825)." },
+      "lavender": { "$value": "#7D67B6", "$description": "Eyebrows and illustration lines, 'Both channels' screens. 26 Nov 2026 frames (selling channels, onboarding 4216:677 / 4216:961 / 4216:825)." },
+      "teal": { "$value": "#16857D", "$description": "Eyebrows, 'explained' screens. 26 Nov 2026 frames (selling channels, onboarding 4216:677 / 4216:961 / 4216:825)." },
+      "green": { "$value": "#208A79", "$description": "Channel card tag lines ('Shopfront • single-item sales'). 26 Nov 2026 frames (selling channels, onboarding 4216:677 / 4216:961 / 4216:825)." },
+      "navy": { "$value": "#145B89", "$description": "Selected choice card border and tag. 26 Nov 2026 frames (selling channels, onboarding 4216:677 / 4216:961 / 4216:825)." },
+      "gold": { "$value": "#B88744", "$description": "Wholesale channel accent. 26 Nov 2026 frames (selling channels, onboarding 4216:677 / 4216:961 / 4216:825)." }
     },
     "kpi": {
       "revenue-bg": {

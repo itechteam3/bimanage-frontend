@@ -42,7 +42,7 @@ export function TrialStartedPage() {
                 </li>
               ))}
             </ol>
-            <ButtonLink to="/onboarding/business" fullWidth>
+            <ButtonLink to="/onboarding/channels" fullWidth>
               Continue setting up <IconArrowRight aria-hidden="true" className="size-4" />
             </ButtonLink>
           </div>
