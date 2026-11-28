@@ -10,7 +10,7 @@ import { count, naira, nairaCompact } from "@/lib/format";
 import { cn } from "@/lib/cn";
 import { useUrlState } from "@/lib/nav/useUrlState";
 import { downloadStoreReport, useStoreAnalytics, type AnalyticsRange, type Store, type StoreAnalytics } from "@/lib/store/api";
-import { Loading, StoreTabs, WithStore, opsEyebrow } from "./shared";
+import { Loading, SmallStep, StoreTabs, WithStore, opsEyebrow } from "./shared";
 
 const RANGES: Array<[AnalyticsRange, string]> = [
   ["7d", "Last 7 days"],
@@ -73,7 +73,9 @@ function Analytics({ store }: { store: Store }) {
       </PageTitle>
       <p className="-mt-4 text-body-sm text-ink-muted">Follow order activity, product views and revenue.</p>
       <StoreTabs />
-      <IntroCard eyebrow={opsEyebrow(store)} title={`${rangeLabel} · Download the orders as a spreadsheet.`} />
+      <IntroCard eyebrow={opsEyebrow(store)} title={`${rangeLabel} · Download the orders as a spreadsheet.`}>
+        Use this snapshot to notice what's working and choose one area to improve.
+      </IntroCard>
       <div role="tablist" aria-label="Date range" className="flex w-fit max-w-full flex-wrap items-center gap-1 rounded-md bg-surface-pale p-1">
         {RANGES.map(([key, label]) => (
           <button key={key} type="button" role="tab" aria-selected={range === key} onClick={() => setRange(key)} className={cn("min-h-11 rounded-sm px-3 text-action font-semibold", range === key ? "bg-surface-card text-ink-brand shadow-card" : "text-ink-muted")}>
@@ -139,6 +141,7 @@ function Analytics({ store }: { store: Store }) {
                   </div>
                 ))}
               </dl>
+              <SmallStep>{a.orders === 0 ? "Share your store link on WhatsApp or Instagram to bring in your first visitors." : undefined}</SmallStep>
             </Panel>
           </div>
         </>
